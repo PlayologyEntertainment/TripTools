@@ -2696,16 +2696,103 @@ body.no-scroll { overflow: hidden; }
     </div>
   </div>
 </div>
-<div id="view-placeholder-baggage" class="view">
-  <nav class="tool-topbar">
+<style>
+/* ── BAGGAGE FEE CALCULATOR ── */
+.bfc-search-wrap{position:relative}
+.bfc-search-input{width:100%;padding:10px 12px;border:1.5px solid var(--ink);border-radius:var(--r);font-size:14px;font-family:var(--sans);background:var(--paper);color:var(--ink);box-sizing:border-box;outline:none;display:block}
+.bfc-search-input:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(255,77,46,.15)}
+.bfc-drop{position:absolute;top:100%;left:0;right:0;max-height:240px;overflow-y:auto;background:var(--paper);border:1.5px solid var(--ink);border-top:none;border-radius:0 0 var(--r) var(--r);z-index:200;box-shadow:0 4px 12px rgba(0,0,0,.12)}
+.bfc-drop-item{padding:9px 12px;cursor:pointer;font-size:14px;font-family:var(--sans);color:var(--ink);border-bottom:1px solid var(--rule);display:flex;align-items:center;gap:8px}
+.bfc-drop-item:last-child{border-bottom:none}
+.bfc-drop-item:hover{background:var(--paper-2)}
+.bfc-drop-flag{font-size:18px;width:24px;text-align:center;flex-shrink:0}
+.bfc-drop-name{flex:1}
+.bfc-drop-region{font-size:11px;font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.bfc-route-toggle{display:flex;gap:8px}
+.bfc-route-btn{flex:1;padding:10px;border:1.5px solid var(--ink);border-radius:var(--r);background:var(--paper);font-family:var(--sans);font-size:14px;cursor:pointer;color:var(--ink-2);transition:background .12s,color .12s}
+.bfc-route-btn.active{background:var(--ink);color:var(--paper)}
+.bfc-route-btn:hover:not(.active){background:var(--paper-2)}
+.bfc-card{border:2px solid var(--ink);border-radius:var(--r);overflow:hidden}
+.bfc-card-header{padding:16px 18px;display:flex;align-items:center;gap:12px;border-bottom:1.5px solid var(--ink)}
+.bfc-card-flag{font-size:30px;line-height:1;flex-shrink:0}
+.bfc-card-airline{font-family:var(--serif);font-size:22px;font-weight:700;letter-spacing:-.02em;line-height:1.1}
+.bfc-card-sub{font-size:11px;font-family:var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:3px}
+.bfc-fee-grid{display:grid;grid-template-columns:1fr 1fr}
+.bfc-fee-cell{padding:14px 18px;border-right:1.5px solid var(--ink);border-bottom:1.5px solid var(--ink)}
+.bfc-fee-cell:nth-child(even){border-right:none}
+.bfc-fee-cell.bfc-full{grid-column:1/-1;border-right:none}
+.bfc-fee-lbl{font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:4px}
+.bfc-fee-val{font-family:var(--serif);font-size:26px;font-weight:600;letter-spacing:-.02em;line-height:1.1}
+.bfc-fee-sub{font-size:12px;font-family:var(--sans);color:var(--muted);margin-top:2px}
+.bfc-free{color:var(--green)}
+.bfc-paid{color:var(--accent)}
+.bfc-total-bar{padding:16px 20px;display:flex;align-items:center;justify-content:space-between;background:var(--ink);color:var(--paper)}
+.bfc-total-lbl{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase}
+.bfc-total-sub{font-size:11px;font-family:var(--mono);letter-spacing:.06em;color:rgba(255,255,255,.5);margin-top:3px}
+.bfc-total-val{font-family:var(--serif);font-size:36px;font-weight:600;letter-spacing:-.02em;text-align:right}
+.bfc-total-free{color:var(--yellow)}
+.bfc-info-row{padding:12px 18px;border-top:1.5px solid var(--ink);font-size:13px;color:var(--ink-2);line-height:1.6}
+.bfc-notes-row{padding:10px 18px;border-top:1.5px solid var(--ink);font-size:12px;font-family:var(--mono);color:var(--muted);line-height:1.6;background:var(--paper-2)}
+@media print{.bfc-route-toggle,.bfc-search-wrap,.bfc-drop{display:none!important}.bfc-card{border:1.5px solid #000!important}.bfc-total-bar{background:#000!important}}
+</style>
+<div id="view-baggage" class="view">
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="window.print()">🖨 Print</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">💸</span>
-    <h2>Baggage Fee Calculator</h2>
-    <p style="margin-bottom:24px">Carry-on & checked bag fees for 30+ major airlines. Works with passengers × bags.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-baggage"></div>
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>Baggage Fee Calculator</h1>
+    <p class="tool-sub">Carry-on &amp; checked bag fees for 35 major airlines. Select your airline, route type, and party size to calculate your total baggage cost.</p>
+  </div>
+  <div class="tool-body">
+    <div class="fg">
+      <label>Airline</label>
+      <div class="bfc-search-wrap">
+        <input type="search" id="bfc-airline-search" class="bfc-search-input" placeholder="🔍 Search airline…" autocomplete="off">
+        <div id="bfc-airline-drop" class="bfc-drop" style="display:none"></div>
+        <input type="hidden" id="bfc-airline-val">
+      </div>
+    </div>
+    <div class="fg">
+      <label>Route Type</label>
+      <div class="bfc-route-toggle">
+        <button class="bfc-route-btn active" id="bfc-dom-btn" onclick="bfcSetRoute('dom')">🏠 Domestic</button>
+        <button class="bfc-route-btn" id="bfc-intl-btn" onclick="bfcSetRoute('intl')">🌍 International</button>
+      </div>
+    </div>
+    <div class="frow">
+      <div class="fg">
+        <label for="bfc-pax">Passengers</label>
+        <input type="number" id="bfc-pax" value="1" min="1" max="9">
+      </div>
+      <div class="fg">
+        <label for="bfc-bags">Checked Bags per Person</label>
+        <select id="bfc-bags">
+          <option value="0">0 (carry-on only)</option>
+          <option value="1" selected>1 bag</option>
+          <option value="2">2 bags</option>
+          <option value="3">3 bags</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn btn-p" style="width:100%;margin-top:4px" onclick="bfcCalculate()">💸 Calculate Fees</button>
+    <div id="bfc-result" style="display:none;margin-top:24px"></div>
+    <div style="margin-top:16px;padding:12px 16px;background:var(--paper-2);border-left:3px solid var(--yellow);border-radius:var(--r);font-size:13px;color:var(--muted);line-height:1.55">
+      ⚠️ <strong>Fees are approximate.</strong> Actual charges vary by fare class, booking channel, loyalty status, co-branded credit card, and specific route. Always verify with the airline before booking.
+    </div>
+  </div>
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    Co-branded airline credit cards typically waive the first checked bag fee for you and companions — saving $70–$160+ per round trip. Southwest is the only major US carrier that still includes 2 free checked bags for all passengers on every fare, every time.
+  </div>
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('packing')">📝 Smart Packing List</button>
+      <button class="rel-btn" onclick="openTool('carry-on')">📐 Carry-On Size Checker</button>
+      <button class="rel-btn" onclick="openTool('luggage-wt')">⚖️ Luggage Weight</button>
     </div>
   </div>
 </div>
@@ -4856,7 +4943,7 @@ const TOOLS = [
   {id:'vaccination',   nm:'Vaccination Requirements',   ico:'💉', ph:'docs',      on:false, live:false, ds:'Required & recommended vaccines for 100+ destinations.'},
   {id:'tsa-guide',     nm:'TSA & Security Guide',       ico:'🔒', ph:'docs',      on:false, live:false, ds:'Search any item for carry-on / checked / prohibited status.'},
   {id:'packing',       nm:'Smart Packing List',         ico:'📝', ph:'packing',   on:false, live:true,  ds:'Generate a list by trip type, duration & climate. Check off as you go.'},
-  {id:'baggage',       nm:'Baggage Fee Calculator',     ico:'💸', ph:'packing',   on:false, live:false, ds:'Carry-on & checked bag fees for 30+ major airlines.'},
+  {id:'baggage',       nm:'Baggage Fee Calculator',     ico:'💸', ph:'packing',   on:false, live:true,  ds:'Carry-on & checked bag fees for 35 major airlines.'},
   {id:'carry-on',      nm:'Carry-On Size Checker',      ico:'📐', ph:'packing',   on:false, live:false, ds:'Enter dimensions + airline → fits / borderline / too large.'},
   {id:'luggage-wt',    nm:'Luggage Weight Calculator',  ico:'⚖️', ph:'packing',   on:false, live:false, ds:'Virtual baggage scale. Add items & see remaining allowance.'},
   {id:'wardrobe',      nm:'Weather-Based Wardrobe',     ico:'🌤', ph:'packing',   on:true,  live:false, ds:'14-day forecast → packing suggestions per condition.'},
@@ -5557,6 +5644,7 @@ function injectTripCtx(id) {
   if(id==='visa-guide') vgInit();
   if(id==='passport')   paInit();
   if(id==='expense-track') etInit();
+  if(id==='baggage')    bfcInit();
 }
 
 /* ── HUB RENDER ── */
@@ -11151,6 +11239,318 @@ function paCheck() {
   <div class="pa-action">${actionMsg}</div>
   <div class="pa-footer">⚠ Requirements may vary by nationality. Always verify with the official embassy or government travel advisory.</div>
 </div>`;
+}
+
+/* ── BAGGAGE FEE CALCULATOR ── */
+const BFC_AIRLINES = [
+  // US Carriers
+  {id:'aa', name:'American Airlines',    flag:'🇺🇸', region:'US',
+   carryon:{dom:0,intl:0}, checked:{dom:[40,45,200],intl:[0,100,200]},
+   weight:'50 lbs (23 kg)', coSize:'22×14×9 in (56×36×23 cm)',
+   notes:'Standard Economy. First bag waived for AAdvantage credit card holders and co-branded Citi/Barclays cardmembers on eligible bookings.'},
+  {id:'dl', name:'Delta Air Lines',      flag:'🇺🇸', region:'US',
+   carryon:{dom:0,intl:0}, checked:{dom:[35,45,200],intl:[0,100,200]},
+   weight:'50 lbs (23 kg)', coSize:'22×14×9 in (56×36×23 cm)',
+   notes:'Main Cabin fare. Delta SkyMiles credit card holders waive the first checked bag fee. Transatlantic fares typically include 1 free checked bag.'},
+  {id:'ua', name:'United Airlines',      flag:'🇺🇸', region:'US',
+   carryon:{dom:0,intl:0}, checked:{dom:[35,45,200],intl:[0,100,200]},
+   weight:'50 lbs (23 kg)', coSize:'22×14×9 in (56×36×23 cm)',
+   notes:'Economy fare. United Explorer card holders waive the first bag fee. Most transatlantic fares include 1 free checked bag.'},
+  {id:'wn', name:'Southwest Airlines',   flag:'🇺🇸', region:'US',
+   carryon:{dom:0,intl:0}, checked:{dom:[0,0,75],intl:[0,0,75]},
+   weight:'50 lbs (23 kg)', coSize:'24×16×10 in (61×41×25 cm)',
+   notes:'2 checked bags FREE on every fare — the only major US carrier that still offers this. Third bag and beyond: $75 each. No change or cancellation fees.'},
+  {id:'nk', name:'Spirit Airlines',      flag:'🇺🇸', region:'US',
+   carryon:{dom:49,intl:65}, checked:{dom:[39,49,89],intl:[55,65,99]},
+   weight:'40 lbs (18 kg)', coSize:'22×18×10 in (56×46×25 cm)',
+   notes:'Advance purchase pricing shown. Fees increase significantly closer to departure and at the gate. Personal item (40×32×20 cm, under seat) is always free.'},
+  {id:'f9', name:'Frontier Airlines',    flag:'🇺🇸', region:'US',
+   carryon:{dom:35,intl:45}, checked:{dom:[35,45,89],intl:[45,55,99]},
+   weight:'50 lbs (23 kg)', coSize:'24×16×10 in (61×41×25 cm)',
+   notes:'Advance purchase pricing. Fees rise sharply at check-in and at the gate. Personal item (under seat) is free. FRONTIER Miles elites and co-branded card holders save on fees.'},
+  {id:'as', name:'Alaska Airlines',      flag:'🇺🇸', region:'US',
+   carryon:{dom:0,intl:0}, checked:{dom:[35,45,150],intl:[35,45,150]},
+   weight:'50 lbs (23 kg)', coSize:'22×14×9 in (56×36×23 cm)',
+   notes:'Main Cabin fare. Alaska Airlines Visa Signature card holders waive the first checked bag fee for themselves and up to 6 companions on the same reservation.'},
+  {id:'b6', name:'JetBlue Airways',      flag:'🇺🇸', region:'US',
+   carryon:{dom:0,intl:0}, checked:{dom:[35,50,150],intl:[35,50,150]},
+   weight:'50 lbs (23 kg)', coSize:'22×14×9 in (56×36×23 cm)',
+   notes:'Blue fare class (not Blue Basic). Blue Basic passengers do not receive a free carry-on. Mosaic and Mint members receive additional allowances.'},
+  {id:'g4', name:'Allegiant Air',        flag:'🇺🇸', region:'US',
+   carryon:{dom:20,intl:20}, checked:{dom:[20,35,50],intl:[20,35,50]},
+   weight:'40 lbs (18 kg)', coSize:'22×16×10 in (56×41×25 cm)',
+   notes:'Advance purchase pricing. Allegiant World Mastercard holders receive 1 free checked bag per person per flight.'},
+  {id:'ha', name:'Hawaiian Airlines',    flag:'🇺🇸', region:'US/Pacific',
+   carryon:{dom:0,intl:0}, checked:{dom:[30,40,100],intl:[0,50,100]},
+   weight:'50 lbs (23 kg)', coSize:'22×14×9 in (56×36×23 cm)',
+   notes:'Domestic shows mainland US fees. Inter-island Hawaii flights: 2 bags FREE. Trans-Pacific Economy: 1st bag free. HawaiianMiles Visa cardholders may waive fees on some routes.'},
+  {id:'sy', name:'Sun Country Airlines', flag:'🇺🇸', region:'US',
+   carryon:{dom:35,intl:35}, checked:{dom:[35,50,75],intl:[35,50,75]},
+   weight:'50 lbs (23 kg)', coSize:'24×16×10 in (61×41×25 cm)',
+   notes:'Advance purchase pricing. Sun Country Visa card holders receive 1 free checked bag per person per trip. Personal item (under seat) is always free.'},
+  // Canadian
+  {id:'ac', name:'Air Canada',           flag:'🇨🇦', region:'Canada',
+   carryon:{dom:0,intl:0}, checked:{dom:[35,60,100],intl:[0,100,150]},
+   weight:'50 lbs (23 kg)', coSize:'21×15×9 in (54×38×23 cm)',
+   notes:'Standard (Flex) fare. Basic fare does not include a carry-on. Most trans-Atlantic/Pacific economy fares include 1 free checked bag. Aeroplan status holders receive extra allowances.'},
+  {id:'ws', name:'WestJet',             flag:'🇨🇦', region:'Canada',
+   carryon:{dom:0,intl:0}, checked:{dom:[35,55,100],intl:[35,55,100]},
+   weight:'50 lbs (23 kg)', coSize:'21×15×9 in (54×38×23 cm)',
+   notes:'Econo fare class. Basic Econo passengers pay a carry-on fee. WestJet Rewards status members may receive additional benefits.'},
+  // European
+  {id:'ba', name:'British Airways',      flag:'🇬🇧', region:'Europe',
+   carryon:{dom:0,intl:0}, checked:{dom:[65,75,150],intl:[0,115,200]},
+   weight:'51 lbs (23 kg)', coSize:'22×18×10 in (56×45×25 cm)',
+   notes:'Short-haul Economy: 1st checked bag fee applies. Long-haul World Traveller: 1st bag free. Executive Club status holders receive extra allowances.'},
+  {id:'vs', name:'Virgin Atlantic',      flag:'🇬🇧', region:'Europe',
+   carryon:{dom:0,intl:0}, checked:{dom:[0,80,150],intl:[0,80,150]},
+   weight:'51 lbs (23 kg)', coSize:'22×18×10 in (56×45×25 cm)',
+   notes:'Economy Light (long-haul): 1 free 23 kg bag included. Flying Club members and Virgin Atlantic credit card holders may receive extra allowances.'},
+  {id:'fr', name:'Ryanair',              flag:'🇮🇪', region:'Europe',
+   carryon:{dom:30,intl:40}, checked:{dom:[35,55,100],intl:[40,60,110]},
+   weight:'44 lbs (20 kg)', coSize:'21.6×15.7×7.9 in (55×40×20 cm)',
+   notes:'Carry-on fee covers the large cabin bag with Priority boarding. A small personal bag (40×20×25 cm) is always free under the seat. Fees vary by route and booking window.'},
+  {id:'u2', name:'easyJet',              flag:'🇬🇧', region:'Europe',
+   carryon:{dom:0,intl:0}, checked:{dom:[30,45,100],intl:[35,50,110]},
+   weight:'51 lbs (23 kg)', coSize:'22×18×10 in (56×45×25 cm)',
+   notes:'Small bag under seat is always free. Large cabin bag requires FLEXI fare, Up Front/Extra Legroom seat, or a fee. easyJet Plus cardholders get a free large cabin bag.'},
+  {id:'w6', name:'Wizz Air',             flag:'🇭🇺', region:'Europe',
+   carryon:{dom:30,intl:35}, checked:{dom:[30,50,95],intl:[35,55,100]},
+   weight:'44 lbs (20 kg)', coSize:'21.6×15.7×7.9 in (55×40×20 cm)',
+   notes:'Small bag (40×30×20 cm, under seat) is always free. Cabin bag requires WIZZ Priority boarding. WIZZ Discount Club and Wizz Air credit card holders save on fees.'},
+  {id:'lh', name:'Lufthansa',            flag:'🇩🇪', region:'Europe',
+   carryon:{dom:0,intl:0}, checked:{dom:[35,55,150],intl:[0,110,200]},
+   weight:'51 lbs (23 kg)', coSize:'21.6×15.7×9 in (55×40×23 cm)',
+   notes:'Short-haul Economy Light: 1st bag fee applies. Economy Classic: 1 bag included. Long-haul Economy: 1 free bag included. Miles & More status holders get additional allowances.'},
+  {id:'af', name:'Air France',           flag:'🇫🇷', region:'Europe',
+   carryon:{dom:0,intl:0}, checked:{dom:[35,55,150],intl:[0,115,200]},
+   weight:'51 lbs (23 kg)', coSize:'21.6×13.7×9.4 in (55×35×24 cm)',
+   notes:'Short-haul Light fare: 1st bag fee applies. Standard fare: 1 bag included. Long-haul Economy: 1 free bag. Flying Blue status members receive extra allowances.'},
+  {id:'kl', name:'KLM',                  flag:'🇳🇱', region:'Europe',
+   carryon:{dom:0,intl:0}, checked:{dom:[35,55,150],intl:[0,115,200]},
+   weight:'51 lbs (23 kg)', coSize:'21.6×13.7×9.4 in (55×35×24 cm)',
+   notes:'Short-haul Light fare: no free checked bag. Standard and long-haul Economy include 1 free bag. Part of Air France–KLM Flying Blue program.'},
+  {id:'ei', name:'Aer Lingus',           flag:'🇮🇪', region:'Europe',
+   carryon:{dom:0,intl:0}, checked:{dom:[40,60,120],intl:[0,65,120]},
+   weight:'51 lbs (23 kg)', coSize:'21.6×15.7×9 in (55×40×23 cm)',
+   notes:'SAVER fare: carry-on included, checked bag not. PLUS fare: 1 bag included. North America routes: 1 bag typically included. AerClub members may receive benefits.'},
+  // Middle East
+  {id:'ek', name:'Emirates',             flag:'🇦🇪', region:'Middle East',
+   carryon:{dom:0,intl:0}, checked:{dom:[0,0,70],intl:[0,0,70]},
+   weight:'66 lbs (30 kg)', coSize:'21.6×13.7×9.4 in (55×35×24 cm)',
+   notes:'Economy: 1 free 30 kg checked bag included on all routes. Saver fares may restrict allowance. Skywards elite status members receive generous extra allowances.'},
+  {id:'qr', name:'Qatar Airways',        flag:'🇶🇦', region:'Middle East',
+   carryon:{dom:0,intl:0}, checked:{dom:[0,0,60],intl:[0,0,60]},
+   weight:'51 lbs (23 kg)', coSize:'19.7×15.7×7.9 in (50×40×20 cm)',
+   notes:'Economy Classic: 1 free 23 kg bag included. Economy Lite may have no free bag. Privilege Club elite status members receive extra allowances.'},
+  {id:'ey', name:'Etihad Airways',       flag:'🇦🇪', region:'Middle East',
+   carryon:{dom:0,intl:0}, checked:{dom:[0,0,60],intl:[0,0,60]},
+   weight:'51 lbs (23 kg)', coSize:'21.6×17.7×9.8 in (55×45×25 cm)',
+   notes:'Economy Value: 1 free 23 kg bag included. Economy Saver/Lite may restrict allowance. Guest Tier and Etihad Guest Visa cardholders receive additional benefits.'},
+  {id:'tk', name:'Turkish Airlines',     flag:'🇹🇷', region:'Europe/Middle East',
+   carryon:{dom:0,intl:0}, checked:{dom:[0,0,50],intl:[0,0,50]},
+   weight:'44–51 lbs (20–23 kg)', coSize:'21.6×15.7×9 in (55×40×23 cm)',
+   notes:'Economy Class: 1 free bag (20 kg domestic, 23 kg international). Miles&Smiles elite status and THY credit card holders receive extra allowances.'},
+  // Asia-Pacific
+  {id:'sq', name:'Singapore Airlines',   flag:'🇸🇬', region:'Asia-Pacific',
+   carryon:{dom:0,intl:0}, checked:{dom:[0,0,55],intl:[0,0,55]},
+   weight:'66 lbs (30 kg)', coSize:'21.6×13.7×9.8 in (55×35×25 cm)',
+   notes:'Economy Standard: 1 free 30 kg bag included. Economy Lite: 25 kg. KrisFlyer elite status members receive additional allowances on eligible fares.'},
+  {id:'cx', name:'Cathay Pacific',       flag:'🇭🇰', region:'Asia-Pacific',
+   carryon:{dom:0,intl:0}, checked:{dom:[0,0,55],intl:[0,0,55]},
+   weight:'51 lbs (23 kg)', coSize:'22×14×9.4 in (56×36×24 cm)',
+   notes:'Economy Light: 1 free 23 kg bag included. Marco Polo Club and Asia Miles status members receive extra allowances on qualifying tickets.'},
+  {id:'qf', name:'Qantas',              flag:'🇦🇺', region:'Asia-Pacific',
+   carryon:{dom:0,intl:0}, checked:{dom:[30,40,100],intl:[0,75,150]},
+   weight:'51 lbs (23 kg)', coSize:'21.6×13.7×9 in (55×35×23 cm)',
+   notes:'Domestic standard booking includes 1 checked bag. International Economy: 1 free 23 kg bag. Qantas Frequent Flyer status holders receive extra allowances.'},
+  {id:'nz', name:'Air New Zealand',      flag:'🇳🇿', region:'Asia-Pacific',
+   carryon:{dom:0,intl:0}, checked:{dom:[20,35,80],intl:[0,65,130]},
+   weight:'51 lbs (23 kg)', coSize:'21.6×13.7×9.8 in (55×35×25 cm)',
+   notes:'Domestic Seat: carry-on only; add checked bag for a fee. International Economy: 1 free 23 kg bag. Airpoints members may receive status benefits.'},
+  {id:'nh', name:'ANA (All Nippon)',     flag:'🇯🇵', region:'Asia-Pacific',
+   carryon:{dom:0,intl:0}, checked:{dom:[0,0,55],intl:[0,0,55]},
+   weight:'51 lbs (23 kg)', coSize:'21.6×15.7×7.9 in (55×40×20 cm)',
+   notes:'International Economy: 1–2 free 23 kg bags (route-dependent). Domestic Economy: 1–2 free bags. ANA Mileage Club Star Alliance Gold/Platinum members receive extra allowances.'},
+  {id:'jl', name:'Japan Airlines',       flag:'🇯🇵', region:'Asia-Pacific',
+   carryon:{dom:0,intl:0}, checked:{dom:[0,0,55],intl:[0,0,55]},
+   weight:'51 lbs (23 kg)', coSize:'21.6×15.7×7.9 in (55×40×20 cm)',
+   notes:'International Economy: 2 free 23 kg bags included. Domestic Economy: 2 free bags on most routes. JMB JGC and Sapphire/Crystal members receive additional benefits.'},
+  {id:'ak', name:'AirAsia',              flag:'🇲🇾', region:'Asia-Pacific',
+   carryon:{dom:0,intl:0}, checked:{dom:[10,18,35],intl:[15,25,50]},
+   weight:'15–30 kg (purchased)', coSize:'21.6×13.7×7.9 in (56×36×23 cm)',
+   notes:'No free checked baggage — must purchase allowance (10–40 kg bundles). Cabin bag up to 7 kg is free. BIG Loyalty members may get discounts on advance purchases.'},
+  // South America
+  {id:'la', name:'LATAM Airlines',       flag:'🇧🇷', region:'S. America',
+   carryon:{dom:0,intl:0}, checked:{dom:[25,40,100],intl:[0,80,150]},
+   weight:'51 lbs (23 kg)', coSize:'21.6×13.7×9 in (55×35×23 cm)',
+   notes:'Economy Light: 1 bag domestic; 1 bag international included. Additional bags billed per flight segment. LATAM Pass Black/Platinum status members receive extra allowances.'},
+  {id:'av', name:'Avianca',              flag:'🇨🇴', region:'S. America',
+   carryon:{dom:0,intl:0}, checked:{dom:[35,50,100],intl:[35,50,100]},
+   weight:'51 lbs (23 kg)', coSize:'21.6×13.7×9 in (55×35×23 cm)',
+   notes:'Economy Classic: 1 bag included on some routes. LifeMiles Gold/Diamond status members receive extra allowances. Fees may vary by departure country.'},
+];
+
+let bfcRoute = 'dom';
+
+function bfcInit() {
+  bfcRoute = 'dom';
+  document.getElementById('bfc-dom-btn').classList.add('active');
+  document.getElementById('bfc-intl-btn').classList.remove('active');
+  document.getElementById('bfc-result').style.display = 'none';
+  document.getElementById('bfc-airline-search').value = '';
+  document.getElementById('bfc-airline-val').value = '';
+  const search = document.getElementById('bfc-airline-search');
+  const drop   = document.getElementById('bfc-airline-drop');
+  search.oninput = () => {
+    document.getElementById('bfc-airline-val').value = '';
+    bfcRenderDrop(drop, search.value);
+    drop.style.display = 'block';
+  };
+  search.onfocus = () => {
+    bfcRenderDrop(drop, search.value);
+    drop.style.display = 'block';
+  };
+  search.onblur = () => setTimeout(() => { drop.style.display = 'none'; }, 160);
+}
+
+function bfcRenderDrop(drop, q) {
+  const query = (q || '').toLowerCase().trim();
+  const items = query
+    ? BFC_AIRLINES.filter(a => a.name.toLowerCase().includes(query) || a.region.toLowerCase().includes(query) || a.id === query)
+    : BFC_AIRLINES;
+  if (!items.length) {
+    drop.innerHTML = '<div class="bfc-drop-item" style="color:var(--muted);cursor:default">No airlines found</div>';
+    return;
+  }
+  drop.innerHTML = items.map(a =>
+    `<div class="bfc-drop-item" onmousedown="bfcSelect(event,'${a.id}')">
+      <span class="bfc-drop-flag">${a.flag}</span>
+      <span class="bfc-drop-name">${a.name}</span>
+      <span class="bfc-drop-region">${a.region}</span>
+    </div>`
+  ).join('');
+}
+
+function bfcSelect(e, id) {
+  e.preventDefault();
+  const a = BFC_AIRLINES.find(x => x.id === id);
+  if (!a) return;
+  document.getElementById('bfc-airline-search').value = a.flag + '  ' + a.name;
+  document.getElementById('bfc-airline-val').value = id;
+  document.getElementById('bfc-airline-drop').style.display = 'none';
+  document.getElementById('bfc-result').style.display = 'none';
+}
+
+function bfcSetRoute(route) {
+  bfcRoute = route;
+  document.getElementById('bfc-dom-btn').classList.toggle('active', route === 'dom');
+  document.getElementById('bfc-intl-btn').classList.toggle('active', route === 'intl');
+  document.getElementById('bfc-result').style.display = 'none';
+}
+
+function bfcFmt(n) {
+  return n === 0
+    ? '<span class="bfc-free">FREE</span>'
+    : '<span class="bfc-paid">$' + n + '</span>';
+}
+
+function bfcCalculate() {
+  const id = document.getElementById('bfc-airline-val').value;
+  if (!id) {
+    const drop = document.getElementById('bfc-airline-drop');
+    bfcRenderDrop(drop, '');
+    drop.style.display = 'block';
+    document.getElementById('bfc-airline-search').focus();
+    return;
+  }
+  const a = BFC_AIRLINES.find(x => x.id === id);
+  if (!a) return;
+
+  const pax  = Math.max(1, Math.min(9, parseInt(document.getElementById('bfc-pax').value) || 1));
+  const bags = parseInt(document.getElementById('bfc-bags').value) || 0;
+  const fees = a.checked[bfcRoute];
+  const cof  = a.carryon[bfcRoute];
+
+  let bagCost = 0;
+  for (let b = 0; b < bags; b++) bagCost += fees[Math.min(b, fees.length - 1)];
+  const perPax   = cof + bagCost;
+  const grandTot = perPax * pax;
+
+  let cells = '';
+
+  cells += `<div class="bfc-fee-cell">
+    <div class="bfc-fee-lbl">✈️ Carry-On Bag</div>
+    <div class="bfc-fee-val">${bfcFmt(cof)}</div>
+    <div class="bfc-fee-sub">per person</div>
+  </div>`;
+
+  if (bags === 0) {
+    cells += `<div class="bfc-fee-cell">
+      <div class="bfc-fee-lbl">🧳 Checked Bags</div>
+      <div class="bfc-fee-val" style="font-size:16px;font-family:var(--sans);font-weight:500;color:var(--muted);padding-top:4px">None selected</div>
+    </div>`;
+  } else {
+    cells += `<div class="bfc-fee-cell">
+      <div class="bfc-fee-lbl">🧳 1st Checked Bag</div>
+      <div class="bfc-fee-val">${bfcFmt(fees[0])}</div>
+      <div class="bfc-fee-sub">per person</div>
+    </div>`;
+  }
+
+  if (bags === 2) {
+    cells += `<div class="bfc-fee-cell bfc-full">
+      <div class="bfc-fee-lbl">🧳 2nd Checked Bag</div>
+      <div class="bfc-fee-val">${bfcFmt(fees[Math.min(1, fees.length - 1)])}</div>
+      <div class="bfc-fee-sub">per person</div>
+    </div>`;
+  } else if (bags >= 3) {
+    cells += `<div class="bfc-fee-cell">
+      <div class="bfc-fee-lbl">🧳 2nd Checked Bag</div>
+      <div class="bfc-fee-val">${bfcFmt(fees[Math.min(1, fees.length - 1)])}</div>
+      <div class="bfc-fee-sub">per person</div>
+    </div>
+    <div class="bfc-fee-cell">
+      <div class="bfc-fee-lbl">🧳 3rd Checked Bag</div>
+      <div class="bfc-fee-val">${bfcFmt(fees[Math.min(2, fees.length - 1)])}</div>
+      <div class="bfc-fee-sub">per person</div>
+    </div>`;
+  }
+
+  cells += `<div class="bfc-fee-cell bfc-full" style="background:var(--paper-2)">
+    <div class="bfc-fee-lbl">📊 Per Person Total</div>
+    <div class="bfc-fee-val" style="font-size:28px">${bfcFmt(perPax)}</div>
+    <div class="bfc-fee-sub">carry-on${bags > 0 ? ' + ' + bags + ' checked bag' + (bags > 1 ? 's' : '') : ''}</div>
+  </div>`;
+
+  const routeLbl = bfcRoute === 'dom' ? 'Domestic' : 'International';
+  const bagLbl   = bags === 0 ? 'carry-on only' : bags + ' checked bag' + (bags > 1 ? 's' : '') + ' each';
+  const totDisp  = grandTot === 0
+    ? '<span class="bfc-total-free">$0 — FREE</span>'
+    : '$' + grandTot;
+
+  const res = document.getElementById('bfc-result');
+  res.innerHTML = `<div class="bfc-card">
+    <div class="bfc-card-header">
+      <span class="bfc-card-flag">${a.flag}</span>
+      <div>
+        <div class="bfc-card-airline">${a.name}</div>
+        <div class="bfc-card-sub">${routeLbl} · ${pax} passenger${pax > 1 ? 's' : ''} · ${bagLbl}</div>
+      </div>
+    </div>
+    <div class="bfc-fee-grid">${cells}</div>
+    <div class="bfc-total-bar">
+      <div>
+        <div class="bfc-total-lbl">Total Estimated Fees</div>
+        ${pax > 1 ? '<div class="bfc-total-sub">$' + perPax + ' × ' + pax + ' passengers</div>' : ''}
+      </div>
+      <div class="bfc-total-val">${totDisp}</div>
+    </div>
+    <div class="bfc-info-row">⚖️ <strong>Max weight:</strong> ${a.weight} &nbsp;·&nbsp; 📐 <strong>Carry-on max:</strong> ${a.coSize}</div>
+    <div class="bfc-notes-row">ℹ️ ${a.notes}</div>
+  </div>`;
+  res.style.display = 'block';
+  res.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 </script>
 </body>
