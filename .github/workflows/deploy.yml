@@ -15,19 +15,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install lftp
-        run: sudo apt-get install -y lftp
+      - name: Install sshpass
+        run: sudo apt-get install -y sshpass
 
-      - name: Upload TripTools.html via FTP
+      - name: Upload TripTools.html via SFTP
         run: |
-          lftp -u "${{ secrets.FTP_USERNAME }},${{ secrets.FTP_PASSWORD }}" \
-            ftp://playologyentertainment.com <<'EOF'
-          set ftp:ssl-allow yes
-          set ssl:verify-certificate no
-          set net:timeout 30
-          set net:max-retries 2
-          set ftp:passive-mode yes
-          mkdir -fp experiments/TripTools
-          put TripTools.html -o experiments/TripTools/TripTools.html
-          quit
-          EOF
+          sshpass -p "${{ secrets.FTP_PASSWORD }}" scp \
+            -o StrictHostKeyChecking=no \
+            -o UserKnownHostsFile=/dev/null \
+            -P 22 \
+            TripTools.html \
+            "${{ secrets.FTP_USERNAME }}@playologyentertainment.com:public_html/experiments/TripTools/TripTools.html"
