@@ -2418,16 +2418,79 @@ body.no-scroll { overflow: hidden; }
     </div>
   </div>
 </div>
-<div id="view-placeholder-visa-guide" class="view">
-  <nav class="tool-topbar">
+<style>
+.vg-search-wrap{position:relative}
+.vg-search-input{width:100%;padding:10px 12px;border:1.5px solid var(--ink);border-radius:var(--r);font-size:14px;font-family:var(--sans);background:var(--paper);color:var(--ink);box-sizing:border-box;outline:none}
+.vg-search-input:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(255,77,46,.15)}
+.vg-drop{position:absolute;top:100%;left:0;right:0;max-height:220px;overflow-y:auto;background:var(--paper);border:1.5px solid var(--ink);border-top:none;border-radius:0 0 var(--r) var(--r);z-index:200;box-shadow:0 4px 12px rgba(0,0,0,.12)}
+.vg-drop-item{padding:9px 12px;cursor:pointer;font-size:14px;font-family:var(--sans);color:var(--ink);border-bottom:1px solid var(--rule)}
+.vg-drop-item:last-child{border-bottom:none}
+.vg-drop-item:hover{background:var(--paper-2);color:var(--accent)}
+.vg-result-card{border:2px solid var(--ink);border-radius:var(--r);overflow:hidden;margin-top:4px}
+.vg-type-bar{padding:16px 18px;display:flex;align-items:center;gap:14px}
+.vg-type-label{font-family:var(--serif);font-size:22px;font-weight:700;letter-spacing:-.02em;line-height:1.1}
+.vg-type-sub{font-size:12px;font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase;opacity:.75;margin-top:3px}
+.vg-details-grid{display:grid;grid-template-columns:1fr 1fr;border-top:1.5px solid var(--ink)}
+.vg-detail-cell{padding:14px 18px;border-right:1.5px solid var(--ink)}
+.vg-detail-cell:nth-child(even){border-right:none}
+.vg-detail-cell.full{grid-column:1/-1;border-right:none;border-top:1.5px solid var(--ink)}
+.vg-detail-lbl{font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:4px}
+.vg-detail-val{font-size:16px;font-family:var(--sans);font-weight:600;color:var(--ink)}
+.vg-action-note{padding:12px 18px;border-top:1.5px solid var(--ink);font-size:13px;color:var(--ink-2);line-height:1.55}
+.vg-card-footer{padding:10px 18px;border-top:1.5px solid var(--ink);background:var(--paper-2);font-size:12px;color:var(--muted);font-family:var(--mono)}
+</style>
+<div id="view-visa-guide" class="view">
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">🌍</span>
-    <h2>Visa Requirement Guide</h2>
-    <p style="margin-bottom:24px">Nationality + destination = visa type, processing time & cost estimate.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-visa-guide"></div>
+
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>Visa Requirement Guide</h1>
+    <p class="tool-sub">Select your passport and destination to see visa type, cost estimate &amp; processing time. Covers 50 passports × 190+ countries.</p>
+  </div>
+
+  <div class="tool-body">
+    <div class="frow">
+      <div class="fg">
+        <label>Your Passport / Nationality</label>
+        <div class="vg-search-wrap">
+          <input type="search" id="vg-nat-search" class="vg-search-input" placeholder="🔍 Search nationality…" autocomplete="off">
+          <div id="vg-nat-drop" class="vg-drop" style="display:none"></div>
+          <input type="hidden" id="vg-nat-val">
+        </div>
+      </div>
+      <div class="fg">
+        <label>Destination Country</label>
+        <div class="vg-search-wrap">
+          <input type="search" id="vg-dest-search" class="vg-search-input" placeholder="🔍 Search destination…" autocomplete="off">
+          <div id="vg-dest-drop" class="vg-drop" style="display:none"></div>
+          <input type="hidden" id="vg-dest-val">
+        </div>
+      </div>
+    </div>
+
+    <button class="btn btn-p" style="width:100%;margin-top:12px" onclick="vgCheck()">🌍 Check Requirements</button>
+
+    <div id="vg-result" style="display:none;margin-top:24px"></div>
+
+    <div style="margin-top:16px;padding:12px 16px;background:var(--paper-2);border-left:3px solid var(--yellow);border-radius:var(--r);font-size:13px;color:var(--muted);line-height:1.55">
+      ⚠️ <strong>Verify before travel.</strong> Visa rules change frequently. Always confirm with the official embassy or consulate of your destination country before booking.
+    </div>
+  </div>
+
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    Most countries require your passport to be valid for at least 6 months beyond your entry date — even for visa-free travel. Use the Passport Expiry Checker to confirm you meet this requirement.
+  </div>
+
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('passport')">📕 Passport Expiry Checker</button>
+      <button class="rel-btn" onclick="openTool('doc-checklist')">✅ Document Checklist</button>
+      <button class="rel-btn" onclick="openTool('intl-driving')">🚗 International Driving Guide</button>
     </div>
   </div>
 </div>
@@ -4379,7 +4442,7 @@ const TOOLS = [
   {id:'itinerary',     nm:'Itinerary Builder',          ico:'📋', ph:'discovery', on:false, live:true,  ds:'Day-by-day planner with drag-and-drop scheduling. Printable.'},
   {id:'travel-ins',    nm:'Travel Insurance Worksheet', ico:'🛡', ph:'discovery', on:false, live:false, ds:'Side-by-side framework for comparing insurance policies.'},
   {id:'passport',      nm:'Passport Expiry Checker',    ico:'📕', ph:'docs',      on:false, live:false, ds:'Enter expiry + destination. Returns days left & 6-month rule check.'},
-  {id:'visa-guide',    nm:'Visa Requirement Guide',     ico:'🌍', ph:'docs',      on:false, live:false, ds:'Nationality + destination = visa type, cost & processing time.'},
+  {id:'visa-guide',    nm:'Visa Requirement Guide',     ico:'🌍', ph:'docs',      on:false, live:true,  ds:'Nationality + destination = visa type, cost & processing time.'},
   {id:'doc-checklist', nm:'Travel Document Checklist',  ico:'✅', ph:'docs',      on:false, live:true,  ds:'Customizable pre-trip checklist adapting to trip type.'},
   {id:'intl-driving',  nm:'International Driving Guide',ico:'🚗', ph:'docs',      on:false, live:false, ds:'IDP requirements, driving side & speed limits for 80+ countries.'},
   {id:'flight-delay',  nm:'Flight Delay Compensation',  ico:'⚖️', ph:'docs',      on:false, live:false, ds:'Your rights by region — EU261, US DOT, UK, Canada.'},
@@ -5086,6 +5149,7 @@ function injectTripCtx(id) {
   if(id==='group-trip') gtInit();
   if(id==='itinerary') ibInit();
   if(id==='budget-plan') budgetInit();
+  if(id==='visa-guide') vgInit();
 }
 
 /* ── HUB RENDER ── */
@@ -9499,9 +9563,405 @@ function gtCopySplit() {
   }).catch(()=>{ alert(text); });
 }
 
+/* ══════════════════════════════════════════════
+   VISA REQUIREMENT GUIDE  (visa-guide)
+   Rule format: TYPE:DAYS:COST_USD:PROC_DAYS
+   F=Visa Free  A=On Arrival  E=eVisa  T=eTA  R=Required  X=No Entry
+   r array index = tier-1 (t1..t4)
+   ══════════════════════════════════════════════ */
 
+const VG_PASSPORTS = [
+  // Tier 1 — strongest passports
+  {c:'AT',n:'Austria',f:'🇦🇹',t:1},{c:'AU',n:'Australia',f:'🇦🇺',t:1},
+  {c:'BE',n:'Belgium',f:'🇧🇪',t:1},{c:'CA',n:'Canada',f:'🇨🇦',t:1},
+  {c:'CH',n:'Switzerland',f:'🇨🇭',t:1},{c:'DE',n:'Germany',f:'🇩🇪',t:1},
+  {c:'DK',n:'Denmark',f:'🇩🇰',t:1},{c:'ES',n:'Spain',f:'🇪🇸',t:1},
+  {c:'FI',n:'Finland',f:'🇫🇮',t:1},{c:'FR',n:'France',f:'🇫🇷',t:1},
+  {c:'GB',n:'United Kingdom',f:'🇬🇧',t:1},{c:'HK',n:'Hong Kong',f:'🇭🇰',t:1},
+  {c:'IE',n:'Ireland',f:'🇮🇪',t:1},{c:'IT',n:'Italy',f:'🇮🇹',t:1},
+  {c:'JP',n:'Japan',f:'🇯🇵',t:1},{c:'KR',n:'South Korea',f:'🇰🇷',t:1},
+  {c:'LU',n:'Luxembourg',f:'🇱🇺',t:1},{c:'NL',n:'Netherlands',f:'🇳🇱',t:1},
+  {c:'NO',n:'Norway',f:'🇳🇴',t:1},{c:'NZ',n:'New Zealand',f:'🇳🇿',t:1},
+  {c:'PT',n:'Portugal',f:'🇵🇹',t:1},{c:'SE',n:'Sweden',f:'🇸🇪',t:1},
+  {c:'SG',n:'Singapore',f:'🇸🇬',t:1},{c:'US',n:'United States',f:'🇺🇸',t:1},
+  // Tier 2 — strong passports
+  {c:'AE',n:'UAE',f:'🇦🇪',t:2},{c:'AR',n:'Argentina',f:'🇦🇷',t:2},
+  {c:'BR',n:'Brazil',f:'🇧🇷',t:2},{c:'CL',n:'Chile',f:'🇨🇱',t:2},
+  {c:'CO',n:'Colombia',f:'🇨🇴',t:2},{c:'CZ',n:'Czechia',f:'🇨🇿',t:2},
+  {c:'GR',n:'Greece',f:'🇬🇷',t:2},{c:'HU',n:'Hungary',f:'🇭🇺',t:2},
+  {c:'MX',n:'Mexico',f:'🇲🇽',t:2},{c:'MY',n:'Malaysia',f:'🇲🇾',t:2},
+  {c:'PL',n:'Poland',f:'🇵🇱',t:2},{c:'RO',n:'Romania',f:'🇷🇴',t:2},
+  {c:'TH',n:'Thailand',f:'🇹🇭',t:2},{c:'TR',n:'Turkey',f:'🇹🇷',t:2},
+  {c:'TW',n:'Taiwan',f:'🇹🇼',t:2},{c:'UA',n:'Ukraine',f:'🇺🇦',t:2},
+  {c:'ZA',n:'South Africa',f:'🇿🇦',t:2},
+  // Tier 3 — medium passports
+  {c:'EG',n:'Egypt',f:'🇪🇬',t:3},{c:'ID',n:'Indonesia',f:'🇮🇩',t:3},
+  {c:'IL',n:'Israel',f:'🇮🇱',t:3},{c:'IN',n:'India',f:'🇮🇳',t:3},
+  {c:'PH',n:'Philippines',f:'🇵🇭',t:3},{c:'SA',n:'Saudi Arabia',f:'🇸🇦',t:3},
+  {c:'VN',n:'Vietnam',f:'🇻🇳',t:3},
+  // Tier 4 — more restricted passports
+  {c:'CN',n:'China',f:'🇨🇳',t:4},{c:'PK',n:'Pakistan',f:'🇵🇰',t:4},
+  {c:'RU',n:'Russia',f:'🇷🇺',t:4},
+];
 
+const VG_COUNTRIES = [
+  // ── Europe ──
+  {c:'AD',n:'Andorra',r:['F:90:0:0','F:90:0:0','F:90:0:0','R:0:80:14']},
+  {c:'AL',n:'Albania',r:['F:90:0:0','F:90:0:0','R:0:60:14','R:0:80:21']},
+  {c:'AM',n:'Armenia',r:['F:180:0:0','F:180:0:0','A:120:0:0','A:120:0:0']},
+  {c:'AT',n:'Austria',r:['F:90:0:0','F:90:0:0','R:90:80:14','R:90:120:21']},
+  {c:'AZ',n:'Azerbaijan',r:['E:30:20:3','E:30:20:3','E:30:20:3','A:30:0:0']},
+  {c:'BA',n:'Bosnia & Herzegovina',r:['F:90:0:0','F:90:0:0','R:0:60:14','R:0:80:21']},
+  {c:'BE',n:'Belgium',r:['F:90:0:0','F:90:0:0','R:90:80:14','R:90:120:21']},
+  {c:'BG',n:'Bulgaria',r:['F:90:0:0','F:90:0:0','R:90:80:14','R:90:120:21']},
+  {c:'BY',n:'Belarus',r:['F:30:0:0','F:30:0:0','R:0:80:14','R:0:100:21']},
+  {c:'CH',n:'Switzerland',r:['F:90:0:0','F:90:0:0','R:90:80:14','R:90:120:21']},
+  {c:'CY',n:'Cyprus',r:['F:90:0:0','F:90:0:0','R:90:80:14','R:90:120:21']},
+  {c:'CZ',n:'Czechia',r:['F:90:0:0','F:90:0:0','R:90:80:14','R:90:120:21']},
+  {c:'DE',n:'Germany',r:['F:90:0:0','F:90:0:0','R:90:80:14','R:90:120:21']},
+  {c:'DK',n:'Denmark',r:['F:90:0:0','F:90:0:0','R:90:80:14','R:90:120:21']},
+  {c:'EE',n:'Estonia',r:['F:90:0:0','F:90:0:0','R:90:80:14','R:90:120:21']},
+  {c:'ES',n:'Spain',r:['F:90:0:0','F:90:0:0','R:90:80:14','R:90:120:21']},
+  {c:'FI',n:'Finland',r:['F:90:0:0','F:90:0:0','R:90:80:14','R:90:120:21']},
+  {c:'FR',n:'France',r:['F:90:0:0','F:90:0:0','R:90:80:14','R:90:120:21']},
+  {c:'GB',n:'United Kingdom',r:['F:180:0:0','F:180:0:0','R:180:140:15','R:180:140:21']},
+  {c:'GE',n:'Georgia',r:['F:365:0:0','F:365:0:0','F:365:0:0','F:365:0:0']},
+  {c:'GR',n:'Greece',r:['F:90:0:0','F:90:0:0','R:90:80:14','R:90:120:21']},
+  {c:'HR',n:'Croatia',r:['F:90:0:0','F:90:0:0','R:90:80:14','R:90:100:21']},
+  {c:'HU',n:'Hungary',r:['F:90:0:0','F:90:0:0','R:90:80:14','R:90:120:21']},
+  {c:'IE',n:'Ireland',r:['F:90:0:0','F:90:0:0','R:90:80:14','R:90:120:21']},
+  {c:'IS',n:'Iceland',r:['F:90:0:0','F:90:0:0','R:90:80:14','R:90:120:21']},
+  {c:'IT',n:'Italy',r:['F:90:0:0','F:90:0:0','R:90:80:14','R:90:120:21']},
+  {c:'LI',n:'Liechtenstein',r:['F:90:0:0','F:90:0:0','R:90:80:14','R:90:120:21']},
+  {c:'LT',n:'Lithuania',r:['F:90:0:0','F:90:0:0','R:90:80:14','R:90:120:21']},
+  {c:'LU',n:'Luxembourg',r:['F:90:0:0','F:90:0:0','R:90:80:14','R:90:120:21']},
+  {c:'LV',n:'Latvia',r:['F:90:0:0','F:90:0:0','R:90:80:14','R:90:120:21']},
+  {c:'MC',n:'Monaco',r:['F:90:0:0','F:90:0:0','R:90:80:14','R:90:120:21']},
+  {c:'MD',n:'Moldova',r:['F:90:0:0','F:90:0:0','R:0:60:14','R:0:80:21']},
+  {c:'ME',n:'Montenegro',r:['F:90:0:0','F:90:0:0','R:0:60:14','R:0:80:21']},
+  {c:'MK',n:'North Macedonia',r:['F:90:0:0','F:90:0:0','R:0:60:14','R:0:80:21']},
+  {c:'MT',n:'Malta',r:['F:90:0:0','F:90:0:0','R:90:80:14','R:90:120:21']},
+  {c:'NL',n:'Netherlands',r:['F:90:0:0','F:90:0:0','R:90:80:14','R:90:120:21']},
+  {c:'NO',n:'Norway',r:['F:90:0:0','F:90:0:0','R:90:80:14','R:90:120:21']},
+  {c:'PL',n:'Poland',r:['F:90:0:0','F:90:0:0','R:90:80:14','R:90:120:21']},
+  {c:'PT',n:'Portugal',r:['F:90:0:0','F:90:0:0','R:90:80:14','R:90:120:21']},
+  {c:'RO',n:'Romania',r:['F:90:0:0','F:90:0:0','R:90:80:14','R:90:120:21']},
+  {c:'RS',n:'Serbia',r:['F:90:0:0','F:90:0:0','R:0:60:14','R:0:80:21']},
+  {c:'RU',n:'Russia',r:['E:60:50:3','E:60:50:3','E:60:50:3','F:0:0:0']},
+  {c:'SE',n:'Sweden',r:['F:90:0:0','F:90:0:0','R:90:80:14','R:90:120:21']},
+  {c:'SI',n:'Slovenia',r:['F:90:0:0','F:90:0:0','R:90:80:14','R:90:120:21']},
+  {c:'SK',n:'Slovakia',r:['F:90:0:0','F:90:0:0','R:90:80:14','R:90:120:21']},
+  {c:'SM',n:'San Marino',r:['F:90:0:0','F:90:0:0','R:90:80:14','R:90:120:21']},
+  {c:'TR',n:'Turkey',r:['F:90:0:0','F:90:0:0','E:90:51:1','F:60:0:0']},
+  {c:'UA',n:'Ukraine',r:['F:90:0:0','F:90:0:0','R:0:60:14','F:0:0:0']},
+  {c:'VA',n:'Vatican City',r:['F:0:0:0','F:0:0:0','F:0:0:0','F:0:0:0']},
+  {c:'XK',n:'Kosovo',r:['F:90:0:0','F:90:0:0','R:0:30:7','R:0:50:14']},
+  // ── Middle East ──
+  {c:'AE',n:'United Arab Emirates',r:['F:30:0:0','F:30:0:0','E:30:0:3','R:0:80:14']},
+  {c:'BH',n:'Bahrain',r:['A:14:25:0','A:14:25:0','E:14:25:3','R:0:80:14']},
+  {c:'IQ',n:'Iraq',r:['A:30:75:0','A:30:75:0','R:0:100:21','R:0:100:21']},
+  {c:'IR',n:'Iran',r:['A:30:30:0','A:30:30:0','R:0:80:21','R:0:80:21']},
+  {c:'IL',n:'Israel',r:['F:90:0:0','F:90:0:0','F:90:0:0','F:90:0:0']},
+  {c:'JO',n:'Jordan',r:['A:30:20:0','A:30:20:0','A:30:20:0','A:30:20:0']},
+  {c:'KW',n:'Kuwait',r:['A:90:0:0','E:30:3:3','R:0:80:14','R:0:80:14']},
+  {c:'LB',n:'Lebanon',r:['A:30:0:0','A:30:0:0','A:30:0:0','R:0:60:14']},
+  {c:'OM',n:'Oman',r:['E:30:20:3','E:30:20:3','E:30:20:3','R:0:80:14']},
+  {c:'PS',n:'Palestine',r:['F:90:0:0','F:90:0:0','F:90:0:0','F:90:0:0']},
+  {c:'QA',n:'Qatar',r:['F:30:0:0','F:30:0:0','A:30:0:0','A:30:0:0']},
+  {c:'SA',n:'Saudi Arabia',r:['E:90:124:1','E:90:124:1','E:90:124:1','R:0:150:21']},
+  {c:'SY',n:'Syria',r:['R:0:0:0','R:0:0:0','R:0:0:0','R:0:0:0']},
+  {c:'YE',n:'Yemen',r:['R:0:0:0','R:0:0:0','R:0:0:0','R:0:0:0']},
+  // ── Central Asia ──
+  {c:'AF',n:'Afghanistan',r:['R:0:0:0','R:0:0:0','R:0:0:0','R:0:0:0']},
+  {c:'KG',n:'Kyrgyzstan',r:['F:60:0:0','F:60:0:0','A:30:10:0','R:0:60:14']},
+  {c:'KZ',n:'Kazakhstan',r:['F:30:0:0','F:30:0:0','E:30:0:3','R:0:80:14']},
+  {c:'TJ',n:'Tajikistan',r:['E:45:50:2','E:45:50:2','R:0:80:14','R:0:80:14']},
+  {c:'TM',n:'Turkmenistan',r:['R:0:0:0','R:0:0:0','R:0:0:0','R:0:0:0']},
+  {c:'UZ',n:'Uzbekistan',r:['F:30:0:0','F:30:0:0','E:30:20:2','R:0:60:14']},
+  // ── South Asia ──
+  {c:'BD',n:'Bangladesh',r:['A:30:51:0','A:30:51:0','A:30:51:0','A:30:51:0']},
+  {c:'BT',n:'Bhutan',r:['R:0:250:7','R:0:250:7','R:0:250:7','R:0:250:7']},
+  {c:'IN',n:'India',r:['E:60:82:3','E:60:82:3','E:60:82:3','E:60:82:3']},
+  {c:'LK',n:'Sri Lanka',r:['E:30:35:3','E:30:35:3','E:30:35:3','E:30:35:3']},
+  {c:'MV',n:'Maldives',r:['A:30:0:0','A:30:0:0','A:30:0:0','A:30:0:0']},
+  {c:'NP',n:'Nepal',r:['A:90:30:0','A:90:30:0','A:90:30:0','A:90:30:0']},
+  {c:'PK',n:'Pakistan',r:['E:30:75:3','E:30:75:3','E:30:75:3','E:30:75:3']},
+  // ── East & Southeast Asia ──
+  {c:'CN',n:'China',r:['F:15:0:0','R:0:140:21','R:0:140:21','F:0:0:0']},
+  {c:'HK',n:'Hong Kong',r:['F:90:0:0','F:90:0:0','F:14:0:0','F:14:0:0']},
+  {c:'ID',n:'Indonesia',r:['F:30:0:0','F:30:0:0','A:30:35:0','A:30:35:0']},
+  {c:'JP',n:'Japan',r:['F:90:0:0','F:90:0:0','R:0:50:7','R:0:50:7']},
+  {c:'KH',n:'Cambodia',r:['A:30:30:0','A:30:30:0','A:30:30:0','A:30:30:0']},
+  {c:'KP',n:'North Korea',r:['R:0:0:0','R:0:0:0','R:0:0:0','R:0:0:0']},
+  {c:'KR',n:'South Korea',r:['F:90:0:0','F:90:0:0','E:90:0:1','R:0:50:7']},
+  {c:'LA',n:'Laos',r:['A:30:35:0','A:30:35:0','A:30:35:0','A:30:35:0']},
+  {c:'MN',n:'Mongolia',r:['F:30:0:0','F:30:0:0','F:30:0:0','F:30:0:0']},
+  {c:'MO',n:'Macau',r:['F:30:0:0','F:30:0:0','F:30:0:0','F:30:0:0']},
+  {c:'MM',n:'Myanmar',r:['E:28:50:3','E:28:50:3','E:28:50:3','E:28:50:3']},
+  {c:'MY',n:'Malaysia',r:['F:90:0:0','F:90:0:0','F:30:0:0','R:0:60:14']},
+  {c:'PH',n:'Philippines',r:['F:30:0:0','F:30:0:0','F:30:0:0','A:30:0:0']},
+  {c:'SG',n:'Singapore',r:['F:30:0:0','F:30:0:0','F:30:0:0','F:30:0:0']},
+  {c:'TH',n:'Thailand',r:['F:60:0:0','F:60:0:0','F:30:0:0','A:30:35:0']},
+  {c:'TL',n:'Timor-Leste',r:['A:30:30:0','A:30:30:0','A:30:30:0','A:30:30:0']},
+  {c:'TW',n:'Taiwan',r:['F:90:0:0','F:90:0:0','F:30:0:0','R:0:50:7']},
+  {c:'VN',n:'Vietnam',r:['E:90:25:3','E:90:25:3','E:90:25:3','E:90:25:3']},
+  // ── Oceania ──
+  {c:'AU',n:'Australia',r:['T:90:20:1','T:90:20:1','E:90:20:3','R:0:140:28']},
+  {c:'FJ',n:'Fiji',r:['F:90:0:0','F:90:0:0','F:90:0:0','F:90:0:0']},
+  {c:'FM',n:'Micronesia',r:['F:30:0:0','F:30:0:0','F:30:0:0','F:30:0:0']},
+  {c:'KI',n:'Kiribati',r:['A:30:0:0','A:30:0:0','A:30:0:0','A:30:0:0']},
+  {c:'MH',n:'Marshall Islands',r:['A:30:0:0','A:30:0:0','A:30:0:0','A:30:0:0']},
+  {c:'NR',n:'Nauru',r:['R:0:100:14','R:0:100:14','R:0:100:14','R:0:100:14']},
+  {c:'NZ',n:'New Zealand',r:['T:90:17:1','T:90:17:1','E:90:17:3','R:0:120:28']},
+  {c:'PG',n:'Papua New Guinea',r:['A:60:0:0','A:60:0:0','A:60:0:0','A:60:0:0']},
+  {c:'PW',n:'Palau',r:['A:30:0:0','A:30:0:0','A:30:0:0','A:30:0:0']},
+  {c:'SB',n:'Solomon Islands',r:['F:90:0:0','F:90:0:0','F:90:0:0','F:90:0:0']},
+  {c:'TO',n:'Tonga',r:['F:31:0:0','F:31:0:0','F:31:0:0','F:31:0:0']},
+  {c:'TV',n:'Tuvalu',r:['F:30:0:0','F:30:0:0','F:30:0:0','F:30:0:0']},
+  {c:'VU',n:'Vanuatu',r:['F:30:0:0','F:30:0:0','F:30:0:0','F:30:0:0']},
+  {c:'WS',n:'Samoa',r:['F:60:0:0','F:60:0:0','F:60:0:0','F:60:0:0']},
+  // ── North America & Caribbean ──
+  {c:'AG',n:'Antigua & Barbuda',r:['F:180:0:0','F:90:0:0','F:30:0:0','R:0:60:14']},
+  {c:'BB',n:'Barbados',r:['F:180:0:0','F:90:0:0','R:0:60:14','R:0:80:14']},
+  {c:'BS',n:'Bahamas',r:['F:90:0:0','F:90:0:0','R:0:60:14','R:0:80:14']},
+  {c:'BZ',n:'Belize',r:['F:30:0:0','F:30:0:0','F:30:0:0','R:0:60:14']},
+  {c:'CA',n:'Canada',r:['F:180:0:0','T:180:7:1','T:180:7:3','R:0:185:30']},
+  {c:'CR',n:'Costa Rica',r:['F:90:0:0','F:90:0:0','F:90:0:0','R:0:60:14']},
+  {c:'CU',n:'Cuba',r:['A:30:25:0','A:30:25:0','A:30:25:0','A:30:25:0']},
+  {c:'DM',n:'Dominica',r:['F:180:0:0','F:90:0:0','F:21:0:0','R:0:60:14']},
+  {c:'DO',n:'Dominican Republic',r:['A:30:10:0','A:30:10:0','A:30:10:0','R:0:80:14']},
+  {c:'GD',n:'Grenada',r:['F:90:0:0','F:90:0:0','F:90:0:0','R:0:60:14']},
+  {c:'GT',n:'Guatemala',r:['F:90:0:0','F:90:0:0','F:90:0:0','R:0:60:14']},
+  {c:'HN',n:'Honduras',r:['F:90:0:0','F:90:0:0','F:90:0:0','R:0:60:14']},
+  {c:'HT',n:'Haiti',r:['F:90:0:0','F:90:0:0','F:90:0:0','R:0:60:14']},
+  {c:'JM',n:'Jamaica',r:['F:30:0:0','F:30:0:0','F:30:0:0','R:0:60:14']},
+  {c:'KN',n:'St. Kitts & Nevis',r:['F:90:0:0','F:90:0:0','F:90:0:0','R:0:60:14']},
+  {c:'LC',n:'St. Lucia',r:['F:90:0:0','F:90:0:0','F:90:0:0','R:0:60:14']},
+  {c:'MX',n:'Mexico',r:['F:180:0:0','F:180:0:0','F:180:0:0','R:0:60:14']},
+  {c:'NI',n:'Nicaragua',r:['F:90:0:0','F:90:0:0','F:90:0:0','R:0:60:14']},
+  {c:'PA',n:'Panama',r:['F:180:0:0','F:90:0:0','F:90:0:0','R:0:60:14']},
+  {c:'SV',n:'El Salvador',r:['F:90:0:0','F:90:0:0','F:90:0:0','R:0:60:14']},
+  {c:'TT',n:'Trinidad & Tobago',r:['F:90:0:0','F:90:0:0','R:0:80:14','R:0:80:14']},
+  {c:'US',n:'United States',r:['F:90:0:0','T:90:14:1','T:90:14:1','R:0:185:30']},
+  {c:'VC',n:'St. Vincent & Grenadines',r:['F:30:0:0','F:30:0:0','F:30:0:0','R:0:60:14']},
+  // ── South America ──
+  {c:'AR',n:'Argentina',r:['F:90:0:0','F:90:0:0','F:90:0:0','R:0:80:14']},
+  {c:'BO',n:'Bolivia',r:['F:90:0:0','F:90:0:0','F:90:0:0','A:90:0:0']},
+  {c:'BR',n:'Brazil',r:['F:90:0:0','F:90:0:0','E:90:0:3','R:0:80:14']},
+  {c:'CL',n:'Chile',r:['F:90:0:0','F:90:0:0','F:90:0:0','R:0:60:14']},
+  {c:'CO',n:'Colombia',r:['F:90:0:0','F:90:0:0','F:90:0:0','R:0:60:14']},
+  {c:'EC',n:'Ecuador',r:['F:90:0:0','F:90:0:0','F:90:0:0','R:0:60:14']},
+  {c:'GY',n:'Guyana',r:['F:30:0:0','F:30:0:0','F:30:0:0','R:0:60:14']},
+  {c:'PE',n:'Peru',r:['F:90:0:0','F:90:0:0','F:90:0:0','R:0:60:14']},
+  {c:'PY',n:'Paraguay',r:['F:90:0:0','F:90:0:0','F:90:0:0','R:0:60:14']},
+  {c:'SR',n:'Suriname',r:['A:30:25:0','A:30:25:0','R:0:60:14','R:0:80:14']},
+  {c:'UY',n:'Uruguay',r:['F:90:0:0','F:90:0:0','F:90:0:0','R:0:60:14']},
+  {c:'VE',n:'Venezuela',r:['F:90:0:0','F:90:0:0','F:90:0:0','R:0:80:14']},
+  // ── Africa: North ──
+  {c:'DZ',n:'Algeria',r:['R:0:60:14','R:0:60:14','R:0:60:14','R:0:60:14']},
+  {c:'EG',n:'Egypt',r:['A:30:25:0','A:30:25:0','A:30:25:0','A:30:25:0']},
+  {c:'LY',n:'Libya',r:['R:0:0:0','R:0:0:0','R:0:0:0','R:0:0:0']},
+  {c:'MA',n:'Morocco',r:['F:90:0:0','F:90:0:0','F:90:0:0','R:0:60:14']},
+  {c:'SD',n:'Sudan',r:['R:0:100:21','R:0:100:21','R:0:100:21','R:0:100:21']},
+  {c:'TN',n:'Tunisia',r:['F:90:0:0','F:90:0:0','F:90:0:0','R:0:60:14']},
+  // ── Africa: West ──
+  {c:'BF',n:'Burkina Faso',r:['E:30:50:3','E:30:50:3','E:30:50:3','R:0:80:14']},
+  {c:'BJ',n:'Benin',r:['E:30:50:3','E:30:50:3','E:30:50:3','E:30:50:3']},
+  {c:'CI',n:"Côte d'Ivoire",r:['E:90:50:3','E:90:50:3','E:90:50:3','R:0:80:14']},
+  {c:'CV',n:'Cape Verde',r:['A:30:30:0','A:30:30:0','A:30:30:0','A:30:30:0']},
+  {c:'GH',n:'Ghana',r:['A:60:80:0','A:60:80:0','A:60:80:0','A:60:80:0']},
+  {c:'GM',n:'Gambia',r:['F:90:0:0','F:90:0:0','F:90:0:0','A:90:0:0']},
+  {c:'GN',n:'Guinea',r:['R:0:60:14','R:0:60:14','R:0:60:14','R:0:60:14']},
+  {c:'GW',n:'Guinea-Bissau',r:['A:90:0:0','A:90:0:0','A:90:0:0','A:90:0:0']},
+  {c:'LR',n:'Liberia',r:['A:30:0:0','A:30:0:0','A:30:0:0','R:0:80:14']},
+  {c:'ML',n:'Mali',r:['R:0:60:14','R:0:60:14','R:0:60:14','R:0:60:14']},
+  {c:'MR',n:'Mauritania',r:['A:30:55:0','A:30:55:0','A:30:55:0','R:0:80:14']},
+  {c:'NE',n:'Niger',r:['R:0:60:14','R:0:60:14','R:0:60:14','R:0:60:14']},
+  {c:'NG',n:'Nigeria',r:['A:30:100:0','A:30:100:0','A:30:100:0','R:0:100:14']},
+  {c:'SL',n:'Sierra Leone',r:['A:30:0:0','A:30:0:0','A:30:0:0','A:30:0:0']},
+  {c:'SN',n:'Senegal',r:['F:90:0:0','F:90:0:0','F:90:0:0','A:90:0:0']},
+  {c:'TG',n:'Togo',r:['A:7:0:0','A:7:0:0','A:7:0:0','R:0:60:14']},
+  // ── Africa: East ──
+  {c:'BI',n:'Burundi',r:['A:30:90:0','A:30:90:0','A:30:90:0','R:0:100:14']},
+  {c:'DJ',n:'Djibouti',r:['E:30:35:3','E:30:35:3','E:30:35:3','R:0:80:14']},
+  {c:'ER',n:'Eritrea',r:['R:0:40:14','R:0:40:14','R:0:40:14','R:0:40:14']},
+  {c:'ET',n:'Ethiopia',r:['E:30:52:3','E:30:52:3','E:30:52:3','R:0:80:14']},
+  {c:'KE',n:'Kenya',r:['E:90:51:3','E:90:51:3','E:90:51:3','E:90:51:3']},
+  {c:'KM',n:'Comoros',r:['A:45:0:0','A:45:0:0','A:45:0:0','A:45:0:0']},
+  {c:'MG',n:'Madagascar',r:['A:30:0:0','A:30:0:0','A:30:0:0','A:30:0:0']},
+  {c:'MU',n:'Mauritius',r:['F:90:0:0','F:90:0:0','F:90:0:0','F:90:0:0']},
+  {c:'MW',n:'Malawi',r:['F:30:0:0','F:30:0:0','F:30:0:0','A:30:75:0']},
+  {c:'MZ',n:'Mozambique',r:['A:30:55:0','A:30:55:0','A:30:55:0','R:0:80:14']},
+  {c:'RW',n:'Rwanda',r:['A:30:50:0','A:30:50:0','A:30:50:0','A:30:50:0']},
+  {c:'SC',n:'Seychelles',r:['F:90:0:0','F:90:0:0','F:90:0:0','F:90:0:0']},
+  {c:'SO',n:'Somalia',r:['A:30:60:0','A:30:60:0','A:30:60:0','A:30:60:0']},
+  {c:'SS',n:'South Sudan',r:['R:0:100:14','R:0:100:14','R:0:100:14','R:0:100:14']},
+  {c:'TZ',n:'Tanzania',r:['E:90:50:3','E:90:50:3','E:90:50:3','E:90:50:3']},
+  {c:'UG',n:'Uganda',r:['E:90:50:3','E:90:50:3','E:90:50:3','E:90:50:3']},
+  {c:'ZM',n:'Zambia',r:['A:90:50:0','A:90:50:0','A:90:50:0','A:90:50:0']},
+  {c:'ZW',n:'Zimbabwe',r:['A:30:75:0','A:30:75:0','A:30:75:0','R:0:100:14']},
+  // ── Africa: Central ──
+  {c:'AO',n:'Angola',r:['E:30:80:3','E:30:80:3','E:30:80:3','R:0:100:21']},
+  {c:'CF',n:'Central African Republic',r:['R:0:100:14','R:0:100:14','R:0:100:14','R:0:100:14']},
+  {c:'CG',n:'Rep. of Congo',r:['R:0:100:14','R:0:100:14','R:0:100:14','R:0:100:14']},
+  {c:'CM',n:'Cameroon',r:['E:90:60:3','E:90:60:3','E:90:60:3','R:0:80:14']},
+  {c:'CD',n:'DR Congo',r:['R:0:150:21','R:0:150:21','R:0:150:21','R:0:150:21']},
+  {c:'GA',n:'Gabon',r:['E:90:0:1','E:90:0:1','E:90:0:1','R:0:80:14']},
+  {c:'GQ',n:'Equatorial Guinea',r:['R:0:100:14','R:0:100:14','R:0:100:14','R:0:100:14']},
+  {c:'ST',n:'São Tomé & Príncipe',r:['A:15:0:0','A:15:0:0','A:15:0:0','A:15:0:0']},
+  {c:'TD',n:'Chad',r:['R:0:100:14','R:0:100:14','R:0:100:14','R:0:100:14']},
+  // ── Africa: Southern ──
+  {c:'BW',n:'Botswana',r:['F:90:0:0','F:90:0:0','F:90:0:0','R:0:60:14']},
+  {c:'LS',n:'Lesotho',r:['F:30:0:0','F:30:0:0','F:30:0:0','F:30:0:0']},
+  {c:'NA',n:'Namibia',r:['F:90:0:0','F:90:0:0','F:90:0:0','R:0:60:14']},
+  {c:'SZ',n:'Eswatini',r:['F:30:0:0','F:30:0:0','F:30:0:0','F:30:0:0']},
+  {c:'ZA',n:'South Africa',r:['F:90:0:0','F:90:0:0','R:0:80:14','R:0:80:14']},
+];
 
+function vgInit() {
+  const trip = getActiveTrip();
+  const ctx  = document.getElementById('ctx-visa-guide');
+  if (trip && ctx) {
+    ctx.textContent = `✈ Using context from: ${trip.name} — tap to edit ↗`;
+    ctx.classList.add('show');
+    ctx.onclick = () => showView('mytrip');
+  } else if (ctx) { ctx.classList.remove('show'); }
+
+  const natSearch  = document.getElementById('vg-nat-search');
+  const destSearch = document.getElementById('vg-dest-search');
+  const natDrop    = document.getElementById('vg-nat-drop');
+  const destDrop   = document.getElementById('vg-dest-drop');
+  const res        = document.getElementById('vg-result');
+  if (res) { res.style.display = 'none'; res.innerHTML = ''; }
+
+  // Restore saved nationality preference
+  const savedNat = localStorage.getItem('tt_vg_nat');
+  if (savedNat) {
+    const p = VG_PASSPORTS.find(x => x.c === savedNat);
+    if (p) { natSearch.value = p.f + ' ' + p.n; document.getElementById('vg-nat-val').value = p.c; }
+  }
+
+  function openDrop(input, drop, list) {
+    vgRenderDrop(drop, list, input.value);
+    drop.style.display = 'block';
+  }
+  function closeDrop(drop) { setTimeout(() => { drop.style.display = 'none'; }, 160); }
+
+  natSearch.oninput  = () => { document.getElementById('vg-nat-val').value = ''; vgRenderDrop(natDrop, VG_PASSPORTS, natSearch.value); natDrop.style.display = 'block'; };
+  natSearch.onfocus  = () => openDrop(natSearch, natDrop, VG_PASSPORTS);
+  natSearch.onblur   = () => closeDrop(natDrop);
+
+  destSearch.oninput = () => { document.getElementById('vg-dest-val').value = ''; vgRenderDrop(destDrop, VG_COUNTRIES, destSearch.value); destDrop.style.display = 'block'; };
+  destSearch.onfocus = () => openDrop(destSearch, destDrop, VG_COUNTRIES);
+  destSearch.onblur  = () => closeDrop(destDrop);
+}
+
+function vgRenderDrop(drop, list, q) {
+  const query = (q || '').toLowerCase().trim();
+  const items = query ? list.filter(x => x.n.toLowerCase().includes(query) || x.c.toLowerCase().includes(query)) : list;
+  if (!items.length) {
+    drop.innerHTML = '<div class="vg-drop-item" style="color:var(--muted);cursor:default">No results found</div>';
+    return;
+  }
+  drop.innerHTML = items.slice(0, 60).map(x => {
+    const flag = x.f || '';
+    const safeLabel = (flag + ' ' + x.n).replace(/'/g, '&#39;');
+    return `<div class="vg-drop-item" onmousedown="vgSelect(event,'${x.c}','${safeLabel}')">${flag} ${x.n}</div>`;
+  }).join('');
+}
+
+function vgSelect(e, code, label) {
+  e.preventDefault();
+  // Determine which field: check which drop is visible
+  const natDrop  = document.getElementById('vg-nat-drop');
+  const destDrop = document.getElementById('vg-dest-drop');
+  if (natDrop.style.display !== 'none') {
+    document.getElementById('vg-nat-search').value = label;
+    document.getElementById('vg-nat-val').value    = code;
+    natDrop.style.display = 'none';
+  } else {
+    document.getElementById('vg-dest-search').value = label;
+    document.getElementById('vg-dest-val').value    = code;
+    destDrop.style.display = 'none';
+  }
+}
+
+function vgCheck() {
+  const natCode  = document.getElementById('vg-nat-val').value.trim();
+  const destCode = document.getElementById('vg-dest-val').value.trim();
+  const res      = document.getElementById('vg-result');
+  res.style.display = 'block';
+
+  if (!natCode || !destCode) {
+    res.innerHTML = '<div style="padding:16px;border:1.5px solid var(--ink);border-radius:var(--r);color:var(--muted);text-align:center;font-size:14px">Please select both a passport nationality and a destination country.</div>';
+    return;
+  }
+
+  localStorage.setItem('tt_vg_nat', natCode);
+
+  const passport = VG_PASSPORTS.find(p => p.c === natCode);
+  const dest     = VG_COUNTRIES.find(d => d.c === destCode);
+
+  if (natCode === destCode) {
+    res.innerHTML = `<div class="vg-result-card"><div class="vg-type-bar" style="background:#e8f5e9"><span style="font-size:36px">🏠</span><div><div class="vg-type-label" style="color:#2e7d32">Home Country</div><div class="vg-type-sub">No visa required — you are a citizen</div></div></div><div class="vg-card-footer">Always carry a valid passport or national ID when crossing borders.</div></div>`;
+    return;
+  }
+
+  if (!dest) {
+    res.innerHTML = '<div style="padding:16px;border:1.5px solid var(--ink);border-radius:var(--r);color:var(--muted);text-align:center;font-size:14px">No data for this destination. Please verify requirements with the official embassy or consulate.</div>';
+    return;
+  }
+
+  const tier    = passport ? passport.t : 3;
+  const ruleStr = dest.r[tier - 1] || dest.r[0];
+  const parts   = ruleStr.split(':');
+  const type = parts[0], days = parts[1], cost = parts[2], proc = parts[3];
+  const passLabel = passport ? (passport.f + ' ' + passport.n) : natCode;
+  res.innerHTML = vgBuildCard(type, days, cost, proc, passLabel, dest.n);
+}
+
+function vgBuildCard(type, days, cost, proc, fromLabel, toLabel) {
+  const cfg = {
+    F:{icon:'🟢',label:'Visa Free',          bg:'#e8f5e9',color:'#2e7d32'},
+    A:{icon:'🟡',label:'Visa on Arrival',     bg:'#fff8e1',color:'#e65100'},
+    E:{icon:'🔵',label:'eVisa Required',      bg:'#e3f2fd',color:'#1565c0'},
+    T:{icon:'🔵',label:'eTA / ESTA Required', bg:'#e3f2fd',color:'#1565c0'},
+    R:{icon:'🔴',label:'Visa Required',       bg:'#fce4ec',color:'#c62828'},
+    X:{icon:'⛔',label:'Entry Not Permitted', bg:'#f5f5f5',color:'#616161'},
+  }[type] || {icon:'🔴',label:'Visa Required',bg:'#fce4ec',color:'#c62828'};
+
+  const daysStr = (days && days !== '0') ? days + ' days' : 'Varies';
+  const costStr = cost === '0' ? 'Free' : (cost && cost !== '0') ? '~$' + cost + ' USD' : 'Varies';
+  const procStr = proc === '0'
+    ? (type === 'F' ? 'None required' : 'At border / port of entry')
+    : proc === '1' ? '~1 day' : (proc && proc !== '0') ? '~' + proc + ' days' : 'Varies';
+
+  const notes = {
+    E: '🌐 Apply online before travel at the official government eVisa portal.',
+    T: '🌐 Apply for your eTA/ESTA online — usually approved within minutes to hours.',
+    R: '🏛 Apply at the destination country\'s embassy or consulate well in advance.',
+    A: '✈️ Obtain your visa at the airport or border crossing upon arrival. Bring passport photos and cash for fees.',
+    X: '⛔ Entry is restricted or not recognized. Check your government\'s official travel advisory.',
+  };
+  const actionNote = notes[type] ? `<div class="vg-action-note">${notes[type]}</div>` : '';
+
+  return `<div class="vg-result-card">
+  <div class="vg-type-bar" style="background:${cfg.bg}">
+    <span style="font-size:40px">${cfg.icon}</span>
+    <div>
+      <div class="vg-type-label" style="color:${cfg.color}">${cfg.label}</div>
+      <div class="vg-type-sub">${fromLabel} → ${toLabel}</div>
+    </div>
+  </div>
+  <div class="vg-details-grid">
+    <div class="vg-detail-cell"><div class="vg-detail-lbl">Max Stay</div><div class="vg-detail-val">${daysStr}</div></div>
+    <div class="vg-detail-cell"><div class="vg-detail-lbl">Est. Cost</div><div class="vg-detail-val">${costStr}</div></div>
+    <div class="vg-detail-cell full"><div class="vg-detail-lbl">Processing Time</div><div class="vg-detail-val">${procStr}</div></div>
+  </div>
+  ${actionNote}
+  <div class="vg-card-footer">⚠ Estimates only — entry requirements change. Verify with the official embassy before travel.</div>
+</div>`;
+}
 </script>
 </body>
 </html>
