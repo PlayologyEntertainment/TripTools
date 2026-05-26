@@ -3185,13 +3185,6 @@ body.no-scroll { overflow: hidden; }
 </div>
 <style>
 /* ── TIME ZONE CONVERTER ── */
-.tz-tabs{display:flex;gap:0;border-bottom:2px solid var(--ink);margin-bottom:18px;overflow-x:auto}
-.tz-tab{flex-shrink:0;padding:11px 18px;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;border:none;background:var(--paper-2);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;transition:background .12s,border-color .12s;color:var(--muted);min-height:44px}
-.tz-tab.active{background:var(--paper);border-bottom-color:var(--accent);color:var(--ink);font-weight:700}
-.tz-tab:hover:not(.active){background:#e8e1d2}
-.tz-panel{display:none}
-.tz-panel.active{display:block}
-
 /* Reference time controls */
 .tz-ref-bar{background:var(--paper-2);border:1.5px solid var(--ink);border-radius:var(--r);padding:12px 14px;margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .tz-ref-lbl{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);flex-shrink:0}
@@ -3255,36 +3248,6 @@ body.no-scroll { overflow: hidden; }
 .tz-picker-row .pr-tz{font-family:var(--mono);font-size:10px;letter-spacing:.05em;color:var(--muted);margin-left:auto;flex-shrink:0}
 .tz-picker-empty{padding:24px 16px;text-align:center;color:var(--muted);font-size:13px;font-style:italic}
 
-/* Meeting planner grid */
-.tz-mp-info{font-size:13px;color:var(--ink-2);line-height:1.55;margin-bottom:12px}
-.tz-mp-info b{color:var(--ink)}
-.tz-mp-hours{background:var(--paper-2);border:1.5px solid var(--ink);border-radius:var(--r);padding:10px 12px;margin-bottom:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--muted)}
-.tz-mp-hours label{text-transform:uppercase;letter-spacing:.1em}
-.tz-mp-hours input[type="number"]{background:var(--paper);border:1.5px solid var(--ink);border-radius:var(--r);padding:5px 7px;font-family:var(--mono);font-size:13px;width:58px;color:var(--ink);min-height:32px;text-align:center}
-.tz-mp-table-wrap{border:1.5px solid var(--ink);border-radius:var(--r);background:var(--paper);overflow:hidden;margin-bottom:14px}
-.tz-mp-scroll{overflow-x:auto}
-.tz-mp-table{width:100%;border-collapse:collapse;font-size:11px;font-family:var(--mono);min-width:760px}
-.tz-mp-table th,.tz-mp-table td{padding:0;text-align:center;border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);height:32px;vertical-align:middle;white-space:nowrap}
-.tz-mp-table thead th{background:var(--paper-2);font-weight:600;color:var(--ink-2);font-size:10px;letter-spacing:.06em;padding:6px 4px;border-bottom:1.5px solid var(--ink);position:sticky;top:0;z-index:2}
-.tz-mp-table tbody th{background:var(--paper-2);text-align:left;padding:6px 10px;font-family:var(--serif);font-weight:600;font-size:13px;letter-spacing:-.01em;color:var(--ink);border-right:1.5px solid var(--ink);position:sticky;left:0;z-index:1;min-width:160px}
-.tz-mp-table tbody th .mp-tz{font-family:var(--mono);font-size:9px;letter-spacing:.04em;color:var(--muted);font-weight:400;display:block;text-transform:none}
-.tz-mp-cell{position:relative;color:var(--ink-2);font-weight:500;min-width:30px}
-.tz-mp-cell.work{background:#e8f5e9;color:var(--green)}
-.tz-mp-cell.fringe{background:#fff8e1;color:#b8860b}
-.tz-mp-cell.sleep{background:#fce4ec;color:#c62828;opacity:.85}
-.tz-mp-cell.overlap{outline:2px solid var(--ink);outline-offset:-2px;font-weight:700}
-.tz-mp-cell .mp-h{display:block;line-height:1.1}
-.tz-mp-cell .mp-d{font-size:8px;letter-spacing:.04em;color:var(--muted);display:block;line-height:1}
-.tz-mp-legend{display:flex;flex-wrap:wrap;gap:14px;font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--muted);margin-bottom:14px}
-.tz-mp-legend .lg{display:flex;align-items:center;gap:6px}
-.tz-mp-legend .sw{width:14px;height:14px;border:1px solid var(--rule);border-radius:2px;display:inline-block}
-.tz-mp-legend .sw.work{background:#e8f5e9}
-.tz-mp-legend .sw.fringe{background:#fff8e1}
-.tz-mp-legend .sw.sleep{background:#fce4ec}
-.tz-mp-overlap-box{background:#f1f8e9;border:1.5px solid var(--green);border-left:4px solid var(--green);border-radius:var(--r);padding:12px 14px;margin-bottom:14px;font-size:14px;color:var(--ink)}
-.tz-mp-overlap-box.none{background:#fff3e0;border-color:var(--orange);border-left-color:var(--orange)}
-.tz-mp-overlap-box b{font-family:var(--serif);font-weight:600;font-size:15px;display:block;margin-bottom:4px}
-
 .tz-empty{padding:36px 18px;text-align:center;border:1.5px dashed var(--rule);border-radius:var(--r);color:var(--muted);font-size:14px;background:var(--paper-2);margin-bottom:14px}
 
 @media(max-width:520px){
@@ -3298,19 +3261,14 @@ body.no-scroll { overflow: hidden; }
   #view-timezone .ctx-banner,
   #view-timezone .pro-tip,
   #view-timezone .related,
-  #view-timezone .tz-tabs,
   #view-timezone .tz-add-btn,
   #view-timezone .tz-clock-rm,
   #view-timezone .tz-ref-mode,
   #view-timezone .tz-fmt-toggle,
   #view-timezone .tz-picker-backdrop{display:none !important}
-  #view-timezone .tz-panel{display:block !important}
   #view-timezone .tz-print-hdr{display:flex !important;justify-content:space-between;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#555;padding-bottom:10px;border-bottom:2px solid #000;margin-bottom:18px}
   body{background:#fff !important;background-image:none !important}
-  .tz-clock,.tz-mp-table-wrap{border:1.5px solid #000 !important;break-inside:avoid}
-  .tz-mp-cell.work{background:#dcedc8 !important;color:#000 !important}
-  .tz-mp-cell.fringe{background:#fff9c4 !important;color:#000 !important}
-  .tz-mp-cell.sleep{background:#ffcdd2 !important;color:#000 !important}
+  .tz-clock{border:1.5px solid #000 !important;break-inside:avoid}
 }
 .tz-print-hdr{display:none}
 </style>
@@ -3325,88 +3283,45 @@ body.no-scroll { overflow: hidden; }
   <div class="tool-hdr">
     <div class="conn-bdg bdg-off">✈️ Works Offline</div>
     <h1>Time Zone Converter</h1>
-    <p class="tool-sub">Live multi-city clocks with DST awareness — plus a meeting planner that finds the work-hour overlap across every city in your trip.</p>
+    <p class="tool-sub">Live multi-city wall clocks with DST awareness — pin a custom time in any city and watch every other clock recompute instantly.</p>
   </div>
 
   <div class="tool-body">
 
-    <div class="tz-tabs" role="tablist" aria-label="Time Zone tabs">
-      <button class="tz-tab active" role="tab" aria-selected="true" onclick="tzShowTab('clocks',this)">🕐 Clocks</button>
-      <button class="tz-tab" role="tab" aria-selected="false" onclick="tzShowTab('mp',this)">🗓 Meeting Planner</button>
+    <div class="tz-ref-bar">
+      <span class="tz-ref-lbl">Showing</span>
+      <div class="tz-ref-mode" role="group" aria-label="Reference time mode">
+        <button id="tz-mode-now" class="on" onclick="tzSetMode('now')">Now (live)</button>
+        <button id="tz-mode-custom" onclick="tzSetMode('custom')">Custom time</button>
+      </div>
+      <div class="tz-ref-anchor" id="tz-anchor-wrap" style="display:none">
+        <span>at</span>
+        <input type="time" id="tz-anchor-time" oninput="tzRenderClocks()">
+        <span>in</span>
+        <select id="tz-anchor-city" onchange="tzRenderClocks()"></select>
+      </div>
+      <label class="tz-fmt-toggle" style="margin-left:auto">
+        <input type="checkbox" id="tz-fmt-24" onchange="tzToggleFmt()"> 24-hour
+      </label>
     </div>
 
-    <!-- ── CLOCKS TAB ── -->
-    <div id="tz-panel-clocks" class="tz-panel active">
-
-      <div class="tz-ref-bar">
-        <span class="tz-ref-lbl">Showing</span>
-        <div class="tz-ref-mode" role="group" aria-label="Reference time mode">
-          <button id="tz-mode-now" class="on" onclick="tzSetMode('now')">Now (live)</button>
-          <button id="tz-mode-custom" onclick="tzSetMode('custom')">Custom time</button>
-        </div>
-        <div class="tz-ref-anchor" id="tz-anchor-wrap" style="display:none">
-          <span>at</span>
-          <input type="time" id="tz-anchor-time" oninput="tzRenderClocks()">
-          <span>in</span>
-          <select id="tz-anchor-city" onchange="tzRenderClocks()"></select>
-        </div>
-        <label class="tz-fmt-toggle" style="margin-left:auto">
-          <input type="checkbox" id="tz-fmt-24" onchange="tzToggleFmt()"> 24-hour
-        </label>
-      </div>
-
-      <div id="tz-clocks-grid" class="tz-clocks"></div>
-      <button class="tz-add-btn" onclick="tzOpenPicker('add')">+ Add City</button>
-
-    </div>
-
-    <!-- ── MEETING PLANNER TAB ── -->
-    <div id="tz-panel-mp" class="tz-panel">
-
-      <p class="tz-mp-info">Find the window where everyone is awake. Set the work-hour range below; the grid shades each city's local hours as <b>work-friendly</b>, <b>fringe</b>, or <b>asleep</b>. Cells where every city is in work hours are outlined as the <b>shared overlap</b>.</p>
-
-      <div class="tz-mp-hours">
-        <label for="tz-mp-start">Work hours</label>
-        <input type="number" id="tz-mp-start" min="0" max="23" value="9" oninput="tzRenderMP()">
-        <span>to</span>
-        <input type="number" id="tz-mp-end" min="1" max="24" value="17" oninput="tzRenderMP()">
-        <span style="margin-left:auto">Reference:</span>
-        <select id="tz-mp-anchor" onchange="tzRenderMP()"></select>
-      </div>
-
-      <div id="tz-mp-overlap"></div>
-
-      <div class="tz-mp-table-wrap">
-        <div class="tz-mp-scroll">
-          <table class="tz-mp-table" id="tz-mp-table"></table>
-        </div>
-      </div>
-
-      <div class="tz-mp-legend">
-        <span class="lg"><span class="sw work"></span>Work hours</span>
-        <span class="lg"><span class="sw fringe"></span>Fringe (early/late)</span>
-        <span class="lg"><span class="sw sleep"></span>Asleep / off-hours</span>
-        <span class="lg" style="font-weight:700;color:var(--ink)">⬛ Outlined = everyone's overlap</span>
-      </div>
-
-      <button class="tz-add-btn" onclick="tzOpenPicker('add')">+ Add City</button>
-
-    </div>
+    <div id="tz-clocks-grid" class="tz-clocks"></div>
+    <button class="tz-add-btn" onclick="tzOpenPicker('add')">+ Add City</button>
 
   </div><!-- /tool-body -->
 
   <div class="pro-tip">
     <strong>§ Pro Tip</strong>
-    Schedule meetings near the <em>edges</em> of someone's day, not the middle of their night. A 7am call is annoying; a 3am call is sleep-destroying. Use the fringe (yellow) zones only when work hours don't overlap at all.
+    Planning a call across zones? Use the <strong>Meeting Time Zone Planner</strong> tool to find the work-hour overlap across every participant. This tool is for "what time is it right now in…"
   </div>
 
   <div class="related">
     Related Tools
     <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('meeting-tz')">🗓 Meeting Time Zone Planner</button>
       <button class="rel-btn" onclick="openTool('jet-lag')">😴 Jet Lag Calculator</button>
       <button class="rel-btn" onclick="openTool('itinerary')">📋 Itinerary Builder</button>
       <button class="rel-btn" onclick="openTool('weather')">🌦 Weather Forecast</button>
-      <button class="rel-btn" onclick="openTool('currency')">💱 Currency Converter</button>
     </div>
   </div>
 
@@ -5115,18 +5030,196 @@ input:checked + .pb-toggle-box::after { transform:translateX(16px);background:#f
     </div>
   </div>
 </div>
-<div id="view-placeholder-meeting-tz" class="view">
-  <nav class="tool-topbar">
+<style>
+/* ── MEETING TIME ZONE PLANNER ── */
+.mtp-toolbar{background:var(--paper-2);border:1.5px solid var(--ink);border-radius:var(--r);padding:12px 14px;margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.mtp-toolbar label{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);display:inline-flex;align-items:center;gap:6px}
+.mtp-toolbar input[type="date"],.mtp-toolbar select{background:var(--paper);border:1.5px solid var(--ink);border-radius:var(--r);padding:6px 8px;font-family:var(--sans);font-size:14px;color:var(--ink);min-height:36px}
+.mtp-toolbar input[type="date"]{font-family:var(--mono)}
+.mtp-toolbar .btn-today{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:6px 10px;border:1.5px solid var(--ink);background:var(--paper);color:var(--ink-2);cursor:pointer;border-radius:var(--r);min-height:36px;transition:background .12s,color .12s}
+.mtp-toolbar .btn-today:hover{background:var(--ink);color:var(--paper)}
+.mtp-toolbar .mtp-fmt{margin-left:auto;display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);cursor:pointer}
+.mtp-toolbar .mtp-fmt input{accent-color:var(--accent);cursor:pointer}
+
+/* Participants editor */
+.mtp-sec-lbl{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:14px 0 8px;border-bottom:1px solid var(--rule);padding-bottom:6px}
+.mtp-participants{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
+.mtp-pcard{background:var(--paper);border:1.5px solid var(--ink);border-radius:var(--r);padding:12px 14px;position:relative}
+.mtp-pcard::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--purple);border-radius:var(--r) 0 0 var(--r)}
+.mtp-pcard-top{display:grid;grid-template-columns:1.2fr 1.6fr auto;gap:10px;align-items:flex-end;margin-bottom:10px}
+.mtp-pcard-bot{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.mtp-pfield{display:flex;flex-direction:column;gap:4px;min-width:0}
+.mtp-pfield label{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.mtp-pfield input[type="text"]{background:var(--paper-2);border:1.5px solid var(--ink);border-radius:var(--r);padding:8px 11px;font-family:var(--sans);font-size:14px;color:var(--ink);min-height:40px;width:100%}
+.mtp-pfield input[type="text"]:focus{outline:none;border-color:var(--accent)}
+.mtp-pfield input[type="number"]{background:var(--paper-2);border:1.5px solid var(--ink);border-radius:var(--r);padding:6px 7px;font-family:var(--mono);font-size:13px;width:56px;color:var(--ink);min-height:34px;text-align:center}
+.mtp-pfield input[type="number"]:focus{outline:none;border-color:var(--accent)}
+.mtp-hrow{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--muted)}
+.mtp-city-btn{display:flex;align-items:center;gap:8px;width:100%;background:var(--paper-2);border:1.5px solid var(--ink);border-radius:var(--r);padding:8px 11px;font-family:var(--sans);font-size:14px;color:var(--ink);min-height:40px;cursor:pointer;transition:border-color .12s,background .12s;text-align:left}
+.mtp-city-btn:hover{background:var(--paper)}
+.mtp-city-flag{font-size:18px;line-height:1;flex-shrink:0}
+.mtp-city-label{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mtp-city-cta{color:var(--muted);font-size:12px;flex-shrink:0}
+.mtp-rm{background:none;border:1.5px solid transparent;cursor:pointer;color:var(--muted);font-size:22px;line-height:1;padding:4px 8px;border-radius:var(--r);transition:background .12s,color .12s,border-color .12s;align-self:flex-end;min-height:40px}
+.mtp-rm:hover{background:var(--paper-2);color:var(--accent);border-color:var(--accent)}
+.mtp-ptz{font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--muted);text-align:right;flex:1}
+
+@media(max-width:600px){
+  .mtp-pcard-top{grid-template-columns:1fr 1fr;align-items:stretch}
+  .mtp-rm{grid-column:span 2;justify-self:end}
+  .mtp-pcard-bot{flex-direction:column;align-items:stretch}
+  .mtp-ptz{text-align:left}
+}
+
+.mtp-add-btn{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--paper-2);border:1.5px dashed var(--ink);border-radius:var(--r);padding:12px 18px;cursor:pointer;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);width:100%;min-height:44px;transition:background .12s,color .12s,border-color .12s;margin-bottom:18px}
+.mtp-add-btn:hover{background:#e8e1d2;color:var(--ink);border-color:var(--accent)}
+
+/* Overlap summary box */
+.mtp-overlap-box{background:#f1f8e9;border:1.5px solid var(--green);border-left:4px solid var(--green);border-radius:var(--r);padding:12px 14px;margin-bottom:14px;font-size:14px;color:var(--ink);line-height:1.55}
+.mtp-overlap-box.none{background:#fff3e0;border-color:var(--orange);border-left-color:var(--orange)}
+.mtp-overlap-box b{font-family:var(--serif);font-weight:600;font-size:15px;display:block;margin-bottom:4px}
+
+/* Grid */
+.mtp-table-wrap{border:1.5px solid var(--ink);border-radius:var(--r);background:var(--paper);overflow:hidden;margin-bottom:14px}
+.mtp-table-scroll{overflow-x:auto}
+.mtp-table{width:100%;border-collapse:collapse;font-size:11px;font-family:var(--mono);min-width:780px}
+.mtp-table th,.mtp-table td{padding:0;text-align:center;border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);height:38px;vertical-align:middle;white-space:nowrap}
+.mtp-table thead th{background:var(--paper-2);font-weight:600;color:var(--ink-2);font-size:10px;letter-spacing:.06em;padding:6px 4px;border-bottom:1.5px solid var(--ink);position:sticky;top:0;z-index:2}
+.mtp-table .mtp-corner{text-align:left;padding:6px 10px;min-width:180px}
+.mtp-corner-lbl{display:block;font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.mtp-corner-val{display:block;font-family:var(--serif);font-weight:600;font-size:13px;color:var(--ink);letter-spacing:-.01em;text-transform:none;margin-top:2px}
+.mtp-table tbody th{background:var(--paper-2);text-align:left;padding:8px 10px;border-right:1.5px solid var(--ink);position:sticky;left:0;z-index:1;min-width:180px;max-width:220px}
+.mtp-table tbody th .mtp-rname{font-family:var(--serif);font-weight:600;font-size:13px;color:var(--ink);letter-spacing:-.01em;line-height:1.2}
+.mtp-table tbody th .mtp-rcity{font-family:var(--sans);font-size:12px;color:var(--ink-2);font-weight:500;line-height:1.3;margin-top:2px}
+.mtp-table tbody th .mtp-rhours{font-family:var(--mono);font-size:9px;letter-spacing:.06em;color:var(--muted);margin-top:2px;text-transform:uppercase}
+.mtp-cell{position:relative;color:var(--ink-2);font-weight:500;min-width:30px}
+.mtp-cell.work{background:#e8f5e9;color:var(--green)}
+.mtp-cell.fringe{background:#fff8e1;color:#b8860b}
+.mtp-cell.sleep{background:#fce4ec;color:#c62828;opacity:.85}
+.mtp-cell.overlap{outline:2px solid var(--ink);outline-offset:-2px;font-weight:700}
+.mtp-cell .mtp-h{display:block;line-height:1.1}
+.mtp-cell .mtp-d{font-size:8px;letter-spacing:.04em;color:var(--muted);display:block;line-height:1}
+
+.mtp-legend{display:flex;flex-wrap:wrap;gap:14px;font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--muted);margin-bottom:14px}
+.mtp-legend .lg{display:flex;align-items:center;gap:6px}
+.mtp-legend .sw{width:14px;height:14px;border:1px solid var(--rule);border-radius:2px;display:inline-block}
+.mtp-legend .sw.work{background:#e8f5e9}
+.mtp-legend .sw.fringe{background:#fff8e1}
+.mtp-legend .sw.sleep{background:#fce4ec}
+
+/* Invite actions */
+.mtp-invite-actions{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+#mtp-copy-btn{display:inline-flex;align-items:center;gap:7px;font-family:var(--sans);font-weight:600;font-size:14px;padding:10px 18px;border-radius:var(--r);border:2px solid var(--ink);background:var(--ink);color:var(--paper);cursor:pointer;min-height:44px;transition:background .15s,color .15s,transform .1s,box-shadow .1s}
+#mtp-copy-btn:hover:not(:disabled){background:var(--accent);border-color:var(--accent);transform:translate(-1px,-1px);box-shadow:2px 2px 0 var(--ink)}
+#mtp-copy-btn:disabled{background:var(--green);border-color:var(--green);cursor:default}
+
+/* Picker (re-uses tz-picker styles) */
+.mtp-picker-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:300;display:none;align-items:flex-start;justify-content:center;padding:60px 12px;overflow-y:auto}
+.mtp-picker-backdrop.open{display:flex}
+
+/* Print */
+.mtp-print-hdr{display:none}
+@media print{
+  #view-meeting-tz .tool-bar,
+  #view-meeting-tz .ctx-banner,
+  #view-meeting-tz .pro-tip,
+  #view-meeting-tz .related,
+  #view-meeting-tz .mtp-add-btn,
+  #view-meeting-tz .mtp-rm,
+  #view-meeting-tz .mtp-city-cta,
+  #view-meeting-tz .mtp-invite-actions,
+  #view-meeting-tz .mtp-picker-backdrop,
+  #view-meeting-tz .btn-today{display:none !important}
+  #view-meeting-tz .mtp-print-hdr{display:flex !important;justify-content:space-between;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#555;padding-bottom:10px;border-bottom:2px solid #000;margin-bottom:18px}
+  body{background:#fff !important;background-image:none !important}
+  .mtp-pcard,.mtp-table-wrap,.mtp-overlap-box{border:1.5px solid #000 !important;break-inside:avoid}
+  .mtp-cell.work{background:#dcedc8 !important;color:#000 !important}
+  .mtp-cell.fringe{background:#fff9c4 !important;color:#000 !important}
+  .mtp-cell.sleep{background:#ffcdd2 !important;color:#000 !important}
+}
+</style>
+<div id="view-meeting-tz" class="view">
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="window.print()">🖨 Print</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">🕐</span>
-    <h2>Meeting Time Zone Planner</h2>
-    <p style="margin-bottom:24px">Color-coded grid of acceptable meeting windows across participant cities.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-meeting-tz"></div>
+  <div class="mtp-print-hdr"><span>TripTools · Meeting Time Zone Planner</span><span id="mtp-print-date"></span></div>
+
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>Meeting Time Zone Planner</h1>
+    <p class="tool-sub">Add the people, their cities, and their work hours. Get a color-coded overlap grid plus copy-paste invite text in every participant's local time.</p>
+  </div>
+
+  <div class="tool-body">
+
+    <div class="mtp-toolbar">
+      <label for="mtp-date">📅 Date
+        <input type="date" id="mtp-date" oninput="mtpOnDateChange()">
+      </label>
+      <button class="btn-today" onclick="mtpDateToToday()">Today</button>
+      <label for="mtp-anchor">⚓ Anchor
+        <select id="mtp-anchor" onchange="mtpAnchorChange()"></select>
+      </label>
+      <label class="mtp-fmt">
+        <input type="checkbox" id="mtp-fmt-24" onchange="mtpToggleFmt()"> 24-hour
+      </label>
+    </div>
+
+    <div class="mtp-sec-lbl">Participants</div>
+    <div id="mtp-participants" class="mtp-participants"></div>
+    <button class="mtp-add-btn" onclick="mtpAddParticipant()">+ Add Participant</button>
+
+    <div class="mtp-sec-lbl">Shared overlap</div>
+    <div id="mtp-overlap"></div>
+    <div class="mtp-table-wrap">
+      <div class="mtp-table-scroll">
+        <table class="mtp-table" id="mtp-table"></table>
+      </div>
+    </div>
+    <div class="mtp-legend">
+      <span class="lg"><span class="sw work"></span>In work hours</span>
+      <span class="lg"><span class="sw fringe"></span>Fringe (±1h)</span>
+      <span class="lg"><span class="sw sleep"></span>Off-hours</span>
+      <span class="lg" style="font-weight:700;color:var(--ink)">⬛ Outlined = everyone's overlap</span>
+    </div>
+
+    <div id="mtp-invite-actions" class="mtp-invite-actions" style="display:none">
+      <button id="mtp-copy-btn" onclick="mtpCopyInvite()">📋 Copy invite text</button>
+    </div>
+
+  </div><!-- /tool-body -->
+
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    A "found" overlap doesn't mean a good meeting. Try to land in the <em>middle</em> of everyone's work day, not the first or last hour — that's when energy is highest and there's room to run over.
+  </div>
+
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('timezone')">🕐 Time Zone Converter</button>
+      <button class="rel-btn" onclick="openTool('itinerary')">📋 Itinerary Builder</button>
+      <button class="rel-btn" onclick="openTool('jet-lag')">😴 Jet Lag Calculator</button>
+      <button class="rel-btn" onclick="openTool('biz-packing')">👔 Business Trip Packing</button>
     </div>
   </div>
+
+  <!-- City picker modal (shares .tz-picker styles for visuals) -->
+  <div class="mtp-picker-backdrop tz-picker-backdrop" id="mtp-picker-bd" onclick="mtpClosePicker(event)">
+    <div class="tz-picker" onclick="event.stopPropagation()">
+      <div class="tz-picker-hdr">
+        <h3>Pick a City</h3>
+        <button class="tz-picker-close" onclick="mtpClosePicker()" aria-label="Close">×</button>
+      </div>
+      <div class="tz-picker-search">
+        <input type="search" id="mtp-picker-q" placeholder="🔍 Search city, country, or zone…" autocomplete="off" oninput="mtpPickerFilter()">
+      </div>
+      <div class="tz-picker-list" id="mtp-picker-list"></div>
+    </div>
+  </div>
+
 </div>
 <div id="view-placeholder-lounge-guide" class="view">
   <nav class="tool-topbar">
@@ -5462,7 +5555,7 @@ const TOOLS = [
   {id:'park-dining',   nm:'Park Dining Strategy',       ico:'🍴', ph:'theme',      on:false,live:false, ds:'ADR windows, value picks & dietary restriction guidance.'},
   {id:'per-diem',      nm:'Per Diem Calculator',        ico:'📋', ph:'business',   on:false,live:false, ds:'US GSA per diem rates by city. International via State Dept.'},
   {id:'expense-report',nm:'Expense Report Builder',     ico:'🧾', ph:'business',   on:false,live:false, ds:'Log business expenses. Per diem vs. actual. Export CSV.'},
-  {id:'meeting-tz',    nm:'Meeting Time Zone Planner',  ico:'🕐', ph:'business',   on:false,live:false, ds:'Color-coded grid of acceptable meeting windows by city.'},
+  {id:'meeting-tz',    nm:'Meeting Time Zone Planner',  ico:'🗓', ph:'business',   on:false,live:true,  ds:'Participants + cities + work hours → color-coded overlap grid and copy-paste invite text.'},
   {id:'lounge-guide',  nm:'Airport Lounge Guide',       ico:'🛋', ph:'business',   on:false,live:false, ds:'Lounge access by credit card, status or paid entry at 50+ airports.'},
   {id:'biz-packing',   nm:'Business Trip Packing',      ico:'👔', ph:'business',   on:false,live:true,  ds:'Professional carry-on-only checklist. Tech, attire, docs & wrinkle tips.'},
   {id:'customs-duty',  nm:'Customs Duty Calculator',    ico:'🛃', ph:'home',       on:false,live:false, ds:'Estimate US customs duties on goods purchased abroad.'},
@@ -6126,6 +6219,7 @@ function injectTripCtx(id) {
   if(id==='car-kit')    ckInit();
   if(id==='emergency')  emInit();
   if(id==='timezone')   tzInit();
+  if(id==='meeting-tz') mtpInit();
 }
 
 /* ── HUB RENDER ── */
@@ -13170,7 +13264,6 @@ function tzInit(){
   tzEnsureDefaults();
   tzPopulateAnchorDropdowns();
   tzRenderClocks();
-  tzRenderMP();
   tzStartTicker();
 }
 
@@ -13185,7 +13278,7 @@ function tzLoad(){
       }
     }
   } catch(_){}
-  tzState = { cities:[], fmt24:false, mpStart:9, mpEnd:17, anchorTz:null };
+  tzState = { cities:[], fmt24:false, anchorTz:null };
 }
 
 function tzSave(){
@@ -13244,19 +13337,17 @@ function tzEnsureDefaults(){
 }
 
 function tzPopulateAnchorDropdowns(){
-  const sels = [document.getElementById('tz-anchor-city'), document.getElementById('tz-mp-anchor')];
-  sels.forEach(sel => {
-    if (!sel) return;
+  const sel = document.getElementById('tz-anchor-city');
+  if (sel) {
     sel.innerHTML = tzState.cities.map(c =>
       `<option value="${c.tz}">${c.flag} ${tzEscape(c.city)}</option>`
     ).join('');
-    // Default anchor = home (first city)
     if (tzState.anchorTz && tzState.cities.some(c => c.tz === tzState.anchorTz)) {
       sel.value = tzState.anchorTz;
     } else if (tzState.cities[0]) {
       sel.value = tzState.cities[0].tz;
     }
-  });
+  }
   // Default custom-time input to current time in the anchor (if blank)
   const ti = document.getElementById('tz-anchor-time');
   if (ti && !ti.value) {
@@ -13268,23 +13359,6 @@ function tzPopulateAnchorDropdowns(){
   // 24h checkbox
   const fmt = document.getElementById('tz-fmt-24');
   if (fmt) fmt.checked = !!tzState.fmt24;
-  // Work hours
-  const s = document.getElementById('tz-mp-start');
-  const e = document.getElementById('tz-mp-end');
-  if (s) s.value = tzState.mpStart ?? 9;
-  if (e) e.value = tzState.mpEnd   ?? 17;
-}
-
-/* ── TAB SWITCH ── */
-function tzShowTab(which, btn){
-  document.querySelectorAll('#view-timezone .tz-tab').forEach(t => {
-    t.classList.remove('active'); t.setAttribute('aria-selected','false');
-  });
-  btn.classList.add('active'); btn.setAttribute('aria-selected','true');
-  document.querySelectorAll('#view-timezone .tz-panel').forEach(p => p.classList.remove('active'));
-  document.getElementById('tz-panel-'+which).classList.add('active');
-  if (which === 'mp') tzRenderMP();
-  if (which === 'clocks') tzRenderClocks();
 }
 
 /* ── MODE ── */
@@ -13300,7 +13374,6 @@ function tzToggleFmt(){
   tzState.fmt24 = !!document.getElementById('tz-fmt-24').checked;
   tzSave();
   tzRenderClocks();
-  tzRenderMP();
 }
 
 /* ── TICKER ── */
@@ -13517,7 +13590,6 @@ function tzRemoveCity(id){
   tzSave();
   tzPopulateAnchorDropdowns();
   tzRenderClocks();
-  tzRenderMP();
 }
 
 function tzAddCity(c){
@@ -13531,7 +13603,6 @@ function tzAddCity(c){
   tzSave();
   tzPopulateAnchorDropdowns();
   tzRenderClocks();
-  tzRenderMP();
   tzClosePicker();
 }
 
@@ -13609,114 +13680,426 @@ document.addEventListener('keydown', (e) => {
 });
 
 /* ══════════════════════════════════════════════════════
-   MEETING PLANNER
+   MEETING TIME ZONE PLANNER  (id: meeting-tz)
    ══════════════════════════════════════════════════════ */
-function tzRenderMP(){
-  const tbl = document.getElementById('tz-mp-table');
-  if (!tbl) return;
+const MTP_KEY = 'tt_meeting_tz_v1';
+let mtpState = null;
+let mtpPickerTarget = null;     // participant id whose city is being picked
+let mtpPickerKbdIdx = -1;
 
-  const sEl = document.getElementById('tz-mp-start');
-  const eEl = document.getElementById('tz-mp-end');
-  let workStart = Math.max(0, Math.min(23, parseInt(sEl.value, 10)));
-  let workEnd   = Math.max(workStart+1, Math.min(24, parseInt(eEl.value, 10)));
-  if (isNaN(workStart)) workStart = 9;
-  if (isNaN(workEnd))   workEnd   = 17;
-  tzState.mpStart = workStart; tzState.mpEnd = workEnd;
+function mtpInit(){
+  const pd = document.getElementById('mtp-print-date');
+  if (pd) pd.textContent = new Date().toLocaleDateString();
+  mtpLoad();
+  mtpEnsureDefaults();
+  mtpSyncDate();
+  mtpRenderParticipants();
+  mtpRender();
+}
 
-  const anchorSel = document.getElementById('tz-mp-anchor');
-  const anchorTz  = anchorSel.value || tzState.cities[0]?.tz || tzBrowserTz();
-  tzState.anchorTz = anchorTz;
-  tzSave();
+function mtpLoad(){
+  try {
+    const raw = localStorage.getItem(MTP_KEY);
+    if (raw) {
+      const obj = JSON.parse(raw);
+      if (obj && Array.isArray(obj.participants)) {
+        mtpState = obj;
+        return;
+      }
+    }
+  } catch(_){}
+  mtpState = { participants:[], date:'', anchorIdx:0, fmt24:false };
+}
+function mtpSave(){
+  try { localStorage.setItem(MTP_KEY, JSON.stringify(mtpState)); } catch(_){}
+}
 
-  if (!tzState.cities.length) {
-    tbl.innerHTML = '';
-    document.getElementById('tz-mp-overlap').innerHTML =
-      `<div class="tz-empty">Add at least one city to plan a meeting.</div>`;
+function mtpToday(){
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function mtpSyncDate(){
+  if (!mtpState.date) mtpState.date = mtpToday();
+  const di = document.getElementById('mtp-date');
+  if (di) di.value = mtpState.date;
+  const f24 = document.getElementById('mtp-fmt-24');
+  if (f24) f24.checked = !!mtpState.fmt24;
+}
+
+function mtpEnsureDefaults(){
+  if (mtpState.participants.length) return;
+  const localTz = tzBrowserTz();
+  const localMatch = TZ_CITIES.find(c => c.tz === localTz);
+  const homeCity = localMatch ? localMatch.city : (localTz.split('/').pop() || 'Local').replace(/_/g,' ');
+  const homeCountry = localMatch ? localMatch.country : '';
+  const homeFlag    = localMatch ? localMatch.flag : '🏠';
+  mtpState.participants.push({
+    id: 'p_'+Date.now()+'_1', name:'You', city:homeCity, country:homeCountry,
+    tz:localTz, flag:homeFlag, workStart:9, workEnd:17
+  });
+
+  // Active trip destination
+  const trip = (typeof getActiveTrip === 'function') ? getActiveTrip() : null;
+  if (trip && trip.destination) {
+    const m = (typeof tzMatchDestination === 'function') ? tzMatchDestination(trip.destination) : null;
+    if (m && m.tz !== localTz) {
+      mtpState.participants.push({
+        id: 'p_'+Date.now()+'_2', name:'Destination contact', city:m.city, country:m.country,
+        tz:m.tz, flag:m.flag, workStart:9, workEnd:17
+      });
+    }
+  }
+  // If only one participant, add a sensible second
+  if (mtpState.participants.length === 1) {
+    const candidates = ['Europe/London','Asia/Tokyo','America/New_York'];
+    for (const ctz of candidates) {
+      if (ctz === localTz) continue;
+      const m = TZ_CITIES.find(c => c.tz === ctz);
+      if (m) {
+        mtpState.participants.push({
+          id: 'p_'+Date.now()+'_2', name:'Teammate', city:m.city, country:m.country,
+          tz:m.tz, flag:m.flag, workStart:9, workEnd:17
+        });
+        break;
+      }
+    }
+  }
+  mtpSave();
+}
+
+/* ── RENDER PARTICIPANTS LIST ── */
+function mtpRenderParticipants(){
+  const wrap = document.getElementById('mtp-participants');
+  if (!wrap) return;
+  if (!mtpState.participants.length) {
+    wrap.innerHTML = `<div class="tz-empty">Add at least one participant to plan a meeting.</div>`;
+    mtpSyncAnchorDropdown();
     return;
   }
+  wrap.innerHTML = mtpState.participants.map((p, idx) => `
+    <div class="mtp-pcard">
+      <div class="mtp-pcard-top">
+        <div class="mtp-pfield mtp-pname">
+          <label>Name</label>
+          <input type="text" value="${mtpAttr(p.name)}" placeholder="Participant name" oninput="mtpUpdate('${p.id}','name',this.value)">
+        </div>
+        <div class="mtp-pfield mtp-pcity">
+          <label>City</label>
+          <button class="mtp-city-btn" onclick="mtpOpenPicker('${p.id}')">
+            <span class="mtp-city-flag">${p.flag}</span>
+            <span class="mtp-city-label">${tzEscape(p.city)}</span>
+            <span class="mtp-city-cta">▾</span>
+          </button>
+        </div>
+        <button class="mtp-rm" onclick="mtpRemove('${p.id}')" title="Remove" aria-label="Remove participant">×</button>
+      </div>
+      <div class="mtp-pcard-bot">
+        <div class="mtp-pfield mtp-phours">
+          <label>Work hours</label>
+          <div class="mtp-hrow">
+            <input type="number" min="0" max="23" value="${p.workStart}" oninput="mtpUpdate('${p.id}','workStart',this.value)">
+            <span>to</span>
+            <input type="number" min="1" max="24" value="${p.workEnd}" oninput="mtpUpdate('${p.id}','workEnd',this.value)">
+          </div>
+        </div>
+        <div class="mtp-ptz">${tzEscape(p.tz)}</div>
+      </div>
+    </div>
+  `).join('');
+  mtpSyncAnchorDropdown();
+}
 
-  // Reference instant: midnight today in the anchor TZ
-  const now = new Date();
-  const anchorParts = tzGetParts(now, anchorTz);
-  const baseInstant = tzWallTimeToInstant(
-    { y:anchorParts.y, mo:anchorParts.mo, d:anchorParts.d, h:0, mi:0, s:0 },
-    anchorTz
-  );
+function mtpSyncAnchorDropdown(){
+  const sel = document.getElementById('mtp-anchor');
+  if (!sel) return;
+  sel.innerHTML = mtpState.participants.map((p, i) =>
+    `<option value="${i}">${p.flag} ${tzEscape(p.name || p.city)} (${tzEscape(p.city)})</option>`
+  ).join('');
+  let idx = mtpState.anchorIdx;
+  if (idx >= mtpState.participants.length) idx = 0;
+  sel.value = String(idx);
+}
 
-  // Build 24 hour-slot instants
+function mtpAttr(s){ return tzEscape(s); }
+
+function mtpUpdate(id, field, value){
+  const p = mtpState.participants.find(x => x.id === id);
+  if (!p) return;
+  if (field === 'workStart' || field === 'workEnd') {
+    let v = parseInt(value, 10);
+    if (isNaN(v)) v = field === 'workStart' ? 9 : 17;
+    v = Math.max(0, Math.min(24, v));
+    p[field] = v;
+  } else {
+    p[field] = value;
+  }
+  mtpSave();
+  mtpRender();
+  if (field === 'name') mtpSyncAnchorDropdown();
+}
+
+function mtpRemove(id){
+  if (mtpState.participants.length <= 1) return;     // keep at least one
+  const anchorId = mtpState.participants[mtpState.anchorIdx]?.id;
+  mtpState.participants = mtpState.participants.filter(p => p.id !== id);
+  const newIdx = mtpState.participants.findIndex(p => p.id === anchorId);
+  mtpState.anchorIdx = newIdx >= 0 ? newIdx : 0;
+  mtpSave();
+  mtpRenderParticipants();
+  mtpRender();
+}
+
+function mtpAddParticipant(){
+  const id = 'p_' + Date.now();
+  // Default to a city not already used
+  const used = new Set(mtpState.participants.map(p => p.tz));
+  let pick = TZ_CITIES.find(c => !used.has(c.tz)) || TZ_CITIES[0];
+  mtpState.participants.push({
+    id, name:'', city:pick.city, country:pick.country, tz:pick.tz, flag:pick.flag,
+    workStart:9, workEnd:17
+  });
+  mtpSave();
+  mtpRenderParticipants();
+  mtpRender();
+}
+
+function mtpOnDateChange(){
+  const di = document.getElementById('mtp-date');
+  mtpState.date = di.value || mtpToday();
+  mtpSave();
+  mtpRender();
+}
+function mtpDateToToday(){
+  mtpState.date = mtpToday();
+  document.getElementById('mtp-date').value = mtpState.date;
+  mtpSave();
+  mtpRender();
+}
+function mtpAnchorChange(){
+  const sel = document.getElementById('mtp-anchor');
+  mtpState.anchorIdx = parseInt(sel.value, 10) || 0;
+  mtpSave();
+  mtpRender();
+}
+function mtpToggleFmt(){
+  mtpState.fmt24 = !!document.getElementById('mtp-fmt-24').checked;
+  mtpSave();
+  mtpRender();
+}
+
+/* ── MAIN RENDER (grid + summary) ── */
+function mtpRender(){
+  const tbl = document.getElementById('mtp-table');
+  const overlapBox = document.getElementById('mtp-overlap');
+  if (!tbl || !overlapBox) return;
+  if (!mtpState.participants.length) {
+    tbl.innerHTML = '';
+    overlapBox.innerHTML = '';
+    return;
+  }
+  if (mtpState.anchorIdx >= mtpState.participants.length) mtpState.anchorIdx = 0;
+  const anchor = mtpState.participants[mtpState.anchorIdx];
+  const dateStr = mtpState.date || mtpToday();
+  const [y, mo, d] = dateStr.split('-').map(n => parseInt(n,10));
+  // Build midnight-on-selected-date in anchor TZ
+  const baseInstant = tzWallTimeToInstant({y, mo, d, h:0, mi:0, s:0}, anchor.tz);
+
+  // 24 hourly slots
   const slots = [];
   for (let h=0; h<24; h++){
     slots.push(new Date(baseInstant.getTime() + h*3600000));
   }
+  const baseDay = tzGetParts(baseInstant, anchor.tz).d;
+  const fmt24 = !!mtpState.fmt24;
+  const padH = (h) => fmt24 ? tzPad(h)+':00' : ((h%12===0?12:h%12) + (h<12?'a':'p'));
 
-  // Header row
-  let header = '<thead><tr><th style="background:var(--paper-2)">';
-  header += `<span style="font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase">Anchor: ${tzEscape(anchorSel.options[anchorSel.selectedIndex].text)}</span>`;
-  header += '</th>';
-  for (let h=0; h<24; h++){
-    const lbl = tzState.fmt24
-      ? tzPad(h) + ':00'
-      : ((h%12===0?12:h%12) + (h<12?'a':'p'));
-    header += `<th>${lbl}</th>`;
-  }
-  header += '</tr></thead>';
-
-  // Body rows — one per city
-  let body = '<tbody>';
-  // For each slot, track if all cities are in work hours → overlap column
-  const cityHours = tzState.cities.map(c => slots.map(inst => {
-    const p = tzGetParts(inst, c.tz);
-    return { h:p.h, d:p.d };
+  // Per-participant hour parts
+  const pHours = mtpState.participants.map(p => slots.map(inst => {
+    const ph = tzGetParts(inst, p.tz);
+    return { h:ph.h, d:ph.d };
   }));
-  const baseDay = tzGetParts(baseInstant, anchorTz).d;
 
+  // Overlap column = all participants in their own work hours
   const overlapCols = [];
   for (let i=0; i<24; i++){
     let inAll = true;
-    for (let r=0; r<tzState.cities.length; r++){
-      const h = cityHours[r][i].h;
-      if (h < workStart || h >= workEnd) { inAll = false; break; }
+    for (let r=0; r<mtpState.participants.length; r++){
+      const h = pHours[r][i].h;
+      const p = mtpState.participants[r];
+      if (h < p.workStart || h >= p.workEnd) { inAll = false; break; }
     }
     overlapCols.push(inAll);
   }
 
-  tzState.cities.forEach((c, r) => {
-    body += `<tr><th>${tzEscape(c.city)} ${c.flag}<span class="mp-tz">${tzEscape(c.tz)}</span></th>`;
+  // Header
+  let header = '<thead><tr><th class="mtp-corner">';
+  header += `<span class="mtp-corner-lbl">Anchor</span><span class="mtp-corner-val">${anchor.flag} ${tzEscape(anchor.name || anchor.city)}</span>`;
+  header += '</th>';
+  for (let h=0; h<24; h++){
+    header += `<th>${padH(h)}</th>`;
+  }
+  header += '</tr></thead>';
+
+  // Body
+  let body = '<tbody>';
+  mtpState.participants.forEach((p, r) => {
+    body += `<tr><th><div class="mtp-rname">${tzEscape(p.name || '—')}</div><div class="mtp-rcity">${p.flag} ${tzEscape(p.city)}</div><div class="mtp-rhours">${tzPad(p.workStart)}–${tzPad(p.workEnd)} local</div></th>`;
     for (let i=0; i<24; i++){
-      const h = cityHours[r][i].h;
-      const dayNum = cityHours[r][i].d;
+      const h = pHours[r][i].h;
+      const dayNum = pHours[r][i].d;
       let cls = 'sleep';
-      if (h >= workStart && h < workEnd) cls = 'work';
-      else if ((h >= workStart-1 && h < workEnd+1) && cls !== 'work') cls = 'fringe';
+      if (h >= p.workStart && h < p.workEnd) cls = 'work';
+      else if (h >= p.workStart-1 && h < p.workEnd+1) cls = 'fringe';
       if (overlapCols[i]) cls += ' overlap';
-      const lbl = tzState.fmt24 ? tzPad(h) : (h%12===0?12:h%12);
-      const dayBadge = (dayNum !== baseDay) ? `<span class="mp-d">${dayNum>baseDay?'+1':'−1'}d</span>` : '';
-      body += `<td class="tz-mp-cell ${cls}"><span class="mp-h">${lbl}</span>${dayBadge}</td>`;
+      const lbl = fmt24 ? tzPad(h) : (h%12===0?12:h%12);
+      const dayBadge = (dayNum !== baseDay) ? `<span class="mtp-d">${dayNum>baseDay?'+1':'−1'}d</span>` : '';
+      body += `<td class="mtp-cell ${cls}"><span class="mtp-h">${lbl}</span>${dayBadge}</td>`;
     }
     body += '</tr>';
   });
   body += '</tbody>';
-
   tbl.innerHTML = header + body;
 
-  // Overlap summary box
-  const overlapBox = document.getElementById('tz-mp-overlap');
-  const overlapWindows = tzCollapseRuns(overlapCols);
-  if (!overlapWindows.length) {
-    overlapBox.innerHTML = `<div class="tz-mp-overlap-box none"><b>No shared work-hour window today.</b>Everyone's work hours never overlap. Consider asynchronous communication or use the fringe (yellow) zones for a brief sync.</div>`;
-  } else {
-    const fmtRange = (start, end) => {
-      const fmt = (h) => tzState.fmt24
-        ? tzPad(h) + ':00'
-        : ((h%12===0?12:h%12) + (h<12?'am':'pm'));
-      return `${fmt(start)} – ${fmt(end)}`;
-    };
-    const anchorName = anchorSel.options[anchorSel.selectedIndex].text;
-    const ranges = overlapWindows.map(w => fmtRange(w.start, w.end)).join(', ');
-    const hrs = overlapWindows.reduce((s,w) => s + (w.end - w.start), 0);
-    overlapBox.innerHTML = `<div class="tz-mp-overlap-box"><b>${hrs} hour${hrs>1?'s':''} of shared work time</b>In ${tzEscape(anchorName)}, everyone is in work hours from <b>${ranges}</b>. Outlined cells in the grid below show this overlap in every city.</div>`;
+  // Overlap summary + invite text
+  const windows = tzCollapseRuns(overlapCols);
+  const dateNice = mtpFormatDate(dateStr);
+  if (!windows.length) {
+    overlapBox.innerHTML = `<div class="mtp-overlap-box none">
+      <b>No shared work-hour window on ${tzEscape(dateNice)}.</b>
+      No hour exists where every participant is inside their own work hours. Try shifting someone's hours by ±1, picking a different date, or use the fringe (yellow) zone for a brief sync.
+    </div>`;
+    document.getElementById('mtp-invite-actions').style.display = 'none';
+    return;
   }
+
+  const fmtTime = (h) => fmt24 ? (tzPad(h)+':00') : ((h%12===0?12:h%12) + (h<12?'am':'pm'));
+  const rangeText = windows.map(w => `${fmtTime(w.start)} – ${fmtTime(w.end)}`).join(', ');
+  const hrs = windows.reduce((s,w) => s + (w.end - w.start), 0);
+  overlapBox.innerHTML = `<div class="mtp-overlap-box">
+    <b>${hrs} hour${hrs>1?'s':''} of shared work time on ${tzEscape(dateNice)}</b>
+    In ${anchor.flag} ${tzEscape(anchor.name || anchor.city)}'s zone, every participant is inside their own work hours during <b>${rangeText}</b>. Outlined cells below show this overlap mapped to every participant.
+  </div>`;
+  document.getElementById('mtp-invite-actions').style.display = 'flex';
+
+  // Stash the best-start hour for invite text (use first overlap window start)
+  mtpInviteStart = windows[0].start;
 }
+let mtpInviteStart = 9;
+
+function mtpFormatDate(iso){
+  if (!iso) return '';
+  const [y,m,d] = iso.split('-').map(n=>parseInt(n,10));
+  const dt = new Date(Date.UTC(y, m-1, d));
+  const wd = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][dt.getUTCDay()];
+  const mo = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m-1];
+  return `${wd}, ${mo} ${d}, ${y}`;
+}
+
+function mtpCopyInvite(){
+  const anchor = mtpState.participants[mtpState.anchorIdx];
+  if (!anchor) return;
+  const dateStr = mtpState.date || mtpToday();
+  const [y, mo, d] = dateStr.split('-').map(n => parseInt(n,10));
+  // Pick start of first overlap window in anchor's zone
+  const startInstant = tzWallTimeToInstant({y, mo, d, h:mtpInviteStart, mi:0, s:0}, anchor.tz);
+  const fmt24 = !!mtpState.fmt24;
+  const lines = mtpState.participants.map(p => {
+    const pp = tzGetParts(startInstant, p.tz);
+    const h12 = pp.h%12===0?12:pp.h%12;
+    const ampm = pp.h<12?'am':'pm';
+    const timeStr = fmt24 ? `${tzPad(pp.h)}:${tzPad(pp.mi)}` : `${h12}:${tzPad(pp.mi)}${ampm}`;
+    return `${p.flag} ${p.name || p.city}: ${timeStr} ${pp.wd}, ${pp.mo}/${pp.d}`;
+  });
+  const header = `Meeting · ${mtpFormatDate(dateStr)}`;
+  const txt = header + '\n' + lines.join('\n');
+
+  navigator.clipboard?.writeText(txt).then(() => {
+    const btn = document.getElementById('mtp-copy-btn');
+    const orig = btn.innerHTML;
+    btn.innerHTML = '✓ Copied';
+    btn.disabled = true;
+    setTimeout(() => { btn.innerHTML = orig; btn.disabled = false; }, 1600);
+  }).catch(() => {
+    // Fallback for older browsers
+    const ta = document.createElement('textarea');
+    ta.value = txt;
+    ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); } catch(_){}
+    document.body.removeChild(ta);
+  });
+}
+
+/* ── CITY PICKER (per-participant) ── */
+function mtpOpenPicker(participantId){
+  mtpPickerTarget = participantId;
+  mtpPickerKbdIdx = -1;
+  document.getElementById('mtp-picker-q').value = '';
+  mtpRenderPickerList('');
+  document.getElementById('mtp-picker-bd').classList.add('open');
+  setTimeout(() => document.getElementById('mtp-picker-q').focus(), 30);
+}
+function mtpClosePicker(ev){
+  if (ev && ev.target && !ev.target.classList.contains('mtp-picker-backdrop')) return;
+  document.getElementById('mtp-picker-bd').classList.remove('open');
+  mtpPickerTarget = null;
+}
+function mtpPickerFilter(){
+  const q = (document.getElementById('mtp-picker-q').value || '').trim().toLowerCase();
+  mtpPickerKbdIdx = -1;
+  mtpRenderPickerList(q);
+}
+function mtpRenderPickerList(q){
+  const list = document.getElementById('mtp-picker-list');
+  let rows = TZ_CITIES;
+  if (q) {
+    rows = TZ_CITIES.filter(c =>
+      c.city.toLowerCase().includes(q) ||
+      c.country.toLowerCase().includes(q) ||
+      c.tz.toLowerCase().includes(q)
+    );
+  }
+  if (!rows.length) {
+    list.innerHTML = `<div class="tz-picker-empty">No cities match "${tzEscape(q)}".<br>Try a country name or IANA zone like "Europe/Berlin".</div>`;
+    return;
+  }
+  list.innerHTML = rows.slice(0, 200).map((c, i) =>
+    `<div class="tz-picker-row" onclick="mtpPickCity(${JSON.stringify(c).replace(/"/g,'&quot;')})" data-i="${i}">
+       <span style="font-size:18px;line-height:1">${c.flag}</span>
+       <span class="pr-city">${tzEscape(c.city)}</span>
+       <span class="pr-country">${tzEscape(c.country)}</span>
+       <span class="pr-tz">${tzEscape(c.tz)}</span>
+     </div>`
+  ).join('');
+}
+function mtpPickCity(c){
+  if (!mtpPickerTarget) { mtpClosePicker(); return; }
+  const p = mtpState.participants.find(x => x.id === mtpPickerTarget);
+  if (p) {
+    p.city = c.city; p.country = c.country; p.tz = c.tz; p.flag = c.flag;
+    mtpSave();
+    mtpRenderParticipants();
+    mtpRender();
+  }
+  mtpClosePicker();
+}
+
+/* Keyboard nav for picker (shared selector — only fires when picker is open) */
+document.addEventListener('keydown', (e) => {
+  const bd = document.getElementById('mtp-picker-bd');
+  if (!bd || !bd.classList.contains('open')) return;
+  if (e.key === 'Escape') { mtpClosePicker(); return; }
+  const rows = bd.querySelectorAll('.tz-picker-row');
+  if (!rows.length) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); mtpPickerKbdIdx = Math.min(rows.length-1, mtpPickerKbdIdx+1); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); mtpPickerKbdIdx = Math.max(0, mtpPickerKbdIdx-1); }
+  else if (e.key === 'Enter') { e.preventDefault(); const idx = mtpPickerKbdIdx >= 0 ? mtpPickerKbdIdx : 0; if (rows[idx]) rows[idx].click(); return; }
+  else return;
+  rows.forEach(r => r.classList.remove('kbd'));
+  if (rows[mtpPickerKbdIdx]) { rows[mtpPickerKbdIdx].classList.add('kbd'); rows[mtpPickerKbdIdx].scrollIntoView({ block:'nearest' }); }
+});
 
 function tzCollapseRuns(arr){
   // Returns [{start, end}] index ranges where arr[i] is truthy.
