@@ -15,21 +15,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Create target directory on server
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: playologyentertainment.com
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          port: 22
-          script: mkdir -p public_html/experiments/TripTools
-
-      - name: Upload TripTools.html via SCP
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: playologyentertainment.com
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          port: 22
-          source: TripTools.html
-          target: public_html/experiments/TripTools/
+      - name: Upload TripTools.html via FTP
+        run: |
+          curl -T TripTools.html \
+            --user "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" \
+            "ftp://156.67.74.86/public_html/experiments/TripTools/TripTools.html"
