@@ -1,0 +1,22 @@
+name: Deploy TripTools to Hostinger
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'TripTools.html'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Upload TripTools.html via FTP
+        run: |
+          curl -T TripTools.html \
+            --user "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" \
+            "ftp://playologyentertainment.com/public_html/experiments/TripTools/TripTools.html"
