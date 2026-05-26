@@ -15,11 +15,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Install lftp
+        run: sudo apt-get install -y lftp
+
       - name: Upload TripTools.html via FTP
         run: |
-          curl -T TripTools.html \
-            --user "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" \
-            --ftp-ssl \
-            --insecure \
-            --ftp-create-dirs \
-            "ftp://playologyentertainment.com/experiments/TripTools/TripTools.html"
+          lftp -u "${{ secrets.FTP_USERNAME }},${{ secrets.FTP_PASSWORD }}" \
+            ftp://playologyentertainment.com <<'EOF'
+          set ftp:ssl-allow yes
+          set ssl:verify-certificate no
+          set net:timeout 30
+          set net:max-retries 2
+          set ftp:passive-mode yes
+          mkdir -fp experiments/TripTools
+          put TripTools.html -o experiments/TripTools/TripTools.html
+          quit
+          EOF
