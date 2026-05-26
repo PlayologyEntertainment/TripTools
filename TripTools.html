@@ -3551,16 +3551,114 @@ body.no-scroll { overflow: hidden; }
     </div>
   </div>
 </div>
-<div id="view-placeholder-car-kit" class="view">
-  <nav class="tool-topbar">
+<div id="view-car-kit" class="view">
+  <style>
+  /* ── CAR EMERGENCY KIT ── */
+  #view-car-kit .ck-section-lbl {
+    font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--muted); margin: 14px 0 6px;
+  }
+  .ck-print-header { display: none; }
+  @media print {
+    body.ck-printing > .view:not(#view-car-kit) { display: none !important; }
+    body.ck-printing #view-car-kit { display: block !important; }
+    #view-car-kit .tool-bar,
+    #view-car-kit .site-header,
+    #view-car-kit .ctx-banner,
+    #view-car-kit .pro-tip,
+    #view-car-kit .related,
+    #view-car-kit #ck-actions,
+    #view-car-kit #ck-season-chips,
+    #view-car-kit #ck-route-chips,
+    #view-car-kit .fg label { display: none !important; }
+    #view-car-kit .ck-print-header {
+      display: flex !important; justify-content: space-between;
+      font-family: var(--mono); font-size: 11px; letter-spacing: .08em;
+      text-transform: uppercase; color: #555;
+      padding-bottom: 10px; border-bottom: 2px solid #000; margin-bottom: 18px;
+    }
+    #view-car-kit .ck-print-context {
+      display: block !important;
+      font-family: var(--mono); font-size: 10px; letter-spacing: .08em;
+      color: #555; margin-bottom: 14px;
+    }
+    #view-car-kit .cat-blk { break-inside: avoid; margin-bottom: 14px; }
+    #view-car-kit .prog-bar { background: #ddd !important; }
+    #view-car-kit .prog-fill { background: #333 !important; }
+    body { background: #fff !important; background-image: none !important; }
+  }
+  #view-car-kit .ck-print-context { display: none; }
+  </style>
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="ckPrint()">🖨 Print</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">🚨</span>
-    <h2>Car Emergency Kit Checklist</h2>
-    <p style="margin-bottom:24px">What to carry for road trip safety. Customizable by season & route.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-car-kit"></div>
+  <div class="ck-print-header">
+    <strong>TripTools — Car Emergency Kit Checklist</strong>
+    <span id="ck-print-date"></span>
+  </div>
+  <div class="ck-print-context" id="ck-print-context"></div>
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>Car Emergency Kit Checklist</h1>
+    <p class="tool-sub">What to carry for road trip safety. Customizable by season &amp; route type. Progress saves per trip.</p>
+  </div>
+  <div class="tool-body">
+
+    <!-- Season selector (single-select) -->
+    <div class="fg" style="margin-bottom:14px">
+      <label>Season</label>
+      <div class="chip-grp" id="ck-season-chips">
+        <span class="chip"     data-v="spring" onclick="ckSetSeason(this)">🌱 Spring</span>
+        <span class="chip on"   data-v="summer" onclick="ckSetSeason(this)">☀️ Summer</span>
+        <span class="chip"     data-v="fall"   onclick="ckSetSeason(this)">🍂 Fall</span>
+        <span class="chip"     data-v="winter" onclick="ckSetSeason(this)">❄️ Winter</span>
+      </div>
+    </div>
+
+    <!-- Route type selector (multi-select) -->
+    <div class="fg" style="margin-bottom:20px">
+      <label>Route Type <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted)">(select all that apply)</span></label>
+      <div class="chip-grp" id="ck-route-chips">
+        <span class="chip"     data-v="urban"    onclick="ckTglRoute(this)">🏙 Urban</span>
+        <span class="chip on"   data-v="highway"  onclick="ckTglRoute(this)">🛣 Highway</span>
+        <span class="chip"     data-v="remote"   onclick="ckTglRoute(this)">🏔 Remote / Rural</span>
+        <span class="chip"     data-v="mountain" onclick="ckTglRoute(this)">⛰ Mountain</span>
+        <span class="chip"     data-v="desert"   onclick="ckTglRoute(this)">🏜 Desert</span>
+      </div>
+    </div>
+
+    <!-- Progress bar -->
+    <div class="prog-wrap" id="ck-prog-wrap" style="display:none">
+      <div class="prog-lbl" id="ck-lbl">0 of 0 items packed</div>
+      <div class="prog-bar"><div class="prog-fill" id="ck-fill" style="width:0%"></div></div>
+    </div>
+
+    <!-- Action bar -->
+    <div style="display:none;gap:6px;flex-wrap:wrap;margin-bottom:18px;align-items:center" id="ck-actions">
+      <button class="btn-ghost" onclick="ckCheckAll()">✓ Check All</button>
+      <button class="btn-ghost" onclick="ckUncheckAll()">○ Uncheck All</button>
+      <button class="btn-ghost" onclick="ckAddItem()">+ Add Item</button>
+      <button class="btn-ghost" onclick="ckReset()" style="margin-left:auto;color:var(--accent)">↺ Reset</button>
+    </div>
+
+    <!-- Checklist categories -->
+    <div id="ck-cats"></div>
+
+  </div><!-- /tool-body -->
+
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    Rotate perishables (water, snacks, batteries) every 6 months and check expiry dates on first-aid items and flares once a year. Keep the kit in a labeled bag or bin in the trunk so it's easy to find in low light — and tell every driver in your household where it lives.
+  </div>
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('rest-stop')">⏸ Rest Stop Planner</button>
+      <button class="rel-btn" onclick="openTool('fuel-cost')">⛽ Fuel Cost Calculator</button>
+      <button class="rel-btn" onclick="openTool('border-cross')">🛂 Border Crossing Guide</button>
+      <button class="rel-btn" onclick="openTool('doc-checklist')">📋 Travel Document Checklist</button>
     </div>
   </div>
 </div>
@@ -4972,7 +5070,7 @@ const TOOLS = [
   {id:'rest-stop',     nm:'Rest Stop Planner',          ico:'⏸', ph:'road',       on:false,live:false, ds:'Recommended break schedule. Adjusts for kids, pets & elderly.'},
   {id:'playlist-time', nm:'Road Trip Playlist Timer',   ico:'🎵', ph:'road',       on:false,live:false, ds:'Enter drive hours → how many albums/podcasts to download.'},
   {id:'border-cross',  nm:'Border Crossing Guide',      ico:'🛂', ph:'road',       on:false,live:false, ds:'US/Canada, US/Mexico & major land borders. Documents & wait times.'},
-  {id:'car-kit',       nm:'Car Emergency Kit Checklist',ico:'🚨', ph:'road',       on:false,live:false, ds:'What to carry for road trip safety. Customizable by season & route.'},
+  {id:'car-kit',       nm:'Car Emergency Kit Checklist',ico:'🚨', ph:'road',       on:false,live:true,  ds:'What to carry for road trip safety. Customizable by season & route.'},
   {id:'toll-est',      nm:'Toll Cost Estimator',        ico:'💲', ph:'road',       on:false,live:false, ds:'Major US toll roads. Estimated total cost city-to-city.'},
   {id:'shore-exc',     nm:'Shore Excursion Planner',    ico:'⚓', ph:'cruise',     on:false,live:false, ds:'Per-port budget & time planner. Never miss ship departure.'},
   {id:'cruise-compare',nm:'Cruise Line Comparison',     ico:'🔍', ph:'cruise',     on:false,live:true,  ds:'Side-by-side of 12 major cruise lines across 10 attributes.'},
@@ -5645,6 +5743,7 @@ function injectTripCtx(id) {
   if(id==='passport')   paInit();
   if(id==='expense-track') etInit();
   if(id==='baggage')    bfcInit();
+  if(id==='car-kit')    ckInit();
 }
 
 /* ── HUB RENDER ── */
@@ -7105,6 +7204,472 @@ function dcSlug(s) { return s.toLowerCase().replace(/[^a-z0-9]/g, '-'); }
 function dcSetPrintDate() {
   const el = document.getElementById('dc-print-date');
   if (el) el.textContent = new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+}
+
+/* ══════════════════════════════════════════════════════
+   CAR EMERGENCY KIT CHECKLIST  (id: car-kit)
+   ══════════════════════════════════════════════════════ */
+
+/* ── BASE CATEGORIES (always shown) ── */
+const CK_BASE = {
+  'Safety & Visibility': [
+    'Reflective warning triangles (×3) or road flares',
+    'Hi-vis reflective safety vest (one per occupant)',
+    'LED flashlight + spare batteries',
+    'Headlamp (hands-free emergency repairs)',
+    'Emergency whistle',
+  ],
+  'Tools & Mechanical': [
+    'Jumper cables (12 ft minimum) or jump-starter pack',
+    'Spare tire confirmed inflated',
+    'Jack & lug wrench (test that they work)',
+    'Tire pressure gauge',
+    'Tire repair / plug kit + 12V air compressor',
+    'Tow strap or recovery rope (10,000 lb rated)',
+    'Multi-tool or basic tool kit (screwdrivers, pliers)',
+    'Duct tape & electrical tape',
+    'Work gloves',
+    'Funnel + 1 qt of motor oil',
+    'Extra washer fluid',
+  ],
+  'First Aid & Health': [
+    'Stocked first-aid kit (bandages, gauze, antiseptic wipes)',
+    'Pain relievers (ibuprofen, acetaminophen)',
+    'Tweezers & small scissors',
+    'Personal prescription meds (3-day supply)',
+    'Hand sanitizer & disposable gloves',
+    'Burn gel & blister bandages',
+  ],
+  'Food & Water': [
+    'Drinking water (1 gallon per person, sealed)',
+    'Non-perishable snacks (granola/protein bars, nuts)',
+    'Manual can opener',
+  ],
+  'Communications & Navigation': [
+    'Phone car charger (12V) + USB-C / Lightning cable',
+    'Portable battery pack (10,000 mAh+) fully charged',
+    'Paper road atlas or printed route',
+    'Emergency contact list (printed, not just in phone)',
+    'Pen & small notepad',
+    'Roadside assistance number written down (AAA, insurer)',
+  ],
+  'Documents & Money': [
+    'Vehicle registration',
+    'Proof of insurance card',
+    'Roadside assistance membership card (AAA, etc.)',
+    'Emergency cash ($40–$100 in small bills)',
+    'Copy of driver license stored separately',
+  ],
+};
+
+/* ── SEASONAL ADDITIONS ── */
+const CK_SEASON = {
+  spring: {
+    'Weather Protection': [
+      'Rain jacket / poncho',
+      'Compact umbrella',
+      'Microfiber towel (mud / wet hands)',
+      'Waterproof shoes or boots',
+    ],
+    'Tools & Mechanical': [
+      'Wiper blades inspected (heavy rain season)',
+    ],
+  },
+  summer: {
+    'Hot-Weather Gear': [
+      'Reflective windshield sunshade',
+      'Extra water (+1 gallon per person)',
+      'Electrolyte powder or tablets',
+      'Sunscreen SPF 30+',
+      'Sun hat & sunglasses',
+      'Insect repellent',
+    ],
+    'Tools & Mechanical': [
+      'Engine coolant (1 gallon)',
+      'Cooler with ice packs (for meds/snacks)',
+    ],
+  },
+  fall: {
+    'Weather Protection': [
+      'Warm fleece or insulated jacket',
+      'Light gloves & beanie',
+      'Wool blanket',
+    ],
+    'Safety & Visibility': [
+      'Extra flashlight batteries (early darkness)',
+    ],
+  },
+  winter: {
+    'Cold-Weather Gear': [
+      'Wool blanket or sleeping bag (per occupant)',
+      'Winter coat, hat, gloves & scarf',
+      'Thermal / wool socks (spare pair)',
+      'Hand & toe warmers (×6+)',
+      'Insulated waterproof boots',
+    ],
+    'Snow & Ice': [
+      'Ice scraper & long-handled snow brush',
+      'Compact snow shovel',
+      'Tire chains or snow socks (and know how to install)',
+      'Bag of kitty litter or sand (traction)',
+      'Traction mats',
+      'Windshield washer fluid rated for sub-freezing temps',
+      'Lock de-icer spray',
+    ],
+    'Food & Water': [
+      'High-calorie snacks (chocolate, peanut butter)',
+      'Insulated water bottles (won\'t freeze as fast)',
+    ],
+  },
+};
+
+/* ── ROUTE-TYPE ADDITIONS ── */
+const CK_ROUTE = {
+  urban: {
+    'Urban Driving': [
+      'Coins / app credit for parking meters',
+      'Comfortable walking shoes (if you have to ditch the car)',
+      'Local transit map / app downloaded offline',
+      'Steering wheel lock (theft deterrent)',
+    ],
+  },
+  highway: {
+    'Highway / Long Distance': [
+      'Reserve fuel can (5 gal) — check legal storage rules',
+      'Printed alternate route / exit list',
+      'Caffeine source (gum, drink) for alertness',
+      'Spare windshield wiper blades',
+      'Tire tread depth checked (penny test or gauge)',
+    ],
+  },
+  remote: {
+    'Remote & Rural': [
+      'Satellite communicator (Garmin inReach, Zoleo, etc.)',
+      'Handheld GPS device with topo maps',
+      'Extra food (2+ days non-perishable)',
+      'Water filter or purification tablets',
+      'Sleeping bag rated for the climate (per occupant)',
+      'Signal mirror & whistle',
+      'Bear spray (if in bear country)',
+      'Extra fuel for stove or vehicle',
+      'Tarp + 50 ft paracord',
+      'Personal locator beacon (PLB)',
+    ],
+  },
+  mountain: {
+    'Mountain Driving': [
+      'Tire chains (required in some passes)',
+      'Brake fluid checked / extra bottle',
+      'Altitude sickness medication (acetazolamide)',
+      'Extra blanket per occupant',
+      'Hand warmers (×4+)',
+      'Note: shift to low gear on long descents',
+      'Headlight & taillight aim checked',
+    ],
+  },
+  desert: {
+    'Desert Driving': [
+      'Extra water (+2 gallons per person, minimum)',
+      'Sunshade + extra interior shades',
+      'Wide-brim sun hat',
+      'Electrolyte powder / oral rehydration salts',
+      'Extra engine coolant (1 gal)',
+      'White sheet or signal flag (visibility to rescuers)',
+      'SPF 50+ sunscreen & SPF lip balm',
+      'Spare radiator hose & hose clamps',
+      'Tell someone your route + ETA before leaving',
+    ],
+  },
+};
+
+/* ── STATE ── */
+let ckSeason  = 'summer';
+let ckRoutes  = ['highway'];
+let ckChecked = {};
+let ckCustom  = [];   // [{text, id}]
+
+function ckKey(tripId) { return 'tt_carkit_' + (tripId || 'default'); }
+
+/* ── INIT / LOAD ── */
+function ckInit() {
+  const tid = getActiveTripId();
+  const saved = localStorage.getItem(ckKey(tid));
+  if (saved) {
+    try {
+      const s = JSON.parse(saved);
+      ckSeason  = s.season  || 'summer';
+      ckRoutes  = Array.isArray(s.routes) ? s.routes : ['highway'];
+      ckChecked = s.checked || {};
+      ckCustom  = s.custom  || [];
+    } catch(e) {
+      ckSeason='summer'; ckRoutes=['highway']; ckChecked={}; ckCustom=[];
+    }
+  } else {
+    ckSeason='summer'; ckRoutes=['highway']; ckChecked={}; ckCustom=[];
+  }
+  // Sync chip UI
+  document.querySelectorAll('#ck-season-chips .chip').forEach(c => {
+    c.classList.toggle('on', c.dataset.v === ckSeason);
+  });
+  document.querySelectorAll('#ck-route-chips .chip').forEach(c => {
+    c.classList.toggle('on', ckRoutes.includes(c.dataset.v));
+  });
+  ckRender();
+  ckSetPrintMeta();
+}
+
+function ckSave() {
+  const tid = getActiveTripId();
+  try {
+    localStorage.setItem(ckKey(tid), JSON.stringify({
+      season: ckSeason, routes: ckRoutes, checked: ckChecked, custom: ckCustom
+    }));
+  } catch(e) {}
+}
+
+/* ── SELECTORS ── */
+function ckSetSeason(el) {
+  document.querySelectorAll('#ck-season-chips .chip').forEach(c => c.classList.remove('on'));
+  el.classList.add('on');
+  ckSeason = el.dataset.v;
+  ckSave();
+  ckRender();
+  ckSetPrintMeta();
+}
+
+function ckTglRoute(el) {
+  const v = el.dataset.v;
+  el.classList.toggle('on');
+  if (el.classList.contains('on')) {
+    if (!ckRoutes.includes(v)) ckRoutes.push(v);
+  } else {
+    ckRoutes = ckRoutes.filter(r => r !== v);
+  }
+  ckSave();
+  ckRender();
+  ckSetPrintMeta();
+}
+
+/* ── BUILD MERGED LIST ── */
+function ckBuildList() {
+  const map = {};
+  // Base
+  for (const [cat, items] of Object.entries(CK_BASE)) {
+    map[cat] = [...items];
+  }
+  // Season
+  const seasonAdd = CK_SEASON[ckSeason] || {};
+  for (const [cat, items] of Object.entries(seasonAdd)) {
+    if (!map[cat]) map[cat] = [];
+    items.forEach(i => { if (!map[cat].includes(i)) map[cat].push(i); });
+  }
+  // Routes (multi)
+  ckRoutes.forEach(r => {
+    const add = CK_ROUTE[r] || {};
+    for (const [cat, items] of Object.entries(add)) {
+      if (!map[cat]) map[cat] = [];
+      items.forEach(i => { if (!map[cat].includes(i)) map[cat].push(i); });
+    }
+  });
+  return map;
+}
+
+/* ── RENDER ── */
+function ckRender() {
+  const container = document.getElementById('ck-cats');
+  if (!container) return;
+  container.innerHTML = '';
+  const map = ckBuildList();
+  let total = 0, done = 0;
+
+  for (const [cat, items] of Object.entries(map)) {
+    if (!items.length) continue;
+    const cd = items.filter(i => ckChecked[i]).length;
+    total += items.length; done += cd;
+    container.appendChild(ckMakeBlock(cat, items));
+  }
+
+  if (ckCustom.length) {
+    const cd = ckCustom.filter(c => ckChecked['custom:'+c.id]).length;
+    total += ckCustom.length; done += cd;
+    container.appendChild(ckMakeCustomBlock());
+  }
+
+  document.getElementById('ck-prog-wrap').style.display = total ? 'block' : 'none';
+  document.getElementById('ck-actions').style.display   = total ? 'flex'  : 'none';
+  ckUpdProg(done, total);
+}
+
+function ckMakeBlock(cat, items) {
+  const cd = items.filter(i => ckChecked[i]).length;
+  const blk = document.createElement('div');
+  blk.className = 'cat-blk open';
+  blk.dataset.cat = cat;
+  blk.innerHTML = `
+    <div class="cat-hdr" onclick="tglCat(this)">
+      <h3>${cat}</h3>
+      <span class="cat-cnt">${cd}/${items.length}</span>
+      <span class="cat-arrow">▾</span>
+    </div>
+    <div class="cat-items">
+      <ul class="cl" id="ck-cl-${ckSlug(cat)}"></ul>
+    </div>`;
+  const ul = blk.querySelector('ul');
+  items.forEach(item => {
+    const li = document.createElement('li');
+    li.className = ckChecked[item] ? 'done' : '';
+    li.innerHTML = `<span class="box"></span><span class="txt">${item}</span>`;
+    li.onclick = () => ckTglItem(item, li, blk);
+    ul.appendChild(li);
+  });
+  return blk;
+}
+
+function ckMakeCustomBlock() {
+  const cd = ckCustom.filter(c => ckChecked['custom:'+c.id]).length;
+  const blk = document.createElement('div');
+  blk.className = 'cat-blk open';
+  blk.id = 'ck-custom-blk';
+  blk.innerHTML = `
+    <div class="cat-hdr" onclick="tglCat(this)">
+      <h3>My Custom Items</h3>
+      <span class="cat-cnt">${cd}/${ckCustom.length}</span>
+      <span class="cat-arrow">▾</span>
+    </div>
+    <div class="cat-items">
+      <ul class="cl" id="ck-cl-custom"></ul>
+    </div>`;
+  const ul = blk.querySelector('#ck-cl-custom');
+  ckCustom.forEach(c => {
+    ul.appendChild(ckMakeCustomLi(c, blk));
+  });
+  return blk;
+}
+
+function ckMakeCustomLi(c, blk) {
+  const li = document.createElement('li');
+  const key = 'custom:' + c.id;
+  li.className = ckChecked[key] ? 'done' : '';
+  li.style.cssText = 'justify-content:space-between';
+  li.innerHTML = `<span style="display:flex;align-items:flex-start;gap:10px;flex:1"><span class="box"></span><span class="txt">${c.text}</span></span><button onclick="event.stopPropagation();ckRemoveCustom('${c.id}')" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:15px;padding:0 0 0 8px;line-height:1;flex-shrink:0" title="Remove item">×</button>`;
+  li.querySelector('span').onclick = () => ckTglCustom(c.id, li, blk);
+  return li;
+}
+
+/* ── TOGGLE ── */
+function ckTglItem(item, li, blk) {
+  ckChecked[item] = !ckChecked[item];
+  li.classList.toggle('done', ckChecked[item]);
+  ckUpdBlockCount(blk);
+  ckUpdGlobalProg();
+  ckSave();
+}
+
+function ckTglCustom(id, li, blk) {
+  const key = 'custom:' + id;
+  ckChecked[key] = !ckChecked[key];
+  li.classList.toggle('done', ckChecked[key]);
+  ckUpdBlockCount(blk || document.getElementById('ck-custom-blk'));
+  ckUpdGlobalProg();
+  ckSave();
+}
+
+function ckUpdBlockCount(blk) {
+  if (!blk) return;
+  const lis = blk.querySelectorAll('.cl li');
+  const d   = blk.querySelectorAll('.cl li.done').length;
+  blk.querySelector('.cat-cnt').textContent = `${d}/${lis.length}`;
+}
+
+function ckUpdGlobalProg() {
+  const allLi   = document.querySelectorAll('#ck-cats .cl li');
+  const allDone = document.querySelectorAll('#ck-cats .cl li.done');
+  ckUpdProg(allDone.length, allLi.length);
+}
+
+function ckUpdProg(done, total) {
+  const pct = total ? done / total * 100 : 0;
+  const lbl = document.getElementById('ck-lbl');
+  const fill= document.getElementById('ck-fill');
+  if (lbl)  lbl.textContent = `${done} of ${total} items packed`;
+  if (fill) fill.style.width = pct + '%';
+}
+
+/* ── BULK ACTIONS ── */
+function ckCheckAll() {
+  document.querySelectorAll('#ck-cats .cl li').forEach(li => li.classList.add('done'));
+  const map = ckBuildList();
+  for (const items of Object.values(map)) items.forEach(i => { ckChecked[i] = true; });
+  ckCustom.forEach(c => { ckChecked['custom:' + c.id] = true; });
+  ckUpdAllCounts(); ckSave();
+}
+
+function ckUncheckAll() {
+  document.querySelectorAll('#ck-cats .cl li').forEach(li => li.classList.remove('done'));
+  const map = ckBuildList();
+  for (const items of Object.values(map)) items.forEach(i => { ckChecked[i] = false; });
+  ckCustom.forEach(c => { ckChecked['custom:' + c.id] = false; });
+  ckUpdAllCounts(); ckSave();
+}
+
+function ckUpdAllCounts() {
+  document.querySelectorAll('#ck-cats .cat-blk').forEach(blk => ckUpdBlockCount(blk));
+  ckUpdGlobalProg();
+}
+
+/* ── ADD / REMOVE CUSTOM ITEMS ── */
+function ckAddItem() {
+  const nm = (prompt('Enter item name:') || '').trim();
+  if (!nm) return;
+  const id = 'c' + Date.now();
+  ckCustom.push({ text: nm, id });
+  ckSave();
+  ckRender();
+}
+
+function ckRemoveCustom(id) {
+  ckCustom = ckCustom.filter(c => c.id !== id);
+  delete ckChecked['custom:' + id];
+  ckSave();
+  ckRender();
+}
+
+/* ── RESET ── */
+function ckReset() {
+  if (!confirm('Clear all checked items and custom entries for this kit?')) return;
+  ckChecked = {}; ckCustom = [];
+  ckSave(); ckRender();
+}
+
+/* ── PRINT ── */
+function ckPrint() {
+  ckSetPrintMeta();
+  document.body.classList.add('ck-printing');
+  const cleanup = () => {
+    document.body.classList.remove('ck-printing');
+    window.removeEventListener('afterprint', cleanup);
+  };
+  window.addEventListener('afterprint', cleanup);
+  setTimeout(() => window.print(), 50);
+  // Fallback cleanup in case afterprint never fires
+  setTimeout(cleanup, 8000);
+}
+
+/* ── HELPERS ── */
+function ckSlug(s) { return s.toLowerCase().replace(/[^a-z0-9]/g, '-'); }
+function ckSetPrintMeta() {
+  const dateEl = document.getElementById('ck-print-date');
+  if (dateEl) dateEl.textContent = new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+  const ctxEl = document.getElementById('ck-print-context');
+  if (ctxEl) {
+    const seasonLbl = ckSeason.charAt(0).toUpperCase() + ckSeason.slice(1);
+    const routeLbls = ckRoutes.map(r => {
+      if (r==='remote') return 'Remote / Rural';
+      return r.charAt(0).toUpperCase() + r.slice(1);
+    });
+    const routes = routeLbls.length ? routeLbls.join(', ') : 'No route type selected';
+    ctxEl.textContent = `Season: ${seasonLbl}  ·  Route: ${routes}`;
+  }
 }
 
 /* ══════════════════════════════════════════
