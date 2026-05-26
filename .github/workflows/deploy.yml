@@ -19,4 +19,6 @@ jobs:
         run: |
           curl -T TripTools.html \
             --user "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" \
-            "ftp://156.67.74.86/public_html/experiments/TripTools/TripTools.html"
+            --max-time 60 \
+            --connect-timeout 15 \
+            "ftp://ftp.playologyentertainment.com/experiments/TripTools/TripTools.html"
