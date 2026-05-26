@@ -3183,18 +3183,247 @@ body.no-scroll { overflow: hidden; }
     </div>
   </div>
 </div>
-<div id="view-placeholder-timezone" class="view">
-  <nav class="tool-topbar">
+<style>
+/* ── TIME ZONE CONVERTER ── */
+.tz-tabs{display:flex;gap:0;border-bottom:2px solid var(--ink);margin-bottom:18px;overflow-x:auto}
+.tz-tab{flex-shrink:0;padding:11px 18px;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;border:none;background:var(--paper-2);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;transition:background .12s,border-color .12s;color:var(--muted);min-height:44px}
+.tz-tab.active{background:var(--paper);border-bottom-color:var(--accent);color:var(--ink);font-weight:700}
+.tz-tab:hover:not(.active){background:#e8e1d2}
+.tz-panel{display:none}
+.tz-panel.active{display:block}
+
+/* Reference time controls */
+.tz-ref-bar{background:var(--paper-2);border:1.5px solid var(--ink);border-radius:var(--r);padding:12px 14px;margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.tz-ref-lbl{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);flex-shrink:0}
+.tz-ref-mode{display:flex;gap:0;border:1.5px solid var(--ink);border-radius:var(--r);overflow:hidden;flex-shrink:0}
+.tz-ref-mode button{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:7px 11px;border:none;background:var(--paper);color:var(--ink-2);cursor:pointer;border-right:1.5px solid var(--ink);transition:background .12s,color .12s;min-height:36px}
+.tz-ref-mode button:last-child{border-right:none}
+.tz-ref-mode button.on{background:var(--ink);color:var(--paper)}
+.tz-ref-anchor{flex:1;display:flex;align-items:center;gap:8px;min-width:200px;font-size:14px;color:var(--ink-2)}
+.tz-ref-anchor select,.tz-ref-anchor input{background:var(--paper);border:1.5px solid var(--ink);border-radius:var(--r);padding:6px 8px;font-family:var(--sans);font-size:14px;color:var(--ink);min-height:36px}
+.tz-ref-anchor input[type="time"]{font-family:var(--mono)}
+.tz-fmt-toggle{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);cursor:pointer}
+.tz-fmt-toggle input{accent-color:var(--accent);cursor:pointer}
+
+/* Clock cards */
+.tz-clocks{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-bottom:18px}
+.tz-clock{position:relative;background:var(--paper);border:1.5px solid var(--ink);border-radius:var(--r);padding:14px 16px;transition:transform .12s,box-shadow .12s;overflow:hidden}
+.tz-clock::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--teal)}
+.tz-clock.home::before{background:var(--accent)}
+.tz-clock.dest::before{background:var(--blue)}
+.tz-clock-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px}
+.tz-clock-meta{flex:1;min-width:0}
+.tz-clock-tag{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:2px;display:block}
+.tz-clock.dest .tz-clock-tag{color:var(--blue)}
+.tz-clock-city{font-family:var(--serif);font-weight:600;font-size:18px;letter-spacing:-.01em;line-height:1.15;color:var(--ink)}
+.tz-clock-tz{font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--muted);margin-top:2px;word-break:break-all}
+.tz-clock-rm{background:none;border:none;cursor:pointer;color:var(--muted);font-size:18px;line-height:1;padding:2px 4px;flex-shrink:0;border-radius:2px;transition:background .12s,color .12s}
+.tz-clock-rm:hover{background:var(--paper-2);color:var(--accent)}
+.tz-clock-time{font-family:var(--serif);font-weight:600;font-size:42px;line-height:1;letter-spacing:-.03em;color:var(--ink);margin:8px 0 4px;font-variation-settings:"opsz" 144,"SOFT" 30,"WONK" 1;display:flex;align-items:baseline;gap:6px}
+.tz-clock-time .ampm{font-size:18px;color:var(--muted);font-weight:500}
+.tz-clock-time .sec{font-size:18px;color:var(--muted);font-weight:500}
+.tz-clock-date{font-family:var(--sans);font-size:13px;color:var(--ink-2);margin-bottom:6px}
+.tz-clock-badges{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.tz-badge{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:2px 6px;border-radius:2px;border:1px solid var(--rule)}
+.tz-badge.offset{background:var(--paper-2);color:var(--ink-2)}
+.tz-badge.dst{background:#fff8e1;color:#b8860b;border-color:#b8860b}
+.tz-badge.day{background:var(--paper-2);color:var(--ink-2)}
+.tz-badge.day.next{background:#e8f5e9;color:var(--green);border-color:var(--green)}
+.tz-badge.day.prev{background:#fde4e0;color:var(--accent);border-color:var(--accent)}
+.tz-clock-utc{font-family:var(--mono);font-size:10px;letter-spacing:.04em;color:var(--muted);margin-top:8px;padding-top:6px;border-top:1px dashed var(--rule)}
+
+/* Add city button */
+.tz-add-btn{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--paper-2);border:1.5px dashed var(--ink);border-radius:var(--r);padding:12px 18px;cursor:pointer;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);width:100%;min-height:44px;transition:background .12s,color .12s,border-color .12s}
+.tz-add-btn:hover{background:#e8e1d2;color:var(--ink);border-color:var(--accent)}
+
+/* City picker modal */
+.tz-picker-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:300;display:none;align-items:flex-start;justify-content:center;padding:60px 12px;overflow-y:auto}
+.tz-picker-backdrop.open{display:flex}
+.tz-picker{background:var(--paper);border:2px solid var(--ink);border-radius:var(--r);box-shadow:6px 6px 0 var(--ink);width:100%;max-width:480px;max-height:75vh;display:flex;flex-direction:column;overflow:hidden}
+.tz-picker-hdr{padding:14px 16px 12px;border-bottom:1.5px solid var(--ink);background:var(--paper-2);display:flex;align-items:center;justify-content:space-between;gap:10px}
+.tz-picker-hdr h3{font-family:var(--serif);font-weight:600;font-size:18px;letter-spacing:-.01em}
+.tz-picker-close{background:none;border:none;cursor:pointer;font-size:22px;line-height:1;color:var(--muted);padding:0 4px}
+.tz-picker-close:hover{color:var(--accent)}
+.tz-picker-search{padding:12px 14px;border-bottom:1.5px solid var(--rule);background:var(--paper)}
+.tz-picker-search input{width:100%;background:var(--paper-2);border:1.5px solid var(--ink);border-radius:var(--r);padding:9px 12px;font-family:var(--sans);font-size:15px;color:var(--ink);min-height:44px;outline:none}
+.tz-picker-search input:focus{border-color:var(--accent)}
+.tz-picker-list{flex:1;overflow-y:auto;padding:6px 0}
+.tz-picker-row{padding:10px 16px;cursor:pointer;border-bottom:1px solid var(--rule);transition:background .1s;display:flex;align-items:baseline;gap:10px}
+.tz-picker-row:hover,.tz-picker-row.kbd{background:var(--paper-2)}
+.tz-picker-row .pr-city{font-family:var(--serif);font-weight:500;font-size:15px;color:var(--ink);flex:1}
+.tz-picker-row .pr-country{font-size:12px;color:var(--muted)}
+.tz-picker-row .pr-tz{font-family:var(--mono);font-size:10px;letter-spacing:.05em;color:var(--muted);margin-left:auto;flex-shrink:0}
+.tz-picker-empty{padding:24px 16px;text-align:center;color:var(--muted);font-size:13px;font-style:italic}
+
+/* Meeting planner grid */
+.tz-mp-info{font-size:13px;color:var(--ink-2);line-height:1.55;margin-bottom:12px}
+.tz-mp-info b{color:var(--ink)}
+.tz-mp-hours{background:var(--paper-2);border:1.5px solid var(--ink);border-radius:var(--r);padding:10px 12px;margin-bottom:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--muted)}
+.tz-mp-hours label{text-transform:uppercase;letter-spacing:.1em}
+.tz-mp-hours input[type="number"]{background:var(--paper);border:1.5px solid var(--ink);border-radius:var(--r);padding:5px 7px;font-family:var(--mono);font-size:13px;width:58px;color:var(--ink);min-height:32px;text-align:center}
+.tz-mp-table-wrap{border:1.5px solid var(--ink);border-radius:var(--r);background:var(--paper);overflow:hidden;margin-bottom:14px}
+.tz-mp-scroll{overflow-x:auto}
+.tz-mp-table{width:100%;border-collapse:collapse;font-size:11px;font-family:var(--mono);min-width:760px}
+.tz-mp-table th,.tz-mp-table td{padding:0;text-align:center;border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);height:32px;vertical-align:middle;white-space:nowrap}
+.tz-mp-table thead th{background:var(--paper-2);font-weight:600;color:var(--ink-2);font-size:10px;letter-spacing:.06em;padding:6px 4px;border-bottom:1.5px solid var(--ink);position:sticky;top:0;z-index:2}
+.tz-mp-table tbody th{background:var(--paper-2);text-align:left;padding:6px 10px;font-family:var(--serif);font-weight:600;font-size:13px;letter-spacing:-.01em;color:var(--ink);border-right:1.5px solid var(--ink);position:sticky;left:0;z-index:1;min-width:160px}
+.tz-mp-table tbody th .mp-tz{font-family:var(--mono);font-size:9px;letter-spacing:.04em;color:var(--muted);font-weight:400;display:block;text-transform:none}
+.tz-mp-cell{position:relative;color:var(--ink-2);font-weight:500;min-width:30px}
+.tz-mp-cell.work{background:#e8f5e9;color:var(--green)}
+.tz-mp-cell.fringe{background:#fff8e1;color:#b8860b}
+.tz-mp-cell.sleep{background:#fce4ec;color:#c62828;opacity:.85}
+.tz-mp-cell.overlap{outline:2px solid var(--ink);outline-offset:-2px;font-weight:700}
+.tz-mp-cell .mp-h{display:block;line-height:1.1}
+.tz-mp-cell .mp-d{font-size:8px;letter-spacing:.04em;color:var(--muted);display:block;line-height:1}
+.tz-mp-legend{display:flex;flex-wrap:wrap;gap:14px;font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--muted);margin-bottom:14px}
+.tz-mp-legend .lg{display:flex;align-items:center;gap:6px}
+.tz-mp-legend .sw{width:14px;height:14px;border:1px solid var(--rule);border-radius:2px;display:inline-block}
+.tz-mp-legend .sw.work{background:#e8f5e9}
+.tz-mp-legend .sw.fringe{background:#fff8e1}
+.tz-mp-legend .sw.sleep{background:#fce4ec}
+.tz-mp-overlap-box{background:#f1f8e9;border:1.5px solid var(--green);border-left:4px solid var(--green);border-radius:var(--r);padding:12px 14px;margin-bottom:14px;font-size:14px;color:var(--ink)}
+.tz-mp-overlap-box.none{background:#fff3e0;border-color:var(--orange);border-left-color:var(--orange)}
+.tz-mp-overlap-box b{font-family:var(--serif);font-weight:600;font-size:15px;display:block;margin-bottom:4px}
+
+.tz-empty{padding:36px 18px;text-align:center;border:1.5px dashed var(--rule);border-radius:var(--r);color:var(--muted);font-size:14px;background:var(--paper-2);margin-bottom:14px}
+
+@media(max-width:520px){
+  .tz-clocks{grid-template-columns:1fr;gap:10px}
+  .tz-clock-time{font-size:36px}
+  .tz-ref-anchor{min-width:0;width:100%}
+}
+
+@media print{
+  #view-timezone .tool-bar,
+  #view-timezone .ctx-banner,
+  #view-timezone .pro-tip,
+  #view-timezone .related,
+  #view-timezone .tz-tabs,
+  #view-timezone .tz-add-btn,
+  #view-timezone .tz-clock-rm,
+  #view-timezone .tz-ref-mode,
+  #view-timezone .tz-fmt-toggle,
+  #view-timezone .tz-picker-backdrop{display:none !important}
+  #view-timezone .tz-panel{display:block !important}
+  #view-timezone .tz-print-hdr{display:flex !important;justify-content:space-between;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#555;padding-bottom:10px;border-bottom:2px solid #000;margin-bottom:18px}
+  body{background:#fff !important;background-image:none !important}
+  .tz-clock,.tz-mp-table-wrap{border:1.5px solid #000 !important;break-inside:avoid}
+  .tz-mp-cell.work{background:#dcedc8 !important;color:#000 !important}
+  .tz-mp-cell.fringe{background:#fff9c4 !important;color:#000 !important}
+  .tz-mp-cell.sleep{background:#ffcdd2 !important;color:#000 !important}
+}
+.tz-print-hdr{display:none}
+</style>
+<div id="view-timezone" class="view">
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="window.print()">🖨 Print</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">🕐</span>
-    <h2>Time Zone Converter</h2>
-    <p style="margin-bottom:24px">Multi-city time display with DST awareness and meeting planner mode.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-timezone"></div>
+  <div class="tz-print-hdr"><span>TripTools · Time Zone Converter</span><span id="tz-print-date"></span></div>
+
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>Time Zone Converter</h1>
+    <p class="tool-sub">Live multi-city clocks with DST awareness — plus a meeting planner that finds the work-hour overlap across every city in your trip.</p>
+  </div>
+
+  <div class="tool-body">
+
+    <div class="tz-tabs" role="tablist" aria-label="Time Zone tabs">
+      <button class="tz-tab active" role="tab" aria-selected="true" onclick="tzShowTab('clocks',this)">🕐 Clocks</button>
+      <button class="tz-tab" role="tab" aria-selected="false" onclick="tzShowTab('mp',this)">🗓 Meeting Planner</button>
+    </div>
+
+    <!-- ── CLOCKS TAB ── -->
+    <div id="tz-panel-clocks" class="tz-panel active">
+
+      <div class="tz-ref-bar">
+        <span class="tz-ref-lbl">Showing</span>
+        <div class="tz-ref-mode" role="group" aria-label="Reference time mode">
+          <button id="tz-mode-now" class="on" onclick="tzSetMode('now')">Now (live)</button>
+          <button id="tz-mode-custom" onclick="tzSetMode('custom')">Custom time</button>
+        </div>
+        <div class="tz-ref-anchor" id="tz-anchor-wrap" style="display:none">
+          <span>at</span>
+          <input type="time" id="tz-anchor-time" oninput="tzRenderClocks()">
+          <span>in</span>
+          <select id="tz-anchor-city" onchange="tzRenderClocks()"></select>
+        </div>
+        <label class="tz-fmt-toggle" style="margin-left:auto">
+          <input type="checkbox" id="tz-fmt-24" onchange="tzToggleFmt()"> 24-hour
+        </label>
+      </div>
+
+      <div id="tz-clocks-grid" class="tz-clocks"></div>
+      <button class="tz-add-btn" onclick="tzOpenPicker('add')">+ Add City</button>
+
+    </div>
+
+    <!-- ── MEETING PLANNER TAB ── -->
+    <div id="tz-panel-mp" class="tz-panel">
+
+      <p class="tz-mp-info">Find the window where everyone is awake. Set the work-hour range below; the grid shades each city's local hours as <b>work-friendly</b>, <b>fringe</b>, or <b>asleep</b>. Cells where every city is in work hours are outlined as the <b>shared overlap</b>.</p>
+
+      <div class="tz-mp-hours">
+        <label for="tz-mp-start">Work hours</label>
+        <input type="number" id="tz-mp-start" min="0" max="23" value="9" oninput="tzRenderMP()">
+        <span>to</span>
+        <input type="number" id="tz-mp-end" min="1" max="24" value="17" oninput="tzRenderMP()">
+        <span style="margin-left:auto">Reference:</span>
+        <select id="tz-mp-anchor" onchange="tzRenderMP()"></select>
+      </div>
+
+      <div id="tz-mp-overlap"></div>
+
+      <div class="tz-mp-table-wrap">
+        <div class="tz-mp-scroll">
+          <table class="tz-mp-table" id="tz-mp-table"></table>
+        </div>
+      </div>
+
+      <div class="tz-mp-legend">
+        <span class="lg"><span class="sw work"></span>Work hours</span>
+        <span class="lg"><span class="sw fringe"></span>Fringe (early/late)</span>
+        <span class="lg"><span class="sw sleep"></span>Asleep / off-hours</span>
+        <span class="lg" style="font-weight:700;color:var(--ink)">⬛ Outlined = everyone's overlap</span>
+      </div>
+
+      <button class="tz-add-btn" onclick="tzOpenPicker('add')">+ Add City</button>
+
+    </div>
+
+  </div><!-- /tool-body -->
+
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    Schedule meetings near the <em>edges</em> of someone's day, not the middle of their night. A 7am call is annoying; a 3am call is sleep-destroying. Use the fringe (yellow) zones only when work hours don't overlap at all.
+  </div>
+
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('jet-lag')">😴 Jet Lag Calculator</button>
+      <button class="rel-btn" onclick="openTool('itinerary')">📋 Itinerary Builder</button>
+      <button class="rel-btn" onclick="openTool('weather')">🌦 Weather Forecast</button>
+      <button class="rel-btn" onclick="openTool('currency')">💱 Currency Converter</button>
     </div>
   </div>
+
+  <!-- City picker modal -->
+  <div class="tz-picker-backdrop" id="tz-picker-bd" onclick="tzClosePicker(event)">
+    <div class="tz-picker" onclick="event.stopPropagation()">
+      <div class="tz-picker-hdr">
+        <h3 id="tz-picker-title">Add a City</h3>
+        <button class="tz-picker-close" onclick="tzClosePicker()" aria-label="Close">×</button>
+      </div>
+      <div class="tz-picker-search">
+        <input type="search" id="tz-picker-q" placeholder="🔍 Search city, country, or zone…" autocomplete="off" oninput="tzPickerFilter()">
+      </div>
+      <div class="tz-picker-list" id="tz-picker-list"></div>
+    </div>
+  </div>
+
 </div>
 <div id="view-placeholder-jet-lag" class="view">
   <nav class="tool-topbar">
@@ -5206,7 +5435,7 @@ const TOOLS = [
   {id:'cost-living',   nm:'Cost of Living Comparison',  ico:'🌐', ph:'money',     on:false, live:false, ds:'How far will $100/day go in Bangkok vs. Paris vs. Tokyo?'},
   {id:'vat-refund',    nm:'VAT & Tax Refund Guide',     ico:'🧾', ph:'money',     on:false, live:false, ds:'Country-by-country guide to claiming VAT refunds as a tourist.'},
   {id:'cruise-grat',   nm:'Cruise Gratuity Calculator', ico:'🚢', ph:'money',     on:false, live:false, ds:'Daily gratuity per person by cruise line and cabin type.'},
-  {id:'timezone',      nm:'Time Zone Converter',        ico:'🕐', ph:'destination',on:false,live:false, ds:'Multi-city time display with DST awareness.'},
+  {id:'timezone',      nm:'Time Zone Converter',        ico:'🕐', ph:'destination',on:false,live:true,  ds:'Multi-city live clocks + meeting planner with DST awareness.'},
   {id:'jet-lag',       nm:'Jet Lag Calculator',         ico:'😴', ph:'destination',on:false,live:false, ds:'Pre-travel adjustment schedule + post-arrival recovery plan.'},
   {id:'unit-conv',     nm:'Universal Unit Converter',   ico:'📏', ph:'destination',on:false,live:true,  ds:'Temp, distance, weight, volume, speed — all traveler conversions.'},
   {id:'phrasebook',    nm:'Language Phrasebook',        ico:'💬', ph:'destination',on:false,live:false, ds:'Essential travel phrases in 25 languages with pronunciation.'},
@@ -5896,6 +6125,7 @@ function injectTripCtx(id) {
   if(id==='baggage')    bfcInit();
   if(id==='car-kit')    ckInit();
   if(id==='emergency')  emInit();
+  if(id==='timezone')   tzInit();
 }
 
 /* ── HUB RENDER ── */
@@ -12777,6 +13007,729 @@ function bfcCalculate() {
   </div>`;
   res.style.display = 'block';
   res.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+/* ══════════════════════════════════════════════════════
+   TIME ZONE CONVERTER  (id: timezone)
+   ══════════════════════════════════════════════════════ */
+
+/* Curated list of major travel cities → IANA zones.
+   Covers all populated continents + Phase-1 destination matches. */
+const TZ_CITIES = [
+  // ── North America ──
+  {city:'New York',      country:'United States',     tz:'America/New_York',       flag:'🇺🇸'},
+  {city:'Los Angeles',   country:'United States',     tz:'America/Los_Angeles',    flag:'🇺🇸'},
+  {city:'San Francisco', country:'United States',     tz:'America/Los_Angeles',    flag:'🇺🇸'},
+  {city:'Seattle',       country:'United States',     tz:'America/Los_Angeles',    flag:'🇺🇸'},
+  {city:'Las Vegas',     country:'United States',     tz:'America/Los_Angeles',    flag:'🇺🇸'},
+  {city:'Chicago',       country:'United States',     tz:'America/Chicago',        flag:'🇺🇸'},
+  {city:'Dallas',        country:'United States',     tz:'America/Chicago',        flag:'🇺🇸'},
+  {city:'Houston',       country:'United States',     tz:'America/Chicago',        flag:'🇺🇸'},
+  {city:'Denver',        country:'United States',     tz:'America/Denver',         flag:'🇺🇸'},
+  {city:'Phoenix',       country:'United States',     tz:'America/Phoenix',        flag:'🇺🇸'},
+  {city:'Miami',         country:'United States',     tz:'America/New_York',       flag:'🇺🇸'},
+  {city:'Orlando',       country:'United States',     tz:'America/New_York',       flag:'🇺🇸'},
+  {city:'Boston',        country:'United States',     tz:'America/New_York',       flag:'🇺🇸'},
+  {city:'Washington DC', country:'United States',     tz:'America/New_York',       flag:'🇺🇸'},
+  {city:'Atlanta',       country:'United States',     tz:'America/New_York',       flag:'🇺🇸'},
+  {city:'Honolulu',      country:'United States',     tz:'Pacific/Honolulu',       flag:'🇺🇸'},
+  {city:'Anchorage',     country:'United States',     tz:'America/Anchorage',      flag:'🇺🇸'},
+  {city:'Toronto',       country:'Canada',            tz:'America/Toronto',        flag:'🇨🇦'},
+  {city:'Montreal',      country:'Canada',            tz:'America/Toronto',        flag:'🇨🇦'},
+  {city:'Vancouver',     country:'Canada',            tz:'America/Vancouver',      flag:'🇨🇦'},
+  {city:'Calgary',       country:'Canada',            tz:'America/Edmonton',       flag:'🇨🇦'},
+  {city:'Halifax',       country:'Canada',            tz:'America/Halifax',        flag:'🇨🇦'},
+  {city:'Mexico City',   country:'Mexico',            tz:'America/Mexico_City',    flag:'🇲🇽'},
+  {city:'Cancún',        country:'Mexico',            tz:'America/Cancun',         flag:'🇲🇽'},
+  {city:'Tijuana',       country:'Mexico',            tz:'America/Tijuana',        flag:'🇲🇽'},
+  // ── Central / South America / Caribbean ──
+  {city:'Havana',        country:'Cuba',              tz:'America/Havana',         flag:'🇨🇺'},
+  {city:'San José',      country:'Costa Rica',        tz:'America/Costa_Rica',     flag:'🇨🇷'},
+  {city:'Panama City',   country:'Panama',            tz:'America/Panama',         flag:'🇵🇦'},
+  {city:'Bogotá',        country:'Colombia',          tz:'America/Bogota',         flag:'🇨🇴'},
+  {city:'Lima',          country:'Peru',              tz:'America/Lima',           flag:'🇵🇪'},
+  {city:'Santiago',      country:'Chile',             tz:'America/Santiago',       flag:'🇨🇱'},
+  {city:'Buenos Aires',  country:'Argentina',         tz:'America/Argentina/Buenos_Aires', flag:'🇦🇷'},
+  {city:'Rio de Janeiro',country:'Brazil',            tz:'America/Sao_Paulo',      flag:'🇧🇷'},
+  {city:'São Paulo',     country:'Brazil',            tz:'America/Sao_Paulo',      flag:'🇧🇷'},
+  {city:'Caracas',       country:'Venezuela',         tz:'America/Caracas',        flag:'🇻🇪'},
+  {city:'Quito',         country:'Ecuador',           tz:'America/Guayaquil',      flag:'🇪🇨'},
+  {city:'Montevideo',    country:'Uruguay',           tz:'America/Montevideo',     flag:'🇺🇾'},
+  // ── Europe ──
+  {city:'London',        country:'United Kingdom',    tz:'Europe/London',          flag:'🇬🇧'},
+  {city:'Edinburgh',     country:'United Kingdom',    tz:'Europe/London',          flag:'🇬🇧'},
+  {city:'Dublin',        country:'Ireland',           tz:'Europe/Dublin',          flag:'🇮🇪'},
+  {city:'Paris',         country:'France',            tz:'Europe/Paris',           flag:'🇫🇷'},
+  {city:'Nice',          country:'France',            tz:'Europe/Paris',           flag:'🇫🇷'},
+  {city:'Berlin',        country:'Germany',           tz:'Europe/Berlin',          flag:'🇩🇪'},
+  {city:'Munich',        country:'Germany',           tz:'Europe/Berlin',          flag:'🇩🇪'},
+  {city:'Frankfurt',     country:'Germany',           tz:'Europe/Berlin',          flag:'🇩🇪'},
+  {city:'Amsterdam',     country:'Netherlands',       tz:'Europe/Amsterdam',       flag:'🇳🇱'},
+  {city:'Brussels',      country:'Belgium',           tz:'Europe/Brussels',        flag:'🇧🇪'},
+  {city:'Zurich',        country:'Switzerland',       tz:'Europe/Zurich',          flag:'🇨🇭'},
+  {city:'Geneva',        country:'Switzerland',       tz:'Europe/Zurich',          flag:'🇨🇭'},
+  {city:'Vienna',        country:'Austria',           tz:'Europe/Vienna',          flag:'🇦🇹'},
+  {city:'Prague',        country:'Czech Republic',    tz:'Europe/Prague',          flag:'🇨🇿'},
+  {city:'Budapest',      country:'Hungary',           tz:'Europe/Budapest',        flag:'🇭🇺'},
+  {city:'Warsaw',        country:'Poland',            tz:'Europe/Warsaw',          flag:'🇵🇱'},
+  {city:'Madrid',        country:'Spain',             tz:'Europe/Madrid',          flag:'🇪🇸'},
+  {city:'Barcelona',     country:'Spain',             tz:'Europe/Madrid',          flag:'🇪🇸'},
+  {city:'Lisbon',        country:'Portugal',          tz:'Europe/Lisbon',          flag:'🇵🇹'},
+  {city:'Rome',          country:'Italy',             tz:'Europe/Rome',            flag:'🇮🇹'},
+  {city:'Milan',         country:'Italy',             tz:'Europe/Rome',            flag:'🇮🇹'},
+  {city:'Venice',        country:'Italy',             tz:'Europe/Rome',            flag:'🇮🇹'},
+  {city:'Athens',        country:'Greece',            tz:'Europe/Athens',          flag:'🇬🇷'},
+  {city:'Istanbul',      country:'Turkey',            tz:'Europe/Istanbul',        flag:'🇹🇷'},
+  {city:'Copenhagen',    country:'Denmark',           tz:'Europe/Copenhagen',      flag:'🇩🇰'},
+  {city:'Stockholm',     country:'Sweden',            tz:'Europe/Stockholm',       flag:'🇸🇪'},
+  {city:'Oslo',          country:'Norway',            tz:'Europe/Oslo',            flag:'🇳🇴'},
+  {city:'Helsinki',      country:'Finland',           tz:'Europe/Helsinki',        flag:'🇫🇮'},
+  {city:'Reykjavík',     country:'Iceland',           tz:'Atlantic/Reykjavik',     flag:'🇮🇸'},
+  {city:'Moscow',        country:'Russia',            tz:'Europe/Moscow',          flag:'🇷🇺'},
+  {city:'Saint Petersburg',country:'Russia',          tz:'Europe/Moscow',          flag:'🇷🇺'},
+  {city:'Kyiv',          country:'Ukraine',           tz:'Europe/Kyiv',            flag:'🇺🇦'},
+  {city:'Bucharest',     country:'Romania',           tz:'Europe/Bucharest',       flag:'🇷🇴'},
+  // ── Middle East / Africa ──
+  {city:'Dubai',         country:'UAE',               tz:'Asia/Dubai',             flag:'🇦🇪'},
+  {city:'Abu Dhabi',     country:'UAE',               tz:'Asia/Dubai',             flag:'🇦🇪'},
+  {city:'Doha',          country:'Qatar',             tz:'Asia/Qatar',             flag:'🇶🇦'},
+  {city:'Riyadh',        country:'Saudi Arabia',      tz:'Asia/Riyadh',            flag:'🇸🇦'},
+  {city:'Tel Aviv',      country:'Israel',            tz:'Asia/Jerusalem',         flag:'🇮🇱'},
+  {city:'Jerusalem',     country:'Israel',            tz:'Asia/Jerusalem',         flag:'🇮🇱'},
+  {city:'Tehran',        country:'Iran',              tz:'Asia/Tehran',            flag:'🇮🇷'},
+  {city:'Cairo',         country:'Egypt',             tz:'Africa/Cairo',           flag:'🇪🇬'},
+  {city:'Casablanca',    country:'Morocco',           tz:'Africa/Casablanca',      flag:'🇲🇦'},
+  {city:'Marrakech',     country:'Morocco',           tz:'Africa/Casablanca',      flag:'🇲🇦'},
+  {city:'Lagos',         country:'Nigeria',           tz:'Africa/Lagos',           flag:'🇳🇬'},
+  {city:'Nairobi',       country:'Kenya',             tz:'Africa/Nairobi',         flag:'🇰🇪'},
+  {city:'Addis Ababa',   country:'Ethiopia',          tz:'Africa/Addis_Ababa',     flag:'🇪🇹'},
+  {city:'Johannesburg',  country:'South Africa',      tz:'Africa/Johannesburg',    flag:'🇿🇦'},
+  {city:'Cape Town',     country:'South Africa',      tz:'Africa/Johannesburg',    flag:'🇿🇦'},
+  // ── Asia ──
+  {city:'Mumbai',        country:'India',             tz:'Asia/Kolkata',           flag:'🇮🇳'},
+  {city:'Delhi',         country:'India',             tz:'Asia/Kolkata',           flag:'🇮🇳'},
+  {city:'Bengaluru',     country:'India',             tz:'Asia/Kolkata',           flag:'🇮🇳'},
+  {city:'Kolkata',       country:'India',             tz:'Asia/Kolkata',           flag:'🇮🇳'},
+  {city:'Chennai',       country:'India',             tz:'Asia/Kolkata',           flag:'🇮🇳'},
+  {city:'Karachi',       country:'Pakistan',          tz:'Asia/Karachi',           flag:'🇵🇰'},
+  {city:'Islamabad',     country:'Pakistan',          tz:'Asia/Karachi',           flag:'🇵🇰'},
+  {city:'Dhaka',         country:'Bangladesh',        tz:'Asia/Dhaka',             flag:'🇧🇩'},
+  {city:'Kathmandu',     country:'Nepal',             tz:'Asia/Kathmandu',         flag:'🇳🇵'},
+  {city:'Colombo',       country:'Sri Lanka',         tz:'Asia/Colombo',           flag:'🇱🇰'},
+  {city:'Bangkok',       country:'Thailand',          tz:'Asia/Bangkok',           flag:'🇹🇭'},
+  {city:'Chiang Mai',    country:'Thailand',          tz:'Asia/Bangkok',           flag:'🇹🇭'},
+  {city:'Singapore',     country:'Singapore',         tz:'Asia/Singapore',         flag:'🇸🇬'},
+  {city:'Kuala Lumpur',  country:'Malaysia',          tz:'Asia/Kuala_Lumpur',      flag:'🇲🇾'},
+  {city:'Jakarta',       country:'Indonesia',         tz:'Asia/Jakarta',           flag:'🇮🇩'},
+  {city:'Bali (Denpasar)',country:'Indonesia',        tz:'Asia/Makassar',          flag:'🇮🇩'},
+  {city:'Manila',        country:'Philippines',       tz:'Asia/Manila',            flag:'🇵🇭'},
+  {city:'Hanoi',         country:'Vietnam',           tz:'Asia/Bangkok',           flag:'🇻🇳'},
+  {city:'Ho Chi Minh City',country:'Vietnam',         tz:'Asia/Ho_Chi_Minh',       flag:'🇻🇳'},
+  {city:'Phnom Penh',    country:'Cambodia',          tz:'Asia/Phnom_Penh',        flag:'🇰🇭'},
+  {city:'Yangon',        country:'Myanmar',           tz:'Asia/Yangon',            flag:'🇲🇲'},
+  {city:'Hong Kong',     country:'Hong Kong',         tz:'Asia/Hong_Kong',         flag:'🇭🇰'},
+  {city:'Taipei',        country:'Taiwan',            tz:'Asia/Taipei',            flag:'🇹🇼'},
+  {city:'Shanghai',      country:'China',             tz:'Asia/Shanghai',          flag:'🇨🇳'},
+  {city:'Beijing',       country:'China',             tz:'Asia/Shanghai',          flag:'🇨🇳'},
+  {city:'Guangzhou',     country:'China',             tz:'Asia/Shanghai',          flag:'🇨🇳'},
+  {city:'Tokyo',         country:'Japan',             tz:'Asia/Tokyo',             flag:'🇯🇵'},
+  {city:'Osaka',         country:'Japan',             tz:'Asia/Tokyo',             flag:'🇯🇵'},
+  {city:'Kyoto',         country:'Japan',             tz:'Asia/Tokyo',             flag:'🇯🇵'},
+  {city:'Seoul',         country:'South Korea',       tz:'Asia/Seoul',             flag:'🇰🇷'},
+  {city:'Busan',         country:'South Korea',       tz:'Asia/Seoul',             flag:'🇰🇷'},
+  {city:'Ulaanbaatar',   country:'Mongolia',          tz:'Asia/Ulaanbaatar',       flag:'🇲🇳'},
+  // ── Oceania ──
+  {city:'Sydney',        country:'Australia',         tz:'Australia/Sydney',       flag:'🇦🇺'},
+  {city:'Melbourne',     country:'Australia',         tz:'Australia/Melbourne',    flag:'🇦🇺'},
+  {city:'Brisbane',      country:'Australia',         tz:'Australia/Brisbane',     flag:'🇦🇺'},
+  {city:'Perth',         country:'Australia',         tz:'Australia/Perth',        flag:'🇦🇺'},
+  {city:'Adelaide',      country:'Australia',         tz:'Australia/Adelaide',     flag:'🇦🇺'},
+  {city:'Auckland',      country:'New Zealand',       tz:'Pacific/Auckland',       flag:'🇳🇿'},
+  {city:'Wellington',    country:'New Zealand',       tz:'Pacific/Auckland',       flag:'🇳🇿'},
+  {city:'Christchurch',  country:'New Zealand',       tz:'Pacific/Auckland',       flag:'🇳🇿'},
+  {city:'Suva',          country:'Fiji',              tz:'Pacific/Fiji',           flag:'🇫🇯'},
+  {city:'Apia',          country:'Samoa',             tz:'Pacific/Apia',           flag:'🇼🇸'},
+  {city:'Papeete',       country:'French Polynesia',  tz:'Pacific/Tahiti',         flag:'🇵🇫'},
+  {city:'Guam',          country:'Guam',              tz:'Pacific/Guam',           flag:'🇬🇺'},
+  // ── UTC anchors ──
+  {city:'UTC',           country:'Coordinated',       tz:'UTC',                    flag:'🌐'},
+];
+
+const TZ_KEY = 'tt_timezone_v1';
+let tzState = null;
+let tzTicker = null;
+let tzCurrentMode = 'now';      // 'now' | 'custom'
+let tzPickerMode = 'add';       // 'add' | future replace
+let tzPickerKbdIdx = -1;
+let tzAddedHomeFromLocal = false;
+
+function tzInit(){
+  const pd = document.getElementById('tz-print-date');
+  if (pd) pd.textContent = new Date().toLocaleDateString();
+  tzLoad();
+  tzEnsureDefaults();
+  tzPopulateAnchorDropdowns();
+  tzRenderClocks();
+  tzRenderMP();
+  tzStartTicker();
+}
+
+function tzLoad(){
+  try {
+    const raw = localStorage.getItem(TZ_KEY);
+    if (raw) {
+      const obj = JSON.parse(raw);
+      if (obj && Array.isArray(obj.cities)) {
+        tzState = obj;
+        return;
+      }
+    }
+  } catch(_){}
+  tzState = { cities:[], fmt24:false, mpStart:9, mpEnd:17, anchorTz:null };
+}
+
+function tzSave(){
+  try { localStorage.setItem(TZ_KEY, JSON.stringify(tzState)); } catch(_){}
+}
+
+function tzBrowserTz(){
+  try { return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'; }
+  catch(_){ return 'UTC'; }
+}
+
+/* Best-effort: turn a "Paris, France" / "Tokyo" string into a curated city entry. */
+function tzMatchDestination(text){
+  if (!text) return null;
+  const norm = s => (s||'').toLowerCase().replace(/[^a-z]/g,'');
+  const t = norm(text);
+  if (!t) return null;
+  // Try city match first
+  let best = TZ_CITIES.find(c => t.includes(norm(c.city)));
+  if (best) return best;
+  // Then country match
+  best = TZ_CITIES.find(c => t.includes(norm(c.country)));
+  return best || null;
+}
+
+function tzEnsureDefaults(){
+  if (tzState.cities.length) return;
+  // 1) Browser local (Home)
+  const localTz = tzBrowserTz();
+  const localMatch = TZ_CITIES.find(c => c.tz === localTz);
+  const homeLabel = localMatch ? localMatch.city : (localTz.split('/').pop() || 'Local').replace(/_/g,' ');
+  const homeCountry = localMatch ? localMatch.country : '';
+  const homeFlag    = localMatch ? localMatch.flag : '🏠';
+  tzState.cities.push({ id:'home', role:'home', city:homeLabel, country:homeCountry, tz:localTz, flag:homeFlag });
+  tzAddedHomeFromLocal = true;
+
+  // 2) Active trip destination (if any & different from home)
+  const trip = (typeof getActiveTrip === 'function') ? getActiveTrip() : null;
+  if (trip && trip.destination) {
+    const m = tzMatchDestination(trip.destination);
+    if (m && m.tz !== localTz) {
+      tzState.cities.push({ id:'dest', role:'dest', city:m.city, country:m.country, tz:m.tz, flag:m.flag });
+    }
+  }
+
+  // 3) Pad with classics, skipping anything already present
+  const classics = ['Europe/London','Asia/Tokyo','America/New_York'];
+  for (const ctz of classics) {
+    if (tzState.cities.length >= 4) break;
+    if (tzState.cities.some(c => c.tz === ctz)) continue;
+    const m = TZ_CITIES.find(c => c.tz === ctz);
+    if (m) tzState.cities.push({ id:'c_'+ctz, role:'extra', city:m.city, country:m.country, tz:m.tz, flag:m.flag });
+  }
+
+  tzSave();
+}
+
+function tzPopulateAnchorDropdowns(){
+  const sels = [document.getElementById('tz-anchor-city'), document.getElementById('tz-mp-anchor')];
+  sels.forEach(sel => {
+    if (!sel) return;
+    sel.innerHTML = tzState.cities.map(c =>
+      `<option value="${c.tz}">${c.flag} ${tzEscape(c.city)}</option>`
+    ).join('');
+    // Default anchor = home (first city)
+    if (tzState.anchorTz && tzState.cities.some(c => c.tz === tzState.anchorTz)) {
+      sel.value = tzState.anchorTz;
+    } else if (tzState.cities[0]) {
+      sel.value = tzState.cities[0].tz;
+    }
+  });
+  // Default custom-time input to current time in the anchor (if blank)
+  const ti = document.getElementById('tz-anchor-time');
+  if (ti && !ti.value) {
+    const now = new Date();
+    const hh = String(now.getHours()).padStart(2,'0');
+    const mm = String(now.getMinutes()).padStart(2,'0');
+    ti.value = `${hh}:${mm}`;
+  }
+  // 24h checkbox
+  const fmt = document.getElementById('tz-fmt-24');
+  if (fmt) fmt.checked = !!tzState.fmt24;
+  // Work hours
+  const s = document.getElementById('tz-mp-start');
+  const e = document.getElementById('tz-mp-end');
+  if (s) s.value = tzState.mpStart ?? 9;
+  if (e) e.value = tzState.mpEnd   ?? 17;
+}
+
+/* ── TAB SWITCH ── */
+function tzShowTab(which, btn){
+  document.querySelectorAll('#view-timezone .tz-tab').forEach(t => {
+    t.classList.remove('active'); t.setAttribute('aria-selected','false');
+  });
+  btn.classList.add('active'); btn.setAttribute('aria-selected','true');
+  document.querySelectorAll('#view-timezone .tz-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tz-panel-'+which).classList.add('active');
+  if (which === 'mp') tzRenderMP();
+  if (which === 'clocks') tzRenderClocks();
+}
+
+/* ── MODE ── */
+function tzSetMode(m){
+  tzCurrentMode = m;
+  document.getElementById('tz-mode-now').classList.toggle('on', m==='now');
+  document.getElementById('tz-mode-custom').classList.toggle('on', m==='custom');
+  document.getElementById('tz-anchor-wrap').style.display = m==='custom' ? 'flex' : 'none';
+  tzRenderClocks();
+}
+
+function tzToggleFmt(){
+  tzState.fmt24 = !!document.getElementById('tz-fmt-24').checked;
+  tzSave();
+  tzRenderClocks();
+  tzRenderMP();
+}
+
+/* ── TICKER ── */
+function tzStartTicker(){
+  tzStopTicker();
+  tzTicker = setInterval(() => {
+    const view = document.getElementById('view-timezone');
+    if (!view || !view.classList.contains('active')) { tzStopTicker(); return; }
+    if (document.hidden) return;
+    if (tzCurrentMode === 'now') tzRenderClocks();
+  }, 1000);
+}
+function tzStopTicker(){
+  if (tzTicker){ clearInterval(tzTicker); tzTicker = null; }
+}
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) {
+    const view = document.getElementById('view-timezone');
+    if (view && view.classList.contains('active')) {
+      tzRenderClocks();
+      tzStartTicker();
+    }
+  }
+});
+
+/* ── REFERENCE DATE ──
+   In Now mode, reference = real now.
+   In Custom mode, anchor city + HH:MM defines the reference instant.
+*/
+function tzReferenceDate(){
+  if (tzCurrentMode === 'now') return new Date();
+  const tEl = document.getElementById('tz-anchor-time');
+  const sEl = document.getElementById('tz-anchor-city');
+  const t = (tEl && tEl.value) || '12:00';
+  const tz = (sEl && sEl.value) || tzBrowserTz();
+  const [h,m] = t.split(':').map(n => parseInt(n,10)||0);
+
+  // Build "today in the anchor TZ" → date string
+  const now = new Date();
+  const parts = tzGetParts(now, tz);
+  // Construct a UTC instant whose representation in `tz` is parts.y/m/d at h:m:00
+  // Approach: iterate to find UTC ms whose wall clock in tz matches.
+  const targetWall = { y:parts.y, mo:parts.mo, d:parts.d, h:h, mi:m, s:0 };
+  return tzWallTimeToInstant(targetWall, tz);
+}
+
+/* Given desired wall-clock values in a target TZ, return the corresponding
+   Date (UTC instant). Uses two-step convergence to handle DST. */
+function tzWallTimeToInstant(wall, tz){
+  // Initial guess: treat the wall time as if it were UTC
+  let guessMs = Date.UTC(wall.y, wall.mo-1, wall.d, wall.h, wall.mi, wall.s||0);
+  for (let i=0; i<3; i++){
+    const p = tzGetParts(new Date(guessMs), tz);
+    const targetMs = Date.UTC(wall.y, wall.mo-1, wall.d, wall.h, wall.mi, wall.s||0);
+    const actualMs = Date.UTC(p.y, p.mo-1, p.d, p.h, p.mi, p.s);
+    const diff = targetMs - actualMs;
+    if (Math.abs(diff) < 1000) break;
+    guessMs += diff;
+  }
+  return new Date(guessMs);
+}
+
+/* Wall-clock parts of `date` in TZ via Intl. */
+function tzGetParts(date, tz){
+  const f = new Intl.DateTimeFormat('en-US', {
+    timeZone: tz,
+    year:'numeric', month:'2-digit', day:'2-digit',
+    hour:'2-digit', minute:'2-digit', second:'2-digit',
+    weekday:'short', hour12:false,
+  });
+  const parts = f.formatToParts(date);
+  const get = t => parts.find(p => p.type===t)?.value;
+  let h = parseInt(get('hour'),10); if (h === 24) h = 0; // some engines emit 24
+  return {
+    y: parseInt(get('year'),10),
+    mo: parseInt(get('month'),10),
+    d: parseInt(get('day'),10),
+    h: h,
+    mi: parseInt(get('minute'),10),
+    s: parseInt(get('second'),10),
+    wd: get('weekday'),
+  };
+}
+
+/* Returns UTC offset of `tz` at `date`, in minutes. */
+function tzOffsetMinutes(date, tz){
+  const p = tzGetParts(date, tz);
+  const asUtc = Date.UTC(p.y, p.mo-1, p.d, p.h, p.mi, p.s);
+  return Math.round((asUtc - date.getTime()) / 60000);
+}
+
+function tzIsDst(tz){
+  // True if current offset differs from January offset (a heuristic that
+  // works for every Northern/Southern hemisphere DST-observing zone).
+  const now = new Date();
+  const jan = new Date(now.getFullYear(), 0, 15);
+  const jul = new Date(now.getFullYear(), 6, 15);
+  const oNow = tzOffsetMinutes(now, tz);
+  const oJan = tzOffsetMinutes(jan, tz);
+  const oJul = tzOffsetMinutes(jul, tz);
+  if (oJan === oJul) return false;            // zone doesn't observe DST
+  return oNow !== Math.min(oJan, oJul);       // currently on the larger (summer) offset
+}
+
+function tzFormatOffset(min){
+  const sign = min >= 0 ? '+' : '−';
+  const a = Math.abs(min);
+  const h = Math.floor(a/60), m = a % 60;
+  return 'UTC' + sign + String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0');
+}
+
+function tzPad(n){ return String(n).padStart(2,'0'); }
+
+function tzFormatTime(date, tz, fmt24){
+  const p = tzGetParts(date, tz);
+  let h = p.h, ampm = '';
+  if (!fmt24) {
+    ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12; if (h === 0) h = 12;
+  }
+  return { hm: (fmt24 ? tzPad(h) : h) + ':' + tzPad(p.mi), s: tzPad(p.s), ampm: ampm, parts: p };
+}
+
+const TZ_WD_FULL = { Sun:'Sunday', Mon:'Monday', Tue:'Tuesday', Wed:'Wednesday', Thu:'Thursday', Fri:'Friday', Sat:'Saturday' };
+const TZ_MO_FULL = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function tzFormatDate(p){
+  const wd = TZ_WD_FULL[p.wd] || p.wd;
+  return `${wd}, ${TZ_MO_FULL[p.mo-1]} ${p.d}`;
+}
+
+/* Day delta vs the "home" (first) city in the user's list. */
+function tzDayDelta(refDate, tz, baseTz){
+  const a = tzGetParts(refDate, tz);
+  const b = tzGetParts(refDate, baseTz);
+  const da = Date.UTC(a.y, a.mo-1, a.d);
+  const db = Date.UTC(b.y, b.mo-1, b.d);
+  return Math.round((da - db) / 86400000);
+}
+
+/* ── CLOCKS RENDER ── */
+function tzRenderClocks(){
+  const grid = document.getElementById('tz-clocks-grid');
+  if (!grid) return;
+  if (!tzState.cities.length) {
+    grid.innerHTML = `<div class="tz-empty">No cities yet — tap "Add City" to start.</div>`;
+    return;
+  }
+
+  const ref = tzReferenceDate();
+  const baseTz = tzState.cities[0].tz;
+  const baseOffset = tzOffsetMinutes(ref, baseTz);
+  const fmt24 = !!tzState.fmt24;
+
+  grid.innerHTML = tzState.cities.map((c, idx) => {
+    const t = tzFormatTime(ref, c.tz, fmt24);
+    const offset = tzOffsetMinutes(ref, c.tz);
+    const diffMin = offset - baseOffset;
+    const dayDelta = tzDayDelta(ref, c.tz, baseTz);
+    const dst = tzIsDst(c.tz);
+
+    const roleTag = c.role === 'home' ? 'Home' : (c.role === 'dest' ? 'Destination' : 'City');
+    const roleCls = c.role === 'home' ? 'home' : (c.role === 'dest' ? 'dest' : '');
+
+    // Offset diff badge (relative to home)
+    let diffBadge = '';
+    if (idx > 0) {
+      const sign = diffMin >= 0 ? '+' : '−';
+      const a = Math.abs(diffMin);
+      const dh = Math.floor(a/60), dm = a%60;
+      const diffTxt = dm === 0 ? `${sign}${dh}h` : `${sign}${dh}h${tzPad(dm)}`;
+      diffBadge = `<span class="tz-badge offset">${diffTxt} vs ${tzEscape(tzState.cities[0].city)}</span>`;
+    }
+    let dayBadge = '';
+    if (dayDelta !== 0) {
+      const cls = dayDelta > 0 ? 'next' : 'prev';
+      dayBadge = `<span class="tz-badge day ${cls}">${dayDelta>0?'+':''}${dayDelta} day${Math.abs(dayDelta)>1?'s':''}</span>`;
+    }
+    const dstBadge = dst ? `<span class="tz-badge dst">DST</span>` : '';
+
+    const rmBtn = c.role === 'home'
+      ? ''
+      : `<button class="tz-clock-rm" onclick="tzRemoveCity('${c.id}')" aria-label="Remove ${tzEscape(c.city)}" title="Remove">×</button>`;
+
+    const ampmEl = fmt24 ? '' : `<span class="ampm">${t.ampm}</span>`;
+
+    return `<div class="tz-clock ${roleCls}">
+      <div class="tz-clock-top">
+        <div class="tz-clock-meta">
+          <span class="tz-clock-tag">${c.flag} ${roleTag}</span>
+          <div class="tz-clock-city">${tzEscape(c.city)}${c.country?`<span style="font-family:var(--sans);font-weight:400;font-size:13px;color:var(--muted)"> · ${tzEscape(c.country)}</span>`:''}</div>
+          <div class="tz-clock-tz">${tzEscape(c.tz)}</div>
+        </div>
+        ${rmBtn}
+      </div>
+      <div class="tz-clock-time">${t.hm}<span class="sec">:${t.s}</span>${ampmEl}</div>
+      <div class="tz-clock-date">${tzFormatDate(t.parts)}</div>
+      <div class="tz-clock-badges">${diffBadge}${dayBadge}${dstBadge}</div>
+      <div class="tz-clock-utc">${tzFormatOffset(offset)}</div>
+    </div>`;
+  }).join('');
+}
+
+function tzEscape(s){
+  return String(s||'').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+
+/* ── ADD / REMOVE CITY ── */
+function tzRemoveCity(id){
+  const i = tzState.cities.findIndex(c => c.id === id);
+  if (i < 0) return;
+  if (tzState.cities[i].role === 'home') return;   // never remove home
+  tzState.cities.splice(i,1);
+  tzSave();
+  tzPopulateAnchorDropdowns();
+  tzRenderClocks();
+  tzRenderMP();
+}
+
+function tzAddCity(c){
+  // Don't add duplicates (same tz already present)
+  if (tzState.cities.some(x => x.tz === c.tz)) {
+    tzClosePicker();
+    return;
+  }
+  const id = 'c_' + c.tz + '_' + Date.now();
+  tzState.cities.push({ id, role:'extra', city:c.city, country:c.country, tz:c.tz, flag:c.flag });
+  tzSave();
+  tzPopulateAnchorDropdowns();
+  tzRenderClocks();
+  tzRenderMP();
+  tzClosePicker();
+}
+
+/* ── PICKER MODAL ── */
+function tzOpenPicker(mode){
+  tzPickerMode = mode || 'add';
+  document.getElementById('tz-picker-title').textContent = 'Add a City';
+  const q = document.getElementById('tz-picker-q');
+  q.value = '';
+  tzPickerKbdIdx = -1;
+  tzRenderPickerList('');
+  document.getElementById('tz-picker-bd').classList.add('open');
+  setTimeout(() => q.focus(), 30);
+}
+
+function tzClosePicker(ev){
+  if (ev && ev.target && !ev.target.classList.contains('tz-picker-backdrop')) return;
+  document.getElementById('tz-picker-bd').classList.remove('open');
+}
+
+function tzPickerFilter(){
+  const q = (document.getElementById('tz-picker-q').value || '').trim().toLowerCase();
+  tzPickerKbdIdx = -1;
+  tzRenderPickerList(q);
+}
+
+function tzRenderPickerList(q){
+  const list = document.getElementById('tz-picker-list');
+  let rows = TZ_CITIES;
+  if (q) {
+    rows = TZ_CITIES.filter(c =>
+      c.city.toLowerCase().includes(q) ||
+      c.country.toLowerCase().includes(q) ||
+      c.tz.toLowerCase().includes(q)
+    );
+  }
+  if (!rows.length) {
+    list.innerHTML = `<div class="tz-picker-empty">No cities match "${tzEscape(q)}".<br>Try a country name or IANA zone like "Europe/Berlin".</div>`;
+    return;
+  }
+  list.innerHTML = rows.slice(0, 200).map((c, i) =>
+    `<div class="tz-picker-row" onclick="tzAddCity(${JSON.stringify(c).replace(/"/g,'&quot;')})" data-i="${i}">
+       <span style="font-size:18px;line-height:1">${c.flag}</span>
+       <span class="pr-city">${tzEscape(c.city)}</span>
+       <span class="pr-country">${tzEscape(c.country)}</span>
+       <span class="pr-tz">${tzEscape(c.tz)}</span>
+     </div>`
+  ).join('');
+}
+
+/* Keyboard nav in picker */
+document.addEventListener('keydown', (e) => {
+  const bd = document.getElementById('tz-picker-bd');
+  if (!bd || !bd.classList.contains('open')) return;
+  if (e.key === 'Escape') { tzClosePicker(); return; }
+  const rows = bd.querySelectorAll('.tz-picker-row');
+  if (!rows.length) return;
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    tzPickerKbdIdx = Math.min(rows.length-1, tzPickerKbdIdx+1);
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    tzPickerKbdIdx = Math.max(0, tzPickerKbdIdx-1);
+  } else if (e.key === 'Enter') {
+    e.preventDefault();
+    const idx = tzPickerKbdIdx >= 0 ? tzPickerKbdIdx : 0;
+    if (rows[idx]) rows[idx].click();
+    return;
+  } else return;
+  rows.forEach(r => r.classList.remove('kbd'));
+  if (rows[tzPickerKbdIdx]) {
+    rows[tzPickerKbdIdx].classList.add('kbd');
+    rows[tzPickerKbdIdx].scrollIntoView({ block:'nearest' });
+  }
+});
+
+/* ══════════════════════════════════════════════════════
+   MEETING PLANNER
+   ══════════════════════════════════════════════════════ */
+function tzRenderMP(){
+  const tbl = document.getElementById('tz-mp-table');
+  if (!tbl) return;
+
+  const sEl = document.getElementById('tz-mp-start');
+  const eEl = document.getElementById('tz-mp-end');
+  let workStart = Math.max(0, Math.min(23, parseInt(sEl.value, 10)));
+  let workEnd   = Math.max(workStart+1, Math.min(24, parseInt(eEl.value, 10)));
+  if (isNaN(workStart)) workStart = 9;
+  if (isNaN(workEnd))   workEnd   = 17;
+  tzState.mpStart = workStart; tzState.mpEnd = workEnd;
+
+  const anchorSel = document.getElementById('tz-mp-anchor');
+  const anchorTz  = anchorSel.value || tzState.cities[0]?.tz || tzBrowserTz();
+  tzState.anchorTz = anchorTz;
+  tzSave();
+
+  if (!tzState.cities.length) {
+    tbl.innerHTML = '';
+    document.getElementById('tz-mp-overlap').innerHTML =
+      `<div class="tz-empty">Add at least one city to plan a meeting.</div>`;
+    return;
+  }
+
+  // Reference instant: midnight today in the anchor TZ
+  const now = new Date();
+  const anchorParts = tzGetParts(now, anchorTz);
+  const baseInstant = tzWallTimeToInstant(
+    { y:anchorParts.y, mo:anchorParts.mo, d:anchorParts.d, h:0, mi:0, s:0 },
+    anchorTz
+  );
+
+  // Build 24 hour-slot instants
+  const slots = [];
+  for (let h=0; h<24; h++){
+    slots.push(new Date(baseInstant.getTime() + h*3600000));
+  }
+
+  // Header row
+  let header = '<thead><tr><th style="background:var(--paper-2)">';
+  header += `<span style="font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase">Anchor: ${tzEscape(anchorSel.options[anchorSel.selectedIndex].text)}</span>`;
+  header += '</th>';
+  for (let h=0; h<24; h++){
+    const lbl = tzState.fmt24
+      ? tzPad(h) + ':00'
+      : ((h%12===0?12:h%12) + (h<12?'a':'p'));
+    header += `<th>${lbl}</th>`;
+  }
+  header += '</tr></thead>';
+
+  // Body rows — one per city
+  let body = '<tbody>';
+  // For each slot, track if all cities are in work hours → overlap column
+  const cityHours = tzState.cities.map(c => slots.map(inst => {
+    const p = tzGetParts(inst, c.tz);
+    return { h:p.h, d:p.d };
+  }));
+  const baseDay = tzGetParts(baseInstant, anchorTz).d;
+
+  const overlapCols = [];
+  for (let i=0; i<24; i++){
+    let inAll = true;
+    for (let r=0; r<tzState.cities.length; r++){
+      const h = cityHours[r][i].h;
+      if (h < workStart || h >= workEnd) { inAll = false; break; }
+    }
+    overlapCols.push(inAll);
+  }
+
+  tzState.cities.forEach((c, r) => {
+    body += `<tr><th>${tzEscape(c.city)} ${c.flag}<span class="mp-tz">${tzEscape(c.tz)}</span></th>`;
+    for (let i=0; i<24; i++){
+      const h = cityHours[r][i].h;
+      const dayNum = cityHours[r][i].d;
+      let cls = 'sleep';
+      if (h >= workStart && h < workEnd) cls = 'work';
+      else if ((h >= workStart-1 && h < workEnd+1) && cls !== 'work') cls = 'fringe';
+      if (overlapCols[i]) cls += ' overlap';
+      const lbl = tzState.fmt24 ? tzPad(h) : (h%12===0?12:h%12);
+      const dayBadge = (dayNum !== baseDay) ? `<span class="mp-d">${dayNum>baseDay?'+1':'−1'}d</span>` : '';
+      body += `<td class="tz-mp-cell ${cls}"><span class="mp-h">${lbl}</span>${dayBadge}</td>`;
+    }
+    body += '</tr>';
+  });
+  body += '</tbody>';
+
+  tbl.innerHTML = header + body;
+
+  // Overlap summary box
+  const overlapBox = document.getElementById('tz-mp-overlap');
+  const overlapWindows = tzCollapseRuns(overlapCols);
+  if (!overlapWindows.length) {
+    overlapBox.innerHTML = `<div class="tz-mp-overlap-box none"><b>No shared work-hour window today.</b>Everyone's work hours never overlap. Consider asynchronous communication or use the fringe (yellow) zones for a brief sync.</div>`;
+  } else {
+    const fmtRange = (start, end) => {
+      const fmt = (h) => tzState.fmt24
+        ? tzPad(h) + ':00'
+        : ((h%12===0?12:h%12) + (h<12?'am':'pm'));
+      return `${fmt(start)} – ${fmt(end)}`;
+    };
+    const anchorName = anchorSel.options[anchorSel.selectedIndex].text;
+    const ranges = overlapWindows.map(w => fmtRange(w.start, w.end)).join(', ');
+    const hrs = overlapWindows.reduce((s,w) => s + (w.end - w.start), 0);
+    overlapBox.innerHTML = `<div class="tz-mp-overlap-box"><b>${hrs} hour${hrs>1?'s':''} of shared work time</b>In ${tzEscape(anchorName)}, everyone is in work hours from <b>${ranges}</b>. Outlined cells in the grid below show this overlap in every city.</div>`;
+  }
+}
+
+function tzCollapseRuns(arr){
+  // Returns [{start, end}] index ranges where arr[i] is truthy.
+  const runs = [];
+  let i = 0;
+  while (i < arr.length) {
+    if (!arr[i]) { i++; continue; }
+    let j = i;
+    while (j < arr.length && arr[j]) j++;
+    runs.push({ start:i, end:j });
+    i = j;
+  }
+  return runs;
 }
 </script>
 </body>
