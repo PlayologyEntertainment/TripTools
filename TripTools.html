@@ -3304,16 +3304,167 @@ body.no-scroll { overflow: hidden; }
     </div>
   </div>
 </div>
-<div id="view-placeholder-emergency" class="view">
-  <nav class="tool-topbar">
+<style>
+/* ── EMERGENCY NUMBERS ── */
+.em-hero{border:2px solid var(--ink);border-radius:var(--r);overflow:hidden;margin-top:4px}
+.em-hero-flag{background:var(--paper-2);padding:14px 18px;display:flex;align-items:center;gap:12px;border-bottom:1.5px solid var(--ink)}
+.em-hero-flag .em-flag{font-size:34px;line-height:1}
+.em-hero-flag .em-cn-name{font-family:var(--serif);font-size:22px;font-weight:700;letter-spacing:-.02em;line-height:1.1}
+.em-hero-flag .em-cn-sub{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:2px}
+.em-hero-universal{background:#fce4ec;padding:18px 18px 20px;text-align:center;border-bottom:1.5px solid var(--ink)}
+.em-uni-lbl{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#c62828;margin-bottom:4px}
+.em-uni-num{font-family:var(--serif);font-size:64px;font-weight:700;line-height:1;letter-spacing:-.03em;color:#c62828;font-variation-settings:"opsz" 144,"SOFT" 30,"WONK" 1}
+.em-uni-num a{color:inherit;text-decoration:none}
+.em-uni-num a:hover{text-decoration:underline}
+.em-uni-cta{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#c62828;margin-top:6px;opacity:.85}
+.em-svc-grid{display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1.5px solid var(--ink)}
+.em-svc-cell{padding:14px 12px;text-align:center;border-right:1.5px solid var(--ink);background:var(--paper)}
+.em-svc-cell:last-child{border-right:none}
+.em-svc-cell.muted{background:var(--paper-2);color:var(--muted)}
+.em-svc-emoji{font-size:22px;line-height:1}
+.em-svc-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:4px 0 6px}
+.em-svc-num{font-family:var(--serif);font-size:26px;font-weight:700;line-height:1;letter-spacing:-.02em;color:var(--ink)}
+.em-svc-num a{color:inherit;text-decoration:none}
+.em-svc-num a:hover{text-decoration:underline;color:var(--accent)}
+.em-svc-cta{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-top:4px}
+.em-svc-cell.muted .em-svc-num{font-size:13px;font-family:var(--sans);font-weight:500;color:var(--muted)}
+.em-svc-cell.muted .em-svc-cta{display:none}
+.em-tip{padding:12px 16px;background:var(--paper-2);font-family:var(--sans);font-size:13px;color:var(--ink-2);line-height:1.55;border-bottom:1.5px solid var(--ink)}
+.em-tip strong{color:var(--ink)}
+.em-extras{padding:0}
+.em-extra-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 16px;border-bottom:1px solid var(--rule);font-size:14px}
+.em-extra-row:last-child{border-bottom:none}
+.em-extra-lbl{display:flex;align-items:center;gap:8px;color:var(--ink-2)}
+.em-extra-lbl .em-eico{font-size:18px;line-height:1}
+.em-extra-num{font-family:var(--mono);font-weight:600;color:var(--ink)}
+.em-extra-num a{color:inherit;text-decoration:none}
+.em-extra-num a:hover{color:var(--accent)}
+.em-empty{padding:32px 20px;text-align:center;border:1.5px dashed var(--rule);border-radius:var(--r);color:var(--muted);font-size:14px;background:var(--paper-2)}
+.em-section{margin-top:28px;padding-top:22px;border-top:1.5px solid var(--rule)}
+.em-section-h{font-family:var(--serif);font-size:22px;font-weight:600;letter-spacing:-.02em;margin-bottom:6px}
+.em-section-desc{font-size:13px;color:var(--muted);line-height:1.55;margin-bottom:14px}
+.em-select{width:100%;background:var(--paper-2);border:1.5px solid var(--ink);color:var(--ink);font-family:var(--sans);font-size:15px;padding:10px 12px;border-radius:var(--r);outline:none;min-height:44px;appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--ink) 50%),linear-gradient(135deg,var(--ink) 50%,transparent 50%);background-position:calc(100% - 18px) 50%,calc(100% - 13px) 50%;background-size:5px 5px;background-repeat:no-repeat;padding-right:32px}
+.em-embassy-note{margin-top:12px;padding:10px 14px;background:var(--paper-2);border-left:3px solid var(--blue);border-radius:var(--r);font-size:13px;color:var(--ink-2);line-height:1.55}
+.em-ins-card{margin-top:16px;border:2px solid var(--ink);border-radius:var(--r);padding:14px 16px;background:#fffde7}
+.em-ins-row{display:flex;align-items:baseline;gap:10px;padding:4px 0;font-size:14px}
+.em-ins-row .em-ins-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);min-width:80px}
+.em-ins-row .em-ins-val{font-weight:600;color:var(--ink);word-break:break-word}
+.em-ins-row .em-ins-val a{color:var(--accent);text-decoration:none}
+.em-ins-row .em-ins-val a:hover{text-decoration:underline}
+.em-ins-status{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--green);margin-top:8px}
+@media(max-width:520px){
+  .em-svc-grid{grid-template-columns:1fr 1fr 1fr}
+  .em-svc-cell{padding:12px 6px}
+  .em-svc-num{font-size:22px}
+  .em-uni-num{font-size:48px}
+  .em-hero-flag .em-flag{font-size:28px}
+  .em-hero-flag .em-cn-name{font-size:18px}
+}
+@media print {
+  #view-emergency .tool-bar,
+  #view-emergency .ctx-banner,
+  #view-emergency .pro-tip,
+  #view-emergency .related,
+  #view-emergency .em-section .btn,
+  #view-emergency input,
+  #view-emergency select { display: none !important; }
+  #view-emergency .em-print-hdr {
+    display: flex !important; justify-content: space-between;
+    font-family: var(--mono); font-size: 11px; letter-spacing: .08em;
+    text-transform: uppercase; color: #555;
+    padding-bottom: 10px; border-bottom: 2px solid #000; margin-bottom: 20px;
+  }
+  body { background: #fff !important; background-image: none !important; }
+  .em-hero, .em-ins-card { border: 1.5px solid #000 !important; break-inside: avoid; }
+  .em-hero-universal { background: #fff !important; }
+  .em-uni-num, .em-uni-lbl, .em-uni-cta { color: #000 !important; }
+  .em-svc-cta { display: none !important; }
+  .vg-search-wrap, .em-select, #em-embassy-btn { display: none !important; }
+}
+.em-print-hdr { display: none; }
+</style>
+<div id="view-emergency" class="view">
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="window.print()">🖨 Print</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">🚨</span>
-    <h2>Emergency Numbers</h2>
-    <p style="margin-bottom:24px">Police, fire & ambulance for 100+ countries. Embassy finder. Always offline.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-emergency"></div>
+  <div class="em-print-hdr"><span>TripTools · Emergency Numbers · <span id="em-print-country">—</span></span><span id="em-print-date"></span></div>
+
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>Emergency Numbers</h1>
+    <p class="tool-sub">Police, fire &amp; ambulance for 150+ countries. Tap any number to dial. Embassy finder + your travel-insurance card — all on one page.</p>
+  </div>
+
+  <div class="tool-body">
+
+    <div class="fg">
+      <label>Where are you?</label>
+      <div class="vg-search-wrap">
+        <input type="search" id="em-dest-search" class="vg-search-input" placeholder="🔍 Search country…" autocomplete="off">
+        <div id="em-dest-drop" class="vg-drop" style="display:none"></div>
+        <input type="hidden" id="em-dest-val">
+      </div>
+    </div>
+
+    <div id="em-result"></div>
+
+    <!-- Embassy Finder -->
+    <div class="em-section">
+      <h3 class="em-section-h">🏛 Find Your Embassy</h3>
+      <p class="em-section-desc">If you lose your passport, are arrested, or face a serious crisis, your country's embassy or consulate is your lifeline. Pick your nationality to open the official embassy directory.</p>
+      <div class="frow">
+        <div class="fg">
+          <label>Your Nationality</label>
+          <select id="em-nat" class="em-select" onchange="emOnNatChange()"></select>
+        </div>
+        <div class="fg" style="display:flex;align-items:flex-end">
+          <button id="em-embassy-btn" class="btn btn-p" style="width:100%" onclick="emOpenEmbassy()">🌐 Open Embassy Directory ↗</button>
+        </div>
+      </div>
+      <div id="em-embassy-note" class="em-embassy-note" style="display:none"></div>
+    </div>
+
+    <!-- Travel Insurance -->
+    <div class="em-section">
+      <h3 class="em-section-h">🛡 My Travel Insurance</h3>
+      <p class="em-section-desc">Save your insurer's 24/7 emergency contact — having it on hand could save you hours in a crisis. Stored only on this device, never uploaded anywhere.</p>
+      <div class="frow">
+        <div class="fg">
+          <label>Provider</label>
+          <input type="text" id="em-ins-prov" placeholder="e.g. Allianz Travel" oninput="emSaveInsurance()">
+        </div>
+        <div class="fg">
+          <label>Emergency Phone (24/7)</label>
+          <input type="tel" id="em-ins-phone" placeholder="e.g. +1-804-281-5700" oninput="emSaveInsurance()">
+        </div>
+      </div>
+      <div class="fg">
+        <label>Policy Number</label>
+        <input type="text" id="em-ins-pol" placeholder="e.g. POL-12345-678" oninput="emSaveInsurance()">
+      </div>
+      <div id="em-ins-card" class="em-ins-card" style="display:none"></div>
+    </div>
+
+    <div style="margin-top:20px;padding:12px 16px;background:var(--paper-2);border-left:3px solid var(--yellow);border-radius:var(--r);font-size:13px;color:var(--muted);line-height:1.55">
+      ⚠️ <strong>Numbers can change.</strong> Verify with your hotel concierge or destination's tourist board before you need them. Some local lines work only from a national SIM or landline — <strong>112</strong> works from any mobile in the EU and many other regions.
+    </div>
+
+  </div>
+
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    Most modern smartphones have "Emergency SOS" built in — holding the side button + a volume key for a few seconds will silently call local emergency services and ping your location to your contacts. Set it up before you fly.
+  </div>
+
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('travel-ins')">🛟 Travel Insurance Worksheet</button>
+      <button class="rel-btn" onclick="openTool('passport')">📕 Passport Expiry Checker</button>
+      <button class="rel-btn" onclick="openTool('visa-guide')">🌍 Visa Requirement Guide</button>
+      <button class="rel-btn" onclick="openTool('phrasebook')">💬 Language Phrasebook</button>
     </div>
   </div>
 </div>
@@ -5059,7 +5210,7 @@ const TOOLS = [
   {id:'jet-lag',       nm:'Jet Lag Calculator',         ico:'😴', ph:'destination',on:false,live:false, ds:'Pre-travel adjustment schedule + post-arrival recovery plan.'},
   {id:'unit-conv',     nm:'Universal Unit Converter',   ico:'📏', ph:'destination',on:false,live:true,  ds:'Temp, distance, weight, volume, speed — all traveler conversions.'},
   {id:'phrasebook',    nm:'Language Phrasebook',        ico:'💬', ph:'destination',on:false,live:false, ds:'Essential travel phrases in 25 languages with pronunciation.'},
-  {id:'emergency',     nm:'Emergency Numbers',          ico:'🚨', ph:'destination',on:false,live:false, ds:'Police, fire & ambulance for 100+ countries. Always offline.'},
+  {id:'emergency',     nm:'Emergency Numbers',          ico:'🚨', ph:'destination',on:false,live:true,  ds:'Police, fire & ambulance for 150+ countries. Embassy finder & your insurance card, always offline.'},
   {id:'uv-index',      nm:'UV Index & Sun Safety',      ico:'☀️', ph:'destination',on:true, live:false, ds:'Live UV index, SPF recommendations by skin type.'},
   {id:'altitude',      nm:'Altitude Sickness Guide',    ico:'⛰', ph:'destination',on:false,live:false, ds:'Enter elevation → risk level + acclimatization timeline.'},
   {id:'weather',       nm:'Weather Forecast',           ico:'🌦', ph:'destination',on:true, live:false, ds:'5-day forecast via Open-Meteo. Free, no API key.'},
@@ -5744,6 +5895,7 @@ function injectTripCtx(id) {
   if(id==='expense-track') etInit();
   if(id==='baggage')    bfcInit();
   if(id==='car-kit')    ckInit();
+  if(id==='emergency')  emInit();
 }
 
 /* ── HUB RENDER ── */
@@ -11804,6 +11956,515 @@ function paCheck() {
   <div class="pa-action">${actionMsg}</div>
   <div class="pa-footer">⚠ Requirements may vary by nationality. Always verify with the official embassy or government travel advisory.</div>
 </div>`;
+}
+
+/* ══════════════════════════════════════════════
+   EMERGENCY NUMBERS  (id: emergency)
+   EM_DATA keyed by ISO 3166-1 alpha-2.
+   Fields:
+     u  = universal "dial-anything" number (e.g. 112, 911)
+     p  = police          f  = fire        a  = ambulance
+     tp = tourist police  rs = roadside    cg = coast guard
+     pc = poison control
+     cc = country calling code (digits only)
+     dz = drop leading 0 when dialing from abroad (1 = yes)
+   Country names + flags are joined from VG_COUNTRIES.
+   ══════════════════════════════════════════════ */
+const EM_DATA = {
+  // Europe (most have 112 as universal)
+  AD:{u:'112',cc:'376'},
+  AL:{u:'112',p:'129',f:'128',a:'127',cc:'355'},
+  AM:{u:'112',p:'102',f:'101',a:'103',cc:'374'},
+  AT:{u:'112',p:'133',f:'122',a:'144',cc:'43',dz:1},
+  AZ:{u:'112',p:'102',f:'101',a:'103',cc:'994'},
+  BA:{u:'112',p:'122',f:'123',a:'124',cc:'387'},
+  BE:{u:'112',p:'101',f:'112',a:'112',cc:'32',dz:1},
+  BG:{u:'112',cc:'359',dz:1},
+  BY:{u:'112',p:'102',f:'101',a:'103',cc:'375',dz:1},
+  CH:{u:'112',p:'117',f:'118',a:'144',cc:'41',dz:1},
+  CY:{u:'112',p:'199',cc:'357'},
+  CZ:{u:'112',p:'158',f:'150',a:'155',cc:'420'},
+  DE:{u:'112',p:'110',f:'112',a:'112',cc:'49',dz:1},
+  DK:{u:'112',cc:'45'},
+  EE:{u:'112',cc:'372'},
+  ES:{u:'112',p:'091',f:'080',a:'061',cc:'34'},
+  FI:{u:'112',cc:'358',dz:1},
+  FR:{u:'112',p:'17',f:'18',a:'15',cc:'33',dz:1},
+  GB:{u:'112',p:'999',f:'999',a:'999',cg:'999',cc:'44',dz:1},
+  GE:{u:'112',cc:'995'},
+  GR:{u:'112',p:'100',f:'199',a:'166',tp:'171',cg:'108',cc:'30'},
+  HR:{u:'112',p:'192',f:'193',a:'194',cc:'385'},
+  HU:{u:'112',p:'107',f:'105',a:'104',cc:'36',dz:1},
+  IE:{u:'112',p:'999',f:'999',a:'999',cg:'112',cc:'353',dz:1},
+  IS:{u:'112',cc:'354'},
+  IT:{u:'112',p:'113',f:'115',a:'118',cg:'1530',cc:'39'},
+  LI:{u:'112',p:'117',f:'118',a:'144',cc:'423'},
+  LT:{u:'112',cc:'370',dz:1},
+  LU:{u:'112',p:'113',cc:'352'},
+  LV:{u:'112',cc:'371'},
+  MC:{u:'112',p:'17',f:'18',a:'15',cc:'377'},
+  MD:{u:'112',cc:'373'},
+  ME:{u:'112',p:'122',f:'123',a:'124',cc:'382'},
+  MK:{u:'112',p:'192',f:'193',a:'194',cc:'389'},
+  MT:{u:'112',cc:'356'},
+  NL:{u:'112',cc:'31',dz:1},
+  NO:{u:'112',p:'112',f:'110',a:'113',cc:'47'},
+  PL:{u:'112',p:'997',f:'998',a:'999',cc:'48'},
+  PT:{u:'112',cc:'351'},
+  RO:{u:'112',cc:'40',dz:1},
+  RS:{u:'112',p:'192',f:'193',a:'194',cc:'381',dz:1},
+  RU:{u:'112',p:'102',f:'101',a:'103',cc:'7',dz:1},
+  SE:{u:'112',cc:'46',dz:1},
+  SI:{u:'112',p:'113',f:'112',a:'112',cc:'386',dz:1},
+  SK:{u:'112',p:'158',f:'150',a:'155',cc:'421',dz:1},
+  SM:{u:'112',cc:'378'},
+  TR:{u:'112',p:'155',f:'110',a:'112',cg:'158',cc:'90',dz:1},
+  UA:{u:'112',p:'102',f:'101',a:'103',cc:'380',dz:1},
+  VA:{u:'112',p:'113',cc:'379'},
+  XK:{u:'112',p:'192',f:'193',a:'194',cc:'383'},
+  // Middle East
+  AE:{u:'112',p:'999',f:'997',a:'998',cg:'996',cc:'971',dz:1},
+  BH:{u:'999',cc:'973'},
+  IQ:{p:'104',f:'115',a:'122',cc:'964'},
+  IR:{p:'110',f:'125',a:'115',u:'112',cc:'98',dz:1},
+  IL:{u:'112',p:'100',f:'102',a:'101',cc:'972',dz:1},
+  JO:{u:'911',p:'191',f:'199',cc:'962',dz:1},
+  KW:{u:'112',cc:'965'},
+  LB:{p:'112',f:'175',a:'140',cc:'961'},
+  OM:{u:'9999',cc:'968'},
+  PS:{p:'100',f:'102',a:'101',cc:'970'},
+  QA:{u:'999',cc:'974'},
+  SA:{u:'911',p:'999',f:'998',a:'997',tp:'911',cc:'966'},
+  SY:{p:'112',f:'113',a:'110',cc:'963'},
+  YE:{p:'194',f:'191',a:'191',cc:'967'},
+  // Central Asia
+  AF:{p:'119',f:'119',a:'112',cc:'93'},
+  KG:{p:'102',f:'101',a:'103',cc:'996'},
+  KZ:{u:'112',p:'102',f:'101',a:'103',cc:'7'},
+  TJ:{p:'102',f:'101',a:'103',cc:'992'},
+  TM:{p:'02',f:'01',a:'03',cc:'993'},
+  UZ:{p:'102',f:'101',a:'103',cc:'998'},
+  // South Asia
+  BD:{u:'999',cc:'880'},
+  BT:{p:'113',f:'110',a:'112',cc:'975'},
+  IN:{u:'112',p:'100',f:'101',a:'102',cg:'1554',cc:'91'},
+  LK:{u:'119',p:'119',f:'110',a:'1990',tp:'1912',cc:'94',dz:1},
+  MV:{p:'119',f:'118',a:'102',cg:'191',cc:'960'},
+  NP:{p:'100',f:'101',a:'102',cc:'977'},
+  PK:{u:'15',p:'15',f:'16',a:'115',cc:'92'},
+  // East & Southeast Asia
+  CN:{p:'110',f:'119',a:'120',cc:'86'},
+  HK:{u:'999',cc:'852'},
+  ID:{u:'112',p:'110',f:'113',a:'118',cg:'115',cc:'62',dz:1},
+  JP:{p:'110',f:'119',a:'119',cg:'118',cc:'81',dz:1},
+  KH:{p:'117',f:'118',a:'119',u:'112',cc:'855',dz:1},
+  KP:{p:'112',f:'119',a:'129',cc:'850'},
+  KR:{p:'112',f:'119',a:'119',cg:'122',tp:'1330',cc:'82',dz:1},
+  LA:{p:'191',f:'190',a:'195',cc:'856'},
+  MN:{p:'102',f:'101',a:'103',cc:'976'},
+  MO:{u:'999',cc:'853'},
+  MM:{u:'199',p:'199',f:'191',a:'192',cc:'95'},
+  MY:{u:'999',p:'999',f:'994',a:'999',tp:'1300885050',cc:'60',dz:1},
+  PH:{u:'911',tp:'117',cc:'63',dz:1},
+  SG:{p:'999',f:'995',a:'995',cc:'65'},
+  TH:{u:'191',p:'191',f:'199',a:'1669',tp:'1155',cg:'1196',cc:'66',dz:1},
+  TL:{p:'112',f:'115',a:'110',cc:'670'},
+  TW:{p:'110',f:'119',a:'119',cc:'886',dz:1},
+  VN:{p:'113',f:'114',a:'115',cc:'84',dz:1},
+  // Oceania
+  AU:{u:'000',cg:'000',cc:'61',dz:1},
+  FJ:{u:'911',p:'917',f:'910',a:'911',cc:'679'},
+  FM:{u:'911',cc:'691'},
+  KI:{p:'192',f:'193',a:'194',cc:'686'},
+  MH:{u:'911',cc:'692'},
+  NR:{p:'110',f:'112',a:'111',cc:'674'},
+  NZ:{u:'111',cc:'64',dz:1},
+  PG:{p:'112',f:'110',a:'111',cc:'675'},
+  PW:{u:'911',cc:'680'},
+  SB:{p:'999',f:'988',a:'911',cc:'677'},
+  TO:{p:'922',f:'999',a:'933',cc:'676'},
+  TV:{u:'911',cc:'688'},
+  VU:{p:'112',f:'113',a:'112',cc:'678'},
+  WS:{p:'995',f:'994',a:'996',cc:'685'},
+  // North America & Caribbean
+  AG:{u:'911',cc:'1-268'},
+  BB:{u:'911',p:'211',f:'311',a:'511',cc:'1-246'},
+  BS:{u:'911',cc:'1-242'},
+  BZ:{p:'911',f:'90',a:'90',cc:'501'},
+  CA:{u:'911',cc:'1'},
+  CR:{u:'911',cc:'506'},
+  CU:{p:'106',f:'105',a:'104',cc:'53'},
+  DM:{u:'999',cc:'1-767'},
+  DO:{u:'911',cc:'1-809'},
+  GD:{u:'911',cg:'399',cc:'1-473'},
+  GT:{u:'110',p:'120',f:'122',a:'123',cc:'502'},
+  HN:{u:'911',cc:'504'},
+  HT:{p:'114',f:'115',a:'116',cc:'509'},
+  JM:{u:'119',p:'119',f:'110',a:'110',cc:'1-876'},
+  KN:{u:'911',cc:'1-869'},
+  LC:{u:'999',cc:'1-758'},
+  MX:{u:'911',cc:'52'},
+  NI:{u:'911',p:'118',f:'115',a:'128',cc:'505'},
+  PA:{u:'911',p:'104',f:'103',cc:'507'},
+  SV:{u:'911',cc:'503'},
+  TT:{u:'999',p:'999',f:'990',a:'811',cc:'1-868'},
+  US:{u:'911',cg:'911',pc:'1-800-222-1222',cc:'1'},
+  VC:{u:'999',cc:'1-784'},
+  // South America
+  AR:{u:'911',p:'101',f:'100',a:'107',cc:'54',dz:1},
+  BO:{p:'110',f:'119',a:'118',cc:'591'},
+  BR:{u:'112',p:'190',f:'193',a:'192',cc:'55',dz:1},
+  CL:{p:'133',f:'132',a:'131',cc:'56'},
+  CO:{u:'123',cc:'57'},
+  EC:{u:'911',cc:'593',dz:1},
+  GY:{p:'911',f:'912',a:'913',cc:'592'},
+  PE:{u:'105',p:'105',f:'116',a:'117',cc:'51'},
+  PY:{u:'911',p:'911',f:'132',a:'141',cc:'595'},
+  SR:{p:'115',f:'110',a:'113',cc:'597'},
+  UY:{u:'911',p:'911',f:'104',a:'105',cc:'598'},
+  VE:{u:'171',cc:'58'},
+  // Africa: North
+  DZ:{p:'17',f:'14',a:'14',cc:'213'},
+  EG:{p:'122',f:'180',a:'123',tp:'126',cc:'20',dz:1},
+  LY:{p:'1515',f:'180',a:'193',cc:'218'},
+  MA:{p:'19',f:'15',a:'15',cc:'212',dz:1},
+  SD:{p:'999',f:'998',a:'333',cc:'249'},
+  TN:{u:'197',p:'197',f:'198',a:'190',cc:'216'},
+  // Africa: West
+  BF:{p:'17',f:'18',a:'112',cc:'226'},
+  BJ:{p:'117',f:'118',a:'112',cc:'229'},
+  CI:{p:'170',f:'180',a:'185',cc:'225'},
+  CV:{p:'132',f:'131',a:'130',cc:'238'},
+  GH:{u:'112',p:'191',f:'192',a:'193',cc:'233'},
+  GM:{u:'117',cc:'220'},
+  GN:{p:'117',f:'18',cc:'224'},
+  GW:{p:'117',f:'118',a:'119',cc:'245'},
+  LR:{u:'911',cc:'231'},
+  ML:{f:'18',a:'15',cc:'223'},
+  MR:{p:'17',f:'18',a:'101',cc:'222'},
+  NE:{p:'17',f:'18',a:'15',cc:'227'},
+  NG:{u:'112',cc:'234'},
+  SL:{p:'019',f:'019',a:'999',cc:'232'},
+  SN:{p:'17',f:'18',a:'15',cc:'221'},
+  TG:{p:'117',f:'118',a:'8200',cc:'228'},
+  // Africa: East
+  BI:{p:'112',f:'118',a:'117',cc:'257'},
+  DJ:{p:'17',f:'18',cc:'253'},
+  ER:{p:'113',f:'114',a:'114',cc:'291'},
+  ET:{p:'991',f:'939',a:'907',cc:'251'},
+  KE:{u:'112',p:'999',f:'999',a:'999',cc:'254'},
+  KM:{p:'17',f:'18',a:'15',cc:'269'},
+  MG:{p:'117',f:'118',a:'124',cc:'261'},
+  MU:{u:'999',p:'999',f:'995',a:'114',cc:'230'},
+  MW:{p:'997',f:'999',a:'998',cc:'265'},
+  MZ:{p:'119',f:'198',a:'117',cc:'258'},
+  RW:{p:'112',f:'112',a:'912',cc:'250'},
+  SC:{u:'999',p:'999',f:'999',a:'151',cc:'248'},
+  SO:{p:'888',f:'555',a:'999',cc:'252'},
+  SS:{p:'777',f:'711',a:'333',cc:'211'},
+  TZ:{p:'112',f:'114',a:'114',cc:'255',dz:1},
+  UG:{p:'999',f:'112',a:'112',cc:'256',dz:1},
+  ZM:{p:'991',f:'993',a:'992',cc:'260'},
+  ZW:{p:'995',f:'993',a:'994',cc:'263'},
+  // Africa: Central
+  AO:{p:'113',f:'115',a:'118',cc:'244'},
+  CF:{p:'117',f:'118',cc:'236'},
+  CG:{p:'117',f:'118',a:'112',cc:'242'},
+  CM:{p:'117',f:'118',a:'119',cc:'237'},
+  CD:{p:'112',f:'118',a:'112',cc:'243'},
+  GA:{p:'1730',f:'18',a:'1300',cc:'241'},
+  GQ:{p:'112',cc:'240'},
+  ST:{p:'112',f:'112',cc:'239'},
+  TD:{p:'17',f:'18',cc:'235'},
+  // Africa: Southern
+  BW:{p:'999',f:'998',a:'997',cc:'267'},
+  LS:{p:'123',f:'122',a:'121',cc:'266'},
+  NA:{p:'10111',cc:'264'},
+  SZ:{p:'999',f:'933',a:'977',cc:'268'},
+  ZA:{u:'112',p:'10111',f:'10177',a:'10177',cc:'27'},
+};
+
+// Official embassy / consular directories (MFA-published).
+// Each value: {label, url}. Only nationalities with a published portal
+// appear in the nationality dropdown.
+const EM_PORTALS = {
+  US:{label:'🇺🇸 United States',     url:'https://www.usembassy.gov/'},
+  GB:{label:'🇬🇧 United Kingdom',    url:'https://www.gov.uk/world/embassies'},
+  CA:{label:'🇨🇦 Canada',            url:'https://travel.gc.ca/assistance/embassies-consulates'},
+  AU:{label:'🇦🇺 Australia',         url:'https://www.dfat.gov.au/about-us/our-locations/missions'},
+  NZ:{label:'🇳🇿 New Zealand',       url:'https://www.mfat.govt.nz/en/embassies/'},
+  IE:{label:'🇮🇪 Ireland',           url:'https://www.ireland.ie/en/dfa/embassies/'},
+  DE:{label:'🇩🇪 Germany',           url:'https://www.auswaertiges-amt.de/en'},
+  FR:{label:'🇫🇷 France',            url:'https://www.diplomatie.gouv.fr/en/the-ministry-and-its-network/the-french-network-abroad/'},
+  IT:{label:'🇮🇹 Italy',             url:'https://www.esteri.it/en/ministero/struttura/sededellestero/'},
+  ES:{label:'🇪🇸 Spain',             url:'https://www.exteriores.gob.es/en/EmbajadasConsulados/Paginas/index.aspx'},
+  PT:{label:'🇵🇹 Portugal',          url:'https://portaldiplomatico.mne.gov.pt/'},
+  NL:{label:'🇳🇱 Netherlands',       url:'https://www.netherlandsworldwide.nl/embassies-consulates-general'},
+  BE:{label:'🇧🇪 Belgium',           url:'https://diplomatie.belgium.be/en'},
+  CH:{label:'🇨🇭 Switzerland',       url:'https://www.eda.admin.ch/eda/en/fdfa/representations-and-travel-advice.html'},
+  AT:{label:'🇦🇹 Austria',           url:'https://www.bmeia.gv.at/en/austrian-missions/'},
+  SE:{label:'🇸🇪 Sweden',            url:'https://www.swedenabroad.se/en/'},
+  NO:{label:'🇳🇴 Norway',            url:'https://www.norway.no/en/'},
+  DK:{label:'🇩🇰 Denmark',           url:'https://um.dk/en/about-us/the-organisation/missions-abroad'},
+  FI:{label:'🇫🇮 Finland',           url:'https://um.fi/missions-abroad'},
+  LU:{label:'🇱🇺 Luxembourg',        url:'https://maee.gouvernement.lu/en/diplomatic-network.html'},
+  PL:{label:'🇵🇱 Poland',            url:'https://www.gov.pl/web/diplomacy/polish-representations-abroad'},
+  CZ:{label:'🇨🇿 Czechia',           url:'https://www.mzv.cz/jnp/en/'},
+  GR:{label:'🇬🇷 Greece',            url:'https://www.mfa.gr/en/foreign-policy/greece-in-the-world/'},
+  HU:{label:'🇭🇺 Hungary',           url:'https://konzuliszolgalat.kormany.hu/en'},
+  RO:{label:'🇷🇴 Romania',           url:'https://www.mae.ro/en/romanian-missions'},
+  TR:{label:'🇹🇷 Turkey',            url:'https://www.mfa.gov.tr/missions.en.mfa'},
+  RU:{label:'🇷🇺 Russia',            url:'https://www.mid.ru/en/'},
+  UA:{label:'🇺🇦 Ukraine',           url:'https://mfa.gov.ua/en'},
+  JP:{label:'🇯🇵 Japan',             url:'https://www.mofa.go.jp/about/emb_cons/mofaserv.html'},
+  KR:{label:'🇰🇷 South Korea',       url:'https://www.mofa.go.kr/eng/wpge/m_5435/contents.do'},
+  CN:{label:'🇨🇳 China',             url:'https://www.fmprc.gov.cn/eng/'},
+  HK:{label:'🇭🇰 Hong Kong (HKSAR)', url:'https://www.fmcoprc.gov.hk/eng/'},
+  TW:{label:'🇹🇼 Taiwan',            url:'https://en.mofa.gov.tw/OverseasOffice.aspx'},
+  SG:{label:'🇸🇬 Singapore',         url:'https://www.mfa.gov.sg/Overseas-Mission'},
+  MY:{label:'🇲🇾 Malaysia',          url:'https://www.kln.gov.my/'},
+  TH:{label:'🇹🇭 Thailand',          url:'https://www.mfa.go.th/en/'},
+  ID:{label:'🇮🇩 Indonesia',         url:'https://kemlu.go.id/'},
+  PH:{label:'🇵🇭 Philippines',       url:'https://dfa.gov.ph/list-of-embassies'},
+  VN:{label:'🇻🇳 Vietnam',           url:'https://lanhsuvietnam.gov.vn/'},
+  IN:{label:'🇮🇳 India',             url:'https://www.mea.gov.in/indian-missions-abroad-new.htm'},
+  PK:{label:'🇵🇰 Pakistan',          url:'https://mofa.gov.pk/'},
+  AE:{label:'🇦🇪 UAE',               url:'https://www.mofa.gov.ae/en'},
+  SA:{label:'🇸🇦 Saudi Arabia',      url:'https://www.mofa.gov.sa/en/'},
+  IL:{label:'🇮🇱 Israel',            url:'https://embassies.gov.il/'},
+  EG:{label:'🇪🇬 Egypt',             url:'https://www.mfa.gov.eg/'},
+  ZA:{label:'🇿🇦 South Africa',      url:'https://www.dirco.gov.za/'},
+  MX:{label:'🇲🇽 Mexico',            url:'https://www.gob.mx/sre'},
+  BR:{label:'🇧🇷 Brazil',            url:'https://www.gov.br/mre/pt-br/embaixadas-e-consulados'},
+  AR:{label:'🇦🇷 Argentina',         url:'https://cancilleria.gob.ar/es/representaciones'},
+  CL:{label:'🇨🇱 Chile',             url:'https://www.minrel.gob.cl/'},
+  CO:{label:'🇨🇴 Colombia',          url:'https://www.cancilleria.gov.co/'},
+};
+
+function emFlag(code) {
+  if (!code || code.length !== 2) return '';
+  try {
+    return String.fromCodePoint(...[...code.toUpperCase()].map(c => 0x1F1E6 + c.charCodeAt(0) - 65));
+  } catch(e) { return ''; }
+}
+
+function emInit() {
+  const trip = getActiveTrip();
+  const ctx  = document.getElementById('ctx-emergency');
+  if (trip && ctx) {
+    ctx.textContent = `✈ Using context from: ${trip.name} — tap to edit ↗`;
+    ctx.classList.add('show');
+    ctx.onclick = () => showView('mytrip');
+  } else if (ctx) { ctx.classList.remove('show'); }
+
+  // Build nationality dropdown from EM_PORTALS, alphabetised by label (sans flag).
+  const natSel = document.getElementById('em-nat');
+  const natOptions = Object.entries(EM_PORTALS)
+    .map(([c, v]) => ({c, label: v.label}))
+    .sort((a, b) => a.label.replace(/^\S+\s/, '').localeCompare(b.label.replace(/^\S+\s/, '')));
+  natSel.innerHTML = '<option value="">— Select your nationality —</option>'
+    + natOptions.map(o => `<option value="${o.c}">${o.label}</option>`).join('');
+  const savedNat = localStorage.getItem('tt_em_nat') || localStorage.getItem('tt_vg_nat') || '';
+  if (savedNat && EM_PORTALS[savedNat]) natSel.value = savedNat;
+
+  // Load saved insurance fields
+  document.getElementById('em-ins-prov').value  = localStorage.getItem('tt_em_ins_prov')  || '';
+  document.getElementById('em-ins-phone').value = localStorage.getItem('tt_em_ins_phone') || '';
+  document.getElementById('em-ins-pol').value   = localStorage.getItem('tt_em_ins_pol')   || '';
+  emRenderInsurance();
+
+  // Wire destination search
+  const search = document.getElementById('em-dest-search');
+  const drop   = document.getElementById('em-dest-drop');
+  const valEl  = document.getElementById('em-dest-val');
+  const result = document.getElementById('em-result');
+  result.innerHTML = '<div class="em-empty">Select a country above to see emergency numbers. Tap any number to dial.</div>';
+  search.value = '';
+  valEl.value  = '';
+
+  search.oninput = () => { valEl.value = ''; emRenderDrop(drop, search.value); drop.style.display = 'block'; };
+  search.onfocus = () => { emRenderDrop(drop, search.value); drop.style.display = 'block'; };
+  search.onblur  = () => setTimeout(() => { drop.style.display = 'none'; }, 160);
+
+  // Auto-detect from active trip destination
+  let autoCode = '';
+  const savedDest = localStorage.getItem('tt_em_dest');
+  if (savedDest && VG_COUNTRIES.find(d => d.c === savedDest)) autoCode = savedDest;
+  if (trip && trip.destination) {
+    const q = trip.destination.toLowerCase().split(',').map(s => s.trim()).filter(Boolean);
+    for (const part of q.reverse()) {
+      const hit = VG_COUNTRIES.find(d => d.n.toLowerCase() === part || d.n.toLowerCase().includes(part) || part.includes(d.n.toLowerCase()));
+      if (hit) { autoCode = hit.c; break; }
+    }
+  }
+  if (autoCode) emSelectCountry(autoCode);
+}
+
+function emRenderDrop(drop, q) {
+  const query = (q || '').toLowerCase().trim();
+  const list = query ? VG_COUNTRIES.filter(x => x.n.toLowerCase().includes(query) || x.c.toLowerCase().includes(query)) : VG_COUNTRIES;
+  if (!list.length) {
+    drop.innerHTML = '<div class="vg-drop-item" style="color:var(--muted);cursor:default">No results found</div>';
+    return;
+  }
+  drop.innerHTML = list.slice(0, 80).map(x => {
+    const flag = emFlag(x.c);
+    const hasData = EM_DATA[x.c] ? '' : ' <span style="color:var(--muted);font-size:11px">· 112 only</span>';
+    return `<div class="vg-drop-item" onmousedown="emPickCountry(event,'${x.c}')">${flag} ${x.n}${hasData}</div>`;
+  }).join('');
+}
+
+function emPickCountry(e, code) {
+  e.preventDefault();
+  document.getElementById('em-dest-drop').style.display = 'none';
+  emSelectCountry(code);
+}
+
+function emSelectCountry(code) {
+  const country = VG_COUNTRIES.find(d => d.c === code);
+  if (!country) return;
+  localStorage.setItem('tt_em_dest', code);
+  document.getElementById('em-dest-search').value = emFlag(code) + ' ' + country.n;
+  document.getElementById('em-dest-val').value = code;
+  document.getElementById('em-print-country').textContent = country.n;
+  document.getElementById('em-result').innerHTML = emBuildCard(code, country.n);
+}
+
+function emTel(num) {
+  return num ? num.replace(/[^\d+]/g, '') : '';
+}
+
+function emBuildCard(code, name) {
+  const d = EM_DATA[code] || {u:'112'};
+  const flag = emFlag(code);
+
+  // Universal "dial-anything" headline.
+  const universal = d.u || (d.p && d.p === d.f && d.p === d.a ? d.p : '');
+  const uniBlock = universal
+    ? `<div class="em-hero-universal">
+         <div class="em-uni-lbl">All Emergencies — Dial Now</div>
+         <div class="em-uni-num"><a href="tel:${emTel(universal)}">${universal}</a></div>
+         <div class="em-uni-cta">📞 Tap to call · ${name}</div>
+       </div>`
+    : '';
+
+  // Police / Fire / Ambulance grid. If country only has universal, mark cells as "use universal".
+  const svc = [
+    {k:'p', emoji:'🚓', label:'Police'},
+    {k:'f', emoji:'🚒', label:'Fire'},
+    {k:'a', emoji:'🚑', label:'Ambulance'},
+  ];
+  const svcCells = svc.map(s => {
+    const num = d[s.k];
+    if (num) {
+      return `<div class="em-svc-cell">
+        <div class="em-svc-emoji">${s.emoji}</div>
+        <div class="em-svc-lbl">${s.label}</div>
+        <div class="em-svc-num"><a href="tel:${emTel(num)}">${num}</a></div>
+        <div class="em-svc-cta">📞 Tap to call</div>
+      </div>`;
+    }
+    return `<div class="em-svc-cell muted">
+      <div class="em-svc-emoji" style="opacity:.4">${s.emoji}</div>
+      <div class="em-svc-lbl">${s.label}</div>
+      <div class="em-svc-num">${universal ? 'use ' + universal : '—'}</div>
+    </div>`;
+  }).join('');
+
+  // Country-code & dialing tip
+  const cc = d.cc ? '+' + d.cc : '';
+  const dzTip = d.dz ? ' When calling local numbers from a foreign SIM, drop the leading <strong>0</strong> after the country code.' : '';
+  const tipText = cc
+    ? `<strong>Country code:</strong> ${cc} (${name}).${dzTip}`
+    : `<strong>${name}</strong> — verify country-code with your phone carrier.`;
+
+  // Extras
+  const extras = [];
+  if (d.tp) extras.push({emoji:'🚓', label:'Tourist Police', num:d.tp});
+  if (d.cg) extras.push({emoji:'⚓', label:'Coast Guard',     num:d.cg});
+  if (d.rs) extras.push({emoji:'🚗', label:'Roadside Assist', num:d.rs});
+  if (d.pc) extras.push({emoji:'☠️', label:'Poison Control',  num:d.pc});
+  const extrasBlock = extras.length
+    ? `<div class="em-extras">${extras.map(x => `
+        <div class="em-extra-row">
+          <div class="em-extra-lbl"><span class="em-eico">${x.emoji}</span>${x.label}</div>
+          <div class="em-extra-num"><a href="tel:${emTel(x.num)}">${x.num}</a></div>
+        </div>`).join('')}</div>`
+    : '';
+
+  const hasAnyNumber = universal || d.p || d.f || d.a;
+  const dataNote = !EM_DATA[code]
+    ? `<div class="em-tip" style="border-top:1.5px solid var(--ink)"><strong>⚠ Limited data for ${name}.</strong> Try <strong>112</strong> from any mobile — it routes to local emergency dispatch in most countries. Confirm with your hotel concierge on arrival.</div>`
+    : '';
+
+  return `<div class="em-hero">
+  <div class="em-hero-flag">
+    <div class="em-flag">${flag}</div>
+    <div>
+      <div class="em-cn-name">${name}</div>
+      <div class="em-cn-sub">Emergency Services · Offline Reference</div>
+    </div>
+  </div>
+  ${uniBlock}
+  ${hasAnyNumber ? `<div class="em-svc-grid">${svcCells}</div>` : ''}
+  <div class="em-tip">📞 ${tipText}</div>
+  ${extrasBlock}
+  ${dataNote}
+</div>`;
+}
+
+function emOnNatChange() {
+  const v = document.getElementById('em-nat').value;
+  if (v) localStorage.setItem('tt_em_nat', v);
+  document.getElementById('em-embassy-note').style.display = 'none';
+}
+
+function emOpenEmbassy() {
+  const code = document.getElementById('em-nat').value;
+  const note = document.getElementById('em-embassy-note');
+  if (!code) {
+    note.innerHTML = 'Pick your nationality above first.';
+    note.style.display = 'block';
+    return;
+  }
+  const portal = EM_PORTALS[code];
+  if (!portal) {
+    note.innerHTML = 'No embassy directory on file for this nationality. Try searching <em>"&lt;your country&gt; embassy in &lt;destination&gt;"</em> in your browser.';
+    note.style.display = 'block';
+    return;
+  }
+  const dest = document.getElementById('em-dest-val').value;
+  const destName = dest ? (VG_COUNTRIES.find(d => d.c === dest) || {}).n : '';
+  note.innerHTML = destName
+    ? `Opening <strong>${portal.label.replace(/^\S+\s/, '')}</strong>'s embassy directory — search it for "<strong>${destName}</strong>" to find your nearest consulate.`
+    : `Opening <strong>${portal.label.replace(/^\S+\s/, '')}</strong>'s embassy directory in a new tab.`;
+  note.style.display = 'block';
+  window.open(portal.url, '_blank', 'noopener,noreferrer');
+}
+
+function emSaveInsurance() {
+  const prov  = document.getElementById('em-ins-prov').value;
+  const phone = document.getElementById('em-ins-phone').value;
+  const pol   = document.getElementById('em-ins-pol').value;
+  localStorage.setItem('tt_em_ins_prov',  prov);
+  localStorage.setItem('tt_em_ins_phone', phone);
+  localStorage.setItem('tt_em_ins_pol',   pol);
+  emRenderInsurance();
+}
+
+function emRenderInsurance() {
+  const prov  = (localStorage.getItem('tt_em_ins_prov')  || '').trim();
+  const phone = (localStorage.getItem('tt_em_ins_phone') || '').trim();
+  const pol   = (localStorage.getItem('tt_em_ins_pol')   || '').trim();
+  const card  = document.getElementById('em-ins-card');
+  if (!prov && !phone && !pol) { card.style.display = 'none'; return; }
+  const esc = s => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const rows = [];
+  if (prov)  rows.push(`<div class="em-ins-row"><div class="em-ins-lbl">Provider</div><div class="em-ins-val">${esc(prov)}</div></div>`);
+  if (phone) rows.push(`<div class="em-ins-row"><div class="em-ins-lbl">24/7 Line</div><div class="em-ins-val"><a href="tel:${emTel(phone)}">${esc(phone)}</a></div></div>`);
+  if (pol)   rows.push(`<div class="em-ins-row"><div class="em-ins-lbl">Policy #</div><div class="em-ins-val">${esc(pol)}</div></div>`);
+  card.innerHTML = rows.join('') + '<div class="em-ins-status">✓ Saved on this device</div>';
+  card.style.display = 'block';
 }
 
 /* ── BAGGAGE FEE CALCULATOR ── */
