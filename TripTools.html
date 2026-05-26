@@ -2405,16 +2405,79 @@ body.no-scroll { overflow: hidden; }
     </div>
   </div>
 </div>
-<div id="view-placeholder-passport" class="view">
-  <nav class="tool-topbar">
+<style>
+.pa-result-card{border:2px solid var(--ink);border-radius:var(--r);overflow:hidden;margin-top:4px}
+.pa-status-bar{padding:20px 22px;display:flex;align-items:center;gap:16px}
+.pa-status-icon{font-size:44px;flex-shrink:0;line-height:1}
+.pa-status-label{font-family:var(--serif);font-size:24px;font-weight:700;letter-spacing:-.02em;line-height:1.1}
+.pa-status-sub{font-size:12px;font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase;opacity:.75;margin-top:4px}
+.pa-details-grid{display:grid;grid-template-columns:1fr 1fr;border-top:1.5px solid var(--ink)}
+.pa-detail-cell{padding:14px 18px;border-right:1.5px solid var(--ink);border-bottom:1px solid var(--rule)}
+.pa-detail-cell:nth-child(even){border-right:none}
+.pa-detail-cell.full{grid-column:1/-1;border-right:none;border-top:1.5px solid var(--ink)}
+.pa-detail-lbl{font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:4px}
+.pa-detail-val{font-size:16px;font-family:var(--sans);font-weight:600;color:var(--ink)}
+.pa-action{padding:14px 18px;border-top:1.5px solid var(--ink);font-size:13px;color:var(--ink-2);line-height:1.55}
+.pa-footer{padding:10px 18px;border-top:1.5px solid var(--ink);background:var(--paper-2);font-size:12px;color:var(--muted);font-family:var(--mono)}
+</style>
+<div id="view-passport" class="view">
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">📕</span>
-    <h2>Passport Expiry Checker</h2>
-    <p style="margin-bottom:24px">Enter expiry + destination. Returns days remaining & 6-month rule check.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-passport"></div>
+
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>Passport Expiry Checker</h1>
+    <p class="tool-sub">Enter your passport expiry date and travel plans. Instantly see days remaining, whether the 6-month rule applies, and your personalised renewal recommendation.</p>
+  </div>
+
+  <div class="tool-body">
+    <div class="frow">
+      <div class="fg">
+        <label>Passport Expiry Date</label>
+        <input type="date" id="pa-expiry">
+      </div>
+      <div class="fg">
+        <label>Departure Date</label>
+        <input type="date" id="pa-depart">
+      </div>
+    </div>
+    <div class="frow">
+      <div class="fg">
+        <label>Return Date <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
+        <input type="date" id="pa-return">
+      </div>
+      <div class="fg">
+        <label>Destination Country <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
+        <div class="vg-search-wrap">
+          <input type="search" id="pa-dest-search" class="vg-search-input" placeholder="🔍 Search country…" autocomplete="off">
+          <div id="pa-dest-drop" class="vg-drop" style="display:none"></div>
+          <input type="hidden" id="pa-dest-val">
+        </div>
+      </div>
+    </div>
+
+    <button class="btn btn-p" style="width:100%;margin-top:12px" onclick="paCheck()">📕 Check My Passport</button>
+
+    <div id="pa-result" style="display:none;margin-top:24px"></div>
+
+    <div style="margin-top:16px;padding:12px 16px;background:var(--paper-2);border-left:3px solid var(--yellow);border-radius:var(--r);font-size:13px;color:var(--muted);line-height:1.55">
+      ⚠️ <strong>Always verify with official sources.</strong> Entry requirements can change. Check the embassy or official government travel advisory of your destination before booking.
+    </div>
+  </div>
+
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    Most countries require your passport to be valid for 6 months beyond your entry date. Schengen countries (EU) require 3 months beyond entry. A few — like the UK, US, Canada, and Japan — only require it to be valid for your stay. When in doubt, renew before your trip.
+  </div>
+
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('visa-guide')">🌍 Visa Requirement Guide</button>
+      <button class="rel-btn" onclick="openTool('doc-checklist')">✅ Document Checklist</button>
+      <button class="rel-btn" onclick="openTool('itinerary')">📋 Itinerary Builder</button>
     </div>
   </div>
 </div>
@@ -4441,7 +4504,7 @@ const TOOLS = [
   {id:'road-planner',  nm:'Road Trip Route Planner',    ico:'🗺', ph:'discovery', on:true,  live:false, ds:'Waypoints, distance, drive time & map via Leaflet + OSM.'},
   {id:'itinerary',     nm:'Itinerary Builder',          ico:'📋', ph:'discovery', on:false, live:true,  ds:'Day-by-day planner with drag-and-drop scheduling. Printable.'},
   {id:'travel-ins',    nm:'Travel Insurance Worksheet', ico:'🛡', ph:'discovery', on:false, live:false, ds:'Side-by-side framework for comparing insurance policies.'},
-  {id:'passport',      nm:'Passport Expiry Checker',    ico:'📕', ph:'docs',      on:false, live:false, ds:'Enter expiry + destination. Returns days left & 6-month rule check.'},
+  {id:'passport',      nm:'Passport Expiry Checker',    ico:'📕', ph:'docs',      on:false, live:true,  ds:'Enter expiry + destination. Returns days left & 6-month rule check.'},
   {id:'visa-guide',    nm:'Visa Requirement Guide',     ico:'🌍', ph:'docs',      on:false, live:true,  ds:'Nationality + destination = visa type, cost & processing time.'},
   {id:'doc-checklist', nm:'Travel Document Checklist',  ico:'✅', ph:'docs',      on:false, live:true,  ds:'Customizable pre-trip checklist adapting to trip type.'},
   {id:'intl-driving',  nm:'International Driving Guide',ico:'🚗', ph:'docs',      on:false, live:false, ds:'IDP requirements, driving side & speed limits for 80+ countries.'},
@@ -5150,6 +5213,7 @@ function injectTripCtx(id) {
   if(id==='itinerary') ibInit();
   if(id==='budget-plan') budgetInit();
   if(id==='visa-guide') vgInit();
+  if(id==='passport')   paInit();
 }
 
 /* ── HUB RENDER ── */
@@ -9960,6 +10024,215 @@ function vgBuildCard(type, days, cost, proc, fromLabel, toLabel) {
   </div>
   ${actionNote}
   <div class="vg-card-footer">⚠ Estimates only — entry requirements change. Verify with the official embassy before travel.</div>
+</div>`;
+}
+
+/* ══════════════════════════════════════════════
+   PASSPORT EXPIRY CHECKER  (passport)
+   PA_RULES: minimum days of validity required AT entry date
+     0   = valid for duration of stay only
+     90  = 3 months beyond entry (Schengen area)
+     180 = 6 months beyond entry (default for most of world)
+   ══════════════════════════════════════════════ */
+const PA_RULES = {
+  /* Duration of stay only */
+  GB:0, GG:0, JE:0, IM:0,
+  US:0, CA:0,
+  AU:0, NZ:0,
+  JP:0, KR:0, HK:0,
+  IE:0,
+  /* Caribbean — no post-entry buffer required */
+  BB:0, BS:0, JM:0, TT:0, AG:0, LC:0, VC:0, GD:0, DM:0, KN:0,
+  AI:0, TC:0, VG:0, KY:0, BM:0, AW:0, CW:0, SX:0,
+  /* Schengen area: 3 months (90 days) beyond end of intended stay */
+  AD:90, AT:90, BE:90, CH:90, CZ:90, DE:90, DK:90, EE:90,
+  ES:90, FI:90, FR:90, GR:90, HR:90, HU:90, IS:90, IT:90,
+  LI:90, LT:90, LU:90, LV:90, MC:90, MT:90, NL:90, NO:90,
+  PL:90, PT:90, RO:90, SE:90, SI:90, SK:90, SM:90, VA:90,
+  /* Western Balkans — EU-aligned entry rules */
+  AL:90, BA:90, RS:90, ME:90, MK:90, XK:90,
+  /* All other countries default to 180 in paGetRule() */
+};
+
+function paGetRule(code) {
+  return Object.prototype.hasOwnProperty.call(PA_RULES, code) ? PA_RULES[code] : 180;
+}
+
+function paFlag(code) {
+  if (!code || code.length !== 2) return '';
+  try {
+    return String.fromCodePoint(...[...code.toUpperCase()].map(c => 0x1F1E6 + c.charCodeAt(0) - 65));
+  } catch(e) { return ''; }
+}
+
+function paFmtDate(d) {
+  if (!d) return '—';
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+function paInit() {
+  const destSearch = document.getElementById('pa-dest-search');
+  const destDrop   = document.getElementById('pa-dest-drop');
+  const res        = document.getElementById('pa-result');
+  if (res) { res.style.display = 'none'; res.innerHTML = ''; }
+
+  const expiryIn = document.getElementById('pa-expiry');
+  const departIn = document.getElementById('pa-depart');
+  const returnIn = document.getElementById('pa-return');
+
+  const savedExpiry = localStorage.getItem('tt_pa_expiry');
+  if (savedExpiry && !expiryIn.value) expiryIn.value = savedExpiry;
+
+  const trip = getActiveTrip();
+  if (trip) {
+    if (trip.departDate && !departIn.value) departIn.value = trip.departDate;
+    if (trip.returnDate && !returnIn.value) returnIn.value = trip.returnDate;
+    if (trip.destination && !document.getElementById('pa-dest-val').value) {
+      const q = trip.destination.toLowerCase().split(',')[0].trim();
+      const dest = VG_COUNTRIES.find(d => d.n.toLowerCase().includes(q) || q.includes(d.n.toLowerCase()));
+      if (dest) {
+        destSearch.value = paFlag(dest.c) + ' ' + dest.n;
+        document.getElementById('pa-dest-val').value = dest.c;
+      }
+    }
+  }
+
+  destSearch.oninput = () => {
+    document.getElementById('pa-dest-val').value = '';
+    paRenderDrop(destDrop, destSearch.value);
+    destDrop.style.display = 'block';
+  };
+  destSearch.onfocus = () => {
+    paRenderDrop(destDrop, destSearch.value);
+    destDrop.style.display = 'block';
+  };
+  destSearch.onblur = () => setTimeout(() => { destDrop.style.display = 'none'; }, 160);
+}
+
+function paRenderDrop(drop, q) {
+  const query = (q || '').toLowerCase().trim();
+  const items = query
+    ? VG_COUNTRIES.filter(x => x.n.toLowerCase().includes(query) || x.c.toLowerCase().includes(query))
+    : VG_COUNTRIES;
+  if (!items.length) {
+    drop.innerHTML = '<div class="vg-drop-item" style="color:var(--muted);cursor:default">No results found</div>';
+    return;
+  }
+  drop.innerHTML = items.slice(0, 60).map(x => {
+    const flag = paFlag(x.c);
+    const safeLabel = (flag + ' ' + x.n).replace(/'/g, '&#39;');
+    return `<div class="vg-drop-item" onmousedown="paSelect(event,'${x.c}','${safeLabel}')">${flag} ${x.n}</div>`;
+  }).join('');
+}
+
+function paSelect(e, code, label) {
+  e.preventDefault();
+  document.getElementById('pa-dest-search').value = label;
+  document.getElementById('pa-dest-val').value = code;
+  document.getElementById('pa-dest-drop').style.display = 'none';
+}
+
+function paCheck() {
+  const expiryVal = document.getElementById('pa-expiry').value;
+  const departVal = document.getElementById('pa-depart').value;
+  const returnVal = document.getElementById('pa-return').value;
+  const destCode  = document.getElementById('pa-dest-val').value.trim();
+  const res       = document.getElementById('pa-result');
+  res.style.display = 'block';
+
+  if (!expiryVal || !departVal) {
+    res.innerHTML = '<div style="padding:16px;border:1.5px solid var(--ink);border-radius:var(--r);color:var(--muted);text-align:center;font-size:14px">Please enter your passport expiry date and departure date.</div>';
+    return;
+  }
+
+  localStorage.setItem('tt_pa_expiry', expiryVal);
+
+  const today   = new Date(); today.setHours(0,0,0,0);
+  const expiry  = new Date(expiryVal  + 'T00:00:00');
+  const depart  = new Date(departVal  + 'T00:00:00');
+  const returnD = returnVal ? new Date(returnVal + 'T00:00:00') : null;
+
+  const daysToExpiry      = Math.round((expiry - today)  / 864e5);
+  const daysValidAtDepart = Math.round((expiry - depart) / 864e5);
+
+  const destEntry = destCode ? VG_COUNTRIES.find(d => d.c === destCode) : null;
+  const destName  = destEntry ? destEntry.n : null;
+  const rule      = destCode ? paGetRule(destCode) : null;
+
+  let reqExpiry = null;
+  if (destCode && rule !== null) {
+    reqExpiry = rule === 0 ? (returnD || depart) : new Date(depart.getTime() + rule * 864e5);
+  }
+  const meetsRule = reqExpiry !== null ? (expiry >= reqExpiry) : null;
+
+  let status, statusColor, statusBg, statusIcon, actionMsg;
+  if (daysToExpiry < 0) {
+    status = 'PASSPORT EXPIRED'; statusColor = '#c62828'; statusBg = '#fce4ec'; statusIcon = '⛔';
+    actionMsg = '🚨 Your passport is expired. You cannot travel internationally. Renew immediately at your country\'s passport agency.';
+  } else if (meetsRule === false) {
+    status = 'FAILS REQUIREMENT'; statusColor = '#c62828'; statusBg = '#fce4ec'; statusIcon = '❌';
+    actionMsg = `🚨 Your passport does not meet ${destName || 'the destination'}'s validity requirement. You must renew before this trip.`;
+  } else if (daysToExpiry < 180) {
+    status = 'RENEWAL RECOMMENDED'; statusColor = '#e65100'; statusBg = '#fff3e0'; statusIcon = '⚠️';
+    actionMsg = '📋 Your passport expires in under 6 months. Many countries require 6 months\' validity beyond your entry date. Consider renewing before booking international travel.';
+  } else if (daysToExpiry < 365) {
+    status = 'EXPIRING WITHIN A YEAR'; statusColor = '#b8860b'; statusBg = '#fffde7'; statusIcon = '🟡';
+    actionMsg = '📋 Your passport is valid but expires within 12 months. Plan ahead — renewal processing times vary by country.';
+  } else {
+    status = 'GOOD TO GO'; statusColor = '#2e7d32'; statusBg = '#e8f5e9'; statusIcon = '✅';
+    actionMsg = '🟢 Your passport meets all requirements for this trip. Bon voyage!';
+  }
+
+  let ruleDesc = '—', ruleReq = '—';
+  if (destCode && rule !== null) {
+    if (rule === 0) {
+      ruleDesc = 'Valid for duration of stay';
+      ruleReq  = returnD ? 'Must be valid through return date' : 'Must be valid through trip';
+    } else if (rule === 90) {
+      ruleDesc = '3 months beyond entry (Schengen)';
+      ruleReq  = 'Valid until at least ' + paFmtDate(reqExpiry);
+    } else {
+      ruleDesc = '6-month rule applies';
+      ruleReq  = 'Valid until at least ' + paFmtDate(reqExpiry);
+    }
+  }
+
+  const expiryColor = daysToExpiry < 0 ? '#c62828' : daysToExpiry < 180 ? '#e65100' : '#2e7d32';
+  const departColor = daysValidAtDepart <= 0 ? '#c62828' : daysValidAtDepart < 90 ? '#e65100' : 'var(--ink)';
+  const expiryLabel = daysToExpiry < 0
+    ? `Expired ${Math.abs(daysToExpiry)} day${Math.abs(daysToExpiry)===1?'':'s'} ago`
+    : `${daysToExpiry} day${daysToExpiry===1?'':'s'} remaining`;
+  const departLabel = daysValidAtDepart < 0
+    ? 'Already expired at departure' : daysValidAtDepart === 0
+    ? 'Expires on departure day'
+    : `${daysValidAtDepart} day${daysValidAtDepart===1?'':'s'} remaining`;
+
+  const returnRow = returnD ? `
+    <div class="pa-detail-cell"><div class="pa-detail-lbl">Return Date</div><div class="pa-detail-val">${paFmtDate(returnD)}</div></div>
+    <div class="pa-detail-cell"><div class="pa-detail-lbl">Valid at Return</div><div class="pa-detail-val" style="color:${expiry>=returnD?'#2e7d32':'#c62828'}">${expiry>=returnD?'✅ Valid':'❌ Expired before return'}</div></div>` : '';
+
+  const destSection = destCode ? `
+    <div class="pa-detail-cell"><div class="pa-detail-lbl">Destination Rule</div><div class="pa-detail-val" style="font-size:14px;line-height:1.3">${ruleDesc}</div></div>
+    <div class="pa-detail-cell"><div class="pa-detail-lbl">Minimum Required</div><div class="pa-detail-val" style="font-size:14px;line-height:1.3">${ruleReq}</div></div>
+    <div class="pa-detail-cell full"><div class="pa-detail-lbl">Requirement Status</div><div class="pa-detail-val" style="color:${meetsRule?'#2e7d32':'#c62828'}">${meetsRule?'✅ Passport meets requirement':'❌ Passport does NOT meet requirement'}</div></div>` : '';
+
+  res.innerHTML = `<div class="pa-result-card">
+  <div class="pa-status-bar" style="background:${statusBg}">
+    <span class="pa-status-icon">${statusIcon}</span>
+    <div>
+      <div class="pa-status-label" style="color:${statusColor}">${status}</div>
+      <div class="pa-status-sub">${destName ? 'For travel to ' + destName : 'General passport status'}</div>
+    </div>
+  </div>
+  <div class="pa-details-grid">
+    <div class="pa-detail-cell"><div class="pa-detail-lbl">Passport Expiry</div><div class="pa-detail-val">${paFmtDate(expiry)}</div></div>
+    <div class="pa-detail-cell"><div class="pa-detail-lbl">Days Until Expiry</div><div class="pa-detail-val" style="color:${expiryColor}">${expiryLabel}</div></div>
+    <div class="pa-detail-cell"><div class="pa-detail-lbl">Departure Date</div><div class="pa-detail-val">${paFmtDate(depart)}</div></div>
+    <div class="pa-detail-cell"><div class="pa-detail-lbl">Valid at Departure</div><div class="pa-detail-val" style="font-size:14px;color:${departColor}">${departLabel}</div></div>
+    ${returnRow}${destSection}
+  </div>
+  <div class="pa-action">${actionMsg}</div>
+  <div class="pa-footer">⚠ Requirements may vary by nationality. Always verify with the official embassy or government travel advisory.</div>
 </div>`;
 }
 </script>
