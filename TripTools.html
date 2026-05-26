@@ -2879,17 +2879,156 @@ body.no-scroll { overflow: hidden; }
     </div>
   </div>
 </div>
-<div id="view-placeholder-expense-track" class="view">
-  <nav class="tool-topbar">
+<div id="view-expense-track" class="view">
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="window.print()">🖨 Print</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">📊</span>
-    <h2>Daily Expense Tracker</h2>
-    <p style="margin-bottom:24px">Log expenses by category. Running total vs. daily budget. Export CSV.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-expense-track"></div>
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>Daily Expense Tracker</h1>
+    <p class="tool-sub">Log spending by category as you go. Auto-converts foreign-currency entries to your home currency, and watches your daily budget so you don't drift over.</p>
+  </div>
+
+  <div class="tool-body">
+
+    <!-- ── SETUP ROW ── -->
+    <div class="frow et-setup-row">
+      <div class="fg">
+        <label for="et-trip-name">Trip Name</label>
+        <input type="text" id="et-trip-name" placeholder="e.g. Paris Anniversary" oninput="etSaveMeta()">
+      </div>
+      <div class="fg et-fg-sm">
+        <label for="et-home-curr">Home Currency</label>
+        <select id="et-home-curr" onchange="etOnHomeCurrChange()"></select>
+      </div>
+      <div class="fg et-fg-sm">
+        <label for="et-daily-budget">Daily Budget <span id="et-budget-sym" style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">($)</span></label>
+        <input type="number" id="et-daily-budget" placeholder="100" min="0" step="any" oninput="etSaveMeta();etRender()">
+      </div>
     </div>
+
+    <!-- ── FX STATUS ── -->
+    <div class="et-fx-status" id="et-fx-status">
+      <span id="et-fx-status-icon">🔄</span>
+      <span id="et-fx-status-text">Loading exchange rates…</span>
+    </div>
+
+    <!-- ── ADD EXPENSE CARD ── -->
+    <div class="et-add-card">
+      <div class="et-add-title">+ Log Expense</div>
+      <div class="et-add-grid">
+        <div class="fg">
+          <label for="et-in-date">Date</label>
+          <input type="date" id="et-in-date">
+        </div>
+        <div class="fg">
+          <label for="et-in-cat">Category</label>
+          <select id="et-in-cat"></select>
+        </div>
+        <div class="fg et-fg-wide">
+          <label for="et-in-desc">Description</label>
+          <input type="text" id="et-in-desc" placeholder="e.g. Dinner at Le Comptoir">
+        </div>
+        <div class="fg et-fg-sm">
+          <label for="et-in-amt">Amount</label>
+          <input type="number" id="et-in-amt" placeholder="0.00" min="0" step="any">
+        </div>
+        <div class="fg et-fg-sm">
+          <label for="et-in-curr">Currency</label>
+          <select id="et-in-curr"></select>
+        </div>
+      </div>
+      <div id="et-conv-preview" class="et-conv-preview" style="display:none"></div>
+      <button class="btn btn-p et-add-btn" onclick="etAddExpense()">Add Expense</button>
+    </div>
+
+    <!-- ── TODAY'S BUDGET STATUS ── -->
+    <div class="et-today-card" id="et-today-card">
+      <div class="et-today-hdr">
+        <div>
+          <div class="et-today-label">Today's Spending</div>
+          <div class="et-today-date" id="et-today-date"></div>
+        </div>
+        <div class="et-today-amt" id="et-today-amt">—</div>
+      </div>
+      <div class="et-today-bar-wrap">
+        <div class="et-today-bar" id="et-today-bar"></div>
+      </div>
+      <div class="et-today-foot">
+        <span id="et-today-budget">Daily budget not set</span>
+        <span id="et-today-remain"></span>
+      </div>
+    </div>
+
+    <!-- ── SUMMARY ── -->
+    <div class="et-summary" id="et-summary">
+      <div class="et-sum-hdr">
+        <h3 style="font-family:var(--serif);font-size:22px;font-weight:600;margin:0">Trip Summary</h3>
+        <div class="et-sum-meta" id="et-sum-meta">No expenses yet</div>
+      </div>
+      <div class="et-sum-body">
+        <div class="et-sum-chart-wrap">
+          <canvas id="et-pie" width="220" height="220"></canvas>
+          <div class="et-pie-center">
+            <div class="et-pie-total" id="et-pie-total">$0</div>
+            <div class="et-pie-label">total spent</div>
+          </div>
+        </div>
+        <div class="et-sum-right">
+          <div id="et-legend" class="et-legend"></div>
+          <div class="et-sum-stats">
+            <div class="et-stat">
+              <span class="et-stat-lbl">Days</span>
+              <span class="et-stat-val" id="et-stat-days">0</span>
+            </div>
+            <div class="et-stat">
+              <span class="et-stat-lbl">Avg / Day</span>
+              <span class="et-stat-val" id="et-stat-avg">—</span>
+            </div>
+            <div class="et-stat">
+              <span class="et-stat-lbl">Entries</span>
+              <span class="et-stat-val" id="et-stat-count">0</span>
+            </div>
+          </div>
+          <div class="et-export-row">
+            <button class="btn btn-p" onclick="etExportCSV()" style="font-size:13px;padding:10px 18px">⬇ Export CSV</button>
+            <button class="btn-ghost" onclick="etReset()" style="color:var(--accent);font-size:13px">↺ Reset Log</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── DAILY LOG ── -->
+    <div class="et-log-wrap">
+      <div class="et-log-hdr">
+        <h3 style="font-family:var(--serif);font-size:22px;font-weight:600;margin:0">Expense Log</h3>
+        <div class="et-log-meta" id="et-log-meta"></div>
+      </div>
+      <div id="et-log"></div>
+    </div>
+
+  </div><!-- /tool-body -->
+
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    Log expenses the moment you spend, not at end of day — small cash purchases vanish from memory faster than you'd think. If you pay in local currency, the auto-converted home-currency total is an estimate; your card's actual posted rate may differ by 1–3%.
+  </div>
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('currency')">💱 Currency Converter</button>
+      <button class="rel-btn" onclick="openTool('budget-plan')">💰 Travel Budget Planner</button>
+      <button class="rel-btn" onclick="openTool('bill-split')">➗ Bill Splitter</button>
+      <button class="rel-btn" onclick="openTool('tip-calc')">🤝 Tip Calculator</button>
+    </div>
+  </div>
+
+  <!-- Print-only header -->
+  <div class="et-print-header">
+    <strong>TripTools — Daily Expense Tracker</strong>
+    <span id="et-print-date"></span>
   </div>
 </div>
 <div id="view-placeholder-bill-split" class="view">
@@ -3799,6 +3938,209 @@ input:checked + .pb-toggle-box::after { transform:translateX(16px);background:#f
   .tj-print-header { display: flex !important; justify-content: space-between; font-family: monospace; font-size: 11px; color: #666; border-bottom: 1px solid #ccc; padding-bottom: 8px; margin-bottom: 18px; }
 }
 .tj-print-header { display: none; }
+
+/* =========================================================
+   DAILY EXPENSE TRACKER
+   ========================================================= */
+.et-setup-row { grid-template-columns: 2fr 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+@media(max-width:640px){ .et-setup-row { grid-template-columns: 1fr 1fr; } .et-setup-row .fg:first-child { grid-column: 1 / -1; } }
+.et-fg-sm input, .et-fg-sm select { font-size: 14px; }
+.et-fg-wide { grid-column: span 2; }
+
+/* FX status pill */
+.et-fx-status {
+  display: flex; align-items: center; gap: 8px;
+  font-family: var(--mono); font-size: 11px; letter-spacing: .06em;
+  background: var(--paper-2); border: 1px solid var(--rule);
+  padding: 8px 12px; border-radius: 2px; color: var(--muted);
+  margin-bottom: 18px;
+}
+.et-fx-status.ok    { color: #2E7D32; border-color: rgba(46,125,50,.3); }
+.et-fx-status.warn  { color: #E65100; border-color: rgba(230,81,0,.3); }
+.et-fx-status.err   { color: var(--accent); border-color: var(--accent); }
+
+/* Add expense card */
+.et-add-card {
+  background: var(--paper-2); border: 2px solid var(--ink);
+  border-radius: var(--r); padding: 20px; margin-bottom: 22px;
+}
+.et-add-title {
+  font-family: var(--mono); font-size: 11px; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--ink-2); margin-bottom: 14px;
+}
+.et-add-grid {
+  display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px;
+}
+.et-add-grid .fg { margin-bottom: 0; }
+.et-add-grid .fg:nth-child(1) { grid-column: span 2; }   /* date */
+.et-add-grid .fg:nth-child(2) { grid-column: span 2; }   /* category */
+.et-add-grid .fg:nth-child(3) { grid-column: span 2; }   /* desc */
+.et-add-grid .fg:nth-child(4) { grid-column: span 2; }   /* amount */
+.et-add-grid .fg:nth-child(5) { grid-column: span 2; }   /* curr */
+@media(max-width:760px){
+  .et-add-grid { grid-template-columns: 1fr 1fr; }
+  .et-add-grid .fg:nth-child(n) { grid-column: span 1; }
+  .et-add-grid .fg:nth-child(3) { grid-column: 1 / -1; }
+}
+.et-conv-preview {
+  margin-top: 4px; padding: 10px 12px;
+  background: var(--paper); border: 1px dashed var(--rule); border-radius: 2px;
+  font-family: var(--mono); font-size: 12px; letter-spacing: .04em; color: var(--ink-2);
+}
+.et-conv-preview b { color: var(--ink); }
+.et-add-btn { width: 100%; margin-top: 14px; }
+
+/* Today's card */
+.et-today-card {
+  background: var(--paper); border: 2px solid var(--ink);
+  border-radius: var(--r); padding: 18px 20px; margin-bottom: 22px;
+}
+.et-today-hdr {
+  display: flex; justify-content: space-between; align-items: flex-end; gap: 14px;
+  margin-bottom: 12px;
+}
+.et-today-label {
+  font-family: var(--mono); font-size: 11px; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 2px;
+}
+.et-today-date { font-family: var(--serif); font-size: 18px; font-weight: 500; }
+.et-today-amt {
+  font-family: var(--serif); font-weight: 600; font-size: 32px;
+  line-height: 1; color: var(--ink); letter-spacing: -.02em;
+}
+.et-today-amt.over { color: var(--accent); }
+.et-today-bar-wrap {
+  height: 10px; background: var(--paper-2); border: 1px solid var(--rule);
+  border-radius: 2px; overflow: hidden; margin-bottom: 8px;
+}
+.et-today-bar {
+  height: 100%; width: 0%; background: var(--blue);
+  transition: width .3s ease, background .15s;
+}
+.et-today-bar.near { background: #E65100; }
+.et-today-bar.over { background: var(--accent); }
+.et-today-foot {
+  display: flex; justify-content: space-between;
+  font-family: var(--mono); font-size: 11px; letter-spacing: .06em;
+  color: var(--muted);
+}
+.et-today-foot .over { color: var(--accent); font-weight: 700; }
+
+/* Summary card (mirrors bp-summary visually) */
+.et-summary {
+  background: var(--paper-2); border: 2px solid var(--ink);
+  border-radius: var(--r); padding: 22px; margin-bottom: 22px;
+}
+.et-sum-hdr { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+.et-sum-meta {
+  font-family: var(--mono); font-size: 11px; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--muted);
+  background: var(--paper); border: 1px solid var(--rule); padding: 4px 10px; border-radius: 2px;
+}
+.et-sum-body { display: flex; gap: 28px; align-items: flex-start; flex-wrap: wrap; }
+.et-sum-chart-wrap { position: relative; width: 220px; height: 220px; flex-shrink: 0; }
+.et-pie-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); text-align: center; pointer-events: none; }
+.et-pie-total { font-family: var(--serif); font-weight: 600; font-size: 24px; line-height: 1.1; color: var(--ink); }
+.et-pie-label { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.et-sum-right { flex: 1; min-width: 220px; display: flex; flex-direction: column; gap: 16px; }
+.et-legend { display: flex; flex-direction: column; gap: 6px; }
+.et-legend-item { display: grid; grid-template-columns: 14px 1fr auto auto; gap: 8px; align-items: center; font-family: var(--sans); font-size: 13px; }
+.et-legend-dot { width: 12px; height: 12px; border-radius: 50%; }
+.et-legend-name { color: var(--ink); }
+.et-legend-pct { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.et-legend-amt { font-family: var(--mono); font-size: 12px; color: var(--ink); font-weight: 600; }
+.et-sum-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+.et-stat { background: var(--paper); border: 1px solid var(--rule); padding: 8px 10px; border-radius: 2px; }
+.et-stat-lbl { display: block; font-family: var(--mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 3px; }
+.et-stat-val { font-family: var(--serif); font-weight: 600; font-size: 18px; color: var(--ink); }
+.et-export-row { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+@media(max-width:680px){
+  .et-sum-body { flex-direction: column; align-items: center; }
+  .et-sum-chart-wrap { width: 180px; height: 180px; }
+  .et-sum-stats { grid-template-columns: repeat(2,1fr); }
+}
+
+/* Daily log */
+.et-log-wrap { margin-top: 8px; }
+.et-log-hdr { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.et-log-meta {
+  font-family: var(--mono); font-size: 11px; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--muted);
+}
+.et-day-blk {
+  border: 1.5px solid var(--ink); background: var(--paper);
+  border-radius: var(--r); margin-bottom: 14px; overflow: hidden;
+}
+.et-day-hdr {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 16px; background: var(--paper-2); border-bottom: 1px solid var(--rule);
+  cursor: pointer;
+}
+.et-day-hdr:hover { background: #e6deca; }
+.et-day-date {
+  font-family: var(--serif); font-weight: 600; font-size: 16px;
+}
+.et-day-sub {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--muted); margin-left: 10px;
+}
+.et-day-total {
+  font-family: var(--serif); font-weight: 600; font-size: 18px;
+}
+.et-day-total.over { color: var(--accent); }
+.et-day-status {
+  font-family: var(--mono); font-size: 9px; letter-spacing: .1em;
+  text-transform: uppercase; padding: 2px 6px; border-radius: 2px;
+  margin-left: 8px;
+}
+.et-day-status.ok    { background: rgba(46,125,50,.12); color: #2E7D32; }
+.et-day-status.over  { background: rgba(255,77,46,.12); color: var(--accent); }
+
+.et-row {
+  display: grid; grid-template-columns: 28px 1fr 100px 28px;
+  gap: 10px; align-items: center;
+  padding: 10px 16px; border-bottom: 1px solid var(--rule);
+}
+.et-row:last-child { border-bottom: none; }
+.et-row:hover { background: rgba(255,77,46,.03); }
+.et-row-icon { font-size: 18px; line-height: 1; text-align: center; }
+.et-row-main { min-width: 0; }
+.et-row-desc { font-family: var(--sans); font-size: 14px; color: var(--ink); margin-bottom: 1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.et-row-meta {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .06em;
+  color: var(--muted);
+}
+.et-row-meta .cat { color: var(--ink-2); }
+.et-row-meta .fx { color: var(--muted); }
+.et-row-amt {
+  font-family: var(--mono); font-size: 14px; font-weight: 600;
+  color: var(--ink); text-align: right;
+}
+.et-row-amt-foreign {
+  display: block; font-size: 10px; font-weight: 400; color: var(--muted); margin-top: 1px;
+}
+.et-row-del {
+  background: none; border: none; color: var(--muted); cursor: pointer;
+  font-size: 18px; line-height: 1; padding: 0; opacity: 0; transition: opacity .15s, color .15s;
+}
+.et-row:hover .et-row-del { opacity: 1; }
+.et-row-del:hover { color: var(--accent); }
+
+.et-empty {
+  text-align: center; padding: 36px 24px;
+  font-family: var(--serif); font-style: italic; color: var(--muted); font-size: 16px;
+}
+.et-empty span { font-size: 36px; display: block; margin-bottom: 10px; }
+
+/* Print */
+.et-print-header { display: none; }
+@media print {
+  .et-fx-status, .et-add-card, .et-today-bar-wrap, .et-export-row, .et-row-del,
+  .ctx-banner, .pro-tip, .related, .tool-bar { display: none !important; }
+  .et-print-header { display: flex !important; justify-content: space-between; font-family: monospace; font-size: 11px; color: #666; border-bottom: 1px solid #ccc; padding-bottom: 8px; margin-bottom: 18px; }
+  .et-day-blk, .et-summary, .et-today-card { break-inside: avoid; box-shadow: none !important; }
+  body { background: #fff !important; background-image: none !important; }
+}
 </style>
 
 <nav class="tool-bar">
@@ -4522,7 +4864,7 @@ const TOOLS = [
   {id:'no-pack',       nm:'What NOT to Pack',           ico:'🚫', ph:'packing',   on:false, live:false, ds:'TSA, customs & cruise prohibited items. Searchable guide.'},
   {id:'currency',      nm:'Currency Converter',         ico:'💱', ph:'money',     on:true,  live:true,  ds:'Live rates for 150+ currencies. Cached for offline use.'},
   {id:'tip-calc',      nm:'Tip Calculator by Country',  ico:'🤝', ph:'money',     on:false, live:false, ds:'Local tipping culture + standard % by venue. Exact tip calculator.'},
-  {id:'expense-track', nm:'Daily Expense Tracker',      ico:'📊', ph:'money',     on:false, live:false, ds:'Log expenses by category. Running total vs. daily budget.'},
+  {id:'expense-track', nm:'Daily Expense Tracker',      ico:'📊', ph:'money',     on:false, live:true,  ds:'Log expenses by category. Auto-converts to home currency. Running total vs. daily budget.'},
   {id:'bill-split',    nm:'Bill Splitter',              ico:'➗', ph:'money',     on:false, live:false, ds:'Split any bill equally or unevenly, tip included.'},
   {id:'atm-fee',       nm:'ATM Fee Estimator',          ico:'🏧', ph:'money',     on:false, live:false, ds:'True cost of foreign ATM withdrawals including DCC.'},
   {id:'cost-living',   nm:'Cost of Living Comparison',  ico:'🌐', ph:'money',     on:false, live:false, ds:'How far will $100/day go in Bangkok vs. Paris vs. Tokyo?'},
@@ -5214,6 +5556,7 @@ function injectTripCtx(id) {
   if(id==='budget-plan') budgetInit();
   if(id==='visa-guide') vgInit();
   if(id==='passport')   paInit();
+  if(id==='expense-track') etInit();
 }
 
 /* ── HUB RENDER ── */
@@ -5598,6 +5941,580 @@ function budgetInit() {
   bpView = 'total';
   bpLoad();
   bpFullRender();
+}
+
+/* ══════════════════════════════════════════
+   DAILY EXPENSE TRACKER  (et*)
+   Storage key: tt_expenses_{tripId|default}
+   Re-uses FX_CACHE_KEY from Currency Converter
+   ══════════════════════════════════════════ */
+
+const ET_CATS = [
+  { id:'food',      emoji:'🍽',  name:'Food & Drink' },
+  { id:'transport', emoji:'🚖',  name:'Transport' },
+  { id:'lodging',   emoji:'🏨',  name:'Lodging' },
+  { id:'activity',  emoji:'🎟',  name:'Activities' },
+  { id:'shopping',  emoji:'🛍',  name:'Shopping' },
+  { id:'groceries', emoji:'🛒',  name:'Groceries' },
+  { id:'tips',      emoji:'🤝',  name:'Tips' },
+  { id:'fees',      emoji:'🏧',  name:'Fees & ATM' },
+  { id:'misc',      emoji:'💼',  name:'Misc' },
+];
+const ET_COLORS = ['#FF4D2E','#1565C0','#2E7D32','#FFD23F','#6A1B9A','#E65100','#00838F','#AD1457','#37474F'];
+
+let etData = null;     // { homeCurrency, dailyBudget, tripName, expenses:[] }
+let etChart = null;
+let etCollapsed = {};  // { 'YYYY-MM-DD': true }
+let etPopulated = false;
+
+function etKey() {
+  const id = getActiveTripId() || 'default';
+  return 'tt_expenses_' + id;
+}
+
+function etInit() {
+  const trip = getActiveTrip();
+  const ctx  = document.getElementById('ctx-expense-track');
+  if (trip) {
+    ctx.textContent = `✈ Using context from: ${trip.name} — tap to edit ↗`;
+    ctx.classList.add('show');
+    ctx.onclick = () => showView('mytrip');
+  } else {
+    ctx.classList.remove('show');
+  }
+
+  etLoad();
+
+  // Populate dropdowns once
+  if (!etPopulated) {
+    const homeSel = document.getElementById('et-home-curr');
+    const inSel   = document.getElementById('et-in-curr');
+    const catSel  = document.getElementById('et-in-cat');
+    FX_ALL_CURRENCIES.forEach(c => {
+      homeSel.appendChild(new Option(`${c.code} — ${c.name}`, c.code));
+      inSel.appendChild(new Option(`${c.code} — ${c.name}`, c.code));
+    });
+    ET_CATS.forEach(c => {
+      catSel.appendChild(new Option(`${c.emoji} ${c.name}`, c.id));
+    });
+    // Live-preview FX conversion as user types
+    document.getElementById('et-in-amt').addEventListener('input', etUpdateConvPreview);
+    document.getElementById('et-in-curr').addEventListener('change', etUpdateConvPreview);
+    etPopulated = true;
+  }
+
+  // Apply persisted values to UI
+  document.getElementById('et-trip-name').value   = etData.tripName || '';
+  document.getElementById('et-home-curr').value   = etData.homeCurrency;
+  document.getElementById('et-daily-budget').value = etData.dailyBudget || '';
+  document.getElementById('et-in-curr').value     = etData.homeCurrency;
+  document.getElementById('et-in-date').value     = etTodayISO();
+  document.getElementById('et-in-cat').value      = 'food';
+  document.getElementById('et-print-date').textContent =
+    'Printed ' + new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+
+  etUpdateBudgetSym();
+  etLoadFx();
+  etRender();
+}
+
+function etTodayISO() {
+  const d = new Date();
+  const y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,'0'), dd = String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${dd}`;
+}
+
+function etLoad() {
+  const raw = localStorage.getItem(etKey());
+  if (raw) {
+    try { etData = JSON.parse(raw); } catch(e) { etData = null; }
+  }
+  if (!etData) {
+    const trip = getActiveTrip();
+    etData = {
+      tripName: trip ? trip.name : '',
+      homeCurrency: trip ? (trip.homeCurrency || 'USD') : 'USD',
+      dailyBudget: '',
+      expenses: [],
+    };
+  }
+  // Backfill for any older saved shape
+  if (!etData.homeCurrency) etData.homeCurrency = 'USD';
+  if (!Array.isArray(etData.expenses)) etData.expenses = [];
+}
+
+function etSave() {
+  if (!etData) return;
+  try { localStorage.setItem(etKey(), JSON.stringify(etData)); } catch(_){}
+}
+
+function etSaveMeta() {
+  if (!etData) return;
+  etData.tripName    = document.getElementById('et-trip-name').value;
+  etData.dailyBudget = document.getElementById('et-daily-budget').value;
+  etSave();
+}
+
+function etOnHomeCurrChange() {
+  etData.homeCurrency = document.getElementById('et-home-curr').value;
+  // Default the input currency to match home on first switch (user can change)
+  document.getElementById('et-in-curr').value = etData.homeCurrency;
+  etSave();
+  etUpdateBudgetSym();
+  etUpdateConvPreview();
+  etRender();
+}
+
+function etUpdateBudgetSym() {
+  const code = etData.homeCurrency || 'USD';
+  const sym = etCurrencySymbol(code);
+  document.getElementById('et-budget-sym').textContent = `(${sym} ${code})`;
+}
+
+/* ── FX helpers ─────────────────────────── */
+function etReadFxCache() {
+  try {
+    const raw = localStorage.getItem(FX_CACHE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw); // { ts, data:{base, rates, timestamp} }
+  } catch(_) { return null; }
+}
+
+function etGetRate(from, to) {
+  if (from === to) return 1;
+  const cache = etReadFxCache();
+  if (!cache || !cache.data || !cache.data.rates) return null;
+  const r = cache.data.rates;
+  // Rates are X per 1 USD
+  if (from === 'USD') return r[to] || null;
+  if (to   === 'USD') return r[from] ? 1 / r[from] : null;
+  if (r[from] && r[to]) return r[to] / r[from];
+  return null;
+}
+
+function etConvert(amt, from, to) {
+  const rate = etGetRate(from, to);
+  if (rate == null) return null;
+  return amt * rate;
+}
+
+function etLoadFx() {
+  const cache = etReadFxCache();
+  const setStatus = (cls, icon, text) => {
+    const box = document.getElementById('et-fx-status');
+    box.className = 'et-fx-status ' + cls;
+    document.getElementById('et-fx-status-icon').textContent = icon;
+    document.getElementById('et-fx-status-text').textContent = text;
+  };
+  if (cache && cache.data && cache.data.rates) {
+    const ageMin = Math.round((Date.now() - cache.ts) / 60000);
+    const ageStr = ageMin < 2 ? 'just now' : (ageMin < 60 ? ageMin + ' min ago' : Math.round(ageMin/60) + ' hr ago');
+    setStatus('ok', '✓', `Exchange rates loaded · ${ageStr}`);
+    // If older than 1 hr, refresh in background when online
+    if (Date.now() - cache.ts > 60*60*1000 && navigator.onLine) etFetchFxBg();
+    return;
+  }
+  if (!navigator.onLine) {
+    setStatus('warn', '✈️', 'Offline — no exchange rates cached. Foreign-currency entries can still be logged but won\'t convert.');
+    return;
+  }
+  setStatus('', '🔄', 'Loading exchange rates…');
+  etFetchFxBg();
+}
+
+async function etFetchFxBg() {
+  try {
+    const res = await fetch('https://open.er-api.com/v6/latest/USD');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const json = await res.json();
+    if (json.result !== 'success') throw new Error('API error');
+    const data = { base: json.base_code, rates: json.rates, timestamp: json.time_last_update_utc };
+    localStorage.setItem(FX_CACHE_KEY, JSON.stringify({ ts: Date.now(), data }));
+    // Update FX state in currency converter too if it has been initialized
+    if (typeof fxRates !== 'undefined') { try { fxRates = data; } catch(_){} }
+    const box = document.getElementById('et-fx-status');
+    if (box) {
+      box.className = 'et-fx-status ok';
+      document.getElementById('et-fx-status-icon').textContent = '✓';
+      document.getElementById('et-fx-status-text').textContent = 'Live rates loaded · just now';
+    }
+    etUpdateConvPreview();
+    etRender();
+  } catch(e) {
+    const box = document.getElementById('et-fx-status');
+    if (box) {
+      box.className = 'et-fx-status err';
+      document.getElementById('et-fx-status-icon').textContent = '⚠';
+      document.getElementById('et-fx-status-text').textContent = 'Could not load exchange rates. Foreign-currency conversion unavailable.';
+    }
+  }
+}
+
+/* ── Live conversion preview on the Add card ─ */
+function etUpdateConvPreview() {
+  const amt  = parseFloat(document.getElementById('et-in-amt').value);
+  const from = document.getElementById('et-in-curr').value;
+  const home = etData.homeCurrency;
+  const box  = document.getElementById('et-conv-preview');
+  if (!amt || amt <= 0 || from === home) { box.style.display = 'none'; return; }
+  const conv = etConvert(amt, from, home);
+  if (conv == null) {
+    box.style.display = 'block';
+    box.innerHTML = `<span style="color:var(--accent)">⚠</span> No exchange rate available for ${from} → ${home}. Entry will save as ${from} only.`;
+    return;
+  }
+  box.style.display = 'block';
+  box.innerHTML = `≈ <b>${etFmt(conv, home)}</b> in ${home} <span style="color:var(--muted)">(rate ${etGetRate(from,home).toFixed(4)})</span>`;
+}
+
+/* ── Add / delete ───────────────────────── */
+function etAddExpense() {
+  const date = document.getElementById('et-in-date').value || etTodayISO();
+  const cat  = document.getElementById('et-in-cat').value || 'misc';
+  const desc = document.getElementById('et-in-desc').value.trim();
+  const amt  = parseFloat(document.getElementById('et-in-amt').value);
+  const curr = document.getElementById('et-in-curr').value || etData.homeCurrency;
+  if (!amt || amt <= 0) {
+    document.getElementById('et-in-amt').focus();
+    return;
+  }
+  const rate    = curr === etData.homeCurrency ? 1 : (etGetRate(curr, etData.homeCurrency) || null);
+  const homeAmt = rate != null ? amt * rate : null;
+  etData.expenses.push({
+    id: 'e_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
+    date, cat,
+    desc: desc || ET_CATS.find(c=>c.id===cat).name,
+    amt, curr,
+    rate: rate, homeAmt: homeAmt,
+    ts: Date.now(),
+  });
+  etSave();
+  // Reset description + amount, keep date/category/currency for fast entry
+  document.getElementById('et-in-desc').value = '';
+  document.getElementById('et-in-amt').value  = '';
+  document.getElementById('et-conv-preview').style.display = 'none';
+  etRender();
+  document.getElementById('et-in-desc').focus();
+}
+
+function etDeleteExpense(id) {
+  etData.expenses = etData.expenses.filter(e => e.id !== id);
+  etSave();
+  etRender();
+}
+
+function etReset() {
+  if (!etData.expenses.length) return;
+  if (!confirm('Delete all logged expenses for this trip? This cannot be undone.')) return;
+  etData.expenses = [];
+  etSave();
+  etRender();
+}
+
+/* ── Formatting ─────────────────────────── */
+function etCurrencySymbol(code) {
+  const m = {'USD':'$','EUR':'€','GBP':'£','CAD':'CA$','AUD':'A$','JPY':'¥','MXN':'MX$','CHF':'Fr','INR':'₹','BRL':'R$','KRW':'₩','THB':'฿','SGD':'S$','NZD':'NZ$','ZAR':'R','HKD':'HK$','CNY':'¥'};
+  return m[code] || code + ' ';
+}
+function etFmt(n, code) {
+  if (n == null || isNaN(n)) return '—';
+  const noDecimal = code === 'JPY' || code === 'KRW' || code === 'IDR' || code === 'VND';
+  try {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency', currency: code,
+      minimumFractionDigits: noDecimal ? 0 : 2,
+      maximumFractionDigits: noDecimal ? 0 : 2,
+    }).format(n);
+  } catch(_) {
+    return etCurrencySymbol(code) + n.toFixed(noDecimal ? 0 : 2);
+  }
+}
+function etFmtDate(iso) {
+  const d = new Date(iso + 'T00:00:00');
+  if (isNaN(d)) return iso;
+  return d.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric', year:'numeric' });
+}
+function etFmtDateShort(iso) {
+  const d = new Date(iso + 'T00:00:00');
+  if (isNaN(d)) return iso;
+  return d.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' });
+}
+function etCatById(id) {
+  return ET_CATS.find(c => c.id === id) || { emoji:'•', name:'Misc' };
+}
+
+/* ── Compute helpers ────────────────────── */
+function etExpenseHomeAmt(e) {
+  if (e.curr === etData.homeCurrency) return e.amt;
+  if (e.homeAmt != null && !isNaN(e.homeAmt)) return e.homeAmt;
+  // Try live conversion from current rates
+  const conv = etConvert(e.amt, e.curr, etData.homeCurrency);
+  return conv != null ? conv : e.amt; // fallback: treat as home amount
+}
+
+function etGroupByDate() {
+  const byDate = {};
+  etData.expenses.forEach(e => {
+    if (!byDate[e.date]) byDate[e.date] = [];
+    byDate[e.date].push(e);
+  });
+  // Sort each day by timestamp ascending (oldest first within day)
+  Object.keys(byDate).forEach(k => byDate[k].sort((a,b) => (a.ts||0) - (b.ts||0)));
+  return byDate;
+}
+
+function etGrandTotal() { return etData.expenses.reduce((s,e) => s + etExpenseHomeAmt(e), 0); }
+function etByCategory() {
+  const totals = {};
+  ET_CATS.forEach(c => totals[c.id] = 0);
+  etData.expenses.forEach(e => {
+    if (totals[e.cat] == null) totals[e.cat] = 0;
+    totals[e.cat] += etExpenseHomeAmt(e);
+  });
+  return totals;
+}
+
+/* ── Render ─────────────────────────────── */
+function etRender() {
+  if (!etData) return;
+  etRenderToday();
+  etRenderSummary();
+  etRenderChart();
+  etRenderLegend();
+  etRenderLog();
+  etUpdateConvPreview();
+}
+
+function etRenderToday() {
+  const home = etData.homeCurrency;
+  const today = etTodayISO();
+  const todays = etData.expenses.filter(e => e.date === today);
+  const total = todays.reduce((s,e) => s + etExpenseHomeAmt(e), 0);
+  const budget = parseFloat(etData.dailyBudget) || 0;
+
+  document.getElementById('et-today-date').textContent = etFmtDateShort(today);
+  const amtEl = document.getElementById('et-today-amt');
+  amtEl.textContent = todays.length ? etFmt(total, home) : etFmt(0, home);
+  amtEl.classList.toggle('over', budget > 0 && total > budget);
+
+  const bar = document.getElementById('et-today-bar');
+  const remainEl = document.getElementById('et-today-remain');
+  const budgetEl = document.getElementById('et-today-budget');
+
+  if (budget > 0) {
+    const pct = Math.min(100, (total / budget) * 100);
+    bar.style.width = pct + '%';
+    bar.classList.toggle('near', pct >= 80 && pct < 100);
+    bar.classList.toggle('over', total > budget);
+    budgetEl.textContent = `Daily budget: ${etFmt(budget, home)}`;
+    if (total > budget) {
+      remainEl.innerHTML = `<span class="over">Over by ${etFmt(total - budget, home)}</span>`;
+    } else {
+      remainEl.textContent = `${etFmt(budget - total, home)} remaining`;
+    }
+  } else {
+    bar.style.width = '0%';
+    bar.classList.remove('near','over');
+    budgetEl.textContent = 'Set a daily budget above to track pacing';
+    remainEl.textContent = todays.length ? `${todays.length} ${todays.length===1?'entry':'entries'}` : '';
+  }
+}
+
+function etRenderSummary() {
+  const home = etData.homeCurrency;
+  const total = etGrandTotal();
+  document.getElementById('et-pie-total').textContent = etFmt(total, home);
+
+  const byDate = etGroupByDate();
+  const dayCount = Object.keys(byDate).length;
+  document.getElementById('et-stat-days').textContent = dayCount;
+  document.getElementById('et-stat-count').textContent = etData.expenses.length;
+  document.getElementById('et-stat-avg').textContent  = dayCount > 0 ? etFmt(total / dayCount, home) : '—';
+
+  const meta = document.getElementById('et-sum-meta');
+  if (!etData.expenses.length) {
+    meta.textContent = 'No expenses yet';
+  } else {
+    meta.textContent = `${etData.expenses.length} ${etData.expenses.length===1?'entry':'entries'} · ${dayCount} day${dayCount===1?'':'s'}`;
+  }
+}
+
+function etRenderChart() {
+  const home = etData.homeCurrency;
+  const cats = etByCategory();
+  const entries = ET_CATS.map((c,i) => ({ cat: c, val: cats[c.id] || 0, color: ET_COLORS[i % ET_COLORS.length] }))
+                         .filter(x => x.val > 0);
+  const canvas = document.getElementById('et-pie');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  if (etChart) { etChart.destroy(); etChart = null; }
+
+  if (!entries.length) {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.beginPath();
+    ctx.arc(canvas.width/2, canvas.height/2, canvas.width/2 - 10, 0, Math.PI*2);
+    ctx.strokeStyle = 'rgba(23,21,20,.1)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    return;
+  }
+
+  etChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: entries.map(e => `${e.cat.emoji} ${e.cat.name}`),
+      datasets: [{
+        data: entries.map(e => e.val),
+        backgroundColor: entries.map(e => e.color),
+        borderColor: '#F4EFE6', borderWidth: 3, hoverOffset: 6,
+      }],
+    },
+    options: {
+      cutout: '62%',
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: (c) => ' ' + etFmt(c.raw, home) } },
+      },
+      animation: { duration: 300 },
+    },
+  });
+}
+
+function etRenderLegend() {
+  const home = etData.homeCurrency;
+  const total = etGrandTotal();
+  const cats = etByCategory();
+  const leg = document.getElementById('et-legend');
+  const entries = ET_CATS.map((c,i) => ({ cat:c, val: cats[c.id] || 0, color: ET_COLORS[i % ET_COLORS.length] }))
+                         .filter(x => x.val > 0)
+                         .sort((a,b) => b.val - a.val);
+  if (!entries.length) {
+    leg.innerHTML = `<div style="font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.06em">No spending logged yet</div>`;
+    return;
+  }
+  leg.innerHTML = entries.map(e => {
+    const pct = total > 0 ? Math.round(e.val / total * 100) : 0;
+    return `<div class="et-legend-item">
+      <div class="et-legend-dot" style="background:${e.color}"></div>
+      <span class="et-legend-name">${e.cat.emoji} ${e.cat.name}</span>
+      <span class="et-legend-pct">${pct}%</span>
+      <span class="et-legend-amt">${etFmt(e.val, home)}</span>
+    </div>`;
+  }).join('');
+}
+
+function etRenderLog() {
+  const home = etData.homeCurrency;
+  const wrap = document.getElementById('et-log');
+  const budget = parseFloat(etData.dailyBudget) || 0;
+
+  if (!etData.expenses.length) {
+    wrap.innerHTML = `<div class="et-empty"><span>📊</span>No expenses logged yet.<br><span style="font-size:13px">Add your first entry above to get started.</span></div>`;
+    document.getElementById('et-log-meta').textContent = '';
+    return;
+  }
+
+  const byDate = etGroupByDate();
+  const sortedDates = Object.keys(byDate).sort((a,b) => b.localeCompare(a));
+  document.getElementById('et-log-meta').textContent =
+    `${etData.expenses.length} ${etData.expenses.length===1?'entry':'entries'} across ${sortedDates.length} day${sortedDates.length===1?'':'s'}`;
+
+  wrap.innerHTML = sortedDates.map(date => {
+    const items = byDate[date];
+    const dayTotal = items.reduce((s,e) => s + etExpenseHomeAmt(e), 0);
+    const over = budget > 0 && dayTotal > budget;
+    const statusHTML = budget > 0
+      ? `<span class="et-day-status ${over ? 'over' : 'ok'}">${over ? 'Over' : 'Within'} ${etFmt(budget, home)}</span>`
+      : '';
+    return `<div class="et-day-blk" data-date="${date}">
+      <div class="et-day-hdr" onclick="etToggleDay('${date}')">
+        <div>
+          <span class="et-day-date">${etFmtDate(date)}</span>
+          <span class="et-day-sub">${items.length} ${items.length===1?'item':'items'}</span>
+        </div>
+        <div>
+          ${statusHTML}
+          <span class="et-day-total ${over ? 'over' : ''}">${etFmt(dayTotal, home)}</span>
+        </div>
+      </div>
+      ${etCollapsed[date] ? '' : `<div class="et-day-items">${
+        items.map(e => etRowHTML(e, home)).join('')
+      }</div>`}
+    </div>`;
+  }).join('');
+}
+
+function etRowHTML(e, home) {
+  const cat = etCatById(e.cat);
+  const homeAmt = etExpenseHomeAmt(e);
+  const foreignTag = e.curr !== home
+    ? `<span class="et-row-amt-foreign">${etFmt(e.amt, e.curr)} ${e.curr}</span>`
+    : '';
+  const fxTag = e.curr !== home
+    ? ` · <span class="fx">@ ${e.rate ? e.rate.toFixed(4) : '—'}</span>`
+    : '';
+  return `<div class="et-row">
+    <div class="et-row-icon">${cat.emoji}</div>
+    <div class="et-row-main">
+      <div class="et-row-desc">${escHtml(e.desc)}</div>
+      <div class="et-row-meta"><span class="cat">${cat.name}</span>${fxTag}</div>
+    </div>
+    <div class="et-row-amt">
+      ${etFmt(homeAmt, home)}
+      ${foreignTag}
+    </div>
+    <button class="et-row-del" onclick="etDeleteExpense('${e.id}')" title="Delete entry" aria-label="Delete entry">✕</button>
+  </div>`;
+}
+
+function etToggleDay(date) {
+  etCollapsed[date] = !etCollapsed[date];
+  etRenderLog();
+}
+
+/* ── CSV export ─────────────────────────── */
+function etExportCSV() {
+  if (!etData.expenses.length) return;
+  const home = etData.homeCurrency;
+  const budget = parseFloat(etData.dailyBudget) || 0;
+  const total = etGrandTotal();
+  const byDate = etGroupByDate();
+  const days = Object.keys(byDate).sort();
+
+  let csv = `Daily Expense Tracker — ${etData.tripName || 'My Trip'}\n`;
+  csv += `Home Currency,${home}\n`;
+  csv += `Daily Budget,${budget ? budget.toFixed(2) : ''}\n`;
+  csv += `Generated,${new Date().toISOString()}\n\n`;
+  csv += `Date,Category,Description,Amount,Currency,Rate,Home Amount (${home})\n`;
+  days.forEach(d => {
+    byDate[d].forEach(e => {
+      const cat = etCatById(e.cat).name;
+      const rateStr = e.curr === home ? '1' : (e.rate != null ? e.rate.toFixed(6) : '');
+      const homeAmt = etExpenseHomeAmt(e);
+      csv += `${d},"${cat}","${(e.desc||'').replace(/"/g,'""')}",${(+e.amt).toFixed(2)},${e.curr},${rateStr},${homeAmt.toFixed(2)}\n`;
+    });
+    const dayTotal = byDate[d].reduce((s,e) => s + etExpenseHomeAmt(e), 0);
+    csv += `${d},,DAILY TOTAL,,,,${dayTotal.toFixed(2)}\n\n`;
+  });
+  // Category breakdown
+  csv += `\nCategory Breakdown\nCategory,Total (${home}),% of Trip\n`;
+  const cats = etByCategory();
+  ET_CATS.forEach(c => {
+    const v = cats[c.id] || 0;
+    if (v > 0) {
+      const pct = total > 0 ? (v/total*100).toFixed(1) : '0';
+      csv += `"${c.name}",${v.toFixed(2)},${pct}%\n`;
+    }
+  });
+  csv += `\nGRAND TOTAL,,${total.toFixed(2)}\n`;
+
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const safe = (etData.tripName || 'trip').replace(/[^a-z0-9]+/gi,'-').toLowerCase();
+  a.href = url; a.download = `expenses-${safe}-${etTodayISO()}.csv`; a.click();
+  URL.revokeObjectURL(url);
 }
 
 /* ── MYTRIP ── */
