@@ -19,4 +19,7 @@ jobs:
         run: |
           curl -T TripTools.html \
             --user "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" \
+            --ftp-ssl \
+            --insecure \
+            --verbose \
             "ftp://playologyentertainment.com/public_html/experiments/TripTools/TripTools.html"
