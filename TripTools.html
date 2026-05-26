@@ -2953,17 +2953,249 @@ body.no-scroll { overflow: hidden; }
     <span id="fx-print-date"></span>
   </div>
 </div>
-<div id="view-placeholder-tip-calc" class="view">
-  <nav class="tool-topbar">
+<style>
+/* ── TIP CALCULATOR BY COUNTRY ── */
+.tc-country-wrap{position:relative}
+.tc-country-input{width:100%;padding:12px 14px;border:1.5px solid var(--ink);border-radius:var(--r);font-size:15px;font-family:var(--sans);background:var(--paper);color:var(--ink);box-sizing:border-box;outline:none;display:flex;align-items:center;gap:10px;cursor:pointer;min-height:46px}
+.tc-country-input:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(255,77,46,.15)}
+.tc-country-flag{font-size:22px;line-height:1;flex-shrink:0}
+.tc-country-name{flex:1;font-weight:500}
+.tc-country-cur{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
+.tc-country-caret{color:var(--muted);font-size:12px}
+.tc-search-input{width:100%;padding:10px 12px;border:1.5px solid var(--ink);border-radius:var(--r);font-size:14px;font-family:var(--sans);background:var(--paper);color:var(--ink);box-sizing:border-box;outline:none}
+.tc-drop{position:absolute;top:100%;left:0;right:0;max-height:340px;overflow-y:auto;background:var(--paper);border:1.5px solid var(--ink);border-top:none;border-radius:0 0 var(--r) var(--r);z-index:200;box-shadow:0 6px 18px rgba(0,0,0,.15)}
+.tc-drop-search{padding:10px;border-bottom:1.5px solid var(--rule);position:sticky;top:0;background:var(--paper);z-index:2}
+.tc-drop-item{padding:10px 14px;cursor:pointer;font-size:14px;font-family:var(--sans);color:var(--ink);border-bottom:1px solid var(--rule);display:flex;align-items:center;gap:10px}
+.tc-drop-item:last-child{border-bottom:none}
+.tc-drop-item:hover,.tc-drop-item.kbd{background:var(--paper-2)}
+.tc-drop-flag{font-size:18px;width:24px;text-align:center;flex-shrink:0}
+.tc-drop-name{flex:1}
+.tc-drop-cur{font-size:11px;font-family:var(--mono);letter-spacing:.06em;color:var(--muted)}
+
+/* Venue picker */
+.tc-venues{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:6px}
+@media(max-width:680px){.tc-venues{grid-template-columns:repeat(2,1fr)}}
+.tc-venue-btn{padding:10px 8px;border:1.5px solid var(--ink);border-radius:var(--r);background:var(--paper);font-family:var(--sans);font-size:13px;cursor:pointer;color:var(--ink-2);transition:background .12s,color .12s;display:flex;flex-direction:column;align-items:center;gap:4px;line-height:1.2;text-align:center;min-height:64px}
+.tc-venue-btn:hover:not(.active){background:var(--paper-2)}
+.tc-venue-btn.active{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.tc-venue-ico{font-size:20px;line-height:1}
+.tc-venue-lbl{font-size:12px;font-weight:500}
+
+/* Calc inputs */
+.tc-calc-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:12px;margin-top:14px}
+@media(max-width:680px){.tc-calc-grid{grid-template-columns:1fr 1fr}}
+.tc-calc-grid .fg{margin-bottom:0}
+.tc-svc-row{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px;color:var(--ink-2);font-family:var(--sans);cursor:pointer;user-select:none}
+.tc-svc-row input{accent-color:var(--accent);cursor:pointer;width:16px;height:16px}
+.tc-cur-prefix{font-family:var(--mono);font-size:12px;color:var(--muted);position:absolute;left:14px;top:50%;transform:translateY(-50%);pointer-events:none;letter-spacing:.04em}
+.tc-input-cur{position:relative}
+.tc-input-cur input{padding-left:36px}
+
+/* Status badge per venue */
+.tc-status-row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:14px;padding:12px 14px;background:var(--paper-2);border-radius:var(--r);border-left:4px solid var(--muted)}
+.tc-status-row.s-expected{border-left-color:var(--accent)}
+.tc-status-row.s-customary{border-left-color:var(--orange)}
+.tc-status-row.s-optional{border-left-color:var(--yellow)}
+.tc-status-row.s-unusual{border-left-color:var(--muted)}
+.tc-status-row.s-offensive{border-left-color:#8B0000}
+.tc-status-lbl{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:2px;display:block}
+.tc-status-val{font-family:var(--serif);font-size:18px;font-weight:600;letter-spacing:-.01em;line-height:1.15}
+.tc-status-val.s-expected{color:var(--accent)}
+.tc-status-val.s-customary{color:var(--orange)}
+.tc-status-val.s-optional{color:#9E7A00}
+.tc-status-val.s-unusual{color:var(--muted)}
+.tc-status-val.s-offensive{color:#8B0000}
+.tc-rec-amt{text-align:right;font-family:var(--serif);font-size:20px;font-weight:600;letter-spacing:-.01em;color:var(--ink)}
+.tc-rec-amt small{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:400;margin-bottom:2px}
+
+/* Result card */
+.tc-result{margin-top:18px;border:2px solid var(--ink);border-radius:var(--r);overflow:hidden;background:var(--paper)}
+.tc-result-grid{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.tc-result-cell{padding:14px 18px;border-right:1.5px solid var(--rule);border-bottom:1.5px solid var(--rule)}
+.tc-result-cell:nth-child(2n){border-right:none}
+.tc-result-cell.tc-full{grid-column:1/-1;border-right:none}
+.tc-result-lbl{font-size:11px;font-family:var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.tc-result-val{font-family:var(--serif);font-size:28px;font-weight:600;letter-spacing:-.02em;line-height:1.05;color:var(--ink)}
+.tc-result-val small{font-family:var(--mono);font-size:11px;font-weight:400;color:var(--muted);letter-spacing:.06em;display:block;margin-top:3px;text-transform:none}
+.tc-result-total{padding:16px 20px;background:var(--ink);color:var(--paper);display:flex;align-items:center;justify-content:space-between}
+.tc-result-total-lbl{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase}
+.tc-result-total-val{font-family:var(--serif);font-size:34px;font-weight:600;letter-spacing:-.02em}
+.tc-pp-row{padding:12px 20px;background:var(--paper-2);display:flex;justify-content:space-between;align-items:center;font-size:13px;border-top:1.5px solid var(--rule)}
+.tc-pp-lbl{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.tc-pp-val{font-family:var(--serif);font-size:18px;font-weight:600;color:var(--ink);letter-spacing:-.01em}
+.tc-copy-row{padding:12px 20px;border-top:1.5px solid var(--rule);display:flex;gap:8px;justify-content:flex-end;background:var(--paper)}
+.tc-copy-btn{padding:8px 14px;background:var(--paper-2);border:1.5px solid var(--ink);border-radius:var(--r);font-family:var(--sans);font-size:13px;cursor:pointer;color:var(--ink);transition:background .12s}
+.tc-copy-btn:hover{background:var(--ink);color:var(--paper)}
+
+/* Cultural note */
+.tc-culture{margin-top:16px;padding:14px 16px;background:var(--paper-2);border-left:3px solid var(--blue);border-radius:var(--r);font-size:13px;line-height:1.55;color:var(--ink-2)}
+.tc-culture-hdr{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.tc-culture b{color:var(--ink)}
+
+/* Compact reference table for selected country */
+.tc-ref-table{margin-top:18px;border:1.5px solid var(--ink);border-radius:var(--r);overflow:hidden}
+.tc-ref-hdr{padding:10px 14px;background:var(--paper-2);font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);border-bottom:1.5px solid var(--rule);display:flex;justify-content:space-between;align-items:center;gap:8px}
+.tc-ref-row{display:grid;grid-template-columns:32px 1fr auto auto;gap:10px;padding:10px 14px;border-bottom:1px solid var(--rule);align-items:center;font-size:13px}
+.tc-ref-row:last-child{border-bottom:none}
+.tc-ref-row.active{background:var(--paper-2)}
+.tc-ref-ico{font-size:16px;text-align:center}
+.tc-ref-nm{color:var(--ink-2)}
+.tc-ref-amt{font-family:var(--mono);font-size:12px;color:var(--ink);font-weight:500;text-align:right;white-space:nowrap}
+.tc-ref-stat{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:3px 7px;border-radius:2px;background:var(--paper);border:1px solid var(--rule)}
+.tc-ref-stat.s-expected{background:#FFE5DF;color:var(--accent);border-color:rgba(255,77,46,.3)}
+.tc-ref-stat.s-customary{background:#FFE6CC;color:var(--orange);border-color:rgba(230,81,0,.3)}
+.tc-ref-stat.s-optional{background:#FFF6CC;color:#9E7A00;border-color:rgba(255,210,63,.4)}
+.tc-ref-stat.s-unusual{background:var(--paper-2);color:var(--muted);border-color:var(--rule)}
+.tc-ref-stat.s-offensive{background:#F8D7D7;color:#8B0000;border-color:rgba(139,0,0,.3)}
+
+/* Service-charge warning chip */
+.tc-svc-warn{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:5px 10px;border-radius:2px;background:#FFF6CC;color:#9E7A00;border:1px solid rgba(255,210,63,.4);margin-top:6px}
+
+.tc-print-header{display:none}
+@media print{
+  .tc-country-caret,.tc-drop,.tc-copy-row{display:none!important}
+  .tc-result-total{background:#000!important;color:#fff!important}
+  .tc-result{border:1.5px solid #000!important}
+  .tc-print-header{display:flex!important;justify-content:space-between;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#666;padding:0 0 12px;border-bottom:1px solid #ccc;margin-bottom:16px}
+}
+</style>
+<div id="view-tip-calc" class="view">
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="window.print()">🖨 Print</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">🤝</span>
-    <h2>Tip Calculator by Country</h2>
-    <p style="margin-bottom:24px">Local tipping culture + standard percentages by venue. Exact tip & total calculator.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-tip-calc"></div>
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>Tip Calculator by Country</h1>
+    <p class="tool-sub">Local tipping culture plus a precise tip and total for every venue type — across 50 of the world's most-visited countries.</p>
+  </div>
+
+  <div class="tool-body">
+
+    <!-- ── COUNTRY PICKER ── -->
+    <div class="fg">
+      <label>Country</label>
+      <div class="tc-country-wrap">
+        <div class="tc-country-input" id="tc-country-disp" onclick="tcOpenPicker()" tabindex="0" role="button" aria-label="Choose country">
+          <span class="tc-country-flag" id="tc-disp-flag">🌐</span>
+          <span class="tc-country-name" id="tc-disp-name">Select a country</span>
+          <span class="tc-country-cur" id="tc-disp-cur"></span>
+          <span class="tc-country-caret">▾</span>
+        </div>
+        <div class="tc-drop" id="tc-country-drop" style="display:none">
+          <div class="tc-drop-search">
+            <input type="search" id="tc-country-search" class="tc-search-input" placeholder="🔍 Search 50 countries…" autocomplete="off" oninput="tcFilterCountries()">
+          </div>
+          <div id="tc-country-list"></div>
+        </div>
+      </div>
     </div>
+
+    <!-- ── VENUE PICKER ── -->
+    <div class="fg" id="tc-venue-fg" style="display:none">
+      <label>Venue</label>
+      <div class="tc-venues" id="tc-venues"></div>
+    </div>
+
+    <!-- ── CALC INPUTS ── -->
+    <div id="tc-calc-section" style="display:none">
+      <div class="tc-calc-grid">
+        <div class="fg">
+          <label id="tc-amt-lbl">Bill Amount</label>
+          <div class="tc-input-cur">
+            <span class="tc-cur-prefix" id="tc-cur-prefix">$</span>
+            <input type="number" id="tc-amt" placeholder="0.00" min="0" step="any" oninput="tcCalc()">
+          </div>
+        </div>
+        <div class="fg" id="tc-qty-fg" style="display:none">
+          <label id="tc-qty-lbl">Bags</label>
+          <input type="number" id="tc-qty" value="1" min="1" step="1" oninput="tcCalc()">
+        </div>
+        <div class="fg">
+          <label>Split between</label>
+          <input type="number" id="tc-people" value="1" min="1" step="1" oninput="tcCalc()">
+        </div>
+      </div>
+
+      <label class="tc-svc-row" id="tc-svc-wrap" style="display:none">
+        <input type="checkbox" id="tc-svc-ck" onchange="tcCalc()">
+        <span>Service charge already included on this bill (don't double-tip)</span>
+      </label>
+
+      <!-- Status + recommendation for this venue -->
+      <div class="tc-status-row" id="tc-status-row" style="display:none">
+        <div>
+          <span class="tc-status-lbl">Tipping status</span>
+          <div class="tc-status-val" id="tc-status-val">—</div>
+        </div>
+        <div class="tc-rec-amt">
+          <small>Recommended</small>
+          <span id="tc-rec-amt">—</span>
+        </div>
+      </div>
+
+      <!-- ── RESULT ── -->
+      <div class="tc-result" id="tc-result" style="display:none">
+        <div class="tc-result-grid">
+          <div class="tc-result-cell">
+            <div class="tc-result-lbl">Bill Subtotal</div>
+            <div class="tc-result-val" id="tc-r-bill">—</div>
+          </div>
+          <div class="tc-result-cell">
+            <div class="tc-result-lbl">Tip Amount</div>
+            <div class="tc-result-val" id="tc-r-tip">—<small id="tc-r-tip-sub"></small></div>
+          </div>
+        </div>
+        <div class="tc-result-total">
+          <span class="tc-result-total-lbl">Grand Total</span>
+          <span class="tc-result-total-val" id="tc-r-total">—</span>
+        </div>
+        <div class="tc-pp-row" id="tc-pp-row" style="display:none">
+          <span class="tc-pp-lbl">Per Person <span id="tc-pp-count" style="color:var(--ink-2)"></span></span>
+          <span class="tc-pp-val" id="tc-pp-val">—</span>
+        </div>
+        <div class="tc-copy-row">
+          <button class="tc-copy-btn" onclick="tcCopy()" id="tc-copy-btn">📋 Copy summary</button>
+        </div>
+      </div>
+
+      <!-- Cultural note -->
+      <div class="tc-culture" id="tc-culture" style="display:none">
+        <div class="tc-culture-hdr">§ Local Custom</div>
+        <div id="tc-culture-body"></div>
+      </div>
+    </div>
+
+    <!-- ── REFERENCE TABLE: all venues for selected country ── -->
+    <div class="tc-ref-table" id="tc-ref-table" style="display:none">
+      <div class="tc-ref-hdr">
+        <span id="tc-ref-hdr-lbl">Tipping at a glance</span>
+        <span id="tc-ref-svc-warn"></span>
+      </div>
+      <div id="tc-ref-rows"></div>
+    </div>
+
+  </div><!-- /tool-body -->
+
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    Always tip in local cash when you can — credit-card tips may not reach the worker, especially abroad. In Japan, China and most of South Korea, tipping is genuinely unusual; an attempt to tip can confuse or even offend. When in doubt, watch what locals do.
+  </div>
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('currency')">💱 Currency Converter</button>
+      <button class="rel-btn" onclick="openTool('expense-track')">📊 Expense Tracker</button>
+      <button class="rel-btn" onclick="openTool('bill-split')">➗ Bill Splitter</button>
+      <button class="rel-btn" onclick="openTool('tipping-guide')">🍽 Tipping Culture Guide</button>
+    </div>
+  </div>
+
+  <!-- Print-only header -->
+  <div class="tc-print-header">
+    <strong>TripTools — Tip Calculator</strong>
+    <span id="tc-print-date"></span>
   </div>
 </div>
 <div id="view-expense-track" class="view">
@@ -5521,7 +5753,7 @@ const TOOLS = [
   {id:'power-plug',    nm:'Power Plug & Adapter Guide', ico:'🔌', ph:'packing',   on:false, live:false, ds:'Home + destination = plug types needed, voltage & converter advice.'},
   {id:'no-pack',       nm:'What NOT to Pack',           ico:'🚫', ph:'packing',   on:false, live:false, ds:'TSA, customs & cruise prohibited items. Searchable guide.'},
   {id:'currency',      nm:'Currency Converter',         ico:'💱', ph:'money',     on:true,  live:true,  ds:'Live rates for 150+ currencies. Cached for offline use.'},
-  {id:'tip-calc',      nm:'Tip Calculator by Country',  ico:'🤝', ph:'money',     on:false, live:false, ds:'Local tipping culture + standard % by venue. Exact tip calculator.'},
+  {id:'tip-calc',      nm:'Tip Calculator by Country',  ico:'🤝', ph:'money',     on:false, live:true,  ds:'Local tipping culture + standard % by venue. Exact tip calculator.'},
   {id:'expense-track', nm:'Daily Expense Tracker',      ico:'📊', ph:'money',     on:false, live:true,  ds:'Log expenses by category. Auto-converts to home currency. Running total vs. daily budget.'},
   {id:'bill-split',    nm:'Bill Splitter',              ico:'➗', ph:'money',     on:false, live:false, ds:'Split any bill equally or unevenly, tip included.'},
   {id:'atm-fee',       nm:'ATM Fee Estimator',          ico:'🏧', ph:'money',     on:false, live:false, ds:'True cost of foreign ATM withdrawals including DCC.'},
@@ -6220,6 +6452,7 @@ function injectTripCtx(id) {
   if(id==='emergency')  emInit();
   if(id==='timezone')   tzInit();
   if(id==='meeting-tz') mtpInit();
+  if(id==='tip-calc')   tcInit();
 }
 
 /* ── HUB RENDER ── */
@@ -14114,6 +14347,699 @@ function tzCollapseRuns(arr){
   }
   return runs;
 }
+
+/* ── TIP CALCULATOR BY COUNTRY ── */
+/* Venue definitions: display order + how the bill input behaves.
+   amtType 'pct'   → percentage of bill, returns money tip
+   amtType 'fixed' → fixed local-currency amount × quantity (e.g. per bag, per night) */
+const TC_VENUES = [
+  { id:'restaurant', ico:'🍽',  lbl:'Restaurant',  amtType:'pct',   qtyLbl:null,   amtLbl:'Bill Amount' },
+  { id:'bar',        ico:'🍻',  lbl:'Bar / Café',  amtType:'pct',   qtyLbl:null,   amtLbl:'Bill Amount' },
+  { id:'taxi',       ico:'🚕',  lbl:'Taxi / Ride', amtType:'pct',   qtyLbl:null,   amtLbl:'Fare' },
+  { id:'delivery',   ico:'🛵',  lbl:'Food Delivery',amtType:'pct',  qtyLbl:null,   amtLbl:'Order Total' },
+  { id:'housekeep',  ico:'🛏',  lbl:'Housekeeping',amtType:'fixed', qtyLbl:'Nights',amtLbl:'(per night)' },
+  { id:'porter',     ico:'🧳',  lbl:'Porter',      amtType:'fixed', qtyLbl:'Bags',  amtLbl:'(per bag)' },
+  { id:'tour',       ico:'🧭',  lbl:'Tour Guide',  amtType:'pct',   qtyLbl:null,   amtLbl:'Tour Cost' },
+  { id:'spa',        ico:'💆',  lbl:'Spa / Salon', amtType:'pct',   qtyLbl:null,   amtLbl:'Service Cost' },
+];
+
+/* Status mapping: how strongly is tipping expected? */
+const TC_STATUS = {
+  expected:  { lbl:'Expected',  desc:'Strongly expected — locals always tip.' },
+  customary: { lbl:'Customary', desc:'Common practice; appreciated.' },
+  optional:  { lbl:'Optional',  desc:'Appreciated but not expected.' },
+  unusual:   { lbl:'Unusual',   desc:'Not customary; can confuse staff.' },
+  offensive: { lbl:'Can offend', desc:'Tipping may be considered rude or insulting.' },
+};
+
+/* Country dataset — 50 popular tourist destinations.
+   Per-venue object: { s:status, lo:low, hi:high }
+   For pct venues: lo/hi are percentages. For fixed venues: lo/hi are local-currency amounts per unit.
+   Special status 'unusual'/'offensive' typically have lo=hi=0.
+   svc: 'usually' | 'often' | 'rarely' — frequency of service charge already on the bill.
+   note: short cultural guidance shown when this country is selected. */
+const TC_COUNTRIES = [
+  /* === AMERICAS === */
+  { c:'US', n:'United States', f:'🇺🇸', cur:'USD', sym:'$', svc:'rarely',
+    v:{ restaurant:{s:'expected',lo:15,hi:20}, bar:{s:'expected',lo:15,hi:20},
+        taxi:{s:'expected',lo:10,hi:15}, delivery:{s:'customary',lo:10,hi:15},
+        housekeep:{s:'customary',lo:2,hi:5}, porter:{s:'customary',lo:1,hi:2},
+        tour:{s:'customary',lo:10,hi:20}, spa:{s:'expected',lo:15,hi:20} },
+    note:'Tipping is part of how service workers are paid. <b>15–20%</b> at sit-down restaurants is the norm; under-tipping is considered rude. Bars typically expect $1–2 per drink or 15–20% of the tab.' },
+  { c:'CA', n:'Canada', f:'🇨🇦', cur:'CAD', sym:'$', svc:'rarely',
+    v:{ restaurant:{s:'expected',lo:15,hi:20}, bar:{s:'expected',lo:15,hi:20},
+        taxi:{s:'customary',lo:10,hi:15}, delivery:{s:'customary',lo:10,hi:15},
+        housekeep:{s:'customary',lo:2,hi:5}, porter:{s:'customary',lo:2,hi:5},
+        tour:{s:'customary',lo:10,hi:15}, spa:{s:'customary',lo:15,hi:20} },
+    note:'Tipping practice closely follows the US — <b>15–20%</b> at restaurants. Many point-of-sale terminals now suggest 18%/20%/25%; the lower end is perfectly acceptable.' },
+  { c:'MX', n:'Mexico', f:'🇲🇽', cur:'MXN', sym:'$', svc:'rarely',
+    v:{ restaurant:{s:'expected',lo:10,hi:15}, bar:{s:'customary',lo:10,hi:15},
+        taxi:{s:'optional',lo:5,hi:10}, delivery:{s:'customary',lo:10,hi:10},
+        housekeep:{s:'customary',lo:20,hi:50}, porter:{s:'customary',lo:20,hi:50},
+        tour:{s:'expected',lo:10,hi:15}, spa:{s:'customary',lo:10,hi:15} },
+    note:'<b>10–15%</b> is standard at restaurants — sometimes shown as "propina sugerida". Hotel housekeeping & porters typically receive 20–50 pesos (or $1–2 USD).' },
+  { c:'BR', n:'Brazil', f:'🇧🇷', cur:'BRL', sym:'R$', svc:'usually',
+    v:{ restaurant:{s:'optional',lo:0,hi:5}, bar:{s:'optional',lo:0,hi:5},
+        taxi:{s:'optional',lo:0,hi:10}, delivery:{s:'optional',lo:0,hi:5},
+        housekeep:{s:'customary',lo:5,hi:10}, porter:{s:'customary',lo:5,hi:10},
+        tour:{s:'customary',lo:10,hi:15}, spa:{s:'optional',lo:10,hi:10} },
+    note:'A <b>10% service charge ("taxa de serviço")</b> is usually added to the restaurant bill — it is technically optional but customary to pay. Extra cash tips are rarely expected.' },
+  { c:'AR', n:'Argentina', f:'🇦🇷', cur:'ARS', sym:'$', svc:'often',
+    v:{ restaurant:{s:'customary',lo:10,hi:10}, bar:{s:'optional',lo:5,hi:10},
+        taxi:{s:'optional',lo:0,hi:5}, delivery:{s:'optional',lo:5,hi:10},
+        housekeep:{s:'customary',lo:200,hi:500}, porter:{s:'customary',lo:200,hi:500},
+        tour:{s:'customary',lo:10,hi:15}, spa:{s:'customary',lo:10,hi:10} },
+    note:'<b>10%</b> at restaurants is the norm. A "cubierto" (cover charge) is separate from a tip — don\'t confuse the two. USD cash tips are often welcomed.' },
+  { c:'CL', n:'Chile', f:'🇨🇱', cur:'CLP', sym:'$', svc:'often',
+    v:{ restaurant:{s:'expected',lo:10,hi:10}, bar:{s:'customary',lo:10,hi:10},
+        taxi:{s:'optional',lo:0,hi:5}, delivery:{s:'optional',lo:5,hi:10},
+        housekeep:{s:'customary',lo:1000,hi:2000}, porter:{s:'customary',lo:1000,hi:2000},
+        tour:{s:'customary',lo:10,hi:15}, spa:{s:'customary',lo:10,hi:10} },
+    note:'<b>10%</b> at restaurants is the standard "propina" — it\'s often added as a "suggested" line; you can decline but it\'s widely considered rude to do so.' },
+  { c:'PE', n:'Peru', f:'🇵🇪', cur:'PEN', sym:'S/', svc:'often',
+    v:{ restaurant:{s:'customary',lo:10,hi:10}, bar:{s:'optional',lo:5,hi:10},
+        taxi:{s:'unusual',lo:0,hi:0}, delivery:{s:'optional',lo:5,hi:10},
+        housekeep:{s:'customary',lo:5,hi:10}, porter:{s:'customary',lo:3,hi:5},
+        tour:{s:'expected',lo:10,hi:15}, spa:{s:'customary',lo:10,hi:10} },
+    note:'Better restaurants add a 10% service charge; otherwise <b>10%</b> in cash is appreciated. Taxis: agree on the fare in advance — tipping isn\'t expected.' },
+  { c:'CR', n:'Costa Rica', f:'🇨🇷', cur:'CRC', sym:'₡', svc:'usually',
+    v:{ restaurant:{s:'optional',lo:0,hi:10}, bar:{s:'optional',lo:0,hi:10},
+        taxi:{s:'optional',lo:0,hi:10}, delivery:{s:'optional',lo:0,hi:5},
+        housekeep:{s:'customary',lo:1,hi:2}, porter:{s:'customary',lo:1,hi:2},
+        tour:{s:'expected',lo:10,hi:15}, spa:{s:'optional',lo:10,hi:10} },
+    note:'A <b>10% service charge plus 13% sales tax</b> is required by law on restaurant bills. Additional tips are optional. Tip tour guides generously — they often work for tips.' },
+
+  /* === EUROPE === */
+  { c:'GB', n:'United Kingdom', f:'🇬🇧', cur:'GBP', sym:'£', svc:'often',
+    v:{ restaurant:{s:'customary',lo:10,hi:12.5}, bar:{s:'optional',lo:0,hi:0},
+        taxi:{s:'customary',lo:10,hi:10}, delivery:{s:'optional',lo:0,hi:10},
+        housekeep:{s:'optional',lo:1,hi:2}, porter:{s:'customary',lo:1,hi:2},
+        tour:{s:'customary',lo:10,hi:15}, spa:{s:'customary',lo:10,hi:10} },
+    note:'<b>10–12.5%</b> at sit-down restaurants (often added automatically as "service charge"). Tipping at pubs is unusual — instead, offer to buy the bartender a drink.' },
+  { c:'IE', n:'Ireland', f:'🇮🇪', cur:'EUR', sym:'€', svc:'often',
+    v:{ restaurant:{s:'customary',lo:10,hi:15}, bar:{s:'optional',lo:0,hi:0},
+        taxi:{s:'customary',lo:10,hi:10}, delivery:{s:'optional',lo:0,hi:5},
+        housekeep:{s:'optional',lo:1,hi:2}, porter:{s:'optional',lo:1,hi:2},
+        tour:{s:'customary',lo:10,hi:15}, spa:{s:'customary',lo:10,hi:10} },
+    note:'<b>10–15%</b> at restaurants if service charge isn\'t included. Pubs: round up or no tip at all is normal.' },
+  { c:'FR', n:'France', f:'🇫🇷', cur:'EUR', sym:'€', svc:'usually',
+    v:{ restaurant:{s:'optional',lo:5,hi:10}, bar:{s:'optional',lo:0,hi:5},
+        taxi:{s:'optional',lo:5,hi:10}, delivery:{s:'optional',lo:0,hi:5},
+        housekeep:{s:'optional',lo:1,hi:2}, porter:{s:'customary',lo:1,hi:2},
+        tour:{s:'customary',lo:5,hi:10}, spa:{s:'optional',lo:5,hi:10} },
+    note:'Service is <b>included by law</b> ("service compris") in every restaurant bill. Rounding up or leaving 5–10% for exceptional service is appreciated but never expected.' },
+  { c:'DE', n:'Germany', f:'🇩🇪', cur:'EUR', sym:'€', svc:'rarely',
+    v:{ restaurant:{s:'customary',lo:5,hi:10}, bar:{s:'customary',lo:5,hi:10},
+        taxi:{s:'customary',lo:5,hi:10}, delivery:{s:'optional',lo:0,hi:10},
+        housekeep:{s:'optional',lo:1,hi:2}, porter:{s:'customary',lo:1,hi:2},
+        tour:{s:'customary',lo:5,hi:10}, spa:{s:'customary',lo:5,hi:10} },
+    note:'Round up to the nearest euro or add <b>5–10%</b>. Hand the tip directly to the server when paying — state the total ("Vierzig, bitte") rather than leaving it on the table.' },
+  { c:'IT', n:'Italy', f:'🇮🇹', cur:'EUR', sym:'€', svc:'often',
+    v:{ restaurant:{s:'optional',lo:0,hi:10}, bar:{s:'optional',lo:0,hi:0},
+        taxi:{s:'optional',lo:0,hi:5}, delivery:{s:'optional',lo:0,hi:5},
+        housekeep:{s:'optional',lo:1,hi:2}, porter:{s:'customary',lo:1,hi:2},
+        tour:{s:'customary',lo:5,hi:10}, spa:{s:'optional',lo:5,hi:10} },
+    note:'A <b>"coperto"</b> (cover charge, €1–3 per person) is standard and is NOT a tip. If "servizio" is included, no extra is needed. Otherwise, round up or leave 5–10% for great service.' },
+  { c:'ES', n:'Spain', f:'🇪🇸', cur:'EUR', sym:'€', svc:'rarely',
+    v:{ restaurant:{s:'optional',lo:5,hi:10}, bar:{s:'optional',lo:0,hi:0},
+        taxi:{s:'optional',lo:0,hi:5}, delivery:{s:'optional',lo:0,hi:5},
+        housekeep:{s:'optional',lo:1,hi:2}, porter:{s:'customary',lo:1,hi:2},
+        tour:{s:'customary',lo:5,hi:10}, spa:{s:'optional',lo:5,hi:10} },
+    note:'Tipping is modest and optional — round up or leave a few coins. <b>5–10%</b> at nicer restaurants is generous. Spaniards themselves rarely tip in bars or cafés.' },
+  { c:'PT', n:'Portugal', f:'🇵🇹', cur:'EUR', sym:'€', svc:'rarely',
+    v:{ restaurant:{s:'customary',lo:5,hi:10}, bar:{s:'optional',lo:0,hi:0},
+        taxi:{s:'optional',lo:0,hi:5}, delivery:{s:'optional',lo:0,hi:5},
+        housekeep:{s:'optional',lo:1,hi:2}, porter:{s:'customary',lo:1,hi:2},
+        tour:{s:'customary',lo:5,hi:10}, spa:{s:'customary',lo:5,hi:10} },
+    note:'<b>5–10%</b> at restaurants is welcomed but not expected. A "couvert" (bread, olives) is not a tip — and it\'s removable if untouched.' },
+  { c:'NL', n:'Netherlands', f:'🇳🇱', cur:'EUR', sym:'€', svc:'rarely',
+    v:{ restaurant:{s:'customary',lo:5,hi:10}, bar:{s:'optional',lo:0,hi:5},
+        taxi:{s:'customary',lo:5,hi:10}, delivery:{s:'optional',lo:0,hi:5},
+        housekeep:{s:'optional',lo:1,hi:2}, porter:{s:'customary',lo:1,hi:2},
+        tour:{s:'customary',lo:5,hi:10}, spa:{s:'customary',lo:5,hi:10} },
+    note:'Round up or <b>5–10%</b> at restaurants. Service is technically included but a small tip is increasingly common, especially in tourist areas.' },
+  { c:'BE', n:'Belgium', f:'🇧🇪', cur:'EUR', sym:'€', svc:'usually',
+    v:{ restaurant:{s:'optional',lo:0,hi:10}, bar:{s:'optional',lo:0,hi:5},
+        taxi:{s:'optional',lo:5,hi:10}, delivery:{s:'optional',lo:0,hi:5},
+        housekeep:{s:'optional',lo:1,hi:2}, porter:{s:'customary',lo:1,hi:2},
+        tour:{s:'customary',lo:5,hi:10}, spa:{s:'optional',lo:5,hi:10} },
+    note:'Service is <b>included</b> on the bill. Round up or leave coins for good service — never expected.' },
+  { c:'GR', n:'Greece', f:'🇬🇷', cur:'EUR', sym:'€', svc:'rarely',
+    v:{ restaurant:{s:'customary',lo:5,hi:10}, bar:{s:'optional',lo:0,hi:5},
+        taxi:{s:'optional',lo:0,hi:5}, delivery:{s:'optional',lo:0,hi:5},
+        housekeep:{s:'customary',lo:1,hi:2}, porter:{s:'customary',lo:1,hi:2},
+        tour:{s:'customary',lo:10,hi:10}, spa:{s:'customary',lo:5,hi:10} },
+    note:'<b>5–10%</b> at tavernas is customary. Tips are typically left in cash on the table even when paying by card.' },
+  { c:'CH', n:'Switzerland', f:'🇨🇭', cur:'CHF', sym:'CHF', svc:'usually',
+    v:{ restaurant:{s:'optional',lo:5,hi:10}, bar:{s:'optional',lo:0,hi:5},
+        taxi:{s:'optional',lo:5,hi:10}, delivery:{s:'optional',lo:0,hi:5},
+        housekeep:{s:'optional',lo:2,hi:5}, porter:{s:'customary',lo:2,hi:5},
+        tour:{s:'customary',lo:5,hi:10}, spa:{s:'customary',lo:5,hi:10} },
+    note:'Service is included by law in every restaurant bill. Round up or add <b>5–10%</b> only for excellent service. Wages are high — tips are extra.' },
+  { c:'AT', n:'Austria', f:'🇦🇹', cur:'EUR', sym:'€', svc:'rarely',
+    v:{ restaurant:{s:'customary',lo:5,hi:10}, bar:{s:'customary',lo:5,hi:10},
+        taxi:{s:'customary',lo:5,hi:10}, delivery:{s:'optional',lo:0,hi:10},
+        housekeep:{s:'optional',lo:1,hi:2}, porter:{s:'customary',lo:1,hi:2},
+        tour:{s:'customary',lo:5,hi:10}, spa:{s:'customary',lo:5,hi:10} },
+    note:'Round up by <b>5–10%</b>. State the rounded total to your server when paying ("Zwanzig, bitte" for €20) rather than leaving it on the table.' },
+  { c:'SE', n:'Sweden', f:'🇸🇪', cur:'SEK', sym:'kr', svc:'usually',
+    v:{ restaurant:{s:'optional',lo:5,hi:10}, bar:{s:'optional',lo:0,hi:0},
+        taxi:{s:'optional',lo:0,hi:5}, delivery:{s:'optional',lo:0,hi:0},
+        housekeep:{s:'optional',lo:10,hi:20}, porter:{s:'optional',lo:10,hi:20},
+        tour:{s:'customary',lo:5,hi:10}, spa:{s:'optional',lo:5,hi:10} },
+    note:'Service is included. Round up or leave <b>5–10%</b> for good service — never expected. Card terminals sometimes prompt for a tip; locals typically skip it.' },
+  { c:'NO', n:'Norway', f:'🇳🇴', cur:'NOK', sym:'kr', svc:'usually',
+    v:{ restaurant:{s:'optional',lo:5,hi:10}, bar:{s:'optional',lo:0,hi:0},
+        taxi:{s:'optional',lo:0,hi:5}, delivery:{s:'optional',lo:0,hi:0},
+        housekeep:{s:'optional',lo:10,hi:20}, porter:{s:'optional',lo:10,hi:20},
+        tour:{s:'customary',lo:5,hi:10}, spa:{s:'optional',lo:5,hi:10} },
+    note:'Service is included and wages are high. Round up or leave <b>5–10%</b> for great service. Tipping is genuinely optional here.' },
+  { c:'DK', n:'Denmark', f:'🇩🇰', cur:'DKK', sym:'kr', svc:'usually',
+    v:{ restaurant:{s:'optional',lo:0,hi:10}, bar:{s:'optional',lo:0,hi:0},
+        taxi:{s:'optional',lo:0,hi:0}, delivery:{s:'optional',lo:0,hi:0},
+        housekeep:{s:'optional',lo:10,hi:20}, porter:{s:'optional',lo:10,hi:20},
+        tour:{s:'customary',lo:5,hi:10}, spa:{s:'optional',lo:5,hi:10} },
+    note:'Service is <b>included by law</b>. Tips are genuinely optional and never expected. Round up only for outstanding service.' },
+  { c:'FI', n:'Finland', f:'🇫🇮', cur:'EUR', sym:'€', svc:'usually',
+    v:{ restaurant:{s:'optional',lo:0,hi:10}, bar:{s:'optional',lo:0,hi:0},
+        taxi:{s:'optional',lo:0,hi:0}, delivery:{s:'optional',lo:0,hi:0},
+        housekeep:{s:'optional',lo:1,hi:2}, porter:{s:'optional',lo:1,hi:2},
+        tour:{s:'customary',lo:5,hi:10}, spa:{s:'optional',lo:5,hi:10} },
+    note:'Service is included. Tipping is uncommon and never expected. Round up only for exceptional service.' },
+  { c:'IS', n:'Iceland', f:'🇮🇸', cur:'ISK', sym:'kr', svc:'usually',
+    v:{ restaurant:{s:'optional',lo:0,hi:10}, bar:{s:'optional',lo:0,hi:0},
+        taxi:{s:'optional',lo:0,hi:0}, delivery:{s:'optional',lo:0,hi:0},
+        housekeep:{s:'optional',lo:200,hi:500}, porter:{s:'optional',lo:200,hi:500},
+        tour:{s:'customary',lo:5,hi:10}, spa:{s:'optional',lo:5,hi:10} },
+    note:'Tipping is genuinely not part of the culture. Service is included and staff are paid full wages. Tour guides are an exception and welcome a small tip.' },
+  { c:'CZ', n:'Czechia', f:'🇨🇿', cur:'CZK', sym:'Kč', svc:'rarely',
+    v:{ restaurant:{s:'customary',lo:10,hi:10}, bar:{s:'customary',lo:5,hi:10},
+        taxi:{s:'customary',lo:5,hi:10}, delivery:{s:'optional',lo:0,hi:10},
+        housekeep:{s:'optional',lo:20,hi:50}, porter:{s:'customary',lo:20,hi:50},
+        tour:{s:'customary',lo:10,hi:10}, spa:{s:'customary',lo:10,hi:10} },
+    note:'<b>10%</b> is standard at restaurants. State the rounded total to the server — don\'t leave money on the table.' },
+  { c:'PL', n:'Poland', f:'🇵🇱', cur:'PLN', sym:'zł', svc:'rarely',
+    v:{ restaurant:{s:'customary',lo:10,hi:15}, bar:{s:'customary',lo:5,hi:10},
+        taxi:{s:'optional',lo:5,hi:10}, delivery:{s:'optional',lo:0,hi:10},
+        housekeep:{s:'optional',lo:5,hi:10}, porter:{s:'customary',lo:5,hi:10},
+        tour:{s:'customary',lo:10,hi:15}, spa:{s:'customary',lo:10,hi:10} },
+    note:'<b>10–15%</b> at restaurants is customary. Note: saying "thank you" when handing money to the server in Poland is taken to mean "keep the change" — be careful with timing!' },
+  { c:'HU', n:'Hungary', f:'🇭🇺', cur:'HUF', sym:'Ft', svc:'often',
+    v:{ restaurant:{s:'customary',lo:10,hi:15}, bar:{s:'customary',lo:10,hi:10},
+        taxi:{s:'customary',lo:10,hi:10}, delivery:{s:'optional',lo:0,hi:10},
+        housekeep:{s:'customary',lo:200,hi:500}, porter:{s:'customary',lo:200,hi:500},
+        tour:{s:'customary',lo:10,hi:15}, spa:{s:'customary',lo:10,hi:15} },
+    note:'<b>10–15%</b> is standard. Check the bill — many Budapest restaurants now add a 12–15% service charge automatically.' },
+  { c:'HR', n:'Croatia', f:'🇭🇷', cur:'EUR', sym:'€', svc:'rarely',
+    v:{ restaurant:{s:'customary',lo:10,hi:15}, bar:{s:'optional',lo:5,hi:10},
+        taxi:{s:'optional',lo:5,hi:10}, delivery:{s:'optional',lo:0,hi:10},
+        housekeep:{s:'optional',lo:1,hi:2}, porter:{s:'customary',lo:1,hi:2},
+        tour:{s:'customary',lo:10,hi:15}, spa:{s:'customary',lo:10,hi:10} },
+    note:'<b>10–15%</b> at tourist-area restaurants is increasingly expected. Outside tourist zones, rounding up is fine.' },
+  { c:'TR', n:'Turkey', f:'🇹🇷', cur:'TRY', sym:'₺', svc:'often',
+    v:{ restaurant:{s:'customary',lo:10,hi:15}, bar:{s:'customary',lo:10,hi:10},
+        taxi:{s:'optional',lo:0,hi:10}, delivery:{s:'optional',lo:0,hi:10},
+        housekeep:{s:'customary',lo:20,hi:50}, porter:{s:'customary',lo:20,hi:50},
+        tour:{s:'expected',lo:10,hi:20}, spa:{s:'expected',lo:10,hi:15} },
+    note:'<b>10–15%</b> at restaurants. Hammam (Turkish bath) attendants expect 10–15% — tip in cash, divided among the masseur and helpers.' },
+  { c:'RU', n:'Russia', f:'🇷🇺', cur:'RUB', sym:'₽', svc:'often',
+    v:{ restaurant:{s:'customary',lo:10,hi:15}, bar:{s:'optional',lo:10,hi:10},
+        taxi:{s:'optional',lo:0,hi:10}, delivery:{s:'optional',lo:0,hi:10},
+        housekeep:{s:'customary',lo:50,hi:100}, porter:{s:'customary',lo:50,hi:100},
+        tour:{s:'customary',lo:10,hi:15}, spa:{s:'customary',lo:10,hi:10} },
+    note:'<b>10%</b> at sit-down restaurants is standard, sometimes already included as service charge.' },
+
+  /* === MIDDLE EAST & AFRICA === */
+  { c:'AE', n:'United Arab Emirates', f:'🇦🇪', cur:'AED', sym:'د.إ', svc:'usually',
+    v:{ restaurant:{s:'customary',lo:10,hi:15}, bar:{s:'customary',lo:10,hi:10},
+        taxi:{s:'optional',lo:0,hi:10}, delivery:{s:'optional',lo:0,hi:10},
+        housekeep:{s:'customary',lo:5,hi:10}, porter:{s:'customary',lo:5,hi:10},
+        tour:{s:'customary',lo:10,hi:15}, spa:{s:'customary',lo:10,hi:15} },
+    note:'A <b>10% service charge</b> is added to most restaurant bills, but rarely reaches the server — an extra 10–15% cash tip is appreciated.' },
+  { c:'SA', n:'Saudi Arabia', f:'🇸🇦', cur:'SAR', sym:'﷼', svc:'often',
+    v:{ restaurant:{s:'optional',lo:10,hi:15}, bar:{s:'unusual',lo:0,hi:0},
+        taxi:{s:'optional',lo:0,hi:10}, delivery:{s:'optional',lo:0,hi:10},
+        housekeep:{s:'optional',lo:5,hi:10}, porter:{s:'customary',lo:5,hi:10},
+        tour:{s:'customary',lo:10,hi:15}, spa:{s:'optional',lo:10,hi:10} },
+    note:'Tipping is not customary among locals, but expat-staffed venues appreciate <b>10–15%</b>. Many bills include a service charge.' },
+  { c:'IL', n:'Israel', f:'🇮🇱', cur:'ILS', sym:'₪', svc:'rarely',
+    v:{ restaurant:{s:'expected',lo:12,hi:15}, bar:{s:'expected',lo:12,hi:15},
+        taxi:{s:'optional',lo:0,hi:5}, delivery:{s:'customary',lo:10,hi:10},
+        housekeep:{s:'optional',lo:5,hi:10}, porter:{s:'customary',lo:5,hi:10},
+        tour:{s:'expected',lo:10,hi:15}, spa:{s:'customary',lo:10,hi:15} },
+    note:'<b>12–15%</b> at restaurants is essentially mandatory — service is rarely included. Tipping in cash is preferred so the server keeps the full amount.' },
+  { c:'EG', n:'Egypt', f:'🇪🇬', cur:'EGP', sym:'£', svc:'usually',
+    v:{ restaurant:{s:'expected',lo:10,hi:15}, bar:{s:'customary',lo:10,hi:10},
+        taxi:{s:'customary',lo:10,hi:10}, delivery:{s:'customary',lo:5,hi:10},
+        housekeep:{s:'expected',lo:20,hi:50}, porter:{s:'expected',lo:10,hi:20},
+        tour:{s:'expected',lo:10,hi:20}, spa:{s:'customary',lo:10,hi:15} },
+    note:'<b>"Baksheesh"</b> (small tips) is a way of life. Bills include service, but staff are paid very low base wages — extra 10–15% in cash is expected. Carry small notes.' },
+  { c:'MA', n:'Morocco', f:'🇲🇦', cur:'MAD', sym:'د.م', svc:'often',
+    v:{ restaurant:{s:'customary',lo:10,hi:15}, bar:{s:'customary',lo:10,hi:10},
+        taxi:{s:'optional',lo:0,hi:10}, delivery:{s:'optional',lo:0,hi:10},
+        housekeep:{s:'customary',lo:10,hi:20}, porter:{s:'customary',lo:10,hi:20},
+        tour:{s:'expected',lo:10,hi:15}, spa:{s:'expected',lo:10,hi:15} },
+    note:'Tipping (<b>10–15%</b>) is widely expected throughout the service economy. Small dirham notes are essential — for porters, parking attendants, hammam staff.' },
+  { c:'ZA', n:'South Africa', f:'🇿🇦', cur:'ZAR', sym:'R', svc:'rarely',
+    v:{ restaurant:{s:'expected',lo:10,hi:15}, bar:{s:'expected',lo:10,hi:15},
+        taxi:{s:'customary',lo:10,hi:10}, delivery:{s:'customary',lo:10,hi:10},
+        housekeep:{s:'customary',lo:10,hi:20}, porter:{s:'customary',lo:10,hi:20},
+        tour:{s:'expected',lo:10,hi:15}, spa:{s:'expected',lo:10,hi:15} },
+    note:'<b>10–15%</b> is standard everywhere — many service workers depend on tips. Petrol attendants ("car guards") also expect R5–10.' },
+  { c:'KE', n:'Kenya', f:'🇰🇪', cur:'KES', sym:'KSh', svc:'often',
+    v:{ restaurant:{s:'customary',lo:10,hi:10}, bar:{s:'customary',lo:10,hi:10},
+        taxi:{s:'optional',lo:0,hi:10}, delivery:{s:'optional',lo:5,hi:10},
+        housekeep:{s:'customary',lo:100,hi:200}, porter:{s:'customary',lo:50,hi:100},
+        tour:{s:'expected',lo:10,hi:15}, spa:{s:'customary',lo:10,hi:10} },
+    note:'Tipping safari guides and trackers is the most important convention here — typically <b>$10–20 USD per day per guest</b>. Restaurants 10% if not included.' },
+
+  /* === ASIA & PACIFIC === */
+  { c:'JP', n:'Japan', f:'🇯🇵', cur:'JPY', sym:'¥', svc:'usually',
+    v:{ restaurant:{s:'unusual',lo:0,hi:0}, bar:{s:'unusual',lo:0,hi:0},
+        taxi:{s:'unusual',lo:0,hi:0}, delivery:{s:'unusual',lo:0,hi:0},
+        housekeep:{s:'unusual',lo:0,hi:0}, porter:{s:'unusual',lo:0,hi:0},
+        tour:{s:'optional',lo:0,hi:10}, spa:{s:'unusual',lo:0,hi:0} },
+    note:'<b>Tipping is not customary</b> and may confuse or embarrass staff. Service is included in the price and staff take pride in providing excellent service as part of their job. Private tour guides are a rare exception.' },
+  { c:'KR', n:'South Korea', f:'🇰🇷', cur:'KRW', sym:'₩', svc:'usually',
+    v:{ restaurant:{s:'unusual',lo:0,hi:0}, bar:{s:'unusual',lo:0,hi:0},
+        taxi:{s:'unusual',lo:0,hi:0}, delivery:{s:'unusual',lo:0,hi:0},
+        housekeep:{s:'unusual',lo:0,hi:0}, porter:{s:'unusual',lo:0,hi:0},
+        tour:{s:'optional',lo:0,hi:10}, spa:{s:'unusual',lo:0,hi:0} },
+    note:'<b>Tipping is genuinely not expected.</b> Upscale hotels and restaurants add a 10% service charge to the bill. Beyond that, extra tips can confuse staff.' },
+  { c:'CN', n:'China', f:'🇨🇳', cur:'CNY', sym:'¥', svc:'often',
+    v:{ restaurant:{s:'unusual',lo:0,hi:0}, bar:{s:'unusual',lo:0,hi:0},
+        taxi:{s:'unusual',lo:0,hi:0}, delivery:{s:'unusual',lo:0,hi:0},
+        housekeep:{s:'unusual',lo:0,hi:0}, porter:{s:'optional',lo:5,hi:10},
+        tour:{s:'customary',lo:10,hi:15}, spa:{s:'unusual',lo:0,hi:0} },
+    note:'Mainland China — <b>tipping is not customary</b> outside of tourist-facing tour guides and high-end hotels. Many restaurants add 10–15% service charge.' },
+  { c:'HK', n:'Hong Kong', f:'🇭🇰', cur:'HKD', sym:'$', svc:'usually',
+    v:{ restaurant:{s:'optional',lo:5,hi:10}, bar:{s:'optional',lo:5,hi:10},
+        taxi:{s:'optional',lo:0,hi:5}, delivery:{s:'optional',lo:0,hi:10},
+        housekeep:{s:'optional',lo:10,hi:20}, porter:{s:'customary',lo:10,hi:20},
+        tour:{s:'customary',lo:10,hi:10}, spa:{s:'optional',lo:5,hi:10} },
+    note:'A <b>10% service charge</b> is typically added to restaurant bills. An additional small tip (or rounding up) is appreciated but not expected.' },
+  { c:'TW', n:'Taiwan', f:'🇹🇼', cur:'TWD', sym:'$', svc:'often',
+    v:{ restaurant:{s:'unusual',lo:0,hi:0}, bar:{s:'unusual',lo:0,hi:0},
+        taxi:{s:'unusual',lo:0,hi:0}, delivery:{s:'unusual',lo:0,hi:0},
+        housekeep:{s:'unusual',lo:0,hi:0}, porter:{s:'optional',lo:50,hi:100},
+        tour:{s:'customary',lo:10,hi:10}, spa:{s:'unusual',lo:0,hi:0} },
+    note:'Tipping is generally not customary. Better restaurants add a 10% service charge to the bill. Tour guides are the main exception.' },
+  { c:'TH', n:'Thailand', f:'🇹🇭', cur:'THB', sym:'฿', svc:'often',
+    v:{ restaurant:{s:'customary',lo:5,hi:10}, bar:{s:'optional',lo:0,hi:5},
+        taxi:{s:'optional',lo:0,hi:5}, delivery:{s:'optional',lo:0,hi:10},
+        housekeep:{s:'customary',lo:20,hi:50}, porter:{s:'customary',lo:20,hi:50},
+        tour:{s:'customary',lo:10,hi:15}, spa:{s:'customary',lo:10,hi:15} },
+    note:'A <b>10% service charge</b> is common at sit-down restaurants. If not included, rounding up or leaving small change is appreciated. Massage therapists welcome 50–100฿.' },
+  { c:'VN', n:'Vietnam', f:'🇻🇳', cur:'VND', sym:'₫', svc:'often',
+    v:{ restaurant:{s:'optional',lo:5,hi:10}, bar:{s:'optional',lo:0,hi:5},
+        taxi:{s:'optional',lo:0,hi:0}, delivery:{s:'optional',lo:0,hi:10},
+        housekeep:{s:'customary',lo:20000,hi:50000}, porter:{s:'customary',lo:20000,hi:50000},
+        tour:{s:'customary',lo:10,hi:15}, spa:{s:'customary',lo:10,hi:15} },
+    note:'Tipping isn\'t historically part of the culture but is increasingly expected in tourist areas. <b>5–10%</b> at restaurants if no service charge.' },
+  { c:'ID', n:'Indonesia', f:'🇮🇩', cur:'IDR', sym:'Rp', svc:'usually',
+    v:{ restaurant:{s:'optional',lo:5,hi:10}, bar:{s:'optional',lo:0,hi:5},
+        taxi:{s:'optional',lo:0,hi:5}, delivery:{s:'optional',lo:0,hi:10},
+        housekeep:{s:'customary',lo:10000,hi:20000}, porter:{s:'customary',lo:10000,hi:20000},
+        tour:{s:'customary',lo:10,hi:15}, spa:{s:'customary',lo:10,hi:15} },
+    note:'Restaurants typically add <b>5–10% service + 10% tax</b> ("plus-plus"). Tipping is not strictly expected, but small notes for housekeeping & spa staff are welcomed.' },
+  { c:'MY', n:'Malaysia', f:'🇲🇾', cur:'MYR', sym:'RM', svc:'usually',
+    v:{ restaurant:{s:'optional',lo:0,hi:10}, bar:{s:'optional',lo:0,hi:5},
+        taxi:{s:'optional',lo:0,hi:5}, delivery:{s:'optional',lo:0,hi:10},
+        housekeep:{s:'optional',lo:2,hi:5}, porter:{s:'customary',lo:2,hi:5},
+        tour:{s:'customary',lo:10,hi:10}, spa:{s:'optional',lo:5,hi:10} },
+    note:'Tipping is not customary. Mid-range and upscale restaurants add a <b>10% service charge</b>. Beyond that, tips are optional.' },
+  { c:'SG', n:'Singapore', f:'🇸🇬', cur:'SGD', sym:'$', svc:'usually',
+    v:{ restaurant:{s:'unusual',lo:0,hi:0}, bar:{s:'unusual',lo:0,hi:0},
+        taxi:{s:'unusual',lo:0,hi:0}, delivery:{s:'unusual',lo:0,hi:0},
+        housekeep:{s:'optional',lo:2,hi:5}, porter:{s:'optional',lo:2,hi:5},
+        tour:{s:'customary',lo:10,hi:10}, spa:{s:'unusual',lo:0,hi:0} },
+    note:'A <b>10% service charge + 9% GST</b> is added to most restaurant bills ("++"). Tipping beyond that is not customary; the airport even has signs discouraging it.' },
+  { c:'PH', n:'Philippines', f:'🇵🇭', cur:'PHP', sym:'₱', svc:'usually',
+    v:{ restaurant:{s:'customary',lo:5,hi:10}, bar:{s:'customary',lo:5,hi:10},
+        taxi:{s:'optional',lo:0,hi:10}, delivery:{s:'optional',lo:0,hi:10},
+        housekeep:{s:'customary',lo:50,hi:100}, porter:{s:'customary',lo:20,hi:50},
+        tour:{s:'customary',lo:10,hi:15}, spa:{s:'customary',lo:10,hi:15} },
+    note:'A <b>10% service charge</b> is standard on restaurant bills. An additional 5–10% is appreciated, especially since service-charge laws don\'t always reach the worker.' },
+  { c:'IN', n:'India', f:'🇮🇳', cur:'INR', sym:'₹', svc:'often',
+    v:{ restaurant:{s:'customary',lo:5,hi:10}, bar:{s:'customary',lo:10,hi:10},
+        taxi:{s:'optional',lo:0,hi:10}, delivery:{s:'optional',lo:5,hi:10},
+        housekeep:{s:'customary',lo:50,hi:100}, porter:{s:'customary',lo:20,hi:50},
+        tour:{s:'expected',lo:10,hi:15}, spa:{s:'customary',lo:10,hi:15} },
+    note:'Many restaurants add a <b>10% service charge</b> (legally optional — you can ask for it to be removed). If not included, 5–10% is customary. Carry small ₹10/20/50 notes for tipping daily helpers.' },
+  { c:'AU', n:'Australia', f:'🇦🇺', cur:'AUD', sym:'$', svc:'rarely',
+    v:{ restaurant:{s:'optional',lo:5,hi:10}, bar:{s:'optional',lo:0,hi:0},
+        taxi:{s:'optional',lo:0,hi:5}, delivery:{s:'optional',lo:0,hi:5},
+        housekeep:{s:'optional',lo:2,hi:5}, porter:{s:'optional',lo:2,hi:5},
+        tour:{s:'customary',lo:5,hi:10}, spa:{s:'optional',lo:5,hi:10} },
+    note:'Tipping is genuinely optional — staff are paid a proper living wage. Round up or <b>10%</b> at higher-end restaurants for great service. Public holiday/Sunday surcharges are not a tip.' },
+  { c:'NZ', n:'New Zealand', f:'🇳🇿', cur:'NZD', sym:'$', svc:'rarely',
+    v:{ restaurant:{s:'optional',lo:0,hi:10}, bar:{s:'optional',lo:0,hi:0},
+        taxi:{s:'optional',lo:0,hi:5}, delivery:{s:'optional',lo:0,hi:5},
+        housekeep:{s:'optional',lo:2,hi:5}, porter:{s:'optional',lo:2,hi:5},
+        tour:{s:'customary',lo:5,hi:10}, spa:{s:'optional',lo:5,hi:10} },
+    note:'Tipping is genuinely optional and uncommon among locals. Tour guides are the main exception — <b>5–10%</b> is appreciated.' },
+  { c:'FJ', n:'Fiji', f:'🇫🇯', cur:'FJD', sym:'$', svc:'often',
+    v:{ restaurant:{s:'optional',lo:5,hi:10}, bar:{s:'optional',lo:0,hi:5},
+        taxi:{s:'optional',lo:0,hi:5}, delivery:{s:'optional',lo:0,hi:5},
+        housekeep:{s:'optional',lo:2,hi:5}, porter:{s:'customary',lo:2,hi:5},
+        tour:{s:'customary',lo:10,hi:10}, spa:{s:'optional',lo:5,hi:10} },
+    note:'Many resorts use a <b>"Christmas Fund"</b> — a pooled box at reception that goes to all staff equally. Individual tipping is appreciated but not expected.' },
+];
+
+/* ── TIP CALCULATOR STATE ── */
+const TC_KEY = 'tt_tipcalc_v1';
+let tcState = {
+  countryCode: null,
+  venueId: 'restaurant',
+  pickerKbdIdx: -1,
+};
+
+function tcInit(){
+  // Load saved state, or pre-fill from active trip
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(TC_KEY) || 'null'); } catch(e){}
+  if (saved && saved.countryCode) {
+    tcState.countryCode = saved.countryCode;
+    tcState.venueId = saved.venueId || 'restaurant';
+  } else {
+    // Try to auto-detect from active trip destination
+    const trip = getActiveTrip();
+    if (trip && trip.destination) {
+      const match = tcGuessCountryFromDest(trip.destination);
+      if (match) tcState.countryCode = match.c;
+    }
+  }
+  // Print date
+  const pd = document.getElementById('tc-print-date');
+  if (pd) pd.textContent = new Date().toLocaleDateString();
+
+  tcRenderVenues();
+  if (tcState.countryCode) {
+    tcSelectCountry(tcState.countryCode, false);
+  } else {
+    tcRenderCountryList('');
+  }
+  // Set up outside-click closer
+  if (!document._tcClickBound){
+    document.addEventListener('click', tcDocClick);
+    document._tcClickBound = true;
+  }
+}
+
+function tcGuessCountryFromDest(dest){
+  if (!dest) return null;
+  const q = dest.toLowerCase();
+  // Try direct name match (longest first for "United States" beating "States")
+  const sorted = [...TC_COUNTRIES].sort((a,b)=>b.n.length - a.n.length);
+  for (const co of sorted){
+    if (q.includes(co.n.toLowerCase())) return co;
+  }
+  // Common city → country shortcuts
+  const cities = {
+    'paris':'FR','london':'GB','tokyo':'JP','rome':'IT','barcelona':'ES','madrid':'ES',
+    'amsterdam':'NL','berlin':'DE','munich':'DE','bali':'ID','jakarta':'ID',
+    'bangkok':'TH','phuket':'TH','singapore':'SG','sydney':'AU','melbourne':'AU',
+    'auckland':'NZ','dubai':'AE','istanbul':'TR','athens':'GR','santorini':'GR',
+    'lisbon':'PT','porto':'PT','prague':'CZ','vienna':'AT','zurich':'CH',
+    'stockholm':'SE','oslo':'NO','copenhagen':'DK','helsinki':'FI','reykjavik':'IS',
+    'dublin':'IE','edinburgh':'GB','rio':'BR','sao paulo':'BR','buenos aires':'AR',
+    'cancun':'MX','mexico city':'MX','mumbai':'IN','delhi':'IN','seoul':'KR',
+    'shanghai':'CN','beijing':'CN','hong kong':'HK','taipei':'TW','manila':'PH',
+    'kuala lumpur':'MY','hanoi':'VN','ho chi minh':'VN','cairo':'EG','marrakech':'MA',
+    'cape town':'ZA','nairobi':'KE','tel aviv':'IL','jerusalem':'IL','warsaw':'PL',
+    'budapest':'HU','dubrovnik':'HR','split':'HR','moscow':'RU','st petersburg':'RU',
+    'fiji':'FJ','nadi':'FJ','san jose':'CR','santiago':'CL','lima':'PE','toronto':'CA',
+    'vancouver':'CA','montreal':'CA','new york':'US','los angeles':'US','chicago':'US',
+    'orlando':'US','miami':'US','las vegas':'US','san francisco':'US','honolulu':'US',
+  };
+  for (const k in cities){ if (q.includes(k)) return TC_COUNTRIES.find(co => co.c === cities[k]); }
+  return null;
+}
+
+function tcSave(){
+  try { localStorage.setItem(TC_KEY, JSON.stringify({
+    countryCode: tcState.countryCode,
+    venueId: tcState.venueId,
+  })); } catch(e){}
+}
+
+function tcCountry(){
+  return TC_COUNTRIES.find(co => co.c === tcState.countryCode);
+}
+
+/* ── COUNTRY PICKER ── */
+function tcOpenPicker(){
+  const drop = document.getElementById('tc-country-drop');
+  if (drop.style.display === 'block'){ tcClosePicker(); return; }
+  drop.style.display = 'block';
+  const s = document.getElementById('tc-country-search');
+  s.value = ''; tcRenderCountryList('');
+  setTimeout(()=>s.focus(), 50);
+}
+function tcClosePicker(){
+  document.getElementById('tc-country-drop').style.display = 'none';
+  tcState.pickerKbdIdx = -1;
+}
+function tcDocClick(e){
+  const wrap = document.getElementById('tc-country-disp');
+  const drop = document.getElementById('tc-country-drop');
+  if (!wrap || !drop) return;
+  if (drop.style.display !== 'block') return;
+  if (wrap.contains(e.target) || drop.contains(e.target)) return;
+  tcClosePicker();
+}
+function tcFilterCountries(){
+  const q = (document.getElementById('tc-country-search').value || '').toLowerCase().trim();
+  tcRenderCountryList(q);
+}
+function tcRenderCountryList(q){
+  const list = TC_COUNTRIES.filter(co => !q || co.n.toLowerCase().includes(q) || co.c.toLowerCase().includes(q) || co.cur.toLowerCase().includes(q));
+  const html = list.length
+    ? list.map(co => `<div class="tc-drop-item" onclick="tcSelectCountry('${co.c}')"><span class="tc-drop-flag">${co.f}</span><span class="tc-drop-name">${co.n}</span><span class="tc-drop-cur">${co.cur}</span></div>`).join('')
+    : `<div class="tc-drop-item" style="color:var(--muted);cursor:default">No matches for "${tcEscape(q)}"</div>`;
+  document.getElementById('tc-country-list').innerHTML = html;
+}
+function tcEscape(s){ return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function tcSelectCountry(code, save){
+  if (save === undefined) save = true;
+  tcState.countryCode = code;
+  if (save) tcSave();
+  const co = tcCountry();
+  if (!co) return;
+  document.getElementById('tc-disp-flag').textContent = co.f;
+  document.getElementById('tc-disp-name').textContent = co.n;
+  document.getElementById('tc-disp-cur').textContent = co.cur;
+  document.getElementById('tc-cur-prefix').textContent = co.sym;
+  tcClosePicker();
+  document.getElementById('tc-venue-fg').style.display = '';
+  document.getElementById('tc-calc-section').style.display = '';
+  document.getElementById('tc-ref-table').style.display = '';
+  tcRenderVenues();
+  tcRenderRefTable();
+  tcOnVenueChange();
+}
+
+/* ── VENUE PICKER ── */
+function tcRenderVenues(){
+  const html = TC_VENUES.map(v => {
+    const active = v.id === tcState.venueId ? 'active' : '';
+    return `<button class="tc-venue-btn ${active}" data-vid="${v.id}" onclick="tcSelectVenue('${v.id}')"><span class="tc-venue-ico">${v.ico}</span><span class="tc-venue-lbl">${v.lbl}</span></button>`;
+  }).join('');
+  document.getElementById('tc-venues').innerHTML = html;
+}
+function tcSelectVenue(id){
+  tcState.venueId = id;
+  tcSave();
+  document.querySelectorAll('.tc-venue-btn').forEach(b => b.classList.toggle('active', b.dataset.vid === id));
+  tcOnVenueChange();
+}
+function tcVenue(){ return TC_VENUES.find(v => v.id === tcState.venueId) || TC_VENUES[0]; }
+
+function tcOnVenueChange(){
+  const v = tcVenue();
+  const co = tcCountry();
+  if (!co) return;
+  const data = co.v[v.id];
+  // Update labels
+  document.getElementById('tc-amt-lbl').textContent = v.amtLbl;
+  const qtyFg = document.getElementById('tc-qty-fg');
+  if (v.amtType === 'fixed'){
+    qtyFg.style.display = '';
+    document.getElementById('tc-qty-lbl').textContent = v.qtyLbl || 'Quantity';
+    // Hide bill amount → swap it for "rate" reference; user only changes quantity
+    document.querySelector('#tc-calc-section .tc-calc-grid .fg:first-child').style.display = 'none';
+  } else {
+    qtyFg.style.display = 'none';
+    document.querySelector('#tc-calc-section .tc-calc-grid .fg:first-child').style.display = '';
+  }
+  // Service charge toggle visible only for pct + countries where it's common
+  const svcWrap = document.getElementById('tc-svc-wrap');
+  if (v.amtType === 'pct' && (co.svc === 'usually' || co.svc === 'often') && data.s !== 'unusual' && data.s !== 'offensive'){
+    svcWrap.style.display = '';
+  } else {
+    svcWrap.style.display = 'none';
+    document.getElementById('tc-svc-ck').checked = false;
+  }
+  // Status row
+  const sRow = document.getElementById('tc-status-row');
+  sRow.style.display = '';
+  sRow.className = 'tc-status-row s-' + data.s;
+  const sVal = document.getElementById('tc-status-val');
+  sVal.className = 'tc-status-val s-' + data.s;
+  sVal.textContent = TC_STATUS[data.s].lbl;
+  document.getElementById('tc-rec-amt').textContent = tcFormatRange(data, v, co);
+  // Culture note
+  document.getElementById('tc-culture').style.display = '';
+  document.getElementById('tc-culture-body').innerHTML = co.note;
+  // Recalculate
+  tcCalc();
+}
+
+function tcFormatRange(data, v, co){
+  if (data.s === 'unusual' || data.s === 'offensive') return '—';
+  if (v.amtType === 'pct'){
+    if (data.lo === data.hi) return data.lo + '%';
+    return data.lo + '–' + data.hi + '%';
+  }
+  // fixed
+  if (data.lo === data.hi) return co.sym + tcFmtMoney(data.lo, co.cur) + ' / ' + (v.qtyLbl||'unit').toLowerCase().replace(/s$/,'');
+  return co.sym + tcFmtMoney(data.lo, co.cur) + '–' + tcFmtMoney(data.hi, co.cur) + ' / ' + (v.qtyLbl||'unit').toLowerCase().replace(/s$/,'');
+}
+
+/* ── CALCULATION ── */
+function tcCalc(){
+  const co = tcCountry();
+  if (!co) return;
+  const v = tcVenue();
+  const data = co.v[v.id];
+  const result = document.getElementById('tc-result');
+  const people = Math.max(1, parseInt(document.getElementById('tc-people').value) || 1);
+  let bill = 0, tip = 0, tipPct = null, tipMode = '';
+
+  if (data.s === 'unusual' || data.s === 'offensive'){
+    // Show "no tip" state but still display bill total
+    bill = parseFloat(document.getElementById('tc-amt').value) || 0;
+    if (v.amtType === 'fixed') bill = 0;
+    if (bill <= 0){ result.style.display = 'none'; return; }
+    result.style.display = '';
+    tcFillResult(bill, 0, '', co, people, v);
+    return;
+  }
+
+  if (v.amtType === 'pct'){
+    bill = parseFloat(document.getElementById('tc-amt').value) || 0;
+    if (bill <= 0){ result.style.display = 'none'; return; }
+    const svc = document.getElementById('tc-svc-ck').checked;
+    // Use midpoint of range as the recommended tip
+    let pct = (data.lo + data.hi) / 2;
+    if (svc){
+      // If service charge already included, round-up only — show 0 tip (or the difference if you want to top up)
+      pct = 0;
+      tipMode = 'service already included';
+    } else {
+      tipMode = pct.toFixed(pct % 1 === 0 ? 0 : 1) + '% of bill';
+    }
+    tip = bill * (pct / 100);
+    tipPct = pct;
+  } else {
+    // fixed per unit
+    const qty = Math.max(1, parseInt(document.getElementById('tc-qty').value) || 1);
+    const perUnit = (data.lo + data.hi) / 2;
+    tip = perUnit * qty;
+    bill = 0; // no separate bill for housekeeping/porter
+    tipMode = co.sym + tcFmtMoney(perUnit, co.cur) + ' × ' + qty + ' ' + (v.qtyLbl||'unit').toLowerCase();
+  }
+
+  result.style.display = '';
+  tcFillResult(bill, tip, tipMode, co, people, v);
+}
+
+function tcFillResult(bill, tip, tipMode, co, people, v){
+  document.getElementById('tc-r-bill').textContent = co.sym + tcFmtMoney(bill, co.cur);
+  document.getElementById('tc-r-tip').firstChild.nodeValue = co.sym + tcFmtMoney(tip, co.cur);
+  document.getElementById('tc-r-tip-sub').textContent = tipMode;
+  const total = bill + tip;
+  document.getElementById('tc-r-total').textContent = co.sym + tcFmtMoney(total, co.cur);
+  // Per-person
+  const ppRow = document.getElementById('tc-pp-row');
+  if (people > 1 && total > 0){
+    ppRow.style.display = '';
+    document.getElementById('tc-pp-count').textContent = `(÷ ${people})`;
+    document.getElementById('tc-pp-val').textContent = co.sym + tcFmtMoney(total / people, co.cur);
+  } else {
+    ppRow.style.display = 'none';
+  }
+  // Hide bill subtotal cell for fixed (no bill)
+  const billCell = document.getElementById('tc-r-bill').closest('.tc-result-cell');
+  const tipCell  = document.getElementById('tc-r-tip').closest('.tc-result-cell');
+  if (v.amtType === 'fixed'){
+    billCell.style.display = 'none';
+    tipCell.classList.add('tc-full');
+  } else {
+    billCell.style.display = '';
+    tipCell.classList.remove('tc-full');
+  }
+}
+
+function tcFmtMoney(amt, cur){
+  // No-decimal currencies
+  const noDec = ['JPY','KRW','CLP','IDR','VND','HUF','ISK','TWD'];
+  const digits = noDec.includes(cur) ? 0 : 2;
+  try { return amt.toLocaleString('en-US', { minimumFractionDigits: digits, maximumFractionDigits: digits }); }
+  catch(e){ return amt.toFixed(digits); }
+}
+
+/* ── REFERENCE TABLE (all venues for selected country) ── */
+function tcRenderRefTable(){
+  const co = tcCountry();
+  if (!co) return;
+  const rows = TC_VENUES.map(v => {
+    const d = co.v[v.id];
+    const active = v.id === tcState.venueId ? 'active' : '';
+    const rangeTxt = (d.s === 'unusual' || d.s === 'offensive') ? 'No tip' : tcFormatRange(d, v, co);
+    return `<div class="tc-ref-row ${active}" onclick="tcSelectVenue('${v.id}')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')tcSelectVenue('${v.id}')">
+      <span class="tc-ref-ico">${v.ico}</span>
+      <span class="tc-ref-nm">${v.lbl}</span>
+      <span class="tc-ref-amt">${rangeTxt}</span>
+      <span class="tc-ref-stat s-${d.s}">${TC_STATUS[d.s].lbl}</span>
+    </div>`;
+  }).join('');
+  document.getElementById('tc-ref-rows').innerHTML = rows;
+  document.getElementById('tc-ref-hdr-lbl').innerHTML = `${co.f} ${co.n} — tipping at a glance`;
+  const svcWarn = document.getElementById('tc-ref-svc-warn');
+  if (co.svc === 'usually') svcWarn.innerHTML = '<span class="tc-svc-warn">⚠ Service charge usually included</span>';
+  else if (co.svc === 'often') svcWarn.innerHTML = '<span class="tc-svc-warn">⚠ Service charge sometimes included</span>';
+  else svcWarn.innerHTML = '';
+}
+
+/* ── COPY SUMMARY ── */
+function tcCopy(){
+  const co = tcCountry();
+  if (!co) return;
+  const v = tcVenue();
+  const bill = document.getElementById('tc-r-bill').textContent;
+  const tip  = document.getElementById('tc-r-tip').firstChild.nodeValue.trim();
+  const tipSub = document.getElementById('tc-r-tip-sub').textContent;
+  const total = document.getElementById('tc-r-total').textContent;
+  const people = Math.max(1, parseInt(document.getElementById('tc-people').value) || 1);
+  const pp = people > 1 ? document.getElementById('tc-pp-val').textContent : null;
+
+  let txt = `${co.f} ${co.n} — ${v.lbl}\n`;
+  if (v.amtType === 'pct') txt += `Bill: ${bill}\n`;
+  txt += `Tip: ${tip}${tipSub ? ' ('+tipSub+')' : ''}\nTotal: ${total}`;
+  if (pp) txt += `\nPer person (÷${people}): ${pp}`;
+
+  if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(()=>{
+      const btn = document.getElementById('tc-copy-btn');
+      const orig = btn.textContent;
+      btn.textContent = '✓ Copied!';
+      setTimeout(()=>{ btn.textContent = orig; }, 1400);
+    });
+  }
+}
+
 </script>
 </body>
 </html>
