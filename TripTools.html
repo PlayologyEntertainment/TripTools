@@ -2969,16 +2969,222 @@ body.no-scroll { overflow: hidden; }
     </div>
   </div>
 </div>
-<div id="view-placeholder-vaccination" class="view">
-  <nav class="tool-topbar">
+<style>
+/* ── VACCINATION REQUIREMENTS ── */
+.vac-section{margin-top:28px}
+.vac-section-hdr{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;padding-bottom:8px;border-bottom:1.5px solid var(--ink)}
+.vac-section-num{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.vac-section-hdr h3{font-family:var(--serif);font-size:20px;font-weight:600;letter-spacing:-.01em;color:var(--ink);margin:0}
+.vac-result-card{border:2px solid var(--ink);border-radius:var(--r);overflow:hidden;margin-top:4px;background:var(--paper)}
+.vac-result-top{padding:16px 18px;display:flex;align-items:center;gap:14px;background:var(--paper-2);border-bottom:1.5px solid var(--ink)}
+.vac-result-flag{font-size:38px;line-height:1}
+.vac-result-name{font-family:var(--serif);font-size:22px;font-weight:700;letter-spacing:-.02em;color:var(--ink);line-height:1.1}
+.vac-result-sub{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+.vac-risk-row{display:grid;grid-template-columns:1fr 1fr;border-bottom:1.5px solid var(--ink)}
+.vac-risk-cell{padding:12px 16px;border-right:1.5px solid var(--ink)}
+.vac-risk-cell:last-child{border-right:none}
+.vac-risk-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.vac-risk-val{font-family:var(--serif);font-size:16px;font-weight:600;color:var(--ink);margin-top:3px;display:flex;align-items:center;gap:6px}
+.vac-risk-none .vac-risk-val{color:#2e7d32}
+.vac-risk-low  .vac-risk-val{color:#558b2f}
+.vac-risk-mod  .vac-risk-val{color:#B8860B}
+.vac-risk-high .vac-risk-val{color:#c62828}
+.vac-vax-block{padding:14px 18px;border-bottom:1.5px solid var(--rule)}
+.vac-vax-block:last-child{border-bottom:none}
+.vac-vax-hdr{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.vac-vax-hdr.req{color:#c62828}
+.vac-vax-hdr.rec{color:#1565c0}
+.vac-vax-list{display:flex;flex-direction:column;gap:8px}
+.vac-vax-item{padding:10px 12px;background:var(--paper-2);border:1px solid var(--rule);border-radius:var(--r);display:flex;align-items:flex-start;gap:10px}
+.vac-vax-item-ico{font-size:18px;line-height:1.1;flex-shrink:0}
+.vac-vax-item-main{flex:1;min-width:0}
+.vac-vax-item-name{font-family:var(--sans);font-weight:600;font-size:14px;color:var(--ink);line-height:1.25}
+.vac-vax-item-desc{font-size:13px;color:var(--ink-2);line-height:1.5;margin-top:3px}
+.vac-vax-empty{padding:10px 12px;color:var(--muted);font-size:13px;font-style:italic}
+.vac-notes{padding:12px 18px;font-size:13px;color:var(--ink-2);line-height:1.55;background:var(--paper-2);border-bottom:1.5px solid var(--rule)}
+.vac-notes strong{color:var(--ink)}
+.vac-card-footer{padding:10px 18px;font-size:12px;color:var(--muted);font-family:var(--mono);text-align:center}
+
+.vac-routine-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.vac-routine-item{padding:11px 13px;border:1.5px solid var(--ink);border-radius:var(--r);background:var(--paper)}
+.vac-routine-name{font-family:var(--sans);font-weight:600;font-size:14px;color:var(--ink);display:flex;align-items:center;gap:8px}
+.vac-routine-desc{font-size:12px;color:var(--ink-2);line-height:1.5;margin-top:4px}
+
+.vac-malaria-card,.vac-yf-card,.vac-timeline-card{border:1.5px solid var(--ink);border-radius:var(--r);background:var(--paper);padding:14px 16px;margin-top:8px}
+.vac-malaria-meds{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:10px}
+.vac-malaria-med{padding:10px 12px;background:var(--paper-2);border:1px solid var(--rule);border-radius:var(--r)}
+.vac-malaria-med-name{font-family:var(--sans);font-weight:600;font-size:13px;color:var(--ink)}
+.vac-malaria-med-desc{font-size:12px;color:var(--ink-2);line-height:1.5;margin-top:3px}
+.vac-malaria-key{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-top:4px}
+
+.vac-timeline-steps{display:flex;flex-direction:column;gap:10px;margin-top:10px}
+.vac-timeline-step{display:flex;gap:12px;align-items:flex-start;padding:10px 12px;background:var(--paper-2);border:1px solid var(--rule);border-radius:var(--r)}
+.vac-timeline-when{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);font-weight:600;min-width:88px;flex-shrink:0;padding-top:2px}
+.vac-timeline-what{font-size:13px;color:var(--ink-2);line-height:1.5}
+.vac-timeline-what strong{color:var(--ink)}
+
+.vac-tracker-empty{padding:18px;border:1.5px dashed var(--ink);border-radius:var(--r);color:var(--muted);text-align:center;font-size:13px;background:var(--paper-2);margin-top:10px}
+.vac-tracker-row{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;margin-top:8px;align-items:center}
+.vac-tracker-add{display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:8px;margin-top:10px;align-items:end}
+.vac-tracker-add label{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.vac-tracker-add input,.vac-tracker-add select{width:100%;padding:9px 10px;border:1.5px solid var(--ink);border-radius:var(--r);font-size:14px;font-family:var(--sans);background:var(--paper);color:var(--ink);box-sizing:border-box;outline:none;min-height:42px}
+.vac-tracker-add input:focus,.vac-tracker-add select:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(255,77,46,.15)}
+.vac-tracker-list{display:flex;flex-direction:column;gap:6px;margin-top:14px}
+.vac-tracker-entry{display:grid;grid-template-columns:1fr auto auto;gap:10px;padding:10px 12px;background:var(--paper-2);border:1px solid var(--rule);border-radius:var(--r);align-items:center}
+.vac-tracker-entry-name{font-family:var(--sans);font-weight:600;font-size:14px;color:var(--ink);min-width:0}
+.vac-tracker-entry-name span{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:400;margin-top:2px}
+.vac-tracker-entry-date{font-family:var(--mono);font-size:12px;color:var(--ink-2);white-space:nowrap}
+.vac-tracker-del{background:none;border:1px solid var(--rule);border-radius:4px;color:var(--muted);font-size:14px;cursor:pointer;padding:4px 8px;line-height:1;min-height:32px;min-width:32px}
+.vac-tracker-del:hover{color:var(--accent);border-color:var(--accent)}
+.vac-add-btn{padding:9px 14px;background:var(--ink);color:var(--paper);border:1.5px solid var(--ink);border-radius:var(--r);font-family:var(--sans);font-weight:600;font-size:13px;cursor:pointer;min-height:42px;white-space:nowrap}
+.vac-add-btn:hover{background:var(--accent);border-color:var(--accent)}
+.vac-export-btn{margin-top:12px;padding:9px 14px;background:var(--paper);color:var(--ink);border:1.5px solid var(--ink);border-radius:var(--r);font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
+.vac-export-btn:hover{background:var(--ink);color:var(--paper)}
+
+@media(max-width:640px){
+  .vac-tracker-add{grid-template-columns:1fr 1fr;gap:8px}
+  .vac-tracker-add .vac-add-btn{grid-column:1/-1}
+  .vac-risk-row{grid-template-columns:1fr}
+  .vac-risk-cell{border-right:none;border-bottom:1.5px solid var(--ink)}
+  .vac-risk-cell:last-child{border-bottom:none}
+}
+@media print{
+  .vac-search-wrap,.vac-export-btn,.vac-tracker-add,.vac-tracker-del,.print-btn,.back-btn{display:none !important}
+  .vac-result-card,.vac-routine-item,.vac-malaria-card,.vac-yf-card,.vac-timeline-card,.vac-tracker-entry{break-inside:avoid;border:1.5px solid #000 !important}
+  .vac-result-top{background:#fff !important}
+}
+</style>
+<div id="view-vaccination" class="view">
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="window.print()">🖨 Print</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">💉</span>
-    <h2>Vaccination Requirements</h2>
-    <p style="margin-bottom:24px">Required & recommended vaccines for 100+ destinations. Malaria risk zones.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-vaccination"></div>
+
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>Vaccination &amp; Health Requirements</h1>
+    <p class="tool-sub">Required and recommended vaccines for 120+ destinations. Malaria risk zones, Yellow Fever certificate guidance, and a personal vaccination record — all bundled, all offline.</p>
+  </div>
+
+  <div class="tool-body">
+
+    <!-- ── DESTINATION LOOKUP ── -->
+    <div class="fg">
+      <label>Destination Country</label>
+      <div class="vg-search-wrap">
+        <input type="search" id="vac-dest-search" class="vg-search-input" placeholder="🔍 Search destination…" autocomplete="off">
+        <div id="vac-dest-drop" class="vg-drop" style="display:none"></div>
+        <input type="hidden" id="vac-dest-val">
+      </div>
+    </div>
+
+    <button class="btn btn-p" style="width:100%;margin-top:12px" onclick="vacCheck()">💉 Check Vaccination Requirements</button>
+
+    <div id="vac-result" style="margin-top:20px"></div>
+
+    <div style="margin-top:16px;padding:12px 16px;background:var(--paper-2);border-left:3px solid var(--yellow);border-radius:var(--r);font-size:13px;color:var(--muted);line-height:1.55">
+      ⚠️ <strong>Verify with official sources before travel.</strong> Vaccine recommendations change. Always consult the CDC (cdc.gov/travel), WHO (who.int/ith), or a travel medicine specialist 4–6 weeks before your trip.
+    </div>
+
+    <!-- ── PRE-TRIP TIMELINE ── -->
+    <div class="vac-section">
+      <div class="vac-section-hdr">
+        <span class="vac-section-num">§ 01</span>
+        <h3>🗓 Pre-Trip Vaccination Timeline</h3>
+      </div>
+      <div class="vac-timeline-card">
+        <p style="margin:0 0 6px 0;font-size:14px;color:var(--ink-2);line-height:1.55">Travel vaccines need time to take effect — and some require multiple doses. Start planning well before departure.</p>
+        <div class="vac-timeline-steps" id="vac-timeline-steps"></div>
+      </div>
+    </div>
+
+    <!-- ── ROUTINE VACCINES ── -->
+    <div class="vac-section">
+      <div class="vac-section-hdr">
+        <span class="vac-section-num">§ 02</span>
+        <h3>💊 Routine Adult Vaccines</h3>
+      </div>
+      <p style="margin:0 0 12px 0;font-size:13px;color:var(--ink-2);line-height:1.55">These are recommended for every adult regardless of destination. Check that yours are up to date before any trip.</p>
+      <div class="vac-routine-grid" id="vac-routine-grid"></div>
+    </div>
+
+    <!-- ── MALARIA OVERVIEW ── -->
+    <div class="vac-section">
+      <div class="vac-section-hdr">
+        <span class="vac-section-num">§ 03</span>
+        <h3>🦟 Malaria Prophylaxis Overview</h3>
+      </div>
+      <div class="vac-malaria-card">
+        <p style="margin:0 0 6px 0;font-size:14px;color:var(--ink-2);line-height:1.55">There is no vaccine for malaria in widespread use. Prevention relies on prescription antimalarial drugs plus mosquito-bite avoidance (DEET, permethrin-treated clothing, bed nets).</p>
+        <p style="margin:6px 0 0 0;font-size:13px;color:var(--ink-2);line-height:1.55"><strong>Risk varies dramatically</strong> — even within a single country. Sub-Saharan Africa, Papua New Guinea, and parts of the Amazon basin carry the highest risk; many tourist resorts and major cities are low or no risk.</p>
+        <div class="vac-malaria-meds" id="vac-malaria-meds"></div>
+        <p style="margin:12px 0 0 0;font-size:12px;color:var(--muted);font-style:italic">A travel medicine doctor will choose the right drug based on your destination's drug-resistance profile, your medical history, and how long you'll stay.</p>
+      </div>
+    </div>
+
+    <!-- ── YELLOW FEVER CERTIFICATE ── -->
+    <div class="vac-section">
+      <div class="vac-section-hdr">
+        <span class="vac-section-num">§ 04</span>
+        <h3>📒 Yellow Fever Certificate (WHO "Yellow Card")</h3>
+      </div>
+      <div class="vac-yf-card">
+        <p style="margin:0 0 8px 0;font-size:14px;color:var(--ink-2);line-height:1.55">Yellow Fever is the only vaccine that countries can <strong>legally require</strong> for entry under the International Health Regulations. Proof is the <strong>ICVP</strong> (International Certificate of Vaccination or Prophylaxis), a yellow booklet you receive at a designated travel clinic.</p>
+        <ul style="margin:8px 0 0 18px;padding:0;font-size:13px;color:var(--ink-2);line-height:1.65">
+          <li><strong>When required:</strong> If you've recently been in or are arriving from a Yellow Fever endemic country (most of tropical Africa &amp; South America). Many countries — including South Africa, India, and Thailand — require the certificate from such travelers.</li>
+          <li><strong>Validity:</strong> A single dose now provides lifetime protection per WHO (since 2016).</li>
+          <li><strong>Timing:</strong> The vaccine must be given at least <strong>10 days before</strong> entry for the certificate to be valid.</li>
+          <li><strong>Where:</strong> Only at authorised Yellow Fever Vaccination Centres (in the US, search the CDC's travel clinic directory).</li>
+          <li><strong>Medical exemption:</strong> If you can't be vaccinated for medical reasons, ask the clinic for a signed exemption letter on official letterhead.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ── PERSONAL VACCINATION RECORD ── -->
+    <div class="vac-section">
+      <div class="vac-section-hdr">
+        <span class="vac-section-num">§ 05</span>
+        <h3>📋 My Vaccination Record</h3>
+      </div>
+      <p style="margin:0 0 8px 0;font-size:13px;color:var(--ink-2);line-height:1.55">Log vaccines you've received so you can show them later. Stored only in this browser.</p>
+
+      <div class="vac-tracker-add">
+        <div>
+          <label>Vaccine</label>
+          <select id="vac-tr-vax">
+            <option value="">— select —</option>
+          </select>
+        </div>
+        <div>
+          <label>Date Given</label>
+          <input type="date" id="vac-tr-date">
+        </div>
+        <div>
+          <label>Lot # <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted)">(optional)</span></label>
+          <input type="text" id="vac-tr-lot" placeholder="e.g. AC12345">
+        </div>
+        <button class="vac-add-btn" onclick="vacTrackerAdd()">+ Add</button>
+      </div>
+
+      <div id="vac-tracker-list"></div>
+      <button class="vac-export-btn" id="vac-export" onclick="vacTrackerExport()" style="display:none">⇩ Export Record</button>
+    </div>
+
+  </div>
+
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    Snap a photo of your physical Yellow Card and store it in this app's vaccination record. If you ever lose the booklet, you'll have proof at hand — and the digital record can save you a re-vaccination at the border.
+  </div>
+
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('doc-checklist')">✅ Document Checklist</button>
+      <button class="rel-btn" onclick="openTool('passport')">📕 Passport Expiry Checker</button>
+      <button class="rel-btn" onclick="openTool('visa-guide')">🌍 Visa Requirement Guide</button>
+      <button class="rel-btn" onclick="openTool('emergency')">🚨 Emergency Numbers</button>
     </div>
   </div>
 </div>
@@ -7127,7 +7333,7 @@ const TOOLS = [
   {id:'flight-delay',  nm:'Flight Delay Compensation',  ico:'⚖️', ph:'docs',      on:false, live:false, ds:'Your rights by region — EU261, US DOT, UK, Canada.'},
   {id:'customs-decl',  nm:'Customs Declaration Helper', ico:'📦', ph:'docs',      on:false, live:false, ds:"What you can & can't bring in. Duty-free limits by country."},
   {id:'ff-tracker',    nm:'Frequent Flyer Tracker',     ico:'🏆', ph:'docs',      on:false, live:false, ds:'Log miles/points across programs. Track expiry & redemption value.'},
-  {id:'vaccination',   nm:'Vaccination Requirements',   ico:'💉', ph:'docs',      on:false, live:false, ds:'Required & recommended vaccines for 100+ destinations.'},
+  {id:'vaccination',   nm:'Vaccination Requirements',   ico:'💉', ph:'docs',      on:false, live:true,  ds:'Required & recommended vaccines for 120+ destinations. Malaria risk zones, Yellow Fever certificate guide & personal record.'},
   {id:'tsa-guide',     nm:'TSA & Security Guide',       ico:'🔒', ph:'docs',      on:false, live:true,  ds:'Search any item for carry-on / checked / prohibited status.'},
   {id:'packing',       nm:'Smart Packing List',         ico:'📝', ph:'packing',   on:false, live:true,  ds:'Generate a list by trip type, duration & climate. Check off as you go.'},
   {id:'baggage',       nm:'Baggage Fee Calculator',     ico:'💸', ph:'packing',   on:false, live:true,  ds:'Carry-on & checked bag fees for 35 major airlines.'},
@@ -7842,6 +8048,7 @@ function injectTripCtx(id) {
   if(id==='toll-est')   teInit();
   if(id==='road-planner') rpInit();
   if(id==='tsa-guide')  tsaInit();
+  if(id==='vaccination') vacInit();
 }
 
 /* ── HUB RENDER ── */
@@ -19122,6 +19329,524 @@ function tsaCard(it) {
     </div>
     <div class="tsa-card-notes">${it.note}</div>
   </div>`;
+}
+
+/* ══════════════════════════════════════════════
+   VACCINATION & HEALTH REQUIREMENTS  (vaccination)
+   Source basis: CDC Travelers' Health & WHO ITH guidance, 2024.
+   ══════════════════════════════════════════════ */
+
+/* Vaccine catalog: short code → display name + description shown in cards. */
+const VAC_INFO = {
+  HepA:  { n:'Hepatitis A',                       ico:'💧', desc:'Spread through contaminated food &amp; water. 2 doses, 6 months apart (one dose gives ~1 year of protection).' },
+  HepB:  { n:'Hepatitis B',                       ico:'🩸', desc:'Blood &amp; body-fluid exposure (medical care, tattoos, intimate contact). 3-dose series over 6 months.' },
+  Ty:    { n:'Typhoid',                           ico:'🥘', desc:'Bacterial infection from contaminated food &amp; water. Injection (1 dose, 2-year protection) or oral capsules (4 doses, 5-year protection).' },
+  YF:    { n:'Yellow Fever',                      ico:'📒', desc:'Mosquito-borne viral disease. Single dose gives lifetime protection. ICVP certificate may be required for entry.' },
+  JE:    { n:'Japanese Encephalitis',             ico:'🦟', desc:'Mosquito-borne, rural rice-paddy areas of Asia. 2 doses, 28 days apart. Worth it for long stays or rural travel.' },
+  Rab:   { n:'Rabies (pre-exposure)',             ico:'🐕', desc:'Recommended for adventure travelers, animal workers, long stays, or remote areas with limited medical care. 2 doses, 7 days apart.' },
+  Cho:   { n:'Cholera',                           ico:'🌊', desc:'Severe diarrheal disease. Oral vaccine for aid workers or travelers to active outbreak zones. Rarely needed for tourists.' },
+  Men:   { n:'Meningococcal (ACWY)',              ico:'🧠', desc:'Required for Hajj/Umrah pilgrims to Saudi Arabia and recommended for the African "meningitis belt" in the dry season.' },
+  Pol:   { n:'Polio (adult booster)',             ico:'🦴', desc:'One-time adult booster recommended for travel to countries with active polio circulation. Some countries require proof on exit.' },
+  TBE:   { n:'Tick-borne Encephalitis',           ico:'🪲', desc:'Hiking or camping in forested parts of central, eastern &amp; northern Europe, spring through autumn. 3-dose series.' },
+  MMR:   { n:'Measles, Mumps, Rubella',           ico:'🤒', desc:'Make sure your routine MMR is up to date — measles outbreaks happen worldwide, including in Europe and North America.' },
+  Den:   { n:'Dengue',                            ico:'🦟', desc:'Mosquito-borne. Vaccine (Qdenga) available in some countries for people who have previously had dengue. Bite avoidance is essential.' },
+  Mpx:   { n:'Mpox',                              ico:'🩹', desc:'Recommended for at-risk travelers to areas with active outbreaks. 2 doses, 28 days apart.' },
+  Mal:   { n:'Malaria prophylaxis',               ico:'💊', desc:'Prescription antimalarial medication (not a vaccine). The right drug depends on destination drug-resistance, your health &amp; trip length.' },
+};
+
+/* Routine adult vaccines (universal) */
+const VAC_ROUTINE = [
+  { ico:'💉', n:'MMR',                       d:'Measles, mumps &amp; rubella — 2 lifetime doses; check titer if unsure.' },
+  { ico:'💉', n:'Tdap / Td',                 d:'Tetanus, diphtheria &amp; pertussis — booster every 10 years.' },
+  { ico:'💉', n:'Varicella',                 d:'Chickenpox — 2 doses if not previously infected.' },
+  { ico:'💉', n:'Polio (IPV)',               d:'Complete childhood series; one adult booster if traveling to risk countries.' },
+  { ico:'💉', n:'Influenza',                 d:'Annual flu shot — protects you and the people you visit.' },
+  { ico:'💉', n:'COVID-19',                  d:'Stay current with recommended updates per CDC/WHO guidance.' },
+  { ico:'💉', n:'Pneumococcal',              d:'Recommended for adults 65+ or with certain medical conditions.' },
+  { ico:'💉', n:'Shingles (RZV)',            d:'Recommended for adults 50+ — 2 doses, 2–6 months apart.' },
+  { ico:'💉', n:'HPV',                       d:'Through age 26 (catch-up); shared decision for 27–45.' },
+  { ico:'💉', n:'RSV',                       d:'Adults 60+; pregnancy (32–36 weeks) per CDC schedule.' },
+];
+
+/* Malaria meds overview */
+const VAC_MALARIA_MEDS = [
+  { n:'Atovaquone / Proguanil (Malarone)', d:'Daily, start 1–2 days before, continue 7 days after. Few side effects, costlier.', k:'Most regions' },
+  { n:'Doxycycline',                       d:'Daily, start 1–2 days before, continue 4 weeks after. Sun sensitivity, take with food.', k:'Most regions, cheap' },
+  { n:'Mefloquine (Lariam)',               d:'Weekly, start 2–3 weeks before, continue 4 weeks after. Avoid if history of mental-health issues.', k:'Long trips' },
+  { n:'Tafenoquine (Krintafel/Arakoda)',   d:'Weekly after a 3-day load; requires G6PD screening before use.', k:'Newer option' },
+  { n:'Chloroquine',                       d:'Weekly. Only useful in the few areas without chloroquine-resistant malaria (e.g. Caribbean Hispaniola, parts of Central America).', k:'Limited use' },
+];
+
+/* Pre-trip timeline */
+const VAC_TIMELINE = [
+  { when:'4–6 months', what:'<strong>Book a travel clinic visit.</strong> Some series (Hep B, rabies, Japanese encephalitis) need multiple doses spread over weeks.' },
+  { when:'4–8 weeks',  what:'<strong>Attend your travel-health consult.</strong> Bring your itinerary &amp; current vaccination record. Start the bulk of your shots.' },
+  { when:'2 weeks',    what:'<strong>Pick up antimalarials &amp; finish boosters.</strong> Allow time to discover side effects before you fly.' },
+  { when:'10+ days',   what:'<strong>Yellow Fever cutoff.</strong> Vaccination must be administered at least 10 days before entry for the ICVP certificate to be valid.' },
+  { when:'48 hours',   what:'<strong>Pack your record.</strong> Yellow Card, prescriptions in original bottles, doctor letters for controlled meds, DEET &amp; permethrin spray.' },
+];
+
+/* Country vaccination data
+   Fields:
+     c   ISO-3166 alpha-2 country code (matches VG_COUNTRIES where possible)
+     n   Country name
+     f   Flag emoji
+     req Array of vaccine codes legally required for entry (often Yellow Fever)
+     rec Array of recommended vaccine codes
+     m   Malaria risk: 'none' | 'low' | 'mod' | 'high'
+     yf  Yellow-fever entry-certificate rule:
+           ''                — not relevant
+           'from-risk'       — required only if arriving from a YF-risk country
+           'all'             — required from all travelers
+           'recommended'     — endemic country; vaccine recommended for travelers
+     note Extra guidance specific to the destination
+*/
+const VAC_COUNTRIES = [
+  // ── Europe ──
+  {c:'AL',n:'Albania',           f:'🇦🇱', req:[],     rec:['HepA','HepB','TBE'],       m:'none', yf:'',          note:'Routine vaccines should be up to date. Tick-borne encephalitis a low risk for rural hikers.'},
+  {c:'AT',n:'Austria',           f:'🇦🇹', req:[],     rec:['TBE'],                     m:'none', yf:'',          note:'Tick-borne encephalitis vaccine strongly recommended for hiking or camping spring–autumn.'},
+  {c:'BE',n:'Belgium',           f:'🇧🇪', req:[],     rec:[],                          m:'none', yf:'',          note:'No travel-specific vaccines required. Keep routine immunisations current.'},
+  {c:'BG',n:'Bulgaria',          f:'🇧🇬', req:[],     rec:['HepA','TBE'],              m:'none', yf:'',          note:'Hepatitis A advisable. TBE vaccine for forest activities.'},
+  {c:'CH',n:'Switzerland',       f:'🇨🇭', req:[],     rec:['TBE'],                     m:'none', yf:'',          note:'TBE strongly recommended for hikers in forested regions outside the Alps.'},
+  {c:'CY',n:'Cyprus',            f:'🇨🇾', req:[],     rec:['HepA'],                    m:'none', yf:'',          note:'No specific travel vaccines required.'},
+  {c:'CZ',n:'Czechia',           f:'🇨🇿', req:[],     rec:['TBE','HepA'],              m:'none', yf:'',          note:'TBE highly endemic — vaccine recommended for any outdoor activity.'},
+  {c:'DE',n:'Germany',           f:'🇩🇪', req:[],     rec:['TBE'],                     m:'none', yf:'',          note:'TBE recommended in Bavaria, Baden-Württemberg &amp; other endemic states.'},
+  {c:'DK',n:'Denmark',           f:'🇩🇰', req:[],     rec:[],                          m:'none', yf:'',          note:'Routine vaccinations sufficient.'},
+  {c:'EE',n:'Estonia',           f:'🇪🇪', req:[],     rec:['TBE','HepA'],              m:'none', yf:'',          note:'TBE recommended for forested areas across the country.'},
+  {c:'ES',n:'Spain',             f:'🇪🇸', req:[],     rec:[],                          m:'none', yf:'',          note:'Routine vaccinations sufficient.'},
+  {c:'FI',n:'Finland',           f:'🇫🇮', req:[],     rec:['TBE'],                     m:'none', yf:'',          note:'TBE for Åland Islands, coastal areas &amp; eastern Finland.'},
+  {c:'FR',n:'France',            f:'🇫🇷', req:[],     rec:[],                          m:'none', yf:'',          note:'Routine vaccinations sufficient. For French Guiana: Yellow Fever required &amp; high malaria risk.'},
+  {c:'GB',n:'United Kingdom',    f:'🇬🇧', req:[],     rec:[],                          m:'none', yf:'',          note:'Routine vaccinations sufficient.'},
+  {c:'GR',n:'Greece',            f:'🇬🇷', req:[],     rec:['HepA'],                    m:'none', yf:'',          note:'Sporadic locally-acquired malaria cases historically — risk currently negligible.'},
+  {c:'HR',n:'Croatia',           f:'🇭🇷', req:[],     rec:['TBE'],                     m:'none', yf:'',          note:'TBE recommended for inland forested regions.'},
+  {c:'HU',n:'Hungary',           f:'🇭🇺', req:[],     rec:['TBE','HepA'],              m:'none', yf:'',          note:'TBE endemic in forested areas.'},
+  {c:'IE',n:'Ireland',           f:'🇮🇪', req:[],     rec:[],                          m:'none', yf:'',          note:'Routine vaccinations sufficient.'},
+  {c:'IS',n:'Iceland',           f:'🇮🇸', req:[],     rec:[],                          m:'none', yf:'',          note:'Routine vaccinations sufficient.'},
+  {c:'IT',n:'Italy',             f:'🇮🇹', req:[],     rec:[],                          m:'none', yf:'',          note:'Routine vaccinations sufficient.'},
+  {c:'LT',n:'Lithuania',         f:'🇱🇹', req:[],     rec:['TBE','HepA'],              m:'none', yf:'',          note:'TBE highly endemic — vaccination recommended.'},
+  {c:'LV',n:'Latvia',            f:'🇱🇻', req:[],     rec:['TBE','HepA'],              m:'none', yf:'',          note:'TBE highly endemic — vaccination recommended.'},
+  {c:'MT',n:'Malta',             f:'🇲🇹', req:[],     rec:[],                          m:'none', yf:'',          note:'Routine vaccinations sufficient.'},
+  {c:'NL',n:'Netherlands',       f:'🇳🇱', req:[],     rec:[],                          m:'none', yf:'',          note:'Routine vaccinations sufficient.'},
+  {c:'NO',n:'Norway',            f:'🇳🇴', req:[],     rec:['TBE'],                     m:'none', yf:'',          note:'TBE recommended for coastal southern regions.'},
+  {c:'PL',n:'Poland',            f:'🇵🇱', req:[],     rec:['TBE','HepA'],              m:'none', yf:'',          note:'TBE endemic in forested eastern and northern regions.'},
+  {c:'PT',n:'Portugal',          f:'🇵🇹', req:[],     rec:[],                          m:'none', yf:'',          note:'Routine vaccinations sufficient. For Madeira/Azores: same.'},
+  {c:'RO',n:'Romania',           f:'🇷🇴', req:[],     rec:['HepA','TBE'],              m:'none', yf:'',          note:'TBE for forested rural regions; Hep A advisable.'},
+  {c:'RS',n:'Serbia',            f:'🇷🇸', req:[],     rec:['HepA','TBE'],              m:'none', yf:'',          note:'Hep A advisable; TBE for hiking.'},
+  {c:'RU',n:'Russia',            f:'🇷🇺', req:[],     rec:['HepA','HepB','TBE','Ty'],  m:'none', yf:'',          note:'TBE strongly recommended for travel east of Moscow and Siberian regions.'},
+  {c:'SE',n:'Sweden',            f:'🇸🇪', req:[],     rec:['TBE'],                     m:'none', yf:'',          note:'TBE for coastal areas around Stockholm and southern Sweden.'},
+  {c:'SI',n:'Slovenia',          f:'🇸🇮', req:[],     rec:['TBE'],                     m:'none', yf:'',          note:'TBE highly endemic — vaccination strongly recommended.'},
+  {c:'SK',n:'Slovakia',          f:'🇸🇰', req:[],     rec:['TBE','HepA'],              m:'none', yf:'',          note:'TBE endemic in forested regions.'},
+  {c:'TR',n:'Turkey',            f:'🇹🇷', req:[],     rec:['HepA','HepB','Ty'],        m:'none', yf:'',          note:'Hep A and typhoid recommended for travel outside resort areas.'},
+  {c:'UA',n:'Ukraine',           f:'🇺🇦', req:[],     rec:['HepA','HepB','Ty','TBE'],  m:'none', yf:'',          note:'Polio booster recommended; routine vaccines including measles should be current.'},
+
+  // ── North America ──
+  {c:'CA',n:'Canada',            f:'🇨🇦', req:[],     rec:[],                          m:'none', yf:'',          note:'Routine vaccinations sufficient.'},
+  {c:'MX',n:'Mexico',            f:'🇲🇽', req:[],     rec:['HepA','HepB','Ty'],        m:'low',  yf:'',          note:'Malaria risk only in rural areas of Chiapas, Chihuahua, Durango, Nayarit, Oaxaca, Sinaloa &amp; Sonora; none in resorts. Dengue widespread.'},
+  {c:'US',n:'United States',     f:'🇺🇸', req:[],     rec:[],                          m:'none', yf:'',          note:'Routine vaccinations sufficient. Tick-borne diseases (Lyme, RMSF) — use repellent in wooded areas.'},
+
+  // ── Central America &amp; Caribbean ──
+  {c:'BS',n:'Bahamas',           f:'🇧🇸', req:[],     rec:['HepA'],                    m:'none', yf:'from-risk', note:'YF certificate required if arriving from a YF-risk country.'},
+  {c:'BB',n:'Barbados',          f:'🇧🇧', req:[],     rec:['HepA'],                    m:'none', yf:'from-risk', note:'YF certificate required if arriving from a YF-risk country.'},
+  {c:'BZ',n:'Belize',            f:'🇧🇿', req:[],     rec:['HepA','HepB','Ty'],        m:'low',  yf:'from-risk', note:'Limited malaria risk in rural Stann Creek &amp; Toledo districts.'},
+  {c:'CR',n:'Costa Rica',        f:'🇨🇷', req:[],     rec:['HepA','HepB','Ty'],        m:'low',  yf:'from-risk', note:'Very limited malaria risk in Limón province; no risk in main tourist areas. Dengue widespread.'},
+  {c:'CU',n:'Cuba',              f:'🇨🇺', req:[],     rec:['HepA','Ty'],               m:'none', yf:'from-risk', note:'Dengue present; bite avoidance important.'},
+  {c:'DO',n:'Dominican Republic',f:'🇩🇴', req:[],     rec:['HepA','HepB','Ty'],        m:'low',  yf:'from-risk', note:'Malaria risk in rural border areas near Haiti; chloroquine still effective here.'},
+  {c:'SV',n:'El Salvador',       f:'🇸🇻', req:[],     rec:['HepA','HepB','Ty'],        m:'low',  yf:'from-risk', note:'Very limited rural malaria risk. Dengue active.'},
+  {c:'GT',n:'Guatemala',         f:'🇬🇹', req:[],     rec:['HepA','HepB','Ty'],        m:'low',  yf:'from-risk', note:'Malaria risk below 1500m in rural areas. Hep A &amp; typhoid important for street food.'},
+  {c:'HT',n:'Haiti',             f:'🇭🇹', req:[],     rec:['HepA','HepB','Ty'],        m:'mod',  yf:'from-risk', note:'Country-wide malaria risk; chloroquine effective. Cholera outbreaks have occurred.'},
+  {c:'HN',n:'Honduras',          f:'🇭🇳', req:[],     rec:['HepA','HepB','Ty'],        m:'low',  yf:'from-risk', note:'Malaria in rural lowlands &amp; Bay Islands. Dengue widespread.'},
+  {c:'JM',n:'Jamaica',           f:'🇯🇲', req:[],     rec:['HepA','Ty'],               m:'none', yf:'from-risk', note:'YF certificate required if arriving from a YF-risk country.'},
+  {c:'NI',n:'Nicaragua',         f:'🇳🇮', req:[],     rec:['HepA','HepB','Ty'],        m:'low',  yf:'from-risk', note:'Malaria risk in eastern rural lowlands.'},
+  {c:'PA',n:'Panama',            f:'🇵🇦', req:[],     rec:['HepA','HepB','Ty','YF'],   m:'low',  yf:'recommended',note:'Yellow Fever vaccine recommended for areas east of Canal Zone (Darién, Kuna Yala). Malaria risk in same areas.'},
+  {c:'TT',n:'Trinidad & Tobago', f:'🇹🇹', req:[],     rec:['HepA','Ty','YF'],          m:'none', yf:'recommended',note:'YF recommended for travelers to forested areas of Trinidad. Tobago: no risk.'},
+
+  // ── South America ──
+  {c:'AR',n:'Argentina',         f:'🇦🇷', req:[],     rec:['HepA','HepB','Ty','YF'],   m:'none', yf:'recommended',note:'YF vaccine recommended for travel to Iguazú Falls &amp; northeastern provinces (Misiones, Corrientes).'},
+  {c:'BO',n:'Bolivia',           f:'🇧🇴', req:[],     rec:['HepA','HepB','Ty','YF'],   m:'mod',  yf:'recommended',note:'YF recommended for areas below 2300m. Malaria risk in Amazon lowlands. La Paz is high altitude — see Altitude Sickness Guide.'},
+  {c:'BR',n:'Brazil',            f:'🇧🇷', req:[],     rec:['HepA','HepB','Ty','YF'],   m:'mod',  yf:'recommended',note:'YF vaccine recommended for almost the entire country including Rio &amp; São Paulo states (CDC update). Malaria in Amazon basin.'},
+  {c:'CL',n:'Chile',             f:'🇨🇱', req:[],     rec:['HepA','HepB'],             m:'none', yf:'from-risk', note:'Easter Island: YF certificate from risk countries.'},
+  {c:'CO',n:'Colombia',          f:'🇨🇴', req:[],     rec:['HepA','HepB','Ty','YF'],   m:'mod',  yf:'recommended',note:'YF required for several national parks &amp; lowland regions; malaria risk below 1700m.'},
+  {c:'EC',n:'Ecuador',           f:'🇪🇨', req:[],     rec:['HepA','HepB','Ty','YF'],   m:'low',  yf:'recommended',note:'YF for Amazon lowlands; Galápagos &amp; Quito: no YF or malaria risk.'},
+  {c:'GY',n:'Guyana',            f:'🇬🇾', req:['YF'], rec:['HepA','HepB','Ty'],        m:'high', yf:'all',       note:'YF vaccination certificate required from ALL travelers ≥9 months. High malaria risk country-wide.'},
+  {c:'PY',n:'Paraguay',          f:'🇵🇾', req:[],     rec:['HepA','HepB','Ty','YF'],   m:'low',  yf:'recommended',note:'YF recommended; low malaria risk in eastern departments bordering Brazil.'},
+  {c:'PE',n:'Peru',              f:'🇵🇪', req:[],     rec:['HepA','HepB','Ty','YF'],   m:'mod',  yf:'recommended',note:'YF for Amazon &amp; jungle areas (not Lima, Cusco, Machu Picchu). Malaria in lowland jungle. Cusco is high altitude.'},
+  {c:'SR',n:'Suriname',          f:'🇸🇷', req:['YF'], rec:['HepA','HepB','Ty'],        m:'mod',  yf:'all',       note:'YF certificate required for entry. Malaria risk in interior jungle.'},
+  {c:'UY',n:'Uruguay',           f:'🇺🇾', req:[],     rec:['HepA','HepB'],             m:'none', yf:'',          note:'Routine vaccinations sufficient.'},
+  {c:'VE',n:'Venezuela',         f:'🇻🇪', req:[],     rec:['HepA','HepB','Ty','YF'],   m:'high', yf:'recommended',note:'YF recommended &amp; high malaria risk in Amazon &amp; Orinoco regions; political situation may complicate travel.'},
+
+  // ── East Asia ──
+  {c:'CN',n:'China',             f:'🇨🇳', req:[],     rec:['HepA','HepB','Ty','JE'],   m:'low',  yf:'from-risk', note:'JE recommended for rural areas during transmission season. Limited malaria risk in southern Yunnan.'},
+  {c:'HK',n:'Hong Kong',         f:'🇭🇰', req:[],     rec:['HepA','HepB'],             m:'none', yf:'from-risk', note:'YF certificate required if arriving from a YF-risk country.'},
+  {c:'JP',n:'Japan',             f:'🇯🇵', req:[],     rec:['HepA','HepB','JE'],        m:'none', yf:'',          note:'JE recommended for extended stays in rural rice-growing areas.'},
+  {c:'KR',n:'South Korea',       f:'🇰🇷', req:[],     rec:['HepA','HepB','JE','Ty'],   m:'low',  yf:'from-risk', note:'JE for rural travel; limited malaria in northern DMZ areas.'},
+  {c:'MN',n:'Mongolia',          f:'🇲🇳', req:[],     rec:['HepA','HepB','Ty','Rab'],  m:'none', yf:'',          note:'Rabies risk in rural areas with stray dogs; routine vaccines must be current.'},
+  {c:'TW',n:'Taiwan',            f:'🇹🇼', req:[],     rec:['HepA','HepB','JE'],        m:'none', yf:'',          note:'JE for rural travel during May–October transmission season.'},
+
+  // ── Southeast Asia ──
+  {c:'BN',n:'Brunei',            f:'🇧🇳', req:[],     rec:['HepA','HepB','Ty','JE'],   m:'none', yf:'from-risk', note:'YF certificate required if arriving from a YF-risk country.'},
+  {c:'KH',n:'Cambodia',          f:'🇰🇭', req:[],     rec:['HepA','HepB','Ty','JE','Rab'], m:'mod', yf:'from-risk', note:'Malaria risk in rural &amp; forested areas (NOT Angkor/Siem Reap, Phnom Penh, Tonle Sap). Mefloquine resistance — use atovaquone-proguanil or doxycycline.'},
+  {c:'ID',n:'Indonesia',         f:'🇮🇩', req:[],     rec:['HepA','HepB','Ty','JE','Rab'], m:'mod', yf:'from-risk', note:'High malaria risk in Papua/West Papua; lower elsewhere. None in Jakarta or main resort areas of Bali (though dengue widespread).'},
+  {c:'LA',n:'Laos',              f:'🇱🇦', req:[],     rec:['HepA','HepB','Ty','JE','Rab'], m:'mod', yf:'from-risk', note:'Malaria risk in rural areas &lt;1200m. JE recommended — significant rural exposure.'},
+  {c:'MY',n:'Malaysia',          f:'🇲🇾', req:[],     rec:['HepA','HepB','Ty','JE'],   m:'low',  yf:'from-risk', note:'Malaria risk only in interior rural Borneo (Sabah/Sarawak). None in Peninsular cities.'},
+  {c:'MM',n:'Myanmar (Burma)',   f:'🇲🇲', req:[],     rec:['HepA','HepB','Ty','JE','Rab'], m:'mod', yf:'from-risk', note:'Malaria in rural areas including Yangon Region. Cholera occasional outbreaks. JE recommended.'},
+  {c:'PH',n:'Philippines',       f:'🇵🇭', req:[],     rec:['HepA','HepB','Ty','JE','Rab'], m:'low', yf:'from-risk', note:'Malaria in rural Mindanao, Palawan, Sulu archipelago (NOT Manila, Cebu, Boracay). Dengue widespread.'},
+  {c:'SG',n:'Singapore',         f:'🇸🇬', req:[],     rec:['HepA','HepB'],             m:'none', yf:'from-risk', note:'YF certificate strictly enforced for travelers from risk countries. Dengue present.'},
+  {c:'TH',n:'Thailand',          f:'🇹🇭', req:[],     rec:['HepA','HepB','Ty','JE','Rab'], m:'low', yf:'from-risk', note:'Malaria limited to forested border areas (Myanmar, Cambodia, Laos). None in Bangkok or main beach resorts. Mefloquine-resistant strains.'},
+  {c:'VN',n:'Vietnam',           f:'🇻🇳', req:[],     rec:['HepA','HepB','Ty','JE','Rab'], m:'low', yf:'from-risk', note:'Malaria risk in rural forested areas, including parts of central highlands. JE recommended for rural travel.'},
+  {c:'TL',n:'Timor-Leste',       f:'🇹🇱', req:[],     rec:['HepA','HepB','Ty','JE'],   m:'mod',  yf:'from-risk', note:'Country-wide malaria risk.'},
+
+  // ── South Asia ──
+  {c:'AF',n:'Afghanistan',       f:'🇦🇫', req:[],     rec:['HepA','HepB','Ty','Rab','Pol'], m:'mod', yf:'from-risk', note:'Polio still circulates — adult booster recommended. High malaria risk &lt;2000m. Check government travel advisories before traveling.'},
+  {c:'BD',n:'Bangladesh',        f:'🇧🇩', req:[],     rec:['HepA','HepB','Ty','JE','Rab'], m:'mod', yf:'from-risk', note:'JE recommended (rice-growing areas). Malaria risk in Chittagong Hill Tracts; very limited in Dhaka.'},
+  {c:'BT',n:'Bhutan',            f:'🇧🇹', req:[],     rec:['HepA','HepB','Ty','JE'],   m:'low',  yf:'from-risk', note:'Malaria risk in southern lowlands &lt;1700m. Most tourists travel in lower-risk highlands.'},
+  {c:'IN',n:'India',             f:'🇮🇳', req:[],     rec:['HepA','HepB','Ty','JE','Rab'], m:'mod', yf:'from-risk', note:'YF certificate strictly required if arriving within 6 days of YF country — failure = 6-day quarantine. Malaria country-wide except &gt;2000m.'},
+  {c:'MV',n:'Maldives',          f:'🇲🇻', req:[],     rec:['HepA','HepB','Ty'],        m:'none', yf:'from-risk', note:'No malaria. Routine + standard travel vaccines.'},
+  {c:'NP',n:'Nepal',             f:'🇳🇵', req:[],     rec:['HepA','HepB','Ty','JE','Rab'], m:'low', yf:'from-risk', note:'Malaria in lowland Terai. JE for Terai during transmission season. High altitude — see Altitude Sickness Guide.'},
+  {c:'PK',n:'Pakistan',          f:'🇵🇰', req:[],     rec:['HepA','HepB','Ty','Rab','JE','Pol'], m:'mod', yf:'from-risk', note:'Polio still circulates — adult booster recommended. Malaria risk &lt;2000m.'},
+  {c:'LK',n:'Sri Lanka',         f:'🇱🇰', req:[],     rec:['HepA','HepB','Ty','JE'],   m:'none', yf:'from-risk', note:'Malaria eliminated. JE for rural areas during transmission season. Dengue present.'},
+
+  // ── Middle East ──
+  {c:'AE',n:'United Arab Emirates',f:'🇦🇪',req:[],    rec:['HepA','HepB'],             m:'none', yf:'from-risk', note:'YF certificate strictly required from travelers arriving from risk countries.'},
+  {c:'BH',n:'Bahrain',           f:'🇧🇭', req:[],     rec:['HepA','HepB'],             m:'none', yf:'from-risk', note:'YF certificate required if arriving from a YF-risk country.'},
+  {c:'EG',n:'Egypt',             f:'🇪🇬', req:[],     rec:['HepA','HepB','Ty','Rab'],  m:'none', yf:'from-risk', note:'Hep A &amp; typhoid important — food/water hygiene. Schistosomiasis in Nile waters; avoid freshwater swimming.'},
+  {c:'IL',n:'Israel',            f:'🇮🇱', req:[],     rec:['HepA','HepB'],             m:'none', yf:'',          note:'Routine vaccinations sufficient.'},
+  {c:'IR',n:'Iran',              f:'🇮🇷', req:[],     rec:['HepA','HepB','Ty'],        m:'low',  yf:'from-risk', note:'Limited malaria risk in southeastern provinces.'},
+  {c:'IQ',n:'Iraq',              f:'🇮🇶', req:[],     rec:['HepA','HepB','Ty','Pol'],  m:'none', yf:'from-risk', note:'Polio booster recommended; check government travel advisories.'},
+  {c:'JO',n:'Jordan',            f:'🇯🇴', req:[],     rec:['HepA','HepB','Ty'],        m:'none', yf:'from-risk', note:'Routine + standard travel vaccines.'},
+  {c:'KW',n:'Kuwait',            f:'🇰🇼', req:[],     rec:['HepA','HepB'],             m:'none', yf:'from-risk', note:'YF certificate required if arriving from a YF-risk country.'},
+  {c:'LB',n:'Lebanon',           f:'🇱🇧', req:[],     rec:['HepA','HepB','Ty'],        m:'none', yf:'from-risk', note:'Routine + standard travel vaccines.'},
+  {c:'OM',n:'Oman',              f:'🇴🇲', req:[],     rec:['HepA','HepB','Ty'],        m:'none', yf:'from-risk', note:'YF certificate required if arriving from a YF-risk country.'},
+  {c:'QA',n:'Qatar',             f:'🇶🇦', req:[],     rec:['HepA','HepB'],             m:'none', yf:'from-risk', note:'YF certificate required if arriving from a YF-risk country.'},
+  {c:'SA',n:'Saudi Arabia',      f:'🇸🇦', req:['Men'],rec:['HepA','HepB','Ty'],        m:'none', yf:'from-risk', note:'Meningococcal ACWY certificate REQUIRED for Hajj/Umrah pilgrims (within 3 years, &gt;10 days before arrival).'},
+
+  // ── Africa ──
+  {c:'AO',n:'Angola',            f:'🇦🇴', req:['YF'], rec:['HepA','HepB','Ty','Rab','Men'], m:'high', yf:'all', note:'YF certificate required for entry. High year-round malaria risk country-wide.'},
+  {c:'BJ',n:'Benin',             f:'🇧🇯', req:['YF'], rec:['HepA','HepB','Ty','Rab','Men'], m:'high', yf:'all', note:'YF certificate required for entry. High malaria risk country-wide.'},
+  {c:'BW',n:'Botswana',          f:'🇧🇼', req:[],     rec:['HepA','HepB','Ty','YF'],   m:'mod',  yf:'from-risk', note:'Malaria risk in northern regions (Okavango, Chobe) Nov–May. YF certificate from risk countries.'},
+  {c:'BF',n:'Burkina Faso',      f:'🇧🇫', req:['YF'], rec:['HepA','HepB','Ty','Rab','Men'], m:'high', yf:'all', note:'YF certificate required. Within African meningitis belt — Men ACWY recommended in dry season.'},
+  {c:'CM',n:'Cameroon',          f:'🇨🇲', req:['YF'], rec:['HepA','HepB','Ty','Rab','Men'], m:'high', yf:'all', note:'YF certificate required. High malaria risk country-wide.'},
+  {c:'CV',n:'Cape Verde',        f:'🇨🇻', req:[],     rec:['HepA','HepB','Ty'],        m:'low',  yf:'from-risk', note:'Sporadic malaria on São Tiago island.'},
+  {c:'CF',n:'Central African Rep',f:'🇨🇫',req:['YF'], rec:['HepA','HepB','Ty','Rab','Men'], m:'high', yf:'all', note:'YF required. Check government travel advisories before travel.'},
+  {c:'TD',n:'Chad',              f:'🇹🇩', req:['YF'], rec:['HepA','HepB','Ty','Rab','Men'], m:'high', yf:'all', note:'YF required. Meningitis belt — Men ACWY recommended.'},
+  {c:'CD',n:'DR Congo',          f:'🇨🇩', req:['YF'], rec:['HepA','HepB','Ty','Rab','Men','Mpx'], m:'high', yf:'all', note:'YF required. High malaria; active mpox outbreaks in some regions — Mpox vaccine for at-risk travelers.'},
+  {c:'CG',n:'Congo (Brazzaville)',f:'🇨🇬',req:['YF'], rec:['HepA','HepB','Ty','Rab'],  m:'high', yf:'all', note:'YF required. High malaria risk country-wide.'},
+  {c:'CI',n:"Côte d'Ivoire",     f:'🇨🇮', req:['YF'], rec:['HepA','HepB','Ty','Rab','Men'], m:'high', yf:'all', note:'YF required for entry.'},
+  {c:'DJ',n:'Djibouti',          f:'🇩🇯', req:[],     rec:['HepA','HepB','Ty','YF'],   m:'mod',  yf:'recommended',note:'YF recommended; malaria risk country-wide.'},
+  {c:'ET',n:'Ethiopia',          f:'🇪🇹', req:[],     rec:['HepA','HepB','Ty','YF','Rab'], m:'mod', yf:'recommended', note:'YF recommended for travelers to areas &lt;2300m. Malaria below 2000m. Addis Ababa is high altitude.'},
+  {c:'GA',n:'Gabon',             f:'🇬🇦', req:['YF'], rec:['HepA','HepB','Ty','Rab'],  m:'high', yf:'all', note:'YF required. High malaria year-round.'},
+  {c:'GM',n:'Gambia',            f:'🇬🇲', req:['YF'], rec:['HepA','HepB','Ty','Rab'],  m:'high', yf:'all', note:'YF required for entry. High malaria risk.'},
+  {c:'GH',n:'Ghana',             f:'🇬🇭', req:['YF'], rec:['HepA','HepB','Ty','Rab','Men'], m:'high', yf:'all', note:'YF certificate required at the airport. High malaria year-round.'},
+  {c:'GN',n:'Guinea',            f:'🇬🇳', req:['YF'], rec:['HepA','HepB','Ty','Rab','Men'], m:'high', yf:'all', note:'YF required. Meningitis belt.'},
+  {c:'KE',n:'Kenya',             f:'🇰🇪', req:[],     rec:['HepA','HepB','Ty','YF','Rab'], m:'high', yf:'recommended', note:'YF recommended (not Nairobi or Mombasa coast areas above 2500m). High malaria risk except Nairobi &amp; highlands &gt;2500m.'},
+  {c:'LR',n:'Liberia',           f:'🇱🇷', req:['YF'], rec:['HepA','HepB','Ty','Rab'],  m:'high', yf:'all', note:'YF required. High malaria year-round.'},
+  {c:'LY',n:'Libya',             f:'🇱🇾', req:[],     rec:['HepA','HepB','Ty'],        m:'none', yf:'from-risk', note:'Check government travel advisories before traveling.'},
+  {c:'MG',n:'Madagascar',        f:'🇲🇬', req:[],     rec:['HepA','HepB','Ty','YF','Rab'], m:'high', yf:'from-risk', note:'High malaria risk country-wide; plague present in some areas.'},
+  {c:'MW',n:'Malawi',            f:'🇲🇼', req:[],     rec:['HepA','HepB','Ty','YF','Rab'], m:'high', yf:'from-risk', note:'High malaria risk year-round.'},
+  {c:'ML',n:'Mali',              f:'🇲🇱', req:['YF'], rec:['HepA','HepB','Ty','Rab','Men'], m:'high', yf:'all', note:'YF required. Meningitis belt — Men ACWY recommended.'},
+  {c:'MA',n:'Morocco',           f:'🇲🇦', req:[],     rec:['HepA','HepB','Ty'],        m:'none', yf:'',          note:'Routine + standard travel vaccines.'},
+  {c:'MZ',n:'Mozambique',        f:'🇲🇿', req:[],     rec:['HepA','HepB','Ty','YF','Rab'], m:'high', yf:'from-risk', note:'High malaria risk country-wide.'},
+  {c:'NA',n:'Namibia',           f:'🇳🇦', req:[],     rec:['HepA','HepB','Ty','YF'],   m:'mod',  yf:'from-risk', note:'Malaria risk in northern third (Caprivi, Kavango, Oshikoto) Nov–May; none in main tourist areas of central &amp; southern Namibia.'},
+  {c:'NG',n:'Nigeria',           f:'🇳🇬', req:['YF'], rec:['HepA','HepB','Ty','Rab','Men','Pol'], m:'high', yf:'all', note:'YF required. Polio circulation — adult booster recommended. Lassa fever &amp; mpox outbreaks have occurred.'},
+  {c:'RW',n:'Rwanda',            f:'🇷🇼', req:[],     rec:['HepA','HepB','Ty','YF','Rab'], m:'mod', yf:'recommended', note:'YF certificate may be required at land borders; recommended for all travelers. Malaria year-round, including Kigali.'},
+  {c:'SN',n:'Senegal',           f:'🇸🇳', req:['YF'], rec:['HepA','HepB','Ty','Rab','Men'], m:'high', yf:'all', note:'YF required. Meningitis belt — Men ACWY recommended in dry season.'},
+  {c:'SC',n:'Seychelles',        f:'🇸🇨', req:[],     rec:['HepA','HepB','Ty'],        m:'none', yf:'from-risk', note:'YF certificate required from travelers ≥1 year from risk countries.'},
+  {c:'SL',n:'Sierra Leone',      f:'🇸🇱', req:['YF'], rec:['HepA','HepB','Ty','Rab','Men'], m:'high', yf:'all', note:'YF required for entry.'},
+  {c:'ZA',n:'South Africa',      f:'🇿🇦', req:[],     rec:['HepA','HepB','Ty'],        m:'low',  yf:'from-risk', note:'YF certificate strictly required from travelers (≥1 yr) arriving from risk countries. Malaria risk in northeast Kruger, Limpopo &amp; northern KZN Sep–May.'},
+  {c:'SS',n:'South Sudan',       f:'🇸🇸', req:['YF'], rec:['HepA','HepB','Ty','Rab','Men'], m:'high', yf:'all', note:'YF required. Check government travel advisories before traveling.'},
+  {c:'SD',n:'Sudan',             f:'🇸🇩', req:[],     rec:['HepA','HepB','Ty','YF','Men'], m:'high', yf:'recommended', note:'YF recommended; meningitis belt — Men ACWY recommended.'},
+  {c:'TZ',n:'Tanzania',          f:'🇹🇿', req:[],     rec:['HepA','HepB','Ty','YF','Rab'], m:'high', yf:'from-risk', note:'YF certificate required from travelers arriving from risk countries. High malaria year-round (incl. Zanzibar, lower in highlands).'},
+  {c:'TG',n:'Togo',              f:'🇹🇬', req:['YF'], rec:['HepA','HepB','Ty','Rab','Men'], m:'high', yf:'all', note:'YF required for entry.'},
+  {c:'TN',n:'Tunisia',           f:'🇹🇳', req:[],     rec:['HepA','HepB','Ty'],        m:'none', yf:'',          note:'Routine + standard travel vaccines.'},
+  {c:'UG',n:'Uganda',            f:'🇺🇬', req:['YF'], rec:['HepA','HepB','Ty','Rab'],  m:'high', yf:'all', note:'YF required for entry. High malaria year-round.'},
+  {c:'ZM',n:'Zambia',            f:'🇿🇲', req:[],     rec:['HepA','HepB','Ty','YF','Rab'], m:'high', yf:'from-risk', note:'High malaria risk country-wide. Cholera outbreaks have occurred.'},
+  {c:'ZW',n:'Zimbabwe',          f:'🇿🇼', req:[],     rec:['HepA','HepB','Ty','YF','Rab'], m:'mod', yf:'from-risk', note:'Malaria risk in Zambezi valley, Victoria Falls &amp; lowland areas; minimal in Harare.'},
+
+  // ── Oceania ──
+  {c:'AU',n:'Australia',         f:'🇦🇺', req:[],     rec:[],                          m:'none', yf:'from-risk', note:'YF certificate required from travelers ≥1 year from risk countries.'},
+  {c:'FJ',n:'Fiji',              f:'🇫🇯', req:[],     rec:['HepA','HepB','Ty'],        m:'none', yf:'from-risk', note:'Dengue and Zika present.'},
+  {c:'NZ',n:'New Zealand',       f:'🇳🇿', req:[],     rec:[],                          m:'none', yf:'from-risk', note:'YF certificate required from travelers arriving from risk countries.'},
+  {c:'PG',n:'Papua New Guinea',  f:'🇵🇬', req:[],     rec:['HepA','HepB','Ty','JE','Rab'], m:'high', yf:'from-risk', note:'High malaria risk &lt;1800m — chloroquine &amp; mefloquine resistant. JE recommended.'},
+  {c:'SB',n:'Solomon Islands',   f:'🇸🇧', req:[],     rec:['HepA','HepB','Ty'],        m:'high', yf:'from-risk', note:'High malaria risk country-wide.'},
+  {c:'VU',n:'Vanuatu',           f:'🇻🇺', req:[],     rec:['HepA','HepB','Ty'],        m:'mod',  yf:'from-risk', note:'Malaria risk on most islands.'},
+];
+
+/* ── INIT ── */
+function vacInit() {
+  const trip = getActiveTrip();
+  const ctx  = document.getElementById('ctx-vaccination');
+  if (trip && ctx) {
+    ctx.textContent = `✈ Using context from: ${trip.name} — tap to edit ↗`;
+    ctx.classList.add('show');
+    ctx.onclick = () => showView('mytrip');
+  } else if (ctx) { ctx.classList.remove('show'); }
+
+  // Static section render
+  vacRenderTimeline();
+  vacRenderRoutine();
+  vacRenderMalariaMeds();
+  vacRenderTrackerSelect();
+  vacRenderTracker();
+
+  // Destination search
+  const search = document.getElementById('vac-dest-search');
+  const drop   = document.getElementById('vac-dest-drop');
+  const hidden = document.getElementById('vac-dest-val');
+  const result = document.getElementById('vac-result');
+  if (result) result.innerHTML = '';
+
+  search.value = '';
+  hidden.value = '';
+
+  search.oninput = () => {
+    hidden.value = '';
+    vacRenderDrop(drop, search.value);
+    drop.style.display = 'block';
+  };
+  search.onfocus = () => {
+    vacRenderDrop(drop, search.value);
+    drop.style.display = 'block';
+  };
+  search.onblur  = () => setTimeout(() => { drop.style.display = 'none'; }, 160);
+
+  // Try to autofill from active trip destination (fuzzy match against country name)
+  const tripDest = trip && trip.destination ? trip.destination.toLowerCase() : '';
+  if (tripDest) {
+    const match = VAC_COUNTRIES.find(d =>
+      tripDest.includes(d.n.toLowerCase()) ||
+      d.n.toLowerCase().includes(tripDest.split(/[,\s]/).filter(s => s.length > 2)[0] || '__none__')
+    );
+    if (match) {
+      search.value = match.f + ' ' + match.n;
+      hidden.value = match.c;
+      vacCheck();
+    }
+  }
+}
+
+function vacRenderDrop(drop, q) {
+  const query = (q || '').toLowerCase().trim();
+  const list  = query
+    ? VAC_COUNTRIES.filter(x => x.n.toLowerCase().includes(query) || x.c.toLowerCase().includes(query))
+    : VAC_COUNTRIES;
+  if (!list.length) {
+    drop.innerHTML = '<div class="vg-drop-item" style="color:var(--muted);cursor:default">No results found</div>';
+    return;
+  }
+  drop.innerHTML = list.slice(0, 80).map(x => {
+    const safeLabel = (x.f + ' ' + x.n).replace(/'/g, '&#39;');
+    return `<div class="vg-drop-item" onmousedown="vacSelect(event,'${x.c}','${safeLabel}')">${x.f} ${x.n}</div>`;
+  }).join('');
+}
+
+function vacSelect(e, code, label) {
+  e.preventDefault();
+  document.getElementById('vac-dest-search').value = label;
+  document.getElementById('vac-dest-val').value    = code;
+  document.getElementById('vac-dest-drop').style.display = 'none';
+  vacCheck();
+}
+
+function vacCheck() {
+  const code = document.getElementById('vac-dest-val').value.trim();
+  const res  = document.getElementById('vac-result');
+  if (!code) {
+    res.innerHTML = '<div style="padding:16px;border:1.5px solid var(--ink);border-radius:var(--r);color:var(--muted);text-align:center;font-size:14px">Pick a destination to see vaccine requirements.</div>';
+    return;
+  }
+  const dest = VAC_COUNTRIES.find(d => d.c === code);
+  if (!dest) {
+    res.innerHTML = '<div style="padding:16px;border:1.5px solid var(--ink);border-radius:var(--r);color:var(--muted);text-align:center;font-size:14px">No data for this destination. Verify with CDC, WHO or a travel medicine specialist.</div>';
+    return;
+  }
+  res.innerHTML = vacBuildCard(dest);
+}
+
+function vacBuildCard(dest) {
+  const malariaCfg = {
+    none: { lbl:'No risk',         ico:'🟢', cls:'vac-risk-none' },
+    low:  { lbl:'Low / limited',   ico:'🟡', cls:'vac-risk-low'  },
+    mod:  { lbl:'Moderate',        ico:'🟠', cls:'vac-risk-mod'  },
+    high: { lbl:'High',            ico:'🔴', cls:'vac-risk-high' },
+  }[dest.m] || { lbl:'Unknown', ico:'⚪', cls:'' };
+
+  const yfCfg = {
+    '':            { lbl:'Not relevant',                       ico:'⚪', cls:'vac-risk-none' },
+    'from-risk':   { lbl:'Required if from YF country',        ico:'🟡', cls:'vac-risk-mod'  },
+    'all':         { lbl:'Required for entry',                 ico:'🔴', cls:'vac-risk-high' },
+    'recommended': { lbl:'Endemic — vaccine recommended',      ico:'🟠', cls:'vac-risk-mod'  },
+  }[dest.yf] || { lbl:'See notes', ico:'⚪', cls:'' };
+
+  const requiredHtml = dest.req.length
+    ? `<div class="vac-vax-block">
+        <div class="vac-vax-hdr req">⚠ Required for Entry</div>
+        <div class="vac-vax-list">${dest.req.map(vacVaxItem).join('')}</div>
+       </div>`
+    : `<div class="vac-vax-block">
+        <div class="vac-vax-hdr req">⚠ Required for Entry</div>
+        <div class="vac-vax-empty">No vaccines legally required for entry. (Routine + recommended below still apply.)</div>
+       </div>`;
+
+  const recommendedHtml = dest.rec.length
+    ? `<div class="vac-vax-block">
+        <div class="vac-vax-hdr rec">💡 Recommended</div>
+        <div class="vac-vax-list">${dest.rec.map(vacVaxItem).join('')}</div>
+       </div>`
+    : '';
+
+  return `<div class="vac-result-card">
+    <div class="vac-result-top">
+      <span class="vac-result-flag">${dest.f}</span>
+      <div>
+        <div class="vac-result-name">${dest.n}</div>
+        <div class="vac-result-sub">Vaccine guidance · ${dest.c}</div>
+      </div>
+    </div>
+    <div class="vac-risk-row">
+      <div class="vac-risk-cell ${malariaCfg.cls}">
+        <div class="vac-risk-lbl">🦟 Malaria Risk</div>
+        <div class="vac-risk-val"><span>${malariaCfg.ico}</span> ${malariaCfg.lbl}</div>
+      </div>
+      <div class="vac-risk-cell ${yfCfg.cls}">
+        <div class="vac-risk-lbl">📒 Yellow Fever Cert.</div>
+        <div class="vac-risk-val"><span>${yfCfg.ico}</span> ${yfCfg.lbl}</div>
+      </div>
+    </div>
+    ${requiredHtml}
+    ${recommendedHtml}
+    <div class="vac-notes"><strong>Country notes:</strong> ${dest.note}</div>
+    <div class="vac-card-footer">⚠ Recommendations only · verify with CDC, WHO &amp; a travel clinic</div>
+  </div>`;
+}
+
+function vacVaxItem(code) {
+  const info = VAC_INFO[code];
+  if (!info) return '';
+  return `<div class="vac-vax-item">
+    <span class="vac-vax-item-ico">${info.ico}</span>
+    <div class="vac-vax-item-main">
+      <div class="vac-vax-item-name">${info.n}</div>
+      <div class="vac-vax-item-desc">${info.desc}</div>
+    </div>
+  </div>`;
+}
+
+function vacRenderTimeline() {
+  const el = document.getElementById('vac-timeline-steps');
+  if (!el) return;
+  el.innerHTML = VAC_TIMELINE.map(s =>
+    `<div class="vac-timeline-step"><div class="vac-timeline-when">${s.when}</div><div class="vac-timeline-what">${s.what}</div></div>`
+  ).join('');
+}
+
+function vacRenderRoutine() {
+  const el = document.getElementById('vac-routine-grid');
+  if (!el) return;
+  el.innerHTML = VAC_ROUTINE.map(v =>
+    `<div class="vac-routine-item"><div class="vac-routine-name">${v.ico} ${v.n}</div><div class="vac-routine-desc">${v.d}</div></div>`
+  ).join('');
+}
+
+function vacRenderMalariaMeds() {
+  const el = document.getElementById('vac-malaria-meds');
+  if (!el) return;
+  el.innerHTML = VAC_MALARIA_MEDS.map(m =>
+    `<div class="vac-malaria-med"><div class="vac-malaria-med-name">${m.n}</div><div class="vac-malaria-med-desc">${m.d}</div><div class="vac-malaria-key">${m.k}</div></div>`
+  ).join('');
+}
+
+/* ── PERSONAL VACCINATION TRACKER ── */
+function vacTrackerKey() { return 'tt_vac_record'; }
+function vacTrackerLoad() {
+  try { return JSON.parse(localStorage.getItem(vacTrackerKey())) || []; }
+  catch(e) { return []; }
+}
+function vacTrackerSave(list) {
+  localStorage.setItem(vacTrackerKey(), JSON.stringify(list));
+}
+
+function vacRenderTrackerSelect() {
+  const sel = document.getElementById('vac-tr-vax');
+  if (!sel) return;
+  // Build option list: routine + travel vaccines
+  const opts = [
+    ['', '— select —'],
+    ['__hdr_routine__', '── Routine ──'],
+    ...VAC_ROUTINE.map(v => [v.n, v.n]),
+    ['__hdr_travel__', '── Travel ──'],
+    ...Object.entries(VAC_INFO).map(([k, v]) => [v.n, v.n]),
+  ];
+  sel.innerHTML = opts.map(([val, label]) =>
+    val.startsWith('__hdr_')
+      ? `<option disabled>${label}</option>`
+      : `<option value="${val.replace(/"/g, '&quot;')}">${label}</option>`
+  ).join('');
+}
+
+function vacTrackerAdd() {
+  const vax  = document.getElementById('vac-tr-vax').value.trim();
+  const date = document.getElementById('vac-tr-date').value;
+  const lot  = document.getElementById('vac-tr-lot').value.trim();
+  if (!vax) { alert('Pick a vaccine.'); return; }
+  if (!date) { alert('Enter the date the vaccine was given.'); return; }
+  const list = vacTrackerLoad();
+  list.push({ vax, date, lot, added: Date.now() });
+  // Sort latest first
+  list.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  vacTrackerSave(list);
+  document.getElementById('vac-tr-vax').value = '';
+  document.getElementById('vac-tr-date').value = '';
+  document.getElementById('vac-tr-lot').value  = '';
+  vacRenderTracker();
+}
+
+function vacTrackerDelete(idx) {
+  const list = vacTrackerLoad();
+  list.splice(idx, 1);
+  vacTrackerSave(list);
+  vacRenderTracker();
+}
+
+function vacRenderTracker() {
+  const wrap   = document.getElementById('vac-tracker-list');
+  const exp    = document.getElementById('vac-export');
+  if (!wrap) return;
+  const list   = vacTrackerLoad();
+  if (!list.length) {
+    wrap.innerHTML = '<div class="vac-tracker-empty">No vaccines logged yet. Add your first one above ↑</div>';
+    if (exp) exp.style.display = 'none';
+    return;
+  }
+  wrap.innerHTML = '<div class="vac-tracker-list">' + list.map((e, i) => {
+    const lotPart = e.lot ? `<span>Lot ${escapeHtml(e.lot)}</span>` : '';
+    return `<div class="vac-tracker-entry">
+      <div class="vac-tracker-entry-name">${escapeHtml(e.vax)}${lotPart}</div>
+      <div class="vac-tracker-entry-date">${escapeHtml(e.date)}</div>
+      <button class="vac-tracker-del" onclick="vacTrackerDelete(${i})" aria-label="Remove">✕</button>
+    </div>`;
+  }).join('') + '</div>';
+  if (exp) exp.style.display = 'inline-block';
+}
+
+function vacTrackerExport() {
+  const list = vacTrackerLoad();
+  if (!list.length) return;
+  const header = 'Vaccine,Date,Lot Number\n';
+  const rows = list.map(e =>
+    `"${(e.vax || '').replace(/"/g, '""')}","${e.date || ''}","${(e.lot || '').replace(/"/g, '""')}"`
+  ).join('\n');
+  const blob = new Blob([header + rows], { type: 'text/csv;charset=utf-8' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  a.download = 'vaccination-record-' + (new Date().toISOString().slice(0, 10)) + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function escapeHtml(s) {
+  return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
 </script>
