@@ -4294,16 +4294,211 @@ body.no-scroll { overflow: hidden; }
     </div>
   </div>
 </div>
-<div id="view-placeholder-toll-est" class="view">
-  <nav class="tool-topbar">
+<style>
+/* ── TOLL COST ESTIMATOR ── */
+.te-mode-toggle{display:flex;gap:0;border:1.5px solid var(--ink);border-radius:var(--r);overflow:hidden;margin-bottom:18px}
+.te-mode-btn{flex:1;padding:12px 10px;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;background:var(--paper);color:var(--ink-2);border:none;border-right:1.5px solid var(--ink);cursor:pointer;transition:background .12s,color .12s;min-height:44px}
+.te-mode-btn:last-child{border-right:none}
+.te-mode-btn.active{background:var(--ink);color:var(--yellow)}
+.te-mode-btn:hover:not(.active){background:var(--paper-2)}
+
+.te-section-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:18px 0 10px}
+
+/* Common Routes mode */
+.te-preset-card{border:1.5px solid var(--ink);border-radius:var(--r);background:var(--paper-2);padding:16px;margin-bottom:16px}
+.te-preset-list{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-height:340px;overflow-y:auto}
+@media(max-width:560px){.te-preset-list{grid-template-columns:1fr}}
+.te-preset-btn{text-align:left;padding:11px 13px;border:1.5px solid var(--ink);border-radius:var(--r);background:var(--paper);font-family:var(--sans);font-size:13px;cursor:pointer;color:var(--ink);transition:background .12s,color .12s;display:flex;flex-direction:column;gap:3px;min-height:54px;line-height:1.25}
+.te-preset-btn:hover:not(.active){background:var(--paper-2)}
+.te-preset-btn.active{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.te-preset-name{font-weight:500}
+.te-preset-meta{font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--muted);text-transform:uppercase}
+.te-preset-btn.active .te-preset-meta{color:rgba(255,255,255,.6)}
+
+/* Build My Trip mode */
+.te-region-tabs{display:flex;gap:0;border:1.5px solid var(--ink);border-radius:var(--r);overflow:hidden;margin-bottom:14px;flex-wrap:wrap}
+.te-region-tab{flex:1;min-width:90px;padding:9px 8px;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;background:var(--paper);color:var(--ink-2);border:none;border-right:1.5px solid var(--ink);cursor:pointer;transition:background .12s,color .12s;min-height:38px}
+.te-region-tab:last-child{border-right:none}
+.te-region-tab.active{background:var(--ink);color:var(--yellow)}
+.te-region-tab:hover:not(.active){background:var(--paper-2)}
+
+.te-state-group{margin-bottom:14px;border:1.5px solid var(--rule);border-radius:var(--r);overflow:hidden;background:var(--paper)}
+.te-state-hdr{padding:9px 14px;background:var(--paper-2);font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);border-bottom:1.5px solid var(--rule);display:flex;justify-content:space-between;align-items:center}
+.te-state-flag{font-size:13px}
+.te-state-cnt{font-size:10px;color:var(--muted)}
+.te-seg-row{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-bottom:1px solid var(--rule);cursor:pointer;transition:background .12s;min-height:48px}
+.te-seg-row:last-child{border-bottom:none}
+.te-seg-row:hover{background:var(--paper-2)}
+.te-seg-row.checked{background:rgba(255,77,46,.06)}
+.te-seg-check{width:18px;height:18px;border:1.5px solid var(--ink);border-radius:3px;background:var(--paper);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:13px;line-height:1;color:transparent;transition:background .12s,color .12s}
+.te-seg-row.checked .te-seg-check{background:var(--ink);color:var(--yellow)}
+.te-seg-info{flex:1;min-width:0}
+.te-seg-name{font-size:13.5px;color:var(--ink);font-weight:500;line-height:1.3}
+.te-seg-meta{font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--muted);text-transform:uppercase;margin-top:2px}
+.te-seg-price{font-family:var(--mono);font-size:12px;color:var(--ink-2);font-weight:600;flex-shrink:0;margin-left:8px;white-space:nowrap}
+
+/* Options */
+.te-opts-card{border:1.5px solid var(--ink);border-radius:var(--r);background:var(--paper-2);padding:14px 16px;margin-top:18px}
+.te-opts-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:560px){.te-opts-grid{grid-template-columns:1fr}}
+.te-opt-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;display:block}
+.te-chip-grp{display:flex;gap:6px;flex-wrap:wrap}
+.te-chip{padding:7px 11px;border:1.5px solid var(--ink);border-radius:var(--r);background:var(--paper);font-family:var(--mono);font-size:11px;letter-spacing:.05em;color:var(--ink-2);cursor:pointer;transition:background .12s,color .12s;min-height:34px}
+.te-chip.active{background:var(--ink);color:var(--paper)}
+.te-chip:hover:not(.active){background:var(--paper-2)}
+.te-chip.disabled{opacity:.4;cursor:not-allowed}
+.te-rt-row{display:flex;align-items:center;gap:10px;margin-top:14px;padding-top:12px;border-top:1px solid var(--rule);cursor:pointer;user-select:none}
+.te-rt-check{width:20px;height:20px;border:1.5px solid var(--ink);border-radius:3px;background:var(--paper);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;line-height:1;color:transparent;transition:background .12s,color .12s}
+.te-rt-row.checked .te-rt-check{background:var(--ink);color:var(--yellow)}
+.te-rt-lbl{font-size:14px;color:var(--ink)}
+
+/* Results */
+.te-results{border-top:2px solid var(--ink);margin-top:24px;padding-top:24px}
+.te-results-inner{animation:te-result-in .22s cubic-bezier(.2,.8,.2,1) both}
+@keyframes te-result-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.te-grand{border:2px solid var(--ink);border-radius:var(--r);background:var(--paper);padding:18px 20px;position:relative;overflow:hidden;margin-bottom:18px}
+.te-grand::before{content:'';position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--accent)}
+.te-grand-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.te-grand-num{font-family:var(--serif);font-weight:600;font-size:clamp(34px,7.5vw,56px);letter-spacing:-.03em;line-height:1;color:var(--accent);font-variation-settings:"opsz" 72,"SOFT" 30,"WONK" 1}
+.te-grand-sub{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--ink-2);margin-top:6px}
+.te-grand-actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.te-action-btn{padding:8px 14px;border:1.5px solid var(--ink);border-radius:var(--r);background:var(--paper);font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);cursor:pointer;transition:background .12s,color .12s;min-height:36px}
+.te-action-btn:hover{background:var(--ink);color:var(--paper)}
+
+.te-line-list{border:1.5px solid var(--ink);border-radius:var(--r);overflow:hidden;background:var(--paper)}
+.te-line{display:flex;align-items:center;padding:11px 14px;border-bottom:1px solid var(--rule);gap:12px}
+.te-line:last-child{border-bottom:none}
+.te-line:nth-child(even){background:var(--paper-2)}
+.te-line-name{flex:1;font-size:14px;color:var(--ink);line-height:1.3}
+.te-line-sub{font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--muted);text-transform:uppercase;margin-top:2px}
+.te-line-price{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--ink);flex-shrink:0}
+.te-line-rt-tag{font-family:var(--mono);font-size:9px;letter-spacing:.08em;background:var(--blue);color:#fff;padding:2px 5px;border-radius:2px;margin-left:6px;text-transform:uppercase;vertical-align:1px}
+
+.te-rm-btn{background:none;border:none;color:var(--muted);font-size:18px;line-height:1;cursor:pointer;padding:0 4px;flex-shrink:0}
+.te-rm-btn:hover{color:var(--accent)}
+
+.te-empty{text-align:center;padding:28px 16px;color:var(--muted);font-style:italic;border:1.5px dashed var(--rule);border-radius:var(--r);background:var(--paper-2)}
+
+.te-disclaim{font-family:var(--mono);font-size:10px;letter-spacing:.04em;color:var(--muted);margin-top:14px;line-height:1.6;padding:10px 12px;background:var(--paper-2);border-left:3px solid var(--rule);border-radius:0 var(--r) var(--r) 0}
+
+@media print{
+  .tool-bar,.site-header,.ctx-banner,.pro-tip,.related,.te-mode-toggle,.te-region-tabs,.te-preset-card,.te-state-group,.te-opts-card,.te-action-btn,.te-rm-btn,.btn-ghost,.te-disclaim,#te-builder-wrap,#te-preset-wrap{display:none !important}
+  #te-results{display:block !important}
+  .te-print-header{display:flex !important;justify-content:space-between;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#555;padding-bottom:8px;border-bottom:1px solid #ccc;margin-bottom:16px}
+  .te-results{border-top:1px solid #ccc}
+  body{background:#fff !important;background-image:none !important}
+}
+.te-print-header{display:none}
+</style>
+<div id="view-toll-est" class="view">
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="window.print()">🖨 Print</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">💲</span>
-    <h2>Toll Cost Estimator</h2>
-    <p style="margin-bottom:24px">Major US toll roads with typical costs. Estimated total city-to-city.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-toll-est"></div>
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>Toll Cost Estimator</h1>
+    <p class="tool-sub">Major US toll roads with typical per-segment costs. Pick a common route or build your trip from individual toll facilities.</p>
+  </div>
+
+  <div class="tool-body">
+
+    <!-- Print header -->
+    <div class="te-print-header">
+      <strong>TripTools — Toll Cost Estimator</strong>
+      <span id="te-print-date"></span>
+    </div>
+
+    <!-- ── MODE TOGGLE ── -->
+    <div class="te-mode-toggle">
+      <button class="te-mode-btn active" data-te-mode="preset" onclick="teSetMode('preset')">🗺 Common Routes</button>
+      <button class="te-mode-btn" data-te-mode="builder" onclick="teSetMode('builder')">🔧 Build My Trip</button>
+    </div>
+
+    <!-- ── COMMON ROUTES ── -->
+    <div id="te-preset-wrap">
+      <div class="te-section-lbl">Pick a city-to-city trip</div>
+      <div class="te-preset-card">
+        <div class="te-preset-list" id="te-preset-list"></div>
+      </div>
+    </div>
+
+    <!-- ── BUILD MY TRIP ── -->
+    <div id="te-builder-wrap" style="display:none">
+      <div class="te-section-lbl">Filter by region</div>
+      <div class="te-region-tabs" id="te-region-tabs">
+        <button class="te-region-tab active" data-te-region="all" onclick="teSetRegion('all')">All</button>
+        <button class="te-region-tab" data-te-region="NE" onclick="teSetRegion('NE')">Northeast</button>
+        <button class="te-region-tab" data-te-region="MA" onclick="teSetRegion('MA')">Mid-Atl.</button>
+        <button class="te-region-tab" data-te-region="SE" onclick="teSetRegion('SE')">Southeast</button>
+        <button class="te-region-tab" data-te-region="MW" onclick="teSetRegion('MW')">Midwest</button>
+        <button class="te-region-tab" data-te-region="W"  onclick="teSetRegion('W')">West</button>
+      </div>
+      <div class="te-section-lbl">Pick the toll roads, bridges &amp; tunnels you'll use</div>
+      <div id="te-state-groups"></div>
+    </div>
+
+    <!-- ── OPTIONS ── -->
+    <div class="te-opts-card">
+      <div class="te-opts-grid">
+        <div>
+          <span class="te-opt-lbl">Payment Method</span>
+          <div class="te-chip-grp" id="te-pay-grp">
+            <button class="te-chip active" data-te-pay="ezpass" onclick="teSetPay('ezpass')">📡 E-ZPass / Electronic</button>
+            <button class="te-chip" data-te-pay="cash" onclick="teSetPay('cash')">💵 Cash / Toll-by-Plate</button>
+          </div>
+        </div>
+        <div>
+          <span class="te-opt-lbl">Vehicle</span>
+          <div class="te-chip-grp" id="te-veh-grp">
+            <button class="te-chip" data-te-veh="moto" onclick="teSetVeh('moto')">🏍 Motorcycle</button>
+            <button class="te-chip active" data-te-veh="car" onclick="teSetVeh('car')">🚗 Car (2-axle)</button>
+            <button class="te-chip" data-te-veh="suvtow" onclick="teSetVeh('suvtow')">🚙 SUV + Trailer</button>
+            <button class="te-chip" data-te-veh="rv" onclick="teSetVeh('rv')">🚐 RV / Large</button>
+          </div>
+        </div>
+        <div>
+          <span class="te-opt-lbl">Time of Day <span style="text-transform:none;letter-spacing:0;color:var(--muted)">(where it varies)</span></span>
+          <div class="te-chip-grp" id="te-peak-grp">
+            <button class="te-chip active" data-te-peak="off" onclick="teSetPeak('off')">🌙 Off-peak</button>
+            <button class="te-chip" data-te-peak="on" onclick="teSetPeak('on')">⏰ Peak Hours</button>
+          </div>
+        </div>
+        <div>
+          <span class="te-opt-lbl">Direction</span>
+          <div class="te-rt-row" id="te-rt-row" onclick="teToggleRT()" role="checkbox" tabindex="0" aria-checked="false">
+            <span class="te-rt-check" id="te-rt-check">✓</span>
+            <span class="te-rt-lbl">Round trip (double the total)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── RESULTS ── -->
+    <div class="te-results" id="te-results" style="display:none">
+      <div class="te-results-inner" id="te-results-inner"></div>
+    </div>
+
+    <!-- ── RESET ── -->
+    <div style="margin-top:14px;text-align:right">
+      <button class="btn-ghost" onclick="teReset()">↺ Reset</button>
+    </div>
+
+  </div><!-- /tool-body -->
+
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    Cash and toll-by-plate rates are typically 25–70% higher than E-ZPass / electronic transponder rates on Northeast turnpikes — a single round trip from NYC to DC can be $15+ cheaper with a transponder. If you're renting, ask about the rental company's tolling program (it's often cheaper to let the car bill you than to pay cash and risk violations). All values shown are typical 2024–2025 base rates for a 2-axle passenger car; actual tolls vary by exit and may change.
+  </div>
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('fuel-cost')">⛽ Fuel Cost Calculator</button>
+      <button class="rel-btn" onclick="openTool('rest-stop')">⏸ Rest Stop Planner</button>
+      <button class="rel-btn" onclick="openTool('car-kit')">🚨 Car Emergency Kit</button>
+      <button class="rel-btn" onclick="openTool('border-cross')">🛂 Border Crossing Guide</button>
+      <button class="rel-btn" onclick="openTool('expense-track')">📊 Daily Expense Tracker</button>
     </div>
   </div>
 </div>
@@ -5881,7 +6076,7 @@ const TOOLS = [
   {id:'playlist-time', nm:'Road Trip Playlist Timer',   ico:'🎵', ph:'road',       on:false,live:false, ds:'Enter drive hours → how many albums/podcasts to download.'},
   {id:'border-cross',  nm:'Border Crossing Guide',      ico:'🛂', ph:'road',       on:false,live:false, ds:'US/Canada, US/Mexico & major land borders. Documents & wait times.'},
   {id:'car-kit',       nm:'Car Emergency Kit Checklist',ico:'🚨', ph:'road',       on:false,live:true,  ds:'What to carry for road trip safety. Customizable by season & route.'},
-  {id:'toll-est',      nm:'Toll Cost Estimator',        ico:'💲', ph:'road',       on:false,live:false, ds:'Major US toll roads. Estimated total cost city-to-city.'},
+  {id:'toll-est',      nm:'Toll Cost Estimator',        ico:'💲', ph:'road',       on:false,live:true,  ds:'Major US toll roads. Estimated total cost city-to-city.'},
   {id:'shore-exc',     nm:'Shore Excursion Planner',    ico:'⚓', ph:'cruise',     on:false,live:false, ds:'Per-port budget & time planner. Never miss ship departure.'},
   {id:'cruise-compare',nm:'Cruise Line Comparison',     ico:'🔍', ph:'cruise',     on:false,live:true,  ds:'Side-by-side of 12 major cruise lines across 10 attributes.'},
   {id:'sea-sick',      nm:'Sea Sickness Guide',         ico:'🌊', ph:'cruise',     on:false,live:false, ds:'Prevention, treatment & best cabin locations for motion sickness.'},
@@ -6559,6 +6754,7 @@ function injectTripCtx(id) {
   if(id==='meeting-tz') mtpInit();
   if(id==='tip-calc')   tcInit();
   if(id==='power-plug') ppInit();
+  if(id==='toll-est')   teInit();
 }
 
 /* ── HUB RENDER ── */
@@ -15571,6 +15767,599 @@ function tcCopy(){
       setTimeout(()=>{ btn.textContent = orig; }, 1400);
     });
   }
+}
+
+/* ══════════════════════════════════════════════════════
+   TOLL COST ESTIMATOR
+   ══════════════════════════════════════════════════════ */
+
+/* Each segment = one toll facility / typical traversal.
+   Pricing: ezpass (2-axle car, electronic, off-peak base);
+   cashMult = cash / toll-by-plate multiplier (>=1);
+   peakMult = peak-hour multiplier (>=1) where applicable.
+   region: NE | MA | SE | MW | W */
+const TE_SEGMENTS = [
+  // ── NORTHEAST ──
+  {id:'nj-tp-full',   region:'NE', state:'NJ', stateLbl:'New Jersey', stateFlag:'🗽',
+   road:'NJ Turnpike', name:'NJ Turnpike — full mainline (Delaware River → NYC)',
+   ezpass:18.85, cashMult:1.25, peakMult:1.14, hasPeak:true},
+  {id:'nj-tp-trenton-nyc', region:'NE', state:'NJ', stateLbl:'New Jersey', stateFlag:'🗽',
+   road:'NJ Turnpike', name:'NJ Turnpike — Trenton (Exit 7A) → NYC area (Exit 18)',
+   ezpass:9.50, cashMult:1.25, peakMult:1.14, hasPeak:true},
+  {id:'nj-tp-nwk-nyc', region:'NE', state:'NJ', stateLbl:'New Jersey', stateFlag:'🗽',
+   road:'NJ Turnpike', name:'NJ Turnpike — Newark (Exit 14) → NYC (Exit 18)',
+   ezpass:2.85, cashMult:1.25, peakMult:1.14, hasPeak:true},
+  {id:'gsp-full',     region:'NE', state:'NJ', stateLbl:'New Jersey', stateFlag:'🗽',
+   road:'Garden State Parkway', name:'Garden State Parkway — full length (Cape May → NY border)',
+   ezpass:13.00, cashMult:1.25, peakMult:1.0, hasPeak:false},
+  {id:'gsp-single',   region:'NE', state:'NJ', stateLbl:'New Jersey', stateFlag:'🗽',
+   road:'Garden State Parkway', name:'Garden State Parkway — single mainline barrier',
+   ezpass:1.75, cashMult:1.25, peakMult:1.0, hasPeak:false},
+  {id:'ac-expy',      region:'NE', state:'NJ', stateLbl:'New Jersey', stateFlag:'🗽',
+   road:'Atlantic City Expressway', name:'Atlantic City Expressway — full length',
+   ezpass:3.40, cashMult:1.0, peakMult:1.0, hasPeak:false},
+
+  {id:'pa-tp-full',   region:'NE', state:'PA', stateLbl:'Pennsylvania', stateFlag:'🔔',
+   road:'PA Turnpike', name:'PA Turnpike — full mainline (Ohio border → NJ border)',
+   ezpass:54.20, cashMult:1.42, peakMult:1.0, hasPeak:false},
+  {id:'pa-tp-phl-har',region:'NE', state:'PA', stateLbl:'Pennsylvania', stateFlag:'🔔',
+   road:'PA Turnpike', name:'PA Turnpike — Philadelphia (Valley Forge) → Harrisburg',
+   ezpass:14.55, cashMult:1.42, peakMult:1.0, hasPeak:false},
+  {id:'pa-tp-har-pgh',region:'NE', state:'PA', stateLbl:'Pennsylvania', stateFlag:'🔔',
+   road:'PA Turnpike', name:'PA Turnpike — Harrisburg → Pittsburgh',
+   ezpass:33.25, cashMult:1.42, peakMult:1.0, hasPeak:false},
+  {id:'pa-tp-nj-vf',  region:'NE', state:'PA', stateLbl:'Pennsylvania', stateFlag:'🔔',
+   road:'PA Turnpike', name:'PA Turnpike — NJ border → Valley Forge',
+   ezpass:7.20, cashMult:1.42, peakMult:1.0, hasPeak:false},
+
+  {id:'ny-thr-bf-al', region:'NE', state:'NY', stateLbl:'New York', stateFlag:'🗽',
+   road:'NY State Thruway', name:'NY Thruway — Buffalo → Albany (I-90)',
+   ezpass:20.55, cashMult:1.05, peakMult:1.0, hasPeak:false},
+  {id:'ny-thr-al-nyc',region:'NE', state:'NY', stateLbl:'New York', stateFlag:'🗽',
+   road:'NY State Thruway', name:'NY Thruway — Albany → NYC (I-87)',
+   ezpass:7.45, cashMult:1.05, peakMult:1.0, hasPeak:false},
+  {id:'cuomo-bridge', region:'NE', state:'NY', stateLbl:'New York', stateFlag:'🗽',
+   road:'M. Cuomo (Tappan Zee) Bridge', name:'Mario M. Cuomo Bridge — westbound (one-way)',
+   ezpass:5.75, cashMult:2.03, peakMult:1.19, hasPeak:true},
+  {id:'gw-bridge',    region:'NE', state:'NY', stateLbl:'NY ↔ NJ Crossings', stateFlag:'🌉',
+   road:'Port Authority', name:'George Washington Bridge — eastbound (one-way)',
+   ezpass:13.75, cashMult:1.24, peakMult:1.17, hasPeak:true},
+  {id:'lincoln',      region:'NE', state:'NY', stateLbl:'NY ↔ NJ Crossings', stateFlag:'🌉',
+   road:'Port Authority', name:'Lincoln Tunnel — eastbound (one-way)',
+   ezpass:13.75, cashMult:1.24, peakMult:1.17, hasPeak:true},
+  {id:'holland',      region:'NE', state:'NY', stateLbl:'NY ↔ NJ Crossings', stateFlag:'🌉',
+   road:'Port Authority', name:'Holland Tunnel — eastbound (one-way)',
+   ezpass:13.75, cashMult:1.24, peakMult:1.17, hasPeak:true},
+  {id:'si-bridges',   region:'NE', state:'NY', stateLbl:'NY ↔ NJ Crossings', stateFlag:'🌉',
+   road:'Port Authority', name:'Goethals / Outerbridge / Bayonne Bridge — eastbound',
+   ezpass:13.75, cashMult:1.24, peakMult:1.17, hasPeak:true},
+  {id:'verrazzano',   region:'NE', state:'NY', stateLbl:'New York', stateFlag:'🗽',
+   road:'MTA Bridges', name:'Verrazzano-Narrows Bridge — westbound (one-way)',
+   ezpass:11.19, cashMult:1.70, peakMult:1.0, hasPeak:false},
+  {id:'mta-bt',       region:'NE', state:'NY', stateLbl:'New York', stateFlag:'🗽',
+   road:'MTA Bridges & Tunnels', name:'MTA Bridges & Tunnels (Throgs Neck, Whitestone, RFK, Carey, Midtown)',
+   ezpass:6.94, cashMult:1.61, peakMult:1.09, hasPeak:true},
+  {id:'henry-hudson', region:'NE', state:'NY', stateLbl:'New York', stateFlag:'🗽',
+   road:'MTA Bridges', name:'Henry Hudson Bridge (Manhattan ↔ Bronx)',
+   ezpass:3.13, cashMult:2.24, peakMult:1.0, hasPeak:false},
+  {id:'nyc-cong',     region:'NE', state:'NY', stateLbl:'New York', stateFlag:'🗽',
+   road:'MTA Congestion Pricing', name:'Manhattan Congestion Zone — daytime entry (E-ZPass)',
+   ezpass:9.00, cashMult:1.5, peakMult:1.0, hasPeak:false},
+
+  {id:'mass-pike-full', region:'NE', state:'MA', stateLbl:'Massachusetts', stateFlag:'🦞',
+   road:'Mass Pike (I-90)', name:'Massachusetts Turnpike — full (Boston → NY border)',
+   ezpass:6.40, cashMult:1.10, peakMult:1.0, hasPeak:false},
+  {id:'mass-pike-bos-wor', region:'NE', state:'MA', stateLbl:'Massachusetts', stateFlag:'🦞',
+   road:'Mass Pike (I-90)', name:'Mass Pike — Boston → Worcester',
+   ezpass:1.40, cashMult:1.10, peakMult:1.0, hasPeak:false},
+  {id:'bos-tunnels',  region:'NE', state:'MA', stateLbl:'Massachusetts', stateFlag:'🦞',
+   road:'Boston Tunnels', name:'Sumner / Callahan / Ted Williams Tunnel (one-way inbound)',
+   ezpass:1.40, cashMult:1.46, peakMult:1.0, hasPeak:false},
+  {id:'tobin',        region:'NE', state:'MA', stateLbl:'Massachusetts', stateFlag:'🦞',
+   road:'Tobin Bridge', name:'Tobin Memorial Bridge — northbound (one-way)',
+   ezpass:1.25, cashMult:1.64, peakMult:1.0, hasPeak:false},
+
+  {id:'nh-tp',        region:'NE', state:'NH', stateLbl:'New Hampshire', stateFlag:'🍂',
+   road:'NH Turnpike', name:'NH Turnpike — Hampton mainline barrier',
+   ezpass:1.50, cashMult:1.33, peakMult:1.0, hasPeak:false},
+  {id:'me-tp-york',   region:'NE', state:'ME', stateLbl:'Maine', stateFlag:'🦞',
+   road:'Maine Turnpike', name:'Maine Turnpike — York mainline toll',
+   ezpass:3.20, cashMult:1.25, peakMult:1.0, hasPeak:false},
+
+  {id:'del-tp',       region:'NE', state:'DE', stateLbl:'Delaware', stateFlag:'🇺🇸',
+   road:'Delaware Turnpike (I-95)', name:'Delaware Turnpike — I-95 toll plaza',
+   ezpass:4.00, cashMult:1.25, peakMult:1.0, hasPeak:false},
+
+  // ── MID-ATLANTIC ──
+  {id:'dulles-tr',    region:'MA', state:'VA', stateLbl:'Virginia', stateFlag:'🏛',
+   road:'Dulles Toll Road', name:'Dulles Toll Road — full length',
+   ezpass:5.00, cashMult:1.0, peakMult:1.0, hasPeak:false},
+  {id:'dulles-grnwy', region:'MA', state:'VA', stateLbl:'Virginia', stateFlag:'🏛',
+   road:'Dulles Greenway', name:'Dulles Greenway — full length',
+   ezpass:5.80, cashMult:1.05, peakMult:1.12, hasPeak:true},
+  {id:'va-95-exp',    region:'MA', state:'VA', stateLbl:'Virginia', stateFlag:'🏛',
+   road:'I-95/395 Express Lanes', name:'I-95 / I-395 Express Lanes — typical dynamic toll',
+   ezpass:9.00, cashMult:1.50, peakMult:1.0, hasPeak:false},
+  {id:'va-66-exp',    region:'MA', state:'VA', stateLbl:'Virginia', stateFlag:'🏛',
+   road:'I-66 Express Lanes', name:'I-66 Express Lanes (Inside the Beltway)',
+   ezpass:4.50, cashMult:1.50, peakMult:2.20, hasPeak:true},
+  {id:'va-495-exp',   region:'MA', state:'VA', stateLbl:'Virginia', stateFlag:'🏛',
+   road:'I-495 Express Lanes', name:'I-495 Capital Beltway Express Lanes (typical)',
+   ezpass:5.00, cashMult:1.50, peakMult:1.0, hasPeak:false},
+
+  {id:'ches-bay-md', region:'MA', state:'MD', stateLbl:'Maryland', stateFlag:'🦀',
+   road:'Bay Bridge', name:'Chesapeake Bay Bridge (US-50) — eastbound only',
+   ezpass:4.00, cashMult:1.50, peakMult:1.0, hasPeak:false},
+  {id:'fort-mch',     region:'MA', state:'MD', stateLbl:'Maryland', stateFlag:'🦀',
+   road:'Fort McHenry / Harbor Tunnels', name:'Fort McHenry / Harbor / Key crossings (Baltimore)',
+   ezpass:3.00, cashMult:2.0, peakMult:1.0, hasPeak:false},
+  {id:'jfk-md',       region:'MA', state:'MD', stateLbl:'Maryland', stateFlag:'🦀',
+   road:'JFK Memorial Hwy', name:'JFK Memorial Highway (I-95 toll, MD)',
+   ezpass:6.00, cashMult:1.33, peakMult:1.0, hasPeak:false},
+  {id:'icc-md',       region:'MA', state:'MD', stateLbl:'Maryland', stateFlag:'🦀',
+   road:'ICC (MD-200)', name:'Intercounty Connector (MD-200) — full length',
+   ezpass:5.00, cashMult:1.50, peakMult:1.30, hasPeak:true},
+
+  {id:'ches-bbt-va', region:'MA', state:'VA', stateLbl:'Virginia', stateFlag:'🏛',
+   road:'Bay Bridge-Tunnel', name:'Chesapeake Bay Bridge-Tunnel (one-way)',
+   ezpass:14.00, cashMult:1.0, peakMult:1.29, hasPeak:true},
+  {id:'expr-lanes-nc',region:'MA', state:'NC', stateLbl:'North Carolina', stateFlag:'🏖',
+   road:'Triangle Expressway', name:'Triangle Expressway (NC-540, Raleigh)',
+   ezpass:4.50, cashMult:1.35, peakMult:1.0, hasPeak:false},
+
+  // ── SOUTHEAST ──
+  {id:'fl-tp-main',   region:'SE', state:'FL', stateLbl:'Florida', stateFlag:'🐊',
+   road:'Florida Turnpike', name:'Florida Turnpike — mainline (Wildwood → Homestead)',
+   ezpass:23.20, cashMult:1.25, peakMult:1.0, hasPeak:false},
+  {id:'fl-tp-orl-mia',region:'SE', state:'FL', stateLbl:'Florida', stateFlag:'🐊',
+   road:'Florida Turnpike', name:'Florida Turnpike — Orlando → Miami',
+   ezpass:20.00, cashMult:1.25, peakMult:1.0, hasPeak:false},
+  {id:'fl-tp-homext', region:'SE', state:'FL', stateLbl:'Florida', stateFlag:'🐊',
+   road:'Florida Turnpike', name:'Florida Turnpike — Homestead Extension (full)',
+   ezpass:4.50, cashMult:1.25, peakMult:1.0, hasPeak:false},
+  {id:'fl-528',       region:'SE', state:'FL', stateLbl:'Florida', stateFlag:'🐊',
+   road:'SR-528 Beachline', name:'Beachline Expy (SR-528, Orlando → Space Coast)',
+   ezpass:5.50, cashMult:1.25, peakMult:1.0, hasPeak:false},
+  {id:'fl-417',       region:'SE', state:'FL', stateLbl:'Florida', stateFlag:'🐊',
+   road:'SR-417 GreeneWay', name:'Central FL GreeneWay (SR-417) — full',
+   ezpass:5.25, cashMult:1.25, peakMult:1.0, hasPeak:false},
+  {id:'fl-408',       region:'SE', state:'FL', stateLbl:'Florida', stateFlag:'🐊',
+   road:'SR-408', name:'Spessard Holland East-West Expy (SR-408, Orlando)',
+   ezpass:2.50, cashMult:1.25, peakMult:1.0, hasPeak:false},
+  {id:'fl-429',       region:'SE', state:'FL', stateLbl:'Florida', stateFlag:'🐊',
+   road:'SR-429', name:'Daniel Webster Western Beltway (SR-429)',
+   ezpass:4.50, cashMult:1.25, peakMult:1.0, hasPeak:false},
+  {id:'fl-589',       region:'SE', state:'FL', stateLbl:'Florida', stateFlag:'🐊',
+   road:'Veterans Expy', name:'Veterans Expressway (SR-589, Tampa)',
+   ezpass:3.50, cashMult:1.25, peakMult:1.0, hasPeak:false},
+  {id:'fl-alligator', region:'SE', state:'FL', stateLbl:'Florida', stateFlag:'🐊',
+   road:'Alligator Alley', name:'Alligator Alley (I-75, Naples ↔ Sunrise)',
+   ezpass:3.25, cashMult:1.0, peakMult:1.0, hasPeak:false},
+  {id:'fl-sawgrass',  region:'SE', state:'FL', stateLbl:'Florida', stateFlag:'🐊',
+   road:'Sawgrass Expressway', name:'Sawgrass Expressway (Broward)',
+   ezpass:3.50, cashMult:1.25, peakMult:1.0, hasPeak:false},
+  {id:'fl-skyway',    region:'SE', state:'FL', stateLbl:'Florida', stateFlag:'🐊',
+   road:'Sunshine Skyway', name:'Sunshine Skyway Bridge (one-way)',
+   ezpass:1.50, cashMult:1.0, peakMult:1.0, hasPeak:false},
+
+  // ── MIDWEST ──
+  {id:'oh-tp-full',   region:'MW', state:'OH', stateLbl:'Ohio', stateFlag:'🌰',
+   road:'Ohio Turnpike', name:'Ohio Turnpike — full (PA border → IN border)',
+   ezpass:13.75, cashMult:1.50, peakMult:1.0, hasPeak:false},
+  {id:'in-tp-full',   region:'MW', state:'IN', stateLbl:'Indiana', stateFlag:'🏁',
+   road:'Indiana Toll Road', name:'Indiana Toll Road — full (OH border → IL border)',
+   ezpass:11.20, cashMult:1.50, peakMult:1.0, hasPeak:false},
+  {id:'chi-skyway',   region:'MW', state:'IL', stateLbl:'Illinois', stateFlag:'🌭',
+   road:'Chicago Skyway', name:'Chicago Skyway — one-way',
+   ezpass:7.20, cashMult:1.0, peakMult:1.0, hasPeak:false},
+  {id:'il-294',       region:'MW', state:'IL', stateLbl:'Illinois', stateFlag:'🌭',
+   road:'I-294 Tri-State', name:'Illinois Tollway I-294 (Tri-State, full)',
+   ezpass:7.00, cashMult:2.0, peakMult:1.0, hasPeak:false},
+  {id:'il-90',        region:'MW', state:'IL', stateLbl:'Illinois', stateFlag:'🌭',
+   road:'I-90 Jane Addams', name:'Illinois Tollway I-90 (Chicago → Rockford)',
+   ezpass:6.20, cashMult:2.0, peakMult:1.0, hasPeak:false},
+  {id:'il-355',       region:'MW', state:'IL', stateLbl:'Illinois', stateFlag:'🌭',
+   road:'I-355 Vets Memorial', name:'Illinois Tollway I-355 (Veterans Memorial)',
+   ezpass:3.50, cashMult:2.0, peakMult:1.0, hasPeak:false},
+  {id:'il-88',        region:'MW', state:'IL', stateLbl:'Illinois', stateFlag:'🌭',
+   road:'I-88 Reagan', name:'Illinois Tollway I-88 (Reagan Memorial)',
+   ezpass:4.20, cashMult:2.0, peakMult:1.0, hasPeak:false},
+  {id:'mackinac',     region:'MW', state:'MI', stateLbl:'Michigan', stateFlag:'🦌',
+   road:'Mackinac Bridge', name:'Mackinac Bridge (I-75) — one-way',
+   ezpass:4.00, cashMult:1.0, peakMult:1.0, hasPeak:false},
+  {id:'wv-tp',        region:'MW', state:'WV', stateLbl:'West Virginia', stateFlag:'⛰',
+   road:'WV Turnpike', name:'West Virginia Turnpike — full (all 3 barriers)',
+   ezpass:4.25, cashMult:1.18, peakMult:1.0, hasPeak:false},
+  {id:'ks-tp-full',   region:'MW', state:'KS', stateLbl:'Kansas', stateFlag:'🌾',
+   road:'Kansas Turnpike', name:'Kansas Turnpike — full (Wichita → Kansas City)',
+   ezpass:11.50, cashMult:1.26, peakMult:1.0, hasPeak:false},
+  {id:'ok-turner',    region:'MW', state:'OK', stateLbl:'Oklahoma', stateFlag:'🤠',
+   road:'Turner Turnpike', name:'Oklahoma Turner Turnpike (OKC → Tulsa)',
+   ezpass:4.75, cashMult:1.20, peakMult:1.0, hasPeak:false},
+  {id:'ok-will-rog',  region:'MW', state:'OK', stateLbl:'Oklahoma', stateFlag:'🤠',
+   road:'Will Rogers Turnpike', name:'Oklahoma Will Rogers Turnpike (Tulsa → Joplin)',
+   ezpass:4.40, cashMult:1.20, peakMult:1.0, hasPeak:false},
+
+  // ── WEST ──
+  {id:'e-470',        region:'W', state:'CO', stateLbl:'Colorado', stateFlag:'⛰',
+   road:'E-470', name:'E-470 (Denver beltway → DEN airport, full)',
+   ezpass:12.00, cashMult:1.50, peakMult:1.0, hasPeak:false},
+  {id:'nw-pkwy',      region:'W', state:'CO', stateLbl:'Colorado', stateFlag:'⛰',
+   road:'Northwest Parkway', name:'Northwest Parkway (Denver)',
+   ezpass:4.85, cashMult:1.50, peakMult:1.0, hasPeak:false},
+  {id:'sh-130',       region:'W', state:'TX', stateLbl:'Texas', stateFlag:'⭐',
+   road:'SH-130', name:'SH-130 (Georgetown → Seguin, full)',
+   ezpass:8.50, cashMult:1.33, peakMult:1.0, hasPeak:false},
+  {id:'sam-houston',  region:'W', state:'TX', stateLbl:'Texas', stateFlag:'⭐',
+   road:'Sam Houston Tollway', name:'Sam Houston Tollway (Houston, full loop)',
+   ezpass:8.00, cashMult:1.33, peakMult:1.0, hasPeak:false},
+  {id:'dallas-pgbt',  region:'W', state:'TX', stateLbl:'Texas', stateFlag:'⭐',
+   road:'Pres. George Bush Tpk', name:'President George Bush Turnpike (Dallas, full)',
+   ezpass:5.00, cashMult:1.33, peakMult:1.0, hasPeak:false},
+  {id:'tx-121',       region:'W', state:'TX', stateLbl:'Texas', stateFlag:'⭐',
+   road:'Sam Rayburn Tollway', name:'Sam Rayburn Tollway (TX-121)',
+   ezpass:3.50, cashMult:1.33, peakMult:1.0, hasPeak:false},
+  {id:'golden-gate',  region:'W', state:'CA', stateLbl:'California', stateFlag:'🌉',
+   road:'Golden Gate Bridge', name:'Golden Gate Bridge — southbound (one-way)',
+   ezpass:9.25, cashMult:1.05, peakMult:1.0, hasPeak:false},
+  {id:'bay-bridge',   region:'W', state:'CA', stateLbl:'California', stateFlag:'🌉',
+   road:'Bay Bridge', name:'SF-Oakland Bay Bridge — westbound (peak weekday)',
+   ezpass:7.00, cashMult:1.0, peakMult:1.0, hasPeak:false},
+  {id:'sf-other',     region:'W', state:'CA', stateLbl:'California', stateFlag:'🌉',
+   road:'Bay Area Bridges', name:'Carquinez / Richmond / San Mateo / Dumbarton',
+   ezpass:7.00, cashMult:1.0, peakMult:1.0, hasPeak:false},
+  {id:'ca-91-exp',    region:'W', state:'CA', stateLbl:'California', stateFlag:'🌉',
+   road:'CA-91 Express', name:'CA-91 Express Lanes (Orange County, typical)',
+   ezpass:6.00, cashMult:1.50, peakMult:1.50, hasPeak:true},
+  {id:'la-110-exp',   region:'W', state:'CA', stateLbl:'California', stateFlag:'🌉',
+   road:'LA Metro ExpressLanes', name:'LA Metro ExpressLanes (I-10 / I-110, typical)',
+   ezpass:5.00, cashMult:1.50, peakMult:1.50, hasPeak:true},
+  {id:'wa-520',       region:'W', state:'WA', stateLbl:'Washington', stateFlag:'☔',
+   road:'SR-520 Bridge', name:'SR-520 Floating Bridge — one-way',
+   ezpass:2.05, cashMult:1.0, peakMult:2.32, hasPeak:true},
+  {id:'wa-99',        region:'W', state:'WA', stateLbl:'Washington', stateFlag:'☔',
+   road:'SR-99 Tunnel', name:'SR-99 Tunnel (Seattle) — one-way',
+   ezpass:1.00, cashMult:1.0, peakMult:1.50, hasPeak:true},
+];
+
+/* Vehicle class multipliers (applied uniformly across all segments) */
+const TE_VEH = {
+  moto:   {mult:0.5, lbl:'Motorcycle'},
+  car:    {mult:1.0, lbl:'Car (2-axle)'},
+  suvtow: {mult:1.6, lbl:'SUV + Trailer (3-axle)'},
+  rv:     {mult:2.5, lbl:'RV / Large (4+ axle)'},
+};
+
+/* City-to-city preset routes */
+const TE_PRESETS = [
+  {id:'p-nyc-dc',   name:'New York City → Washington DC',    miles:'~225 mi',
+   segs:['gw-bridge','nj-tp-full','del-tp','jfk-md']},
+  {id:'p-dc-nyc',   name:'Washington DC → New York City',    miles:'~225 mi',
+   segs:['jfk-md','del-tp','nj-tp-full','lincoln']},
+  {id:'p-dc-bos',   name:'Washington DC → Boston',           miles:'~440 mi',
+   segs:['jfk-md','del-tp','nj-tp-full','gw-bridge']},
+  {id:'p-nyc-bos',  name:'New York City → Boston',           miles:'~215 mi',
+   segs:['mta-bt','mass-pike-bos-wor']},
+  {id:'p-bos-nia',  name:'Boston → Niagara Falls',           miles:'~445 mi',
+   segs:['mass-pike-full','ny-thr-bf-al']},
+  {id:'p-phl-pgh',  name:'Philadelphia → Pittsburgh',        miles:'~305 mi',
+   segs:['pa-tp-nj-vf','pa-tp-phl-har','pa-tp-har-pgh']},
+  {id:'p-nyc-phl',  name:'New York City → Philadelphia',     miles:'~95 mi',
+   segs:['lincoln','nj-tp-trenton-nyc']},
+  {id:'p-nyc-atl-c',name:'New York City → Atlantic City',    miles:'~130 mi',
+   segs:['lincoln','gsp-full','ac-expy']},
+  {id:'p-chi-cle',  name:'Chicago → Cleveland',              miles:'~345 mi',
+   segs:['chi-skyway','in-tp-full','oh-tp-full']},
+  {id:'p-chi-det',  name:'Chicago → Detroit',                miles:'~280 mi',
+   segs:['chi-skyway','in-tp-full']},
+  {id:'p-chi-pgh',  name:'Chicago → Pittsburgh',             miles:'~460 mi',
+   segs:['chi-skyway','in-tp-full','oh-tp-full','pa-tp-har-pgh']},
+  {id:'p-cle-nyc',  name:'Cleveland → New York City',        miles:'~460 mi',
+   segs:['oh-tp-full','pa-tp-full','gw-bridge']},
+  {id:'p-orl-mia',  name:'Orlando → Miami',                  miles:'~235 mi',
+   segs:['fl-tp-orl-mia','fl-tp-homext']},
+  {id:'p-tpa-mia',  name:'Tampa → Miami',                    miles:'~280 mi',
+   segs:['fl-alligator']},
+  {id:'p-mia-key',  name:'Miami → Key West',                 miles:'~165 mi',
+   segs:['fl-tp-homext']},
+  {id:'p-orl-cocoa',name:'Orlando → Cocoa Beach',            miles:'~60 mi',
+   segs:['fl-528']},
+  {id:'p-den-dia',  name:'Denver Downtown → DEN Airport',    miles:'~25 mi',
+   segs:['e-470']},
+  {id:'p-kc-wic',   name:'Kansas City → Wichita',            miles:'~200 mi',
+   segs:['ks-tp-full']},
+  {id:'p-okc-tul',  name:'Oklahoma City → Tulsa',            miles:'~100 mi',
+   segs:['ok-turner']},
+  {id:'p-okc-stl',  name:'OKC → St. Louis',                  miles:'~500 mi',
+   segs:['ok-turner','ok-will-rog']},
+  {id:'p-hou-dal',  name:'Houston → Dallas (toll route)',    miles:'~240 mi',
+   segs:['sam-houston','tx-121']},
+  {id:'p-aus-sa',   name:'Austin → San Antonio (via SH-130)',miles:'~80 mi',
+   segs:['sh-130']},
+  {id:'p-sea-bel',  name:'Seattle → Bellevue (via SR-520)',  miles:'~10 mi',
+   segs:['wa-520']},
+  {id:'p-nyc-dc-rt',name:'NYC ↔ DC weekend (uses Verrazzano)',miles:'one-way',
+   segs:['verrazzano','nj-tp-full','del-tp','jfk-md']},
+  {id:'p-dc-norf',  name:'DC → Virginia Beach (via Bay Bridge-Tunnel)', miles:'~265 mi',
+   segs:['ches-bay-md','ches-bbt-va']},
+  {id:'p-bos-prt',  name:'Boston → Portland, ME',            miles:'~110 mi',
+   segs:['tobin','nh-tp','me-tp-york']},
+];
+
+/* ── STATE ── */
+const teState = {
+  mode: 'preset',         // 'preset' | 'builder'
+  region: 'all',
+  presetId: null,
+  pickedIds: [],          // segment ids selected in builder mode
+  pay: 'ezpass',          // 'ezpass' | 'cash'
+  veh: 'car',
+  peak: 'off',            // 'off' | 'on'
+  rt: false,
+};
+
+function teInit() {
+  // Print date
+  const pd = document.getElementById('te-print-date');
+  if(pd) pd.textContent = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  teRenderPresets();
+  teRenderBuilder();
+  teCalc();
+}
+
+function teSetMode(m) {
+  teState.mode = m;
+  document.querySelectorAll('[data-te-mode]').forEach(b =>
+    b.classList.toggle('active', b.dataset.teMode === m));
+  document.getElementById('te-preset-wrap').style.display  = m === 'preset'  ? '' : 'none';
+  document.getElementById('te-builder-wrap').style.display = m === 'builder' ? '' : 'none';
+  teCalc();
+}
+
+function teSetRegion(r) {
+  teState.region = r;
+  document.querySelectorAll('[data-te-region]').forEach(b =>
+    b.classList.toggle('active', b.dataset.teRegion === r));
+  teRenderBuilder();
+}
+
+function teSetPay(p)  { teState.pay  = p;  document.querySelectorAll('[data-te-pay]').forEach(b => b.classList.toggle('active', b.dataset.tePay === p));  teCalc(); }
+function teSetVeh(v)  { teState.veh  = v;  document.querySelectorAll('[data-te-veh]').forEach(b => b.classList.toggle('active', b.dataset.teVeh === v));  teCalc(); }
+function teSetPeak(p) { teState.peak = p;  document.querySelectorAll('[data-te-peak]').forEach(b => b.classList.toggle('active', b.dataset.tePeak === p)); teCalc(); }
+
+function teToggleRT() {
+  teState.rt = !teState.rt;
+  const row = document.getElementById('te-rt-row');
+  row.classList.toggle('checked', teState.rt);
+  row.setAttribute('aria-checked', teState.rt);
+  teCalc();
+}
+
+function tePickPreset(id) {
+  // Toggle: clicking same preset deselects
+  teState.presetId = teState.presetId === id ? null : id;
+  teRenderPresets();
+  teCalc();
+}
+
+function teToggleSeg(id) {
+  const i = teState.pickedIds.indexOf(id);
+  if (i >= 0) teState.pickedIds.splice(i,1);
+  else        teState.pickedIds.push(id);
+  teRenderBuilder();
+  teCalc();
+}
+
+function teRemoveSeg(id) {
+  // From either preset or builder context — drop it from the active list
+  if (teState.mode === 'preset' && teState.presetId) {
+    // Forking: convert preset selection into custom picked list, minus this one
+    const preset = TE_PRESETS.find(p => p.id === teState.presetId);
+    teState.pickedIds = preset.segs.filter(s => s !== id);
+    teState.presetId = null;
+    teState.mode = 'builder';
+    document.querySelectorAll('[data-te-mode]').forEach(b =>
+      b.classList.toggle('active', b.dataset.teMode === 'builder'));
+    document.getElementById('te-preset-wrap').style.display  = 'none';
+    document.getElementById('te-builder-wrap').style.display = '';
+    teRenderBuilder();
+  } else {
+    const i = teState.pickedIds.indexOf(id);
+    if (i >= 0) teState.pickedIds.splice(i,1);
+    teRenderBuilder();
+  }
+  teCalc();
+}
+
+/* ── PRICING ── */
+function teSegPrice(seg) {
+  let p = seg.ezpass;
+  if (teState.pay === 'cash') p *= seg.cashMult;
+  if (teState.peak === 'on' && seg.hasPeak) p *= seg.peakMult;
+  p *= TE_VEH[teState.veh].mult;
+  return p;
+}
+
+function teActiveSegs() {
+  if (teState.mode === 'preset') {
+    if (!teState.presetId) return [];
+    const preset = TE_PRESETS.find(p => p.id === teState.presetId);
+    return preset.segs.map(id => TE_SEGMENTS.find(s => s.id === id)).filter(Boolean);
+  }
+  return teState.pickedIds.map(id => TE_SEGMENTS.find(s => s.id === id)).filter(Boolean);
+}
+
+function teFmt(n) {
+  return n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+
+/* ── RENDER: PRESETS ── */
+function teRenderPresets() {
+  const wrap = document.getElementById('te-preset-list');
+  wrap.innerHTML = TE_PRESETS.map(p => {
+    const segCount = p.segs.length;
+    const active = teState.presetId === p.id ? 'active' : '';
+    return `<button class="te-preset-btn ${active}" onclick="tePickPreset('${p.id}')">
+      <span class="te-preset-name">${p.name}</span>
+      <span class="te-preset-meta">${p.miles} · ${segCount} toll${segCount===1?'':'s'}</span>
+    </button>`;
+  }).join('');
+}
+
+/* ── RENDER: BUILDER ── */
+function teRenderBuilder() {
+  const segs = TE_SEGMENTS.filter(s => teState.region === 'all' || s.region === teState.region);
+  // Group by stateLbl, preserving original order
+  const groups = [];
+  const seen = new Map();
+  segs.forEach(s => {
+    if (!seen.has(s.stateLbl)) {
+      seen.set(s.stateLbl, {lbl:s.stateLbl, flag:s.stateFlag, items:[]});
+      groups.push(seen.get(s.stateLbl));
+    }
+    seen.get(s.stateLbl).items.push(s);
+  });
+
+  const html = groups.map(g => {
+    const picked = g.items.filter(s => teState.pickedIds.includes(s.id)).length;
+    const cntTxt = picked > 0 ? `${picked}/${g.items.length} selected` : `${g.items.length} tolls`;
+    return `<div class="te-state-group">
+      <div class="te-state-hdr">
+        <span><span class="te-state-flag">${g.flag}</span> ${g.lbl}</span>
+        <span class="te-state-cnt">${cntTxt}</span>
+      </div>
+      ${g.items.map(s => {
+        const checked = teState.pickedIds.includes(s.id);
+        const price = teSegPrice(s);
+        return `<div class="te-seg-row ${checked?'checked':''}" onclick="teToggleSeg('${s.id}')" role="checkbox" tabindex="0" aria-checked="${checked}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();teToggleSeg('${s.id}')}">
+          <div class="te-seg-check">✓</div>
+          <div class="te-seg-info">
+            <div class="te-seg-name">${s.name}</div>
+            <div class="te-seg-meta">${s.road}${s.hasPeak?' · peak/off-peak':''}</div>
+          </div>
+          <div class="te-seg-price">$${teFmt(price)}</div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  }).join('');
+
+  document.getElementById('te-state-groups').innerHTML = html || '<div class="te-empty">No toll facilities in this region.</div>';
+}
+
+/* ── CALC / RESULTS ── */
+function teCalc() {
+  const segs = teActiveSegs();
+  const resultsEl = document.getElementById('te-results');
+  const innerEl   = document.getElementById('te-results-inner');
+
+  if (!segs.length) {
+    resultsEl.style.display = 'none';
+    return;
+  }
+
+  // Re-animate
+  innerEl.style.animation = 'none';
+  innerEl.offsetHeight;
+  innerEl.style.animation = '';
+
+  let oneWay = 0;
+  const lines = segs.map(s => {
+    const p = teSegPrice(s);
+    oneWay += p;
+    return {seg:s, price:p};
+  });
+  const grandTotal = teState.rt ? oneWay * 2 : oneWay;
+
+  const payLbl = teState.pay === 'ezpass' ? 'E-ZPass / Electronic' : 'Cash / Toll-by-Plate';
+  const peakLbl = teState.peak === 'on' ? 'Peak hours' : 'Off-peak';
+  const vehLbl = TE_VEH[teState.veh].lbl;
+
+  let html = `<div class="te-grand">
+    <div class="te-grand-lbl">Estimated Total Toll Cost</div>
+    <div class="te-grand-num">$${teFmt(grandTotal)}</div>
+    <div class="te-grand-sub">${vehLbl} · ${payLbl} · ${peakLbl}${teState.rt ? ' · Round trip' : ' · One way'} · ${segs.length} toll${segs.length===1?'':'s'}</div>
+    <div class="te-grand-actions">
+      <button class="te-action-btn" onclick="teCopy()">📋 Copy summary</button>
+      <button class="te-action-btn" onclick="window.print()">🖨 Print</button>
+    </div>
+  </div>`;
+
+  html += `<div class="te-line-list">`;
+  lines.forEach(({seg,price}) => {
+    html += `<div class="te-line">
+      <div style="flex:1;min-width:0">
+        <div class="te-line-name">${seg.name}${teState.rt?'<span class="te-line-rt-tag">×2</span>':''}</div>
+        <div class="te-line-sub">${seg.road} · ${seg.stateLbl}</div>
+      </div>
+      <div class="te-line-price">$${teFmt(teState.rt ? price*2 : price)}</div>
+      <button class="te-rm-btn" onclick="event.stopPropagation();teRemoveSeg('${seg.id}')" title="Remove" aria-label="Remove ${seg.name}">×</button>
+    </div>`;
+  });
+  html += `</div>`;
+
+  html += `<div class="te-disclaim">
+    Typical 2024–2025 base rates for a 2-axle passenger car, scaled by vehicle class, payment method, and time of day where those vary. Actual tolls vary by entry/exit, time of day, and occasional rate changes by the operating authority. For exact pre-trip estimates, check operator sites (E-ZPass, SunPass, TxTag, FasTrak, etc.).
+  </div>`;
+
+  innerEl.innerHTML = html;
+  resultsEl.style.display = 'block';
+}
+
+/* ── COPY ── */
+function teCopy() {
+  const segs = teActiveSegs();
+  if (!segs.length) return;
+  let oneWay = 0;
+  const lines = segs.map(s => {
+    const p = teSegPrice(s);
+    oneWay += p;
+    return `  • ${s.name}  $${teFmt(teState.rt ? p*2 : p)}`;
+  });
+  const total = teState.rt ? oneWay * 2 : oneWay;
+  const payLbl = teState.pay === 'ezpass' ? 'E-ZPass/Electronic' : 'Cash/Toll-by-Plate';
+  const peakLbl = teState.peak === 'on' ? 'Peak' : 'Off-peak';
+  const dirLbl = teState.rt ? 'Round trip' : 'One way';
+  let presetLine = '';
+  if (teState.mode === 'preset' && teState.presetId) {
+    const p = TE_PRESETS.find(x => x.id === teState.presetId);
+    if (p) presetLine = `${p.name}\n`;
+  }
+  const txt = `TripTools — Toll Cost Estimate\n${presetLine}${TE_VEH[teState.veh].lbl} · ${payLbl} · ${peakLbl} · ${dirLbl}\n\n${lines.join('\n')}\n\nTotal: $${teFmt(total)}`;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(txt).then(() => {
+      const btns = document.querySelectorAll('.te-action-btn');
+      if (btns[0]) {
+        const orig = btns[0].textContent;
+        btns[0].textContent = '✓ Copied!';
+        setTimeout(() => { btns[0].textContent = orig; }, 1400);
+      }
+    });
+  }
+}
+
+/* ── RESET ── */
+function teReset() {
+  teState.mode = 'preset';
+  teState.region = 'all';
+  teState.presetId = null;
+  teState.pickedIds = [];
+  teState.pay = 'ezpass';
+  teState.veh = 'car';
+  teState.peak = 'off';
+  teState.rt = false;
+  document.querySelectorAll('[data-te-mode]').forEach(b => b.classList.toggle('active', b.dataset.teMode === 'preset'));
+  document.querySelectorAll('[data-te-region]').forEach(b => b.classList.toggle('active', b.dataset.teRegion === 'all'));
+  document.querySelectorAll('[data-te-pay]').forEach(b => b.classList.toggle('active', b.dataset.tePay === 'ezpass'));
+  document.querySelectorAll('[data-te-veh]').forEach(b => b.classList.toggle('active', b.dataset.teVeh === 'car'));
+  document.querySelectorAll('[data-te-peak]').forEach(b => b.classList.toggle('active', b.dataset.tePeak === 'off'));
+  document.getElementById('te-preset-wrap').style.display = '';
+  document.getElementById('te-builder-wrap').style.display = 'none';
+  const rt = document.getElementById('te-rt-row');
+  rt.classList.remove('checked');
+  rt.setAttribute('aria-checked', 'false');
+  teRenderPresets();
+  teRenderBuilder();
+  teCalc();
 }
 
 </script>
