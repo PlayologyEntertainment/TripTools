@@ -2835,16 +2835,121 @@ body.no-scroll { overflow: hidden; }
     </div>
   </div>
 </div>
-<div id="view-placeholder-power-plug" class="view">
-  <nav class="tool-topbar">
+<style>
+.pp-search-wrap{position:relative}
+.pp-search-input{width:100%;padding:10px 12px;border:1.5px solid var(--ink);border-radius:var(--r);font-size:14px;font-family:var(--sans);background:var(--paper);color:var(--ink);box-sizing:border-box;outline:none;min-height:44px}
+.pp-search-input:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(255,77,46,.15)}
+.pp-drop{position:absolute;top:100%;left:0;right:0;max-height:220px;overflow-y:auto;background:var(--paper);border:1.5px solid var(--ink);border-top:none;border-radius:0 0 var(--r) var(--r);z-index:200;box-shadow:0 4px 12px rgba(0,0,0,.12)}
+.pp-drop-item{padding:9px 12px;cursor:pointer;font-size:14px;font-family:var(--sans);color:var(--ink);border-bottom:1px solid var(--rule)}
+.pp-drop-item:last-child{border-bottom:none}
+.pp-drop-item:hover{background:var(--paper-2);color:var(--accent)}
+.pp-banner{border:2px solid var(--ink);border-radius:var(--r);padding:18px 20px;display:flex;align-items:center;gap:16px;margin-top:4px}
+.pp-banner-ico{font-size:38px;line-height:1;flex-shrink:0}
+.pp-banner-lbl{font-family:var(--serif);font-size:22px;font-weight:700;letter-spacing:-.02em;line-height:1.15}
+.pp-banner-sub{font-size:12px;font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase;opacity:.75;margin-top:3px}
+.pp-compare{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+@media(max-width:540px){.pp-compare{grid-template-columns:1fr}}
+.pp-side{border:1.5px solid var(--ink);border-radius:var(--r);background:var(--paper);overflow:hidden}
+.pp-side-hdr{padding:8px 12px;background:var(--paper-2);border-bottom:1.5px solid var(--ink);font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;justify-content:space-between;gap:6px}
+.pp-side-flag{font-size:14px}
+.pp-side-body{padding:14px 14px 16px}
+.pp-side-name{font-family:var(--serif);font-size:18px;font-weight:600;letter-spacing:-.01em;margin-bottom:10px;line-height:1.2}
+.pp-plug-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.pp-plug-chip{display:flex;flex-direction:column;align-items:center;gap:4px;background:var(--paper-2);border:1.5px solid var(--ink);border-radius:var(--r);padding:7px 10px 6px;min-width:62px}
+.pp-plug-chip svg{width:38px;height:38px;display:block}
+.pp-plug-chip .pp-pt{font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--ink-2);font-weight:600}
+.pp-plug-chip.match{background:#e8f5e9;border-color:var(--green)}
+.pp-plug-chip.match .pp-pt{color:var(--green)}
+.pp-vfreq{display:grid;grid-template-columns:1fr 1fr;border-top:1.5px solid var(--rule)}
+.pp-vfreq-cell{padding:8px 0 0}
+.pp-vfreq-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+.pp-vfreq-val{font-family:var(--serif);font-size:20px;font-weight:600;color:var(--ink);line-height:1.1}
+.pp-vfreq-val small{font-size:12px;font-family:var(--sans);font-weight:400;color:var(--muted);margin-left:3px}
+.pp-recs{margin-top:18px;border:1.5px solid var(--ink);border-radius:var(--r);background:var(--paper);overflow:hidden}
+.pp-rec{padding:12px 16px;border-bottom:1px solid var(--rule);display:flex;gap:12px;align-items:flex-start}
+.pp-rec:last-child{border-bottom:none}
+.pp-rec-ico{font-size:22px;line-height:1;flex-shrink:0;width:28px;text-align:center}
+.pp-rec-body{flex:1;font-size:14px;color:var(--ink-2);line-height:1.5}
+.pp-rec-body strong{font-family:var(--serif);font-weight:600;color:var(--ink);font-size:15px;display:block;margin-bottom:2px}
+.pp-ref-toggle{margin-top:28px;width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 16px;background:var(--paper-2);border:1.5px solid var(--ink);border-radius:var(--r);font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);cursor:pointer;transition:background .12s,color .12s;min-height:44px}
+.pp-ref-toggle:hover{background:var(--ink);color:var(--paper)}
+.pp-ref-toggle .pp-ref-arrow{font-size:11px;transition:transform .2s}
+.pp-ref-toggle.open .pp-ref-arrow{transform:rotate(180deg)}
+.pp-ref-grid{display:none;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-top:12px}
+.pp-ref-grid.open{display:grid}
+.pp-ref-card{border:1.5px solid var(--ink);border-radius:var(--r);background:var(--paper);padding:12px;display:flex;flex-direction:column;gap:8px}
+.pp-ref-card-top{display:flex;align-items:center;gap:10px}
+.pp-ref-card-top svg{width:42px;height:42px;flex-shrink:0;background:var(--paper-2);border:1px solid var(--rule);border-radius:2px;padding:2px}
+.pp-ref-type{font-family:var(--serif);font-weight:600;font-size:15px;letter-spacing:-.01em;line-height:1.1}
+.pp-ref-volt{font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;margin-top:1px}
+.pp-ref-desc{font-size:12px;color:var(--ink-2);line-height:1.4}
+.pp-ref-regions{font-family:var(--mono);font-size:10px;letter-spacing:.04em;color:var(--muted);line-height:1.45}
+.pp-empty{padding:18px 16px;border:1.5px dashed var(--ink);border-radius:var(--r);color:var(--muted);text-align:center;font-size:14px;background:var(--paper-2)}
+@media print{
+  .pp-search-wrap, .pp-ref-toggle, #pp-check-btn { display:none !important; }
+  .pp-ref-grid { display:grid !important; }
+  .pp-banner, .pp-side, .pp-recs, .pp-ref-card { break-inside: avoid; }
+}
+</style>
+<div id="view-power-plug" class="view">
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="window.print()">🖨 Print</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">🔌</span>
-    <h2>Power Plug & Adapter Guide</h2>
-    <p style="margin-bottom:24px">Home + destination = plug types needed, voltage info & converter advice.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-power-plug"></div>
+
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>Power Plug &amp; Adapter Guide</h1>
+    <p class="tool-sub">Home + destination = plug types, voltage difference &amp; whether you need an adapter, a converter, or nothing at all.</p>
+  </div>
+
+  <div class="tool-body">
+    <div class="frow">
+      <div class="fg">
+        <label>Your Home Country</label>
+        <div class="pp-search-wrap">
+          <input type="search" id="pp-home-search" class="pp-search-input" placeholder="🔍 Search home country…" autocomplete="off">
+          <div id="pp-home-drop" class="pp-drop" style="display:none"></div>
+          <input type="hidden" id="pp-home-val">
+        </div>
+      </div>
+      <div class="fg">
+        <label>Destination Country</label>
+        <div class="pp-search-wrap">
+          <input type="search" id="pp-dest-search" class="pp-search-input" placeholder="🔍 Search destination…" autocomplete="off">
+          <div id="pp-dest-drop" class="pp-drop" style="display:none"></div>
+          <input type="hidden" id="pp-dest-val">
+        </div>
+      </div>
+    </div>
+
+    <button id="pp-check-btn" class="btn btn-p" style="width:100%;margin-top:12px" onclick="ppCheck()">🔌 Check Compatibility</button>
+
+    <div id="pp-result" style="margin-top:24px"></div>
+
+    <button id="pp-ref-toggle" class="pp-ref-toggle" onclick="ppToggleRef()">
+      <span>📖 Browse all 15 plug types (A–O)</span>
+      <span class="pp-ref-arrow">▼</span>
+    </button>
+    <div id="pp-ref-grid" class="pp-ref-grid"></div>
+
+    <div style="margin-top:18px;padding:12px 16px;background:var(--paper-2);border-left:3px solid var(--yellow);border-radius:var(--r);font-size:13px;color:var(--muted);line-height:1.55">
+      ⚠️ <strong>Always check the label on each device.</strong> If it reads <em>100–240V</em>, you only need a plug adapter. If it shows a single voltage that doesn't match your destination, you also need a voltage converter — or leave the device at home.
+    </div>
+  </div>
+
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    Hair dryers, curling irons, electric kettles and travel irons draw too much current for compact travel converters. Either buy a true dual-voltage version of these appliances or plan on using what your hotel provides.
+  </div>
+
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('packing')">📝 Smart Packing List</button>
+      <button class="rel-btn" onclick="openTool('doc-checklist')">✅ Travel Document Checklist</button>
+      <button class="rel-btn" onclick="openTool('biz-packing')">👔 Business Trip Packing</button>
     </div>
   </div>
 </div>
@@ -5750,7 +5855,7 @@ const TOOLS = [
   {id:'carry-on',      nm:'Carry-On Size Checker',      ico:'📐', ph:'packing',   on:false, live:false, ds:'Enter dimensions + airline → fits / borderline / too large.'},
   {id:'luggage-wt',    nm:'Luggage Weight Calculator',  ico:'⚖️', ph:'packing',   on:false, live:false, ds:'Virtual baggage scale. Add items & see remaining allowance.'},
   {id:'wardrobe',      nm:'Weather-Based Wardrobe',     ico:'🌤', ph:'packing',   on:true,  live:false, ds:'14-day forecast → packing suggestions per condition.'},
-  {id:'power-plug',    nm:'Power Plug & Adapter Guide', ico:'🔌', ph:'packing',   on:false, live:false, ds:'Home + destination = plug types needed, voltage & converter advice.'},
+  {id:'power-plug',    nm:'Power Plug & Adapter Guide', ico:'🔌', ph:'packing',   on:false, live:true,  ds:'Home + destination = plug types needed, voltage & converter advice.'},
   {id:'no-pack',       nm:'What NOT to Pack',           ico:'🚫', ph:'packing',   on:false, live:false, ds:'TSA, customs & cruise prohibited items. Searchable guide.'},
   {id:'currency',      nm:'Currency Converter',         ico:'💱', ph:'money',     on:true,  live:true,  ds:'Live rates for 150+ currencies. Cached for offline use.'},
   {id:'tip-calc',      nm:'Tip Calculator by Country',  ico:'🤝', ph:'money',     on:false, live:true,  ds:'Local tipping culture + standard % by venue. Exact tip calculator.'},
@@ -6453,6 +6558,7 @@ function injectTripCtx(id) {
   if(id==='timezone')   tzInit();
   if(id==='meeting-tz') mtpInit();
   if(id==='tip-calc')   tcInit();
+  if(id==='power-plug') ppInit();
 }
 
 /* ── HUB RENDER ── */
@@ -12304,6 +12410,433 @@ function vgBuildCard(type, days, cost, proc, fromLabel, toLabel) {
   ${actionNote}
   <div class="vg-card-footer">⚠ Estimates only — entry requirements change. Verify with the official embassy before travel.</div>
 </div>`;
+}
+
+/* ══════════════════════════════════════════════
+   POWER PLUG & ADAPTER GUIDE  (power-plug)
+   PP_TYPES: 15 plug standards (A–O) with inline SVG diagrams.
+   PP_COUNTRIES: country → plug types in use, mains voltage, frequency.
+   ══════════════════════════════════════════════ */
+const PP_SVG = {
+  A: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="var(--ink)"><rect x="14" y="14" width="72" height="72" rx="10" fill="var(--paper-2)" stroke="var(--ink)" stroke-width="2"/><rect x="36" y="32" width="6" height="36" rx="1"/><rect x="58" y="32" width="6" height="36" rx="1"/></svg>`,
+  B: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="var(--ink)"><rect x="14" y="14" width="72" height="72" rx="10" fill="var(--paper-2)" stroke="var(--ink)" stroke-width="2"/><rect x="36" y="24" width="6" height="32" rx="1"/><rect x="58" y="24" width="6" height="32" rx="1"/><circle cx="50" cy="72" r="6"/></svg>`,
+  C: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="var(--ink)"><rect x="14" y="14" width="72" height="72" rx="10" fill="var(--paper-2)" stroke="var(--ink)" stroke-width="2"/><circle cx="38" cy="50" r="7"/><circle cx="62" cy="50" r="7"/></svg>`,
+  D: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="var(--ink)"><rect x="14" y="14" width="72" height="72" rx="10" fill="var(--paper-2)" stroke="var(--ink)" stroke-width="2"/><circle cx="50" cy="28" r="8"/><circle cx="32" cy="64" r="8"/><circle cx="68" cy="64" r="8"/></svg>`,
+  E: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="var(--ink)"><rect x="14" y="14" width="72" height="72" rx="10" fill="var(--paper-2)" stroke="var(--ink)" stroke-width="2"/><rect x="46" y="20" width="8" height="14" rx="2"/><circle cx="34" cy="58" r="7"/><circle cx="66" cy="58" r="7"/></svg>`,
+  F: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="14" y="14" width="72" height="72" rx="10" fill="var(--paper-2)" stroke="var(--ink)" stroke-width="2"/><circle cx="38" cy="50" r="8" fill="var(--ink)"/><circle cx="62" cy="50" r="8" fill="var(--ink)"/><path d="M 20 40 L 22 40 L 22 60 L 20 60" stroke="var(--ink)" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M 80 40 L 78 40 L 78 60 L 80 60" stroke="var(--ink)" stroke-width="3" fill="none" stroke-linecap="round"/></svg>`,
+  G: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="var(--ink)"><rect x="14" y="14" width="72" height="72" rx="10" fill="var(--paper-2)" stroke="var(--ink)" stroke-width="2"/><rect x="46" y="20" width="8" height="22" rx="1"/><rect x="22" y="58" width="22" height="6" rx="1"/><rect x="56" y="58" width="22" height="6" rx="1"/></svg>`,
+  H: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="var(--ink)"><rect x="14" y="14" width="72" height="72" rx="10" fill="var(--paper-2)" stroke="var(--ink)" stroke-width="2"/><rect x="46" y="22" width="8" height="16" rx="1"/><g transform="translate(34,62) rotate(-25)"><rect x="-9" y="-3" width="18" height="6" rx="1"/></g><g transform="translate(66,62) rotate(25)"><rect x="-9" y="-3" width="18" height="6" rx="1"/></g></svg>`,
+  I: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="var(--ink)"><rect x="14" y="14" width="72" height="72" rx="10" fill="var(--paper-2)" stroke="var(--ink)" stroke-width="2"/><rect x="46" y="22" width="8" height="16" rx="1"/><g transform="translate(32,60) rotate(-30)"><rect x="-10" y="-3" width="20" height="6" rx="1"/></g><g transform="translate(68,60) rotate(30)"><rect x="-10" y="-3" width="20" height="6" rx="1"/></g></svg>`,
+  J: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="var(--ink)"><rect x="14" y="14" width="72" height="72" rx="10" fill="var(--paper-2)" stroke="var(--ink)" stroke-width="2"/><circle cx="36" cy="38" r="6"/><circle cx="64" cy="38" r="6"/><circle cx="50" cy="68" r="6"/></svg>`,
+  K: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="14" y="14" width="72" height="72" rx="10" fill="var(--paper-2)" stroke="var(--ink)" stroke-width="2"/><circle cx="38" cy="40" r="6" fill="var(--ink)"/><circle cx="62" cy="40" r="6" fill="var(--ink)"/><path d="M 34 66 Q 50 80 66 66" stroke="var(--ink)" stroke-width="4" fill="none" stroke-linecap="round"/></svg>`,
+  L: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="var(--ink)"><rect x="14" y="14" width="72" height="72" rx="10" fill="var(--paper-2)" stroke="var(--ink)" stroke-width="2"/><circle cx="26" cy="50" r="6"/><circle cx="50" cy="50" r="6"/><circle cx="74" cy="50" r="6"/></svg>`,
+  M: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="var(--ink)"><rect x="14" y="14" width="72" height="72" rx="10" fill="var(--paper-2)" stroke="var(--ink)" stroke-width="2"/><circle cx="50" cy="24" r="10"/><circle cx="28" cy="66" r="10"/><circle cx="72" cy="66" r="10"/></svg>`,
+  N: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="var(--ink)"><rect x="14" y="14" width="72" height="72" rx="10" fill="var(--paper-2)" stroke="var(--ink)" stroke-width="2"/><circle cx="32" cy="36" r="6"/><circle cx="68" cy="36" r="6"/><circle cx="50" cy="68" r="6"/></svg>`,
+  O: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="var(--ink)"><rect x="14" y="14" width="72" height="72" rx="10" fill="var(--paper-2)" stroke="var(--ink)" stroke-width="2"/><circle cx="28" cy="50" r="6"/><circle cx="50" cy="50" r="7"/><circle cx="72" cy="50" r="6"/></svg>`,
+};
+
+const PP_TYPES = {
+  A: { name:'Type A', desc:'Two flat parallel pins. Ungrounded.', volt:'100–127 V', regions:'USA, Canada, Mexico, Japan, much of Central & South America' },
+  B: { name:'Type B', desc:'Two flat pins plus a round grounding pin.', volt:'100–127 V', regions:'USA, Canada, Mexico, Japan, Philippines, Taiwan' },
+  C: { name:'Type C', desc:'Two round pins — the European "Europlug". Ungrounded, very common.', volt:'220–240 V', regions:'Most of continental Europe, parts of Asia, Africa & South America' },
+  D: { name:'Type D', desc:'Three large round pins in a triangular pattern.', volt:'220–240 V', regions:'India, Sri Lanka, Nepal, Bangladesh, some African countries' },
+  E: { name:'Type E', desc:'Two round pins with a protruding male earth pin from the socket.', volt:'220–240 V', regions:'France, Belgium, Poland, Czechia, Slovakia, Tunisia, Morocco' },
+  F: { name:'Type F', desc:'"Schuko" — two round pins with side grounding clips.', volt:'220–240 V', regions:'Germany, Spain, Netherlands, Scandinavia, Eastern Europe, Russia, Turkey' },
+  G: { name:'Type G', desc:'Three large rectangular pins in a triangle. Always grounded, fused.', volt:'220–240 V', regions:'UK, Ireland, Malta, Cyprus, Singapore, Hong Kong, Malaysia, UAE' },
+  H: { name:'Type H', desc:'Three pins in a Y or angled formation. Used only in Israel.', volt:'220–240 V', regions:'Israel, West Bank, Gaza Strip' },
+  I: { name:'Type I', desc:'Two angled flat pins forming an inverted V, often with a ground pin.', volt:'220–240 V', regions:'Australia, New Zealand, China, Argentina, Fiji, Papua New Guinea' },
+  J: { name:'Type J', desc:'Three round pins in an offset triangular pattern.', volt:'220–240 V', regions:'Switzerland, Liechtenstein, Rwanda' },
+  K: { name:'Type K', desc:'Two round pins above a smiling semicircular grounding hole.', volt:'220–240 V', regions:'Denmark, Greenland, Faroe Islands, Bangladesh, Senegal' },
+  L: { name:'Type L', desc:'Three round pins in a single straight line.', volt:'220–240 V', regions:'Italy, Chile, Uruguay, Ethiopia, Cuba' },
+  M: { name:'Type M', desc:'Three very large round pins in a triangular pattern. Higher amperage version of D.', volt:'220–240 V', regions:'South Africa, Botswana, Lesotho, Swaziland, India (large appliances), Nepal' },
+  N: { name:'Type N', desc:'Three round pins in a triangle — Brazilian standard, also adopted by South Africa.', volt:'100–240 V', regions:'Brazil, South Africa (newer outlets)' },
+  O: { name:'Type O', desc:'Three round pins designed for the Thai standard TIS 166-2549.', volt:'220–240 V', regions:'Thailand' },
+};
+
+const PP_COUNTRIES = [
+  // North America
+  {c:'US',n:'United States',f:'🇺🇸',p:['A','B'],v:120,hz:60},
+  {c:'CA',n:'Canada',f:'🇨🇦',p:['A','B'],v:120,hz:60},
+  {c:'MX',n:'Mexico',f:'🇲🇽',p:['A','B'],v:127,hz:60},
+  // Central America & Caribbean
+  {c:'CR',n:'Costa Rica',f:'🇨🇷',p:['A','B'],v:120,hz:60},
+  {c:'PA',n:'Panama',f:'🇵🇦',p:['A','B'],v:110,hz:60},
+  {c:'GT',n:'Guatemala',f:'🇬🇹',p:['A','B','G','I'],v:120,hz:60},
+  {c:'SV',n:'El Salvador',f:'🇸🇻',p:['A','B','C','D','E','F','G','I','J','L'],v:115,hz:60},
+  {c:'HN',n:'Honduras',f:'🇭🇳',p:['A','B'],v:110,hz:60},
+  {c:'NI',n:'Nicaragua',f:'🇳🇮',p:['A','B'],v:120,hz:60},
+  {c:'BZ',n:'Belize',f:'🇧🇿',p:['A','B','G'],v:110,hz:60},
+  {c:'DO',n:'Dominican Republic',f:'🇩🇴',p:['A','B'],v:110,hz:60},
+  {c:'CU',n:'Cuba',f:'🇨🇺',p:['A','B','C','L'],v:110,hz:60},
+  {c:'JM',n:'Jamaica',f:'🇯🇲',p:['A','B'],v:110,hz:50},
+  {c:'BS',n:'Bahamas',f:'🇧🇸',p:['A','B'],v:120,hz:60},
+  {c:'BB',n:'Barbados',f:'🇧🇧',p:['A','B'],v:115,hz:50},
+  {c:'TT',n:'Trinidad & Tobago',f:'🇹🇹',p:['A','B'],v:115,hz:60},
+  {c:'PR',n:'Puerto Rico',f:'🇵🇷',p:['A','B'],v:120,hz:60},
+  // South America
+  {c:'BR',n:'Brazil',f:'🇧🇷',p:['C','N'],v:127,hz:60},
+  {c:'AR',n:'Argentina',f:'🇦🇷',p:['C','I'],v:220,hz:50},
+  {c:'CL',n:'Chile',f:'🇨🇱',p:['C','L'],v:220,hz:50},
+  {c:'CO',n:'Colombia',f:'🇨🇴',p:['A','B'],v:110,hz:60},
+  {c:'PE',n:'Peru',f:'🇵🇪',p:['A','B','C'],v:220,hz:60},
+  {c:'UY',n:'Uruguay',f:'🇺🇾',p:['C','F','I','L'],v:230,hz:50},
+  {c:'VE',n:'Venezuela',f:'🇻🇪',p:['A','B'],v:120,hz:60},
+  {c:'EC',n:'Ecuador',f:'🇪🇨',p:['A','B'],v:120,hz:60},
+  {c:'BO',n:'Bolivia',f:'🇧🇴',p:['A','C'],v:230,hz:50},
+  {c:'PY',n:'Paraguay',f:'🇵🇾',p:['C'],v:220,hz:50},
+  {c:'GY',n:'Guyana',f:'🇬🇾',p:['A','B','D','G'],v:240,hz:60},
+  // Western Europe
+  {c:'GB',n:'United Kingdom',f:'🇬🇧',p:['G'],v:230,hz:50},
+  {c:'IE',n:'Ireland',f:'🇮🇪',p:['G'],v:230,hz:50},
+  {c:'FR',n:'France',f:'🇫🇷',p:['C','E'],v:230,hz:50},
+  {c:'DE',n:'Germany',f:'🇩🇪',p:['C','F'],v:230,hz:50},
+  {c:'IT',n:'Italy',f:'🇮🇹',p:['C','F','L'],v:230,hz:50},
+  {c:'ES',n:'Spain',f:'🇪🇸',p:['C','F'],v:230,hz:50},
+  {c:'PT',n:'Portugal',f:'🇵🇹',p:['C','F'],v:230,hz:50},
+  {c:'NL',n:'Netherlands',f:'🇳🇱',p:['C','F'],v:230,hz:50},
+  {c:'BE',n:'Belgium',f:'🇧🇪',p:['C','E'],v:230,hz:50},
+  {c:'CH',n:'Switzerland',f:'🇨🇭',p:['C','J'],v:230,hz:50},
+  {c:'AT',n:'Austria',f:'🇦🇹',p:['C','F'],v:230,hz:50},
+  {c:'LU',n:'Luxembourg',f:'🇱🇺',p:['C','F'],v:230,hz:50},
+  {c:'MC',n:'Monaco',f:'🇲🇨',p:['C','E','F'],v:230,hz:50},
+  {c:'LI',n:'Liechtenstein',f:'🇱🇮',p:['C','J'],v:230,hz:50},
+  {c:'AD',n:'Andorra',f:'🇦🇩',p:['C','F'],v:230,hz:50},
+  // Nordic
+  {c:'SE',n:'Sweden',f:'🇸🇪',p:['C','F'],v:230,hz:50},
+  {c:'NO',n:'Norway',f:'🇳🇴',p:['C','F'],v:230,hz:50},
+  {c:'DK',n:'Denmark',f:'🇩🇰',p:['C','E','F','K'],v:230,hz:50},
+  {c:'FI',n:'Finland',f:'🇫🇮',p:['C','F'],v:230,hz:50},
+  {c:'IS',n:'Iceland',f:'🇮🇸',p:['C','F'],v:230,hz:50},
+  // Eastern Europe
+  {c:'PL',n:'Poland',f:'🇵🇱',p:['C','E'],v:230,hz:50},
+  {c:'CZ',n:'Czechia',f:'🇨🇿',p:['C','E'],v:230,hz:50},
+  {c:'SK',n:'Slovakia',f:'🇸🇰',p:['C','E'],v:230,hz:50},
+  {c:'HU',n:'Hungary',f:'🇭🇺',p:['C','F'],v:230,hz:50},
+  {c:'GR',n:'Greece',f:'🇬🇷',p:['C','F'],v:230,hz:50},
+  {c:'TR',n:'Turkey',f:'🇹🇷',p:['C','F'],v:230,hz:50},
+  {c:'RU',n:'Russia',f:'🇷🇺',p:['C','F'],v:220,hz:50},
+  {c:'UA',n:'Ukraine',f:'🇺🇦',p:['C','F'],v:230,hz:50},
+  {c:'BY',n:'Belarus',f:'🇧🇾',p:['C','F'],v:230,hz:50},
+  {c:'RO',n:'Romania',f:'🇷🇴',p:['C','F'],v:230,hz:50},
+  {c:'BG',n:'Bulgaria',f:'🇧🇬',p:['C','F'],v:230,hz:50},
+  {c:'HR',n:'Croatia',f:'🇭🇷',p:['C','F'],v:230,hz:50},
+  {c:'SI',n:'Slovenia',f:'🇸🇮',p:['C','F'],v:230,hz:50},
+  {c:'RS',n:'Serbia',f:'🇷🇸',p:['C','F'],v:230,hz:50},
+  {c:'BA',n:'Bosnia & Herzegovina',f:'🇧🇦',p:['C','F'],v:230,hz:50},
+  {c:'AL',n:'Albania',f:'🇦🇱',p:['C','F'],v:230,hz:50},
+  {c:'MK',n:'North Macedonia',f:'🇲🇰',p:['C','F'],v:230,hz:50},
+  {c:'ME',n:'Montenegro',f:'🇲🇪',p:['C','F'],v:230,hz:50},
+  {c:'LT',n:'Lithuania',f:'🇱🇹',p:['C','F'],v:230,hz:50},
+  {c:'LV',n:'Latvia',f:'🇱🇻',p:['C','F'],v:230,hz:50},
+  {c:'EE',n:'Estonia',f:'🇪🇪',p:['C','F'],v:230,hz:50},
+  {c:'MT',n:'Malta',f:'🇲🇹',p:['G'],v:230,hz:50},
+  {c:'CY',n:'Cyprus',f:'🇨🇾',p:['G'],v:240,hz:50},
+  {c:'MD',n:'Moldova',f:'🇲🇩',p:['C','F'],v:230,hz:50},
+  {c:'GE',n:'Georgia',f:'🇬🇪',p:['C','F'],v:220,hz:50},
+  {c:'AM',n:'Armenia',f:'🇦🇲',p:['C','F'],v:230,hz:50},
+  {c:'AZ',n:'Azerbaijan',f:'🇦🇿',p:['C','F'],v:220,hz:50},
+  // East Asia
+  {c:'JP',n:'Japan',f:'🇯🇵',p:['A','B'],v:100,hz:50,hzNote:'50 Hz east / 60 Hz west'},
+  {c:'CN',n:'China (mainland)',f:'🇨🇳',p:['A','C','I'],v:220,hz:50},
+  {c:'KR',n:'South Korea',f:'🇰🇷',p:['C','F'],v:220,hz:60},
+  {c:'TW',n:'Taiwan',f:'🇹🇼',p:['A','B'],v:110,hz:60},
+  {c:'HK',n:'Hong Kong',f:'🇭🇰',p:['G'],v:220,hz:50},
+  {c:'MO',n:'Macao',f:'🇲🇴',p:['D','G','M'],v:220,hz:50},
+  {c:'MN',n:'Mongolia',f:'🇲🇳',p:['C','E'],v:220,hz:50},
+  // Southeast Asia
+  {c:'TH',n:'Thailand',f:'🇹🇭',p:['A','B','C','O'],v:220,hz:50},
+  {c:'VN',n:'Vietnam',f:'🇻🇳',p:['A','C','D'],v:220,hz:50},
+  {c:'ID',n:'Indonesia',f:'🇮🇩',p:['C','F'],v:230,hz:50},
+  {c:'MY',n:'Malaysia',f:'🇲🇾',p:['G','M'],v:240,hz:50},
+  {c:'SG',n:'Singapore',f:'🇸🇬',p:['G'],v:230,hz:50},
+  {c:'PH',n:'Philippines',f:'🇵🇭',p:['A','B','C'],v:220,hz:60},
+  {c:'KH',n:'Cambodia',f:'🇰🇭',p:['A','C','G'],v:230,hz:50},
+  {c:'LA',n:'Laos',f:'🇱🇦',p:['A','B','C','E','F'],v:230,hz:50},
+  {c:'MM',n:'Myanmar',f:'🇲🇲',p:['C','D','F','G'],v:230,hz:50},
+  {c:'BN',n:'Brunei',f:'🇧🇳',p:['G'],v:240,hz:50},
+  // South Asia
+  {c:'IN',n:'India',f:'🇮🇳',p:['C','D','M'],v:230,hz:50},
+  {c:'PK',n:'Pakistan',f:'🇵🇰',p:['C','D','G','M'],v:230,hz:50},
+  {c:'BD',n:'Bangladesh',f:'🇧🇩',p:['A','C','D','G','K'],v:220,hz:50},
+  {c:'LK',n:'Sri Lanka',f:'🇱🇰',p:['D','G','M'],v:230,hz:50},
+  {c:'NP',n:'Nepal',f:'🇳🇵',p:['C','D','M'],v:230,hz:50},
+  {c:'MV',n:'Maldives',f:'🇲🇻',p:['A','D','G','J','K','L'],v:230,hz:50},
+  {c:'BT',n:'Bhutan',f:'🇧🇹',p:['D','F','G','M'],v:230,hz:50},
+  // Middle East
+  {c:'IL',n:'Israel',f:'🇮🇱',p:['C','H','M'],v:230,hz:50},
+  {c:'AE',n:'UAE',f:'🇦🇪',p:['C','D','G'],v:220,hz:50},
+  {c:'SA',n:'Saudi Arabia',f:'🇸🇦',p:['A','B','F','G'],v:230,hz:60},
+  {c:'QA',n:'Qatar',f:'🇶🇦',p:['D','G'],v:240,hz:50},
+  {c:'KW',n:'Kuwait',f:'🇰🇼',p:['C','G'],v:240,hz:50},
+  {c:'BH',n:'Bahrain',f:'🇧🇭',p:['G'],v:230,hz:50},
+  {c:'OM',n:'Oman',f:'🇴🇲',p:['C','G'],v:240,hz:50},
+  {c:'JO',n:'Jordan',f:'🇯🇴',p:['B','C','D','F','G','J'],v:230,hz:50},
+  {c:'LB',n:'Lebanon',f:'🇱🇧',p:['A','B','C','D','G'],v:230,hz:50},
+  {c:'IR',n:'Iran',f:'🇮🇷',p:['C','F'],v:220,hz:50},
+  {c:'IQ',n:'Iraq',f:'🇮🇶',p:['C','D','G'],v:230,hz:50},
+  // Central Asia
+  {c:'KZ',n:'Kazakhstan',f:'🇰🇿',p:['C','F'],v:220,hz:50},
+  {c:'UZ',n:'Uzbekistan',f:'🇺🇿',p:['C','I'],v:220,hz:50},
+  {c:'KG',n:'Kyrgyzstan',f:'🇰🇬',p:['C','F'],v:220,hz:50},
+  {c:'TJ',n:'Tajikistan',f:'🇹🇯',p:['C','F','I'],v:220,hz:50},
+  {c:'TM',n:'Turkmenistan',f:'🇹🇲',p:['B','C','F'],v:220,hz:50},
+  // Africa
+  {c:'ZA',n:'South Africa',f:'🇿🇦',p:['C','D','M','N'],v:230,hz:50},
+  {c:'EG',n:'Egypt',f:'🇪🇬',p:['C','F'],v:220,hz:50},
+  {c:'MA',n:'Morocco',f:'🇲🇦',p:['C','E'],v:220,hz:50},
+  {c:'KE',n:'Kenya',f:'🇰🇪',p:['G'],v:240,hz:50},
+  {c:'NG',n:'Nigeria',f:'🇳🇬',p:['D','G'],v:230,hz:50},
+  {c:'ET',n:'Ethiopia',f:'🇪🇹',p:['C','F','L'],v:220,hz:50},
+  {c:'TZ',n:'Tanzania',f:'🇹🇿',p:['D','G'],v:230,hz:50},
+  {c:'UG',n:'Uganda',f:'🇺🇬',p:['G'],v:240,hz:50},
+  {c:'GH',n:'Ghana',f:'🇬🇭',p:['D','G'],v:230,hz:50},
+  {c:'SN',n:'Senegal',f:'🇸🇳',p:['C','D','E','K'],v:230,hz:50},
+  {c:'DZ',n:'Algeria',f:'🇩🇿',p:['C','F'],v:230,hz:50},
+  {c:'TN',n:'Tunisia',f:'🇹🇳',p:['C','E'],v:230,hz:50},
+  {c:'ZW',n:'Zimbabwe',f:'🇿🇼',p:['D','G'],v:220,hz:50},
+  {c:'BW',n:'Botswana',f:'🇧🇼',p:['D','G','M'],v:230,hz:50},
+  {c:'NA',n:'Namibia',f:'🇳🇦',p:['D','M'],v:220,hz:50},
+  {c:'MZ',n:'Mozambique',f:'🇲🇿',p:['C','F','M'],v:220,hz:50},
+  {c:'RW',n:'Rwanda',f:'🇷🇼',p:['C','J'],v:230,hz:50},
+  {c:'CI',n:'Côte d\'Ivoire',f:'🇨🇮',p:['C','E'],v:230,hz:50},
+  {c:'CM',n:'Cameroon',f:'🇨🇲',p:['C','E'],v:220,hz:50},
+  {c:'AO',n:'Angola',f:'🇦🇴',p:['C'],v:220,hz:50},
+  {c:'MG',n:'Madagascar',f:'🇲🇬',p:['C','D','E','J','K'],v:127,hz:50},
+  {c:'MU',n:'Mauritius',f:'🇲🇺',p:['C','G'],v:230,hz:50},
+  {c:'SC',n:'Seychelles',f:'🇸🇨',p:['G'],v:240,hz:50},
+  // Oceania
+  {c:'AU',n:'Australia',f:'🇦🇺',p:['I'],v:230,hz:50},
+  {c:'NZ',n:'New Zealand',f:'🇳🇿',p:['I'],v:230,hz:50},
+  {c:'FJ',n:'Fiji',f:'🇫🇯',p:['I'],v:240,hz:50},
+  {c:'PG',n:'Papua New Guinea',f:'🇵🇬',p:['I'],v:240,hz:50},
+  {c:'WS',n:'Samoa',f:'🇼🇸',p:['I'],v:230,hz:50},
+  {c:'TO',n:'Tonga',f:'🇹🇴',p:['I'],v:240,hz:50},
+];
+
+let ppRefOpen = false;
+
+function ppInit() {
+  const trip = getActiveTrip();
+  const ctx  = document.getElementById('ctx-power-plug');
+  if (trip && ctx) {
+    ctx.textContent = `✈ Using context from: ${trip.name} — tap to edit ↗`;
+    ctx.classList.add('show');
+    ctx.onclick = () => showView('mytrip');
+  } else if (ctx) { ctx.classList.remove('show'); }
+
+  const homeSearch = document.getElementById('pp-home-search');
+  const destSearch = document.getElementById('pp-dest-search');
+  const homeDrop   = document.getElementById('pp-home-drop');
+  const destDrop   = document.getElementById('pp-dest-drop');
+  const res        = document.getElementById('pp-result');
+  if (res) res.innerHTML = '';
+
+  // Restore saved home country
+  const savedHome = localStorage.getItem('tt_pp_home');
+  if (savedHome) {
+    const c = PP_COUNTRIES.find(x => x.c === savedHome);
+    if (c) { homeSearch.value = c.f + ' ' + c.n; document.getElementById('pp-home-val').value = c.c; }
+  }
+
+  // Prefill destination from active trip
+  document.getElementById('pp-dest-val').value = '';
+  destSearch.value = '';
+  if (trip && trip.destination) {
+    const q = trip.destination.toLowerCase().split(',').pop().trim();
+    const dest = PP_COUNTRIES.find(d =>
+      d.n.toLowerCase() === q ||
+      d.n.toLowerCase().includes(q) ||
+      q.includes(d.n.toLowerCase())
+    );
+    if (dest) { destSearch.value = dest.f + ' ' + dest.n; document.getElementById('pp-dest-val').value = dest.c; }
+  }
+
+  function openDrop(input, drop) { ppRenderDrop(drop, input.value); drop.style.display = 'block'; }
+  function closeDrop(drop) { setTimeout(() => { drop.style.display = 'none'; }, 160); }
+
+  homeSearch.oninput = () => { document.getElementById('pp-home-val').value = ''; ppRenderDrop(homeDrop, homeSearch.value); homeDrop.style.display = 'block'; };
+  homeSearch.onfocus = () => openDrop(homeSearch, homeDrop);
+  homeSearch.onblur  = () => closeDrop(homeDrop);
+
+  destSearch.oninput = () => { document.getElementById('pp-dest-val').value = ''; ppRenderDrop(destDrop, destSearch.value); destDrop.style.display = 'block'; };
+  destSearch.onfocus = () => openDrop(destSearch, destDrop);
+  destSearch.onblur  = () => closeDrop(destDrop);
+
+  // Reset reference grid each open
+  const refBtn  = document.getElementById('pp-ref-toggle');
+  const refGrid = document.getElementById('pp-ref-grid');
+  ppRefOpen = false;
+  refBtn.classList.remove('open');
+  refGrid.classList.remove('open');
+  refGrid.innerHTML = '';
+
+  // Auto-run check if both pre-filled
+  if (document.getElementById('pp-home-val').value && document.getElementById('pp-dest-val').value) {
+    ppCheck();
+  }
+}
+
+function ppRenderDrop(drop, q) {
+  const query = (q || '').toLowerCase().trim();
+  const list  = query
+    ? PP_COUNTRIES.filter(x => x.n.toLowerCase().includes(query) || x.c.toLowerCase() === query)
+    : PP_COUNTRIES.slice().sort((a,b) => a.n.localeCompare(b.n));
+  if (!list.length) {
+    drop.innerHTML = '<div class="pp-drop-item" style="color:var(--muted);cursor:default">No countries match</div>';
+    return;
+  }
+  drop.innerHTML = list.slice(0, 80).map(x => {
+    const label = (x.f + ' ' + x.n).replace(/'/g, '&#39;');
+    return `<div class="pp-drop-item" onmousedown="ppSelect(event,'${x.c}','${label}')">${x.f} ${x.n}</div>`;
+  }).join('');
+}
+
+function ppSelect(e, code, label) {
+  e.preventDefault();
+  const homeDrop = document.getElementById('pp-home-drop');
+  const destDrop = document.getElementById('pp-dest-drop');
+  if (homeDrop.style.display !== 'none') {
+    document.getElementById('pp-home-search').value = label;
+    document.getElementById('pp-home-val').value    = code;
+    homeDrop.style.display = 'none';
+  } else {
+    document.getElementById('pp-dest-search').value = label;
+    document.getElementById('pp-dest-val').value    = code;
+    destDrop.style.display = 'none';
+  }
+}
+
+function ppCheck() {
+  const homeCode = document.getElementById('pp-home-val').value.trim();
+  const destCode = document.getElementById('pp-dest-val').value.trim();
+  const res = document.getElementById('pp-result');
+
+  if (!homeCode || !destCode) {
+    res.innerHTML = '<div class="pp-empty">Please select both your home country and your destination.</div>';
+    return;
+  }
+
+  localStorage.setItem('tt_pp_home', homeCode);
+
+  const home = PP_COUNTRIES.find(x => x.c === homeCode);
+  const dest = PP_COUNTRIES.find(x => x.c === destCode);
+  if (!home || !dest) {
+    res.innerHTML = '<div class="pp-empty">Country data missing — please re-select.</div>';
+    return;
+  }
+
+  const shared       = home.p.filter(p => dest.p.includes(p));
+  const needsAdapter = shared.length === 0;
+  const vDiff        = Math.abs(home.v - dest.v);
+  const needsVoltage = vDiff >= 30;            // 100–127 V class vs 220–240 V class
+  const minorVoltage = vDiff >= 5 && vDiff < 30;
+  const hzDiff       = home.hz !== dest.hz;
+
+  let banner;
+  if (home.c === dest.c) {
+    banner = { ico:'🏠', lbl:'Same Country', sub:'No adapter or converter needed', bg:'#e8f5e9', color:'#2e7d32' };
+  } else if (!needsAdapter && !needsVoltage) {
+    banner = { ico:'✅', lbl:'Fully Compatible', sub:'Plug, voltage and frequency all match', bg:'#e8f5e9', color:'#2e7d32' };
+  } else if (!needsAdapter && needsVoltage) {
+    banner = { ico:'⚡', lbl:'Voltage Difference', sub:'Plug fits, but voltage is different', bg:'#fff3e0', color:'#e65100' };
+  } else if (needsAdapter && !needsVoltage) {
+    banner = { ico:'🔌', lbl:'Plug Adapter Needed', sub:'Voltage matches — only the shape is different', bg:'#e3f2fd', color:'#1565c0' };
+  } else {
+    banner = { ico:'⚠️', lbl:'Adapter + Voltage Care', sub:'Both plug shape and voltage differ', bg:'#fce4ec', color:'#c62828' };
+  }
+
+  const hzNote = dest.hzNote ? ` <small>(${dest.hzNote})</small>` : '';
+
+  let html = `<div class="pp-banner" style="background:${banner.bg}">
+    <span class="pp-banner-ico">${banner.ico}</span>
+    <div>
+      <div class="pp-banner-lbl" style="color:${banner.color}">${banner.lbl}</div>
+      <div class="pp-banner-sub">${home.f} ${home.n} → ${dest.f} ${dest.n}</div>
+      <div class="pp-banner-sub" style="opacity:.6;margin-top:1px">${banner.sub}</div>
+    </div>
+  </div>`;
+
+  html += `<div class="pp-compare">
+    ${ppSidePanel('Home', home, shared)}
+    ${ppSidePanel('Destination', dest, shared)}
+  </div>`;
+
+  // Recommendations
+  const recs = [];
+  if (home.c === dest.c) {
+    recs.push({ ico:'🏠', title:'You\'re home', body:'No adapter or converter needed when travelling within your own country.' });
+  } else if (needsAdapter && needsVoltage) {
+    recs.push({ ico:'🔌', title:'Plug adapter required', body:`Buy an adapter that converts a <strong>${home.p.join('/')}</strong> plug to <strong>${dest.p.slice(0,3).join('/')}</strong>${dest.p.length>3?' (or other local types)':''}. A universal travel adapter covers all of these in one device.` });
+    recs.push({ ico:'⚡', title:'Voltage converter or dual-voltage device', body:`Mains voltage rises from <strong>${home.v} V</strong> at home to <strong>${dest.v} V</strong> at your destination. Check each device: if the label says <em>100–240 V</em>, you're fine with just the adapter. Anything rated only for ${home.v} V will need a step-down voltage converter — or stay home.` });
+  } else if (needsAdapter) {
+    recs.push({ ico:'🔌', title:'Plug adapter required', body:`Voltage and frequency match, so you only need a physical adapter from <strong>${home.p.join('/')}</strong> to <strong>${dest.p.slice(0,3).join('/')}</strong>${dest.p.length>3?' (or other local types)':''}.` });
+  } else if (needsVoltage) {
+    recs.push({ ico:'⚡', title:'Watch the voltage, not the plug', body:`Your plug fits, but mains voltage changes from <strong>${home.v} V</strong> to <strong>${dest.v} V</strong>. Single-voltage devices designed for ${home.v} V can burn out or fail safety circuits — verify each label reads <em>100–240 V</em> before plugging in.` });
+  } else if (minorVoltage) {
+    recs.push({ ico:'⚠️', title:'Minor voltage difference', body:`Voltage is close (<strong>${home.v} V</strong> vs <strong>${dest.v} V</strong>) and within tolerance for nearly all modern electronics. Plug it in normally.` });
+  } else {
+    recs.push({ ico:'✅', title:'Nothing extra to pack', body:'Your devices will plug straight into the wall — same plug, same voltage, same frequency.' });
+  }
+
+  if (hzDiff) {
+    recs.push({ ico:'🔄', title:`Frequency: ${home.hz} Hz → ${dest.hz} Hz`, body:'Mains frequency only matters for clocks with mechanical timers and old motorized appliances (mains-powered shavers, some kitchen gadgets). All modern chargers, laptops, and switching power supplies are unaffected.' });
+  }
+
+  recs.push({ ico:'📱', title:'Phones, tablets & laptops', body:'Almost every modern charger is rated <strong>100–240 V, 50/60 Hz</strong> — read the small print on the brick. If yes, you only ever need a plug adapter, never a voltage converter.' });
+
+  recs.push({ ico:'🔌', title:'USB charging works anywhere', body:'USB output is always 5 V regardless of country. Pack a multi-port USB charger plus one travel plug adapter and you\'ll cover almost every personal device in your bag.' });
+
+  if (needsVoltage || dest.v >= 200) {
+    recs.push({ ico:'💇', title:'Hair dryers, irons & kettles', body:'High-wattage heating appliances overload compact travel converters. Pack a true dual-voltage version (look for a 110/220 V switch) — or rely on what your hotel provides.' });
+  }
+
+  html += `<div class="pp-recs">${recs.map(r =>
+    `<div class="pp-rec"><div class="pp-rec-ico">${r.ico}</div><div class="pp-rec-body"><strong>${r.title}</strong>${r.body}</div></div>`
+  ).join('')}</div>`;
+
+  res.innerHTML = html;
+}
+
+function ppSidePanel(label, country, shared) {
+  const plugs = country.p.map(pt => {
+    const matchCls = shared.includes(pt) ? ' match' : '';
+    return `<div class="pp-plug-chip${matchCls}" title="${PP_TYPES[pt]?.name||''}">${PP_SVG[pt]||''}<span class="pp-pt">${pt}</span></div>`;
+  }).join('');
+  const hzNote = country.hzNote ? `<small>${country.hzNote}</small>` : '';
+  return `<div class="pp-side">
+    <div class="pp-side-hdr"><span>${label}</span><span class="pp-side-flag">${country.f}</span></div>
+    <div class="pp-side-body">
+      <div class="pp-side-name">${country.n}</div>
+      <div class="pp-plug-row">${plugs}</div>
+      <div class="pp-vfreq">
+        <div class="pp-vfreq-cell"><div class="pp-vfreq-lbl">Voltage</div><div class="pp-vfreq-val">${country.v} V</div></div>
+        <div class="pp-vfreq-cell"><div class="pp-vfreq-lbl">Frequency</div><div class="pp-vfreq-val">${country.hz} Hz ${hzNote}</div></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function ppToggleRef() {
+  const btn  = document.getElementById('pp-ref-toggle');
+  const grid = document.getElementById('pp-ref-grid');
+  ppRefOpen = !ppRefOpen;
+  if (ppRefOpen) {
+    if (!grid.innerHTML) {
+      grid.innerHTML = Object.keys(PP_TYPES).map(k => {
+        const t = PP_TYPES[k];
+        return `<div class="pp-ref-card">
+          <div class="pp-ref-card-top">${PP_SVG[k]}<div><div class="pp-ref-type">${t.name}</div><div class="pp-ref-volt">${t.volt}</div></div></div>
+          <div class="pp-ref-desc">${t.desc}</div>
+          <div class="pp-ref-regions">📍 ${t.regions}</div>
+        </div>`;
+      }).join('');
+    }
+    btn.classList.add('open');
+    grid.classList.add('open');
+  } else {
+    btn.classList.remove('open');
+    grid.classList.remove('open');
+  }
 }
 
 /* ══════════════════════════════════════════════
