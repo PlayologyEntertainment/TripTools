@@ -5153,6 +5153,300 @@ input:checked + .pb-toggle-box::after { transform:translateX(16px);background:#f
   .et-day-blk, .et-summary, .et-today-card { break-inside: avoid; box-shadow: none !important; }
   body { background: #fff !important; background-image: none !important; }
 }
+
+/* =========================================================
+   EXPENSE REPORT BUILDER
+   ========================================================= */
+.er-meta-card, .er-perdiem-card {
+  background: var(--paper); border: 1.5px solid var(--ink);
+  border-radius: var(--r); padding: 18px 20px; margin-bottom: 14px; position: relative;
+}
+.er-meta-card::before, .er-perdiem-card::before {
+  content:''; position:absolute; left:0; top:0; bottom:0; width:4px;
+  background: var(--purple); border-radius: var(--r) 0 0 var(--r);
+}
+.er-perdiem-card::before { background: var(--blue); }
+.er-meta-title, .er-perdiem-title {
+  font-family: var(--mono); font-size: 11px; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--ink-2); margin-bottom: 14px;
+}
+.er-perdiem-sub {
+  font-family: var(--sans); font-size: 12px; letter-spacing: 0;
+  text-transform: none; color: var(--muted); margin-left: 8px;
+}
+.er-meta-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;
+}
+.er-meta-grid .fg:nth-child(1), .er-meta-grid .fg:nth-child(2), .er-meta-grid .fg:nth-child(3) {
+  grid-column: span 2;
+}
+.er-meta-grid .fg { margin-bottom: 0; }
+@media(max-width:760px){
+  .er-meta-grid { grid-template-columns: 1fr 1fr; }
+  .er-meta-grid .fg:nth-child(1), .er-meta-grid .fg:nth-child(2), .er-meta-grid .fg:nth-child(3) { grid-column: 1 / -1; }
+}
+.er-perdiem-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;
+}
+.er-perdiem-grid .fg { margin-bottom: 0; }
+.er-perdiem-grid .er-fg-wide { grid-column: span 2; }
+@media(max-width:760px){
+  .er-perdiem-grid { grid-template-columns: 1fr 1fr; }
+  .er-perdiem-grid .er-fg-wide { grid-column: 1 / -1; }
+}
+.er-fg-sm input, .er-fg-sm select { font-size: 14px; }
+
+/* Tabs */
+.er-tabs {
+  display: flex; gap: 8px; margin-bottom: 0; flex-wrap: wrap; align-items: center;
+}
+.er-tab {
+  font-family: var(--mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
+  background: var(--paper); color: var(--ink-2);
+  border: 1.5px solid var(--ink); border-bottom: none;
+  padding: 9px 16px; border-radius: var(--r) var(--r) 0 0;
+  cursor: pointer; min-height: 36px; position: relative; top: 1px;
+  transition: background .12s, color .12s;
+}
+.er-tab:hover { background: var(--paper-2); }
+.er-tab.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.er-tab-import {
+  margin-left: auto;
+  font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
+  background: var(--paper); color: var(--ink-2);
+  border: 1.5px solid var(--ink);
+  padding: 8px 14px; border-radius: var(--r);
+  cursor: pointer; min-height: 34px;
+  transition: background .12s, color .12s;
+}
+.er-tab-import:hover { background: var(--ink); color: var(--paper); }
+
+/* Add card */
+.er-add-card {
+  background: var(--paper-2); border: 2px solid var(--ink);
+  border-radius: 0 var(--r) var(--r) var(--r); padding: 20px; margin-bottom: 22px;
+}
+.er-add-grid {
+  display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px;
+}
+.er-add-grid .fg { margin-bottom: 0; }
+.er-add-grid .fg:nth-child(1) { grid-column: span 2; }
+.er-add-grid .fg:nth-child(2) { grid-column: span 2; }
+.er-add-grid .fg:nth-child(3) { grid-column: span 2; }
+.er-add-grid .fg:nth-child(4) { grid-column: span 2; }
+.er-add-grid .fg:nth-child(5) { grid-column: span 2; }
+.er-add-grid .fg:nth-child(6) { grid-column: span 2; }
+.er-add-grid .er-fg-flags { grid-column: 1 / -1; }
+.er-add-grid .er-fg-wide { grid-column: span 4; }
+@media(max-width:760px){
+  .er-add-grid { grid-template-columns: 1fr 1fr; }
+  .er-add-grid .fg:nth-child(n) { grid-column: span 1; }
+  .er-add-grid .fg:nth-child(3), .er-add-grid .er-fg-wide { grid-column: 1 / -1; }
+}
+.er-flags {
+  display: flex; gap: 18px; align-items: center; flex-wrap: wrap;
+  padding: 8px 0;
+}
+.er-flag {
+  font-family: var(--sans); font-size: 13px; color: var(--ink-2);
+  display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
+  letter-spacing: 0; text-transform: none;
+}
+.er-flag input { accent-color: var(--accent); width: 16px; height: 16px; cursor: pointer; }
+.er-add-btn { width: 100%; margin-top: 14px; }
+
+/* Summary */
+.er-summary {
+  background: var(--paper); border: 2px solid var(--ink);
+  border-radius: var(--r); padding: 22px 24px; margin-bottom: 22px;
+}
+.er-sum-hdr {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+  border-bottom: 1px solid var(--rule); padding-bottom: 12px; margin-bottom: 16px;
+}
+.er-sum-meta { font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: .06em; }
+.er-sum-body {
+  display: grid; grid-template-columns: 1.1fr 1fr; gap: 28px;
+}
+@media(max-width:780px){ .er-sum-body { grid-template-columns: 1fr; } }
+.er-bigstat {
+  background: var(--paper-2); border: 1.5px solid var(--ink); border-radius: var(--r);
+  padding: 14px 16px; margin-bottom: 12px;
+}
+.er-bigstat-lbl {
+  display: block;
+  font-family: var(--mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted);
+  margin-bottom: 4px;
+}
+.er-bigstat-val {
+  font-family: var(--serif); font-weight: 600; font-size: 32px; line-height: 1; color: var(--ink); letter-spacing: -.02em;
+}
+.er-substat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+.er-substat {
+  background: var(--paper-2); border: 1px solid var(--rule); border-radius: var(--r);
+  padding: 9px 10px; text-align: center;
+}
+.er-substat-lbl {
+  display: block;
+  font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted);
+  margin-bottom: 3px;
+}
+.er-substat-val {
+  font-family: var(--serif); font-weight: 600; font-size: 16px; color: var(--ink);
+}
+.er-pay-bd {
+  display: flex; flex-direction: column; gap: 6px;
+}
+.er-pay-row {
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-family: var(--sans); font-size: 13px; color: var(--ink-2);
+  border-bottom: 1px dotted var(--rule); padding: 4px 0;
+}
+.er-pay-row b { font-family: var(--mono); font-size: 13px; color: var(--ink); }
+
+.er-sub-lbl {
+  font-family: var(--mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 8px;
+}
+.er-cat-row {
+  display: grid; grid-template-columns: auto 1fr auto; gap: 8px 12px;
+  font-family: var(--sans); font-size: 13px; color: var(--ink);
+  padding: 5px 0; border-bottom: 1px dotted var(--rule); align-items: center;
+}
+.er-cat-row:last-child { border-bottom: none; }
+.er-cat-row .er-cat-name { display: flex; gap: 6px; align-items: center; }
+.er-cat-row .er-cat-bar-wrap {
+  height: 6px; background: var(--paper-2); border-radius: 2px; overflow: hidden; position: relative;
+  border: 1px solid var(--rule); min-width: 60px;
+}
+.er-cat-row .er-cat-bar { height: 100%; background: var(--purple); }
+.er-cat-row .er-cat-val { font-family: var(--mono); font-size: 13px; color: var(--ink); white-space: nowrap; }
+
+/* Per-diem comparison block */
+.er-pd-compare {
+  margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--rule);
+}
+.er-pd-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;
+}
+@media(max-width:600px){ .er-pd-grid { grid-template-columns: 1fr; } }
+.er-pd-block {
+  background: var(--paper-2); border: 1.5px solid var(--ink); border-radius: var(--r); padding: 14px;
+}
+.er-pd-block-hdr {
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--ink-2); margin-bottom: 8px;
+}
+.er-pd-bar-wrap {
+  height: 10px; background: var(--paper); border: 1px solid var(--rule);
+  border-radius: 2px; overflow: hidden; margin-bottom: 8px;
+}
+.er-pd-bar { height: 100%; width: 0%; background: var(--green); transition: width .25s; }
+.er-pd-bar.near { background: #E65100; }
+.er-pd-bar.over { background: var(--accent); }
+.er-pd-foot {
+  display: flex; justify-content: space-between; align-items: center;
+  font-family: var(--mono); font-size: 12px; color: var(--ink-2); letter-spacing: .04em;
+}
+.er-pd-foot .over { color: var(--accent); font-weight: 600; }
+.er-pd-foot .under { color: #2E7D32; }
+.er-pd-note {
+  margin-top: 10px;
+  font-family: var(--serif); font-size: 13px; color: var(--ink-2); font-style: italic;
+}
+
+.er-export-row {
+  display: flex; gap: 10px; margin-top: 18px; align-items: center; flex-wrap: wrap;
+}
+
+/* Log */
+.er-log-wrap { margin-top: 10px; }
+.er-log-hdr {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+  border-bottom: 1px solid var(--rule); padding-bottom: 8px; margin-bottom: 12px;
+}
+.er-log-meta { font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: .06em; }
+.er-day-blk {
+  background: var(--paper); border: 1.5px solid var(--ink);
+  border-radius: var(--r); margin-bottom: 10px; overflow: hidden;
+}
+.er-day-hdr {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 14px; cursor: pointer; user-select: none;
+  background: var(--paper-2); border-bottom: 1px solid var(--rule);
+}
+.er-day-hdr:hover { background: var(--paper); }
+.er-day-date { font-family: var(--serif); font-weight: 500; font-size: 15px; color: var(--ink); margin-right: 8px; }
+.er-day-sub { font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: .04em; }
+.er-day-total { font-family: var(--serif); font-weight: 600; font-size: 17px; color: var(--ink); margin-left: 10px; }
+.er-day-items { display: flex; flex-direction: column; }
+.er-row {
+  display: grid; grid-template-columns: 36px 1fr auto auto;
+  gap: 10px; align-items: center; padding: 10px 14px;
+  border-top: 1px dotted var(--rule);
+}
+.er-row:first-child { border-top: none; }
+.er-row-icon { font-size: 20px; text-align: center; }
+.er-row-main { min-width: 0; }
+.er-row-desc { font-family: var(--sans); font-size: 14px; color: var(--ink); font-weight: 500; }
+.er-row-meta {
+  font-family: var(--mono); font-size: 11px; color: var(--muted);
+  letter-spacing: .04em; margin-top: 2px;
+  display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+}
+.er-row-meta .er-tag {
+  display: inline-block; padding: 2px 6px; border-radius: 2px;
+  font-family: var(--mono); font-size: 10px; letter-spacing: .04em;
+  border: 1px solid var(--rule); background: var(--paper-2); color: var(--ink-2);
+}
+.er-row-meta .er-tag.bill { background: rgba(46,125,50,.08); border-color: rgba(46,125,50,.4); color: #2E7D32; }
+.er-row-meta .er-tag.warn { background: rgba(255,77,46,.08); border-color: rgba(255,77,46,.5); color: var(--accent); }
+.er-row-meta .er-tag.ok   { background: rgba(21,101,192,.08); border-color: rgba(21,101,192,.4); color: var(--blue); }
+.er-row-amt {
+  font-family: var(--serif); font-weight: 600; font-size: 16px; color: var(--ink);
+  text-align: right; white-space: nowrap;
+}
+.er-row-amt-foreign {
+  display: block; font-family: var(--mono); font-size: 11px; color: var(--muted);
+  letter-spacing: .04em; font-weight: 400; margin-top: 2px;
+}
+.er-row-del {
+  background: transparent; border: none; cursor: pointer;
+  font-size: 16px; color: var(--muted); padding: 4px 8px;
+  border-radius: 2px; min-height: 30px;
+}
+.er-row-del:hover { color: var(--accent); background: rgba(255,77,46,.08); }
+.er-empty {
+  text-align: center; padding: 36px 24px;
+  font-family: var(--serif); font-style: italic; color: var(--muted); font-size: 16px;
+  border: 1.5px dashed var(--rule); border-radius: var(--r);
+}
+.er-empty span { font-size: 36px; display: block; margin-bottom: 10px; }
+
+/* Print */
+.er-print-header { display: none; }
+@media print {
+  #view-expense-report .et-fx-status,
+  #view-expense-report .er-tabs,
+  #view-expense-report .er-add-card,
+  #view-expense-report .er-export-row,
+  #view-expense-report .er-row-del,
+  #view-expense-report .ctx-banner,
+  #view-expense-report .pro-tip,
+  #view-expense-report .related,
+  #view-expense-report .tool-bar { display: none !important; }
+  #view-expense-report .er-print-header {
+    display: flex !important; justify-content: space-between;
+    font-family: monospace; font-size: 11px; color: #666;
+    border-bottom: 1px solid #ccc; padding-bottom: 8px; margin-bottom: 18px;
+  }
+  #view-expense-report .er-day-blk,
+  #view-expense-report .er-summary,
+  #view-expense-report .er-meta-card,
+  #view-expense-report .er-perdiem-card { break-inside: avoid; box-shadow: none !important; }
+  body { background: #fff !important; background-image: none !important; }
+}
 </style>
 
 <nav class="tool-bar">
@@ -5549,17 +5843,240 @@ input:checked + .pb-toggle-box::after { transform:translateX(16px);background:#f
     </div>
   </div>
 </div>
-<div id="view-placeholder-expense-report" class="view">
-  <nav class="tool-topbar">
+<div id="view-expense-report" class="view">
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="erPrint()">🖨 Print Report</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">🧾</span>
-    <h2>Expense Report Builder</h2>
-    <p style="margin-bottom:24px">Log business expenses by category. Per diem vs. actual comparison. Export CSV.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-expense-report"></div>
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>Expense Report Builder</h1>
+    <p class="tool-sub">Log business expenses by category as you travel. Track billable items, payment method, mileage, and receipts; compare actuals against per-diem allowances. Export an approval-ready CSV or printed report.</p>
+  </div>
+
+  <div class="tool-body">
+
+    <!-- ── REPORT META ── -->
+    <div class="er-meta-card">
+      <div class="er-meta-title">📋 Report Details</div>
+      <div class="er-meta-grid">
+        <div class="fg">
+          <label for="er-report-name">Report Name</label>
+          <input type="text" id="er-report-name" placeholder="e.g. Chicago Client Meetings" oninput="erSaveMeta()">
+        </div>
+        <div class="fg">
+          <label for="er-client">Client</label>
+          <input type="text" id="er-client" placeholder="e.g. Acme Corp" oninput="erSaveMeta()">
+        </div>
+        <div class="fg">
+          <label for="er-project">Project / Code</label>
+          <input type="text" id="er-project" placeholder="e.g. Q2 Onboarding" oninput="erSaveMeta()">
+        </div>
+        <div class="fg er-fg-sm">
+          <label for="er-start">Start Date</label>
+          <input type="date" id="er-start" oninput="erSaveMeta()">
+        </div>
+        <div class="fg er-fg-sm">
+          <label for="er-end">End Date</label>
+          <input type="date" id="er-end" oninput="erSaveMeta()">
+        </div>
+        <div class="fg er-fg-sm">
+          <label for="er-home-curr">Home Currency</label>
+          <select id="er-home-curr" onchange="erOnHomeCurrChange()"></select>
+        </div>
+        <div class="fg er-fg-sm">
+          <label for="er-default-pay">Default Pay Method</label>
+          <select id="er-default-pay" onchange="erSaveMeta()">
+            <option value="personal">Personal Card</option>
+            <option value="corporate">Corporate Card</option>
+            <option value="cash">Cash</option>
+          </select>
+        </div>
+        <div class="fg er-fg-sm">
+          <label for="er-mileage-rate">Mileage Rate <span id="er-mileage-sym" style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">($/mi)</span></label>
+          <input type="number" id="er-mileage-rate" placeholder="0.67" min="0" step="0.001" oninput="erSaveMeta();erRender()">
+        </div>
+      </div>
     </div>
+
+    <!-- ── PER DIEM ── -->
+    <div class="er-perdiem-card">
+      <div class="er-perdiem-title">💼 Per Diem Allowances <span class="er-perdiem-sub">optional — compare actuals against your daily allowance</span></div>
+      <div class="er-perdiem-grid">
+        <div class="fg er-fg-sm">
+          <label for="er-pd-lodging">Lodging / day <span id="er-pd-lodging-sym" style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">($)</span></label>
+          <input type="number" id="er-pd-lodging" placeholder="e.g. 180" min="0" step="any" oninput="erSaveMeta();erRender()">
+        </div>
+        <div class="fg er-fg-sm">
+          <label for="er-pd-mie">M&IE / day <span id="er-pd-mie-sym" style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">($)</span></label>
+          <input type="number" id="er-pd-mie" placeholder="e.g. 79" min="0" step="any" oninput="erSaveMeta();erRender()">
+        </div>
+        <div class="fg er-fg-wide">
+          <label for="er-pd-note">Notes</label>
+          <input type="text" id="er-pd-note" placeholder="e.g. M&IE at 75% on travel days (DOT rules)" oninput="erSaveMeta()">
+        </div>
+      </div>
+    </div>
+
+    <!-- ── FX STATUS ── -->
+    <div class="et-fx-status" id="er-fx-status">
+      <span id="er-fx-status-icon">🔄</span>
+      <span id="er-fx-status-text">Loading exchange rates…</span>
+    </div>
+
+    <!-- ── ENTRY TYPE TABS ── -->
+    <div class="er-tabs">
+      <button class="er-tab active" data-er-tab="expense" onclick="erSwitchTab('expense')">+ Add Expense</button>
+      <button class="er-tab" data-er-tab="mileage" onclick="erSwitchTab('mileage')">+ Add Mileage</button>
+      <button class="er-tab-import" onclick="erImportFromTracker()" title="Copy entries from Daily Expense Tracker">↘ Import from Expense Tracker</button>
+    </div>
+
+    <!-- ── ADD EXPENSE CARD ── -->
+    <div class="er-add-card" id="er-add-expense">
+      <div class="er-add-grid">
+        <div class="fg">
+          <label for="er-in-date">Date</label>
+          <input type="date" id="er-in-date">
+        </div>
+        <div class="fg">
+          <label for="er-in-cat">Category</label>
+          <select id="er-in-cat"></select>
+        </div>
+        <div class="fg er-fg-wide">
+          <label for="er-in-desc">Description</label>
+          <input type="text" id="er-in-desc" placeholder="e.g. Hilton Chicago, room night">
+        </div>
+        <div class="fg er-fg-sm">
+          <label for="er-in-amt">Amount</label>
+          <input type="number" id="er-in-amt" placeholder="0.00" min="0" step="any">
+        </div>
+        <div class="fg er-fg-sm">
+          <label for="er-in-curr">Currency</label>
+          <select id="er-in-curr"></select>
+        </div>
+        <div class="fg er-fg-sm">
+          <label for="er-in-pay">Paid With</label>
+          <select id="er-in-pay">
+            <option value="personal">Personal Card</option>
+            <option value="corporate">Corporate Card</option>
+            <option value="cash">Cash</option>
+          </select>
+        </div>
+        <div class="fg er-fg-flags">
+          <label>Flags</label>
+          <div class="er-flags">
+            <label class="er-flag"><input type="checkbox" id="er-in-billable"> Billable to client</label>
+            <label class="er-flag"><input type="checkbox" id="er-in-receipt"> Receipt attached</label>
+          </div>
+        </div>
+      </div>
+      <div id="er-conv-preview" class="et-conv-preview" style="display:none"></div>
+      <button class="btn btn-p er-add-btn" onclick="erAddExpense()">Add Expense</button>
+    </div>
+
+    <!-- ── ADD MILEAGE CARD ── -->
+    <div class="er-add-card" id="er-add-mileage" style="display:none">
+      <div class="er-add-grid">
+        <div class="fg">
+          <label for="er-mi-date">Date</label>
+          <input type="date" id="er-mi-date">
+        </div>
+        <div class="fg er-fg-wide">
+          <label for="er-mi-desc">Trip Description / Route</label>
+          <input type="text" id="er-mi-desc" placeholder="e.g. Office → O'Hare Airport">
+        </div>
+        <div class="fg er-fg-sm">
+          <label for="er-mi-miles">Miles</label>
+          <input type="number" id="er-mi-miles" placeholder="0" min="0" step="0.1" oninput="erUpdateMileagePreview()">
+        </div>
+        <div class="fg er-fg-sm">
+          <label for="er-mi-rate">Rate $/mi</label>
+          <input type="number" id="er-mi-rate" placeholder="0.67" min="0" step="0.001" oninput="erUpdateMileagePreview()">
+        </div>
+        <div class="fg er-fg-flags">
+          <label>Flags</label>
+          <div class="er-flags">
+            <label class="er-flag"><input type="checkbox" id="er-mi-billable"> Billable to client</label>
+          </div>
+        </div>
+      </div>
+      <div id="er-mileage-preview" class="et-conv-preview" style="display:none"></div>
+      <button class="btn btn-p er-add-btn" onclick="erAddMileage()">Add Mileage</button>
+    </div>
+
+    <!-- ── SUMMARY ── -->
+    <div class="er-summary" id="er-summary">
+      <div class="er-sum-hdr">
+        <h3 style="font-family:var(--serif);font-size:22px;font-weight:600;margin:0">Report Summary</h3>
+        <div class="er-sum-meta" id="er-sum-meta">No expenses logged yet</div>
+      </div>
+      <div class="er-sum-body">
+        <div class="er-sum-totals">
+          <div class="er-bigstat">
+            <span class="er-bigstat-lbl">Total Spent</span>
+            <span class="er-bigstat-val" id="er-stat-total">$0</span>
+          </div>
+          <div class="er-substat-row">
+            <div class="er-substat">
+              <span class="er-substat-lbl">Billable</span>
+              <span class="er-substat-val" id="er-stat-billable">—</span>
+            </div>
+            <div class="er-substat">
+              <span class="er-substat-lbl">Non-billable</span>
+              <span class="er-substat-val" id="er-stat-nonbill">—</span>
+            </div>
+            <div class="er-substat">
+              <span class="er-substat-lbl">Reimbursable</span>
+              <span class="er-substat-val" id="er-stat-reimb" title="Personal card + Cash">—</span>
+            </div>
+          </div>
+          <div class="er-pay-bd" id="er-pay-bd"></div>
+        </div>
+        <div class="er-sum-cats">
+          <div class="er-sub-lbl">By Category</div>
+          <div id="er-cat-bd"></div>
+        </div>
+      </div>
+      <!-- Per diem comparison -->
+      <div class="er-pd-compare" id="er-pd-compare"></div>
+      <div class="er-export-row">
+        <button class="btn btn-p" onclick="erExportCSV()" style="font-size:13px;padding:10px 18px">⬇ Export CSV</button>
+        <button class="btn btn-s" onclick="erCopySummary()" style="font-size:13px;padding:10px 18px">📋 Copy Summary</button>
+        <button class="btn-ghost" onclick="erReset()" style="color:var(--accent);font-size:13px">↺ Reset Report</button>
+      </div>
+    </div>
+
+    <!-- ── LOG ── -->
+    <div class="er-log-wrap">
+      <div class="er-log-hdr">
+        <h3 style="font-family:var(--serif);font-size:22px;font-weight:600;margin:0">Expense Log</h3>
+        <div class="er-log-meta" id="er-log-meta"></div>
+      </div>
+      <div id="er-log"></div>
+    </div>
+
+  </div><!-- /tool-body -->
+
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    Snap receipts as you go and check "Receipt attached" — most companies require originals (or scans) for any expense $75+. Entries paid with a personal card or cash typically need reimbursement; corporate card charges usually don't. If your company uses GSA per-diem rules, M&IE drops to 75% on first/last travel days.
+  </div>
+
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('expense-track')">📊 Daily Expense Tracker</button>
+      <button class="rel-btn" onclick="openTool('per-diem')">📋 Per Diem Calculator</button>
+      <button class="rel-btn" onclick="openTool('biz-packing')">👔 Business Trip Packing</button>
+      <button class="rel-btn" onclick="openTool('meeting-tz')">🗓 Meeting Time Zone Planner</button>
+    </div>
+  </div>
+
+  <!-- Print-only header -->
+  <div class="er-print-header">
+    <strong>TripTools — Expense Report</strong>
+    <span id="er-print-date"></span>
   </div>
 </div>
 <style>
@@ -6086,7 +6603,7 @@ const TOOLS = [
   {id:'ride-height',   nm:'Ride Height Checker',        ico:'📏', ph:'theme',      on:false,live:false, ds:'Height requirements across Disney, Universal & SeaWorld.'},
   {id:'park-dining',   nm:'Park Dining Strategy',       ico:'🍴', ph:'theme',      on:false,live:false, ds:'ADR windows, value picks & dietary restriction guidance.'},
   {id:'per-diem',      nm:'Per Diem Calculator',        ico:'📋', ph:'business',   on:false,live:false, ds:'US GSA per diem rates by city. International via State Dept.'},
-  {id:'expense-report',nm:'Expense Report Builder',     ico:'🧾', ph:'business',   on:false,live:false, ds:'Log business expenses. Per diem vs. actual. Export CSV.'},
+  {id:'expense-report',nm:'Expense Report Builder',     ico:'🧾', ph:'business',   on:false,live:true,  ds:'Log business expenses. Per diem vs. actual. Mileage, billable, receipts. Export CSV.'},
   {id:'meeting-tz',    nm:'Meeting Time Zone Planner',  ico:'🗓', ph:'business',   on:false,live:true,  ds:'Participants + cities + work hours → color-coded overlap grid and copy-paste invite text.'},
   {id:'lounge-guide',  nm:'Airport Lounge Guide',       ico:'🛋', ph:'business',   on:false,live:false, ds:'Lounge access by credit card, status or paid entry at 50+ airports.'},
   {id:'biz-packing',   nm:'Business Trip Packing',      ico:'👔', ph:'business',   on:false,live:true,  ds:'Professional carry-on-only checklist. Tech, attire, docs & wrinkle tips.'},
@@ -6747,6 +7264,7 @@ function injectTripCtx(id) {
   if(id==='visa-guide') vgInit();
   if(id==='passport')   paInit();
   if(id==='expense-track') etInit();
+  if(id==='expense-report') erInit();
   if(id==='baggage')    bfcInit();
   if(id==='car-kit')    ckInit();
   if(id==='emergency')  emInit();
@@ -16360,6 +16878,768 @@ function teReset() {
   teRenderPresets();
   teRenderBuilder();
   teCalc();
+}
+
+/* ══════════════════════════════════════════
+   EXPENSE REPORT BUILDER  (er*)
+   Storage key: tt_expense_report_{tripId|default}
+   Re-uses FX cache from Currency Converter
+   ══════════════════════════════════════════ */
+const ER_CATS = [
+  { id:'lodging',     emoji:'🏨', name:'Lodging',          pdGroup:'lodging' },
+  { id:'breakfast',   emoji:'🍳', name:'Breakfast',        pdGroup:'mie' },
+  { id:'lunch',       emoji:'🥗', name:'Lunch',            pdGroup:'mie' },
+  { id:'dinner',      emoji:'🍽', name:'Dinner',           pdGroup:'mie' },
+  { id:'transport',   emoji:'🚖', name:'Ground Transport', pdGroup:null },
+  { id:'airfare',     emoji:'✈️', name:'Airfare',          pdGroup:null },
+  { id:'car-rental',  emoji:'🚗', name:'Car Rental',       pdGroup:null },
+  { id:'parking',     emoji:'🅿️', name:'Parking',          pdGroup:null },
+  { id:'fuel',        emoji:'⛽', name:'Fuel',             pdGroup:null },
+  { id:'mileage',     emoji:'📍', name:'Mileage',          pdGroup:null },
+  { id:'tips',        emoji:'🤝', name:'Tips',             pdGroup:'mie' },
+  { id:'comms',       emoji:'📞', name:'Communications',   pdGroup:null },
+  { id:'entertain',   emoji:'🎭', name:'Client Entertainment', pdGroup:null },
+  { id:'supplies',    emoji:'📎', name:'Office / Supplies',pdGroup:null },
+  { id:'misc',        emoji:'💼', name:'Misc',             pdGroup:null },
+];
+const ER_DEFAULT_MILEAGE_RATE = 0.67; // 2024 IRS standard rate
+const ER_RECEIPT_THRESHOLD    = 75;   // common IRS rule for substantiated expense
+
+let erData = null;
+let erPopulated = false;
+let erCollapsed = {};
+let erActiveTab = 'expense';
+
+function erKey() {
+  const id = getActiveTripId() || 'default';
+  return 'tt_expense_report_' + id;
+}
+
+function erInit() {
+  const trip = getActiveTrip();
+  const ctx  = document.getElementById('ctx-expense-report');
+  if (trip) {
+    ctx.textContent = `✈ Using context from: ${trip.name} — tap to edit ↗`;
+    ctx.classList.add('show');
+    ctx.onclick = () => showView('mytrip');
+  } else {
+    ctx.classList.remove('show');
+  }
+
+  erLoad();
+
+  if (!erPopulated) {
+    const homeSel = document.getElementById('er-home-curr');
+    const inSel   = document.getElementById('er-in-curr');
+    const catSel  = document.getElementById('er-in-cat');
+    FX_ALL_CURRENCIES.forEach(c => {
+      homeSel.appendChild(new Option(`${c.code} — ${c.name}`, c.code));
+      inSel.appendChild(new Option(`${c.code} — ${c.name}`, c.code));
+    });
+    ER_CATS.forEach(c => {
+      // Skip Mileage in the expense category dropdown (uses dedicated form)
+      if (c.id === 'mileage') return;
+      catSel.appendChild(new Option(`${c.emoji} ${c.name}`, c.id));
+    });
+    document.getElementById('er-in-amt').addEventListener('input', erUpdateConvPreview);
+    document.getElementById('er-in-curr').addEventListener('change', erUpdateConvPreview);
+    erPopulated = true;
+  }
+
+  // Apply persisted to UI
+  document.getElementById('er-report-name').value   = erData.reportName || (trip ? trip.name + ' — Expense Report' : '');
+  document.getElementById('er-client').value        = erData.client || '';
+  document.getElementById('er-project').value       = erData.project || '';
+  document.getElementById('er-start').value         = erData.startDate || (trip ? (trip.departDate || '') : '');
+  document.getElementById('er-end').value           = erData.endDate   || (trip ? (trip.returnDate || '') : '');
+  document.getElementById('er-home-curr').value     = erData.homeCurrency;
+  document.getElementById('er-default-pay').value   = erData.defaultPay || 'personal';
+  document.getElementById('er-mileage-rate').value  = erData.mileageRate || '';
+  document.getElementById('er-pd-lodging').value    = erData.pdLodging || '';
+  document.getElementById('er-pd-mie').value        = erData.pdMIE || '';
+  document.getElementById('er-pd-note').value       = erData.pdNote || '';
+
+  // Pre-fill report-meta back into model for the trip-provided fields
+  erSaveMeta();
+
+  document.getElementById('er-in-curr').value = erData.homeCurrency;
+  document.getElementById('er-in-date').value = erTodayISO();
+  document.getElementById('er-in-cat').value  = 'lodging';
+  document.getElementById('er-in-pay').value  = erData.defaultPay || 'personal';
+  document.getElementById('er-mi-date').value = erTodayISO();
+  document.getElementById('er-mi-rate').value = erData.mileageRate || ER_DEFAULT_MILEAGE_RATE;
+
+  document.getElementById('er-print-date').textContent =
+    'Printed ' + new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+
+  erUpdateCurrencySyms();
+  erLoadFx();
+  erRender();
+}
+
+function erTodayISO() {
+  const d = new Date();
+  const y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,'0'), dd = String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${dd}`;
+}
+
+function erLoad() {
+  const raw = localStorage.getItem(erKey());
+  if (raw) {
+    try { erData = JSON.parse(raw); } catch(e) { erData = null; }
+  }
+  if (!erData) {
+    const trip = getActiveTrip();
+    erData = {
+      reportName:  trip ? trip.name + ' — Expense Report' : '',
+      client: '', project: '',
+      startDate: trip ? (trip.departDate || '') : '',
+      endDate:   trip ? (trip.returnDate || '') : '',
+      homeCurrency: trip ? (trip.homeCurrency || 'USD') : 'USD',
+      defaultPay: 'personal',
+      mileageRate: '',
+      pdLodging: '', pdMIE: '', pdNote: '',
+      expenses: [],
+    };
+  }
+  if (!erData.homeCurrency) erData.homeCurrency = 'USD';
+  if (!Array.isArray(erData.expenses)) erData.expenses = [];
+}
+
+function erSave() {
+  if (!erData) return;
+  try { localStorage.setItem(erKey(), JSON.stringify(erData)); } catch(_){}
+}
+
+function erSaveMeta() {
+  if (!erData) return;
+  erData.reportName  = document.getElementById('er-report-name').value;
+  erData.client      = document.getElementById('er-client').value;
+  erData.project     = document.getElementById('er-project').value;
+  erData.startDate   = document.getElementById('er-start').value;
+  erData.endDate     = document.getElementById('er-end').value;
+  erData.defaultPay  = document.getElementById('er-default-pay').value;
+  erData.mileageRate = document.getElementById('er-mileage-rate').value;
+  erData.pdLodging   = document.getElementById('er-pd-lodging').value;
+  erData.pdMIE       = document.getElementById('er-pd-mie').value;
+  erData.pdNote      = document.getElementById('er-pd-note').value;
+  erSave();
+}
+
+function erOnHomeCurrChange() {
+  erData.homeCurrency = document.getElementById('er-home-curr').value;
+  document.getElementById('er-in-curr').value = erData.homeCurrency;
+  erSave();
+  erUpdateCurrencySyms();
+  erUpdateConvPreview();
+  erUpdateMileagePreview();
+  erRender();
+}
+
+function erUpdateCurrencySyms() {
+  const code = erData.homeCurrency || 'USD';
+  const sym = etCurrencySymbol(code);
+  document.getElementById('er-mileage-sym').textContent  = `(${sym} ${code} / mi)`;
+  document.getElementById('er-pd-lodging-sym').textContent = `(${sym} ${code})`;
+  document.getElementById('er-pd-mie-sym').textContent     = `(${sym} ${code})`;
+}
+
+/* ── FX (re-uses Daily Expense Tracker helpers) ── */
+function erLoadFx() {
+  const cache = etReadFxCache();
+  const setStatus = (cls, icon, text) => {
+    const box = document.getElementById('er-fx-status');
+    if (!box) return;
+    box.className = 'et-fx-status ' + cls;
+    document.getElementById('er-fx-status-icon').textContent = icon;
+    document.getElementById('er-fx-status-text').textContent = text;
+  };
+  if (cache && cache.data && cache.data.rates) {
+    const ageMin = Math.round((Date.now() - cache.ts) / 60000);
+    const ageStr = ageMin < 2 ? 'just now' : (ageMin < 60 ? ageMin + ' min ago' : Math.round(ageMin/60) + ' hr ago');
+    setStatus('ok', '✓', `Exchange rates loaded · ${ageStr}`);
+    if (Date.now() - cache.ts > 60*60*1000 && navigator.onLine) erFetchFxBg();
+    return;
+  }
+  if (!navigator.onLine) {
+    setStatus('warn', '✈️', 'Offline — no exchange rates cached. Foreign-currency entries will save in their original currency.');
+    return;
+  }
+  setStatus('', '🔄', 'Loading exchange rates…');
+  erFetchFxBg();
+}
+
+async function erFetchFxBg() {
+  try {
+    const res = await fetch('https://open.er-api.com/v6/latest/USD');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const json = await res.json();
+    if (json.result !== 'success') throw new Error('API error');
+    const data = { base: json.base_code, rates: json.rates, timestamp: json.time_last_update_utc };
+    localStorage.setItem(FX_CACHE_KEY, JSON.stringify({ ts: Date.now(), data }));
+    if (typeof fxRates !== 'undefined') { try { fxRates = data; } catch(_){} }
+    const box = document.getElementById('er-fx-status');
+    if (box) {
+      box.className = 'et-fx-status ok';
+      document.getElementById('er-fx-status-icon').textContent = '✓';
+      document.getElementById('er-fx-status-text').textContent = 'Live rates loaded · just now';
+    }
+    erUpdateConvPreview();
+    erRender();
+  } catch(e) {
+    const box = document.getElementById('er-fx-status');
+    if (box) {
+      box.className = 'et-fx-status err';
+      document.getElementById('er-fx-status-icon').textContent = '⚠';
+      document.getElementById('er-fx-status-text').textContent = 'Could not load exchange rates. Foreign-currency conversion unavailable.';
+    }
+  }
+}
+
+function erUpdateConvPreview() {
+  const amt  = parseFloat(document.getElementById('er-in-amt').value);
+  const from = document.getElementById('er-in-curr').value;
+  const home = erData.homeCurrency;
+  const box  = document.getElementById('er-conv-preview');
+  if (!amt || amt <= 0 || from === home) { box.style.display = 'none'; return; }
+  const conv = etConvert(amt, from, home);
+  if (conv == null) {
+    box.style.display = 'block';
+    box.innerHTML = `<span style="color:var(--accent)">⚠</span> No exchange rate available for ${from} → ${home}. Entry will save as ${from} only.`;
+    return;
+  }
+  box.style.display = 'block';
+  box.innerHTML = `≈ <b>${etFmt(conv, home)}</b> in ${home} <span style="color:var(--muted)">(rate ${etGetRate(from,home).toFixed(4)})</span>`;
+}
+
+function erUpdateMileagePreview() {
+  const miles = parseFloat(document.getElementById('er-mi-miles').value);
+  const rate  = parseFloat(document.getElementById('er-mi-rate').value) || parseFloat(erData.mileageRate) || ER_DEFAULT_MILEAGE_RATE;
+  const box   = document.getElementById('er-mileage-preview');
+  if (!miles || miles <= 0) { box.style.display = 'none'; return; }
+  const total = miles * rate;
+  box.style.display = 'block';
+  box.innerHTML = `${miles} mi × ${etFmt(rate, erData.homeCurrency)}/mi = <b>${etFmt(total, erData.homeCurrency)}</b>`;
+}
+
+/* ── Tab switching ─────────────────────────── */
+function erSwitchTab(tab) {
+  erActiveTab = tab;
+  document.querySelectorAll('[data-er-tab]').forEach(b => {
+    b.classList.toggle('active', b.dataset.erTab === tab);
+  });
+  document.getElementById('er-add-expense').style.display = tab === 'expense' ? '' : 'none';
+  document.getElementById('er-add-mileage').style.display = tab === 'mileage' ? '' : 'none';
+}
+
+/* ── Add / delete ──────────────────────────── */
+function erAddExpense() {
+  const date = document.getElementById('er-in-date').value || erTodayISO();
+  const cat  = document.getElementById('er-in-cat').value || 'misc';
+  const desc = document.getElementById('er-in-desc').value.trim();
+  const amt  = parseFloat(document.getElementById('er-in-amt').value);
+  const curr = document.getElementById('er-in-curr').value || erData.homeCurrency;
+  const pay  = document.getElementById('er-in-pay').value || 'personal';
+  const billable = document.getElementById('er-in-billable').checked;
+  const receipt  = document.getElementById('er-in-receipt').checked;
+  if (!amt || amt <= 0) {
+    document.getElementById('er-in-amt').focus();
+    return;
+  }
+  const rate    = curr === erData.homeCurrency ? 1 : (etGetRate(curr, erData.homeCurrency) || null);
+  const homeAmt = rate != null ? amt * rate : null;
+  erData.expenses.push({
+    id: 'er_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
+    date, cat,
+    desc: desc || ER_CATS.find(c=>c.id===cat).name,
+    amt, curr,
+    rate, homeAmt,
+    pay, billable, receipt,
+    isMileage: false,
+    ts: Date.now(),
+  });
+  erSave();
+  document.getElementById('er-in-desc').value = '';
+  document.getElementById('er-in-amt').value  = '';
+  document.getElementById('er-in-billable').checked = false;
+  document.getElementById('er-in-receipt').checked  = false;
+  document.getElementById('er-conv-preview').style.display = 'none';
+  erRender();
+  document.getElementById('er-in-desc').focus();
+}
+
+function erAddMileage() {
+  const date  = document.getElementById('er-mi-date').value || erTodayISO();
+  const desc  = document.getElementById('er-mi-desc').value.trim();
+  const miles = parseFloat(document.getElementById('er-mi-miles').value);
+  const rate  = parseFloat(document.getElementById('er-mi-rate').value) || ER_DEFAULT_MILEAGE_RATE;
+  const billable = document.getElementById('er-mi-billable').checked;
+  if (!miles || miles <= 0) {
+    document.getElementById('er-mi-miles').focus();
+    return;
+  }
+  const total = miles * rate;
+  erData.expenses.push({
+    id: 'er_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
+    date, cat: 'mileage',
+    desc: desc || `Mileage (${miles} mi)`,
+    amt: total, curr: erData.homeCurrency,
+    rate: 1, homeAmt: total,
+    pay: 'personal', billable, receipt: true,
+    isMileage: true,
+    miles, mileageRate: rate,
+    ts: Date.now(),
+  });
+  erSave();
+  document.getElementById('er-mi-desc').value  = '';
+  document.getElementById('er-mi-miles').value = '';
+  document.getElementById('er-mi-billable').checked = false;
+  document.getElementById('er-mileage-preview').style.display = 'none';
+  erRender();
+  document.getElementById('er-mi-desc').focus();
+}
+
+function erDeleteExpense(id) {
+  erData.expenses = erData.expenses.filter(e => e.id !== id);
+  erSave();
+  erRender();
+}
+
+function erReset() {
+  if (!erData.expenses.length) return;
+  if (!confirm('Delete all expenses on this report? This cannot be undone.')) return;
+  erData.expenses = [];
+  erSave();
+  erRender();
+}
+
+/* ── Import from Daily Expense Tracker ─────── */
+function erImportFromTracker() {
+  // Read tracker data for the current trip
+  const id = getActiveTripId() || 'default';
+  const trackerRaw = localStorage.getItem('tt_expenses_' + id);
+  if (!trackerRaw) {
+    alert('No Daily Expense Tracker entries found for this trip. Open the Expense Tracker first and log some expenses, or use a different trip.');
+    return;
+  }
+  let tracker;
+  try { tracker = JSON.parse(trackerRaw); } catch(_) { tracker = null; }
+  if (!tracker || !Array.isArray(tracker.expenses) || !tracker.expenses.length) {
+    alert('Daily Expense Tracker has no entries for this trip.');
+    return;
+  }
+  // Map tracker categories to ER categories
+  const catMap = {
+    food:'dinner', transport:'transport', lodging:'lodging', activity:'entertain',
+    shopping:'misc', groceries:'misc', tips:'tips', fees:'misc', misc:'misc',
+  };
+  const existing = new Set(erData.expenses.filter(e => e.importedFrom).map(e => e.importedFrom));
+  let added = 0, skipped = 0;
+  tracker.expenses.forEach(t => {
+    if (existing.has(t.id)) { skipped++; return; }
+    erData.expenses.push({
+      id: 'er_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
+      date: t.date,
+      cat: catMap[t.cat] || 'misc',
+      desc: t.desc || '',
+      amt: t.amt, curr: t.curr,
+      rate: t.rate, homeAmt: t.homeAmt,
+      pay: erData.defaultPay || 'personal',
+      billable: false, receipt: false,
+      isMileage: false,
+      importedFrom: t.id,
+      ts: t.ts || Date.now(),
+    });
+    added++;
+  });
+  erSave();
+  erRender();
+  alert(`Imported ${added} ${added===1?'entry':'entries'} from Daily Expense Tracker.${skipped?` (${skipped} already imported, skipped.)`:''}\nReview categories, mark billable / receipt flags, and set payment method.`);
+}
+
+/* ── Compute helpers ───────────────────────── */
+function erCatById(id) { return ER_CATS.find(c => c.id === id) || { emoji:'•', name:'Misc', pdGroup:null }; }
+
+function erHomeAmt(e) {
+  if (e.curr === erData.homeCurrency) return e.amt;
+  if (e.homeAmt != null && !isNaN(e.homeAmt)) return e.homeAmt;
+  const conv = etConvert(e.amt, e.curr, erData.homeCurrency);
+  return conv != null ? conv : e.amt;
+}
+
+function erGrandTotal() { return erData.expenses.reduce((s,e) => s + erHomeAmt(e), 0); }
+
+function erByCategory() {
+  const totals = {};
+  ER_CATS.forEach(c => totals[c.id] = 0);
+  erData.expenses.forEach(e => {
+    if (totals[e.cat] == null) totals[e.cat] = 0;
+    totals[e.cat] += erHomeAmt(e);
+  });
+  return totals;
+}
+
+function erByPayment() {
+  const totals = { personal: 0, corporate: 0, cash: 0 };
+  erData.expenses.forEach(e => {
+    const k = e.pay || 'personal';
+    if (totals[k] == null) totals[k] = 0;
+    totals[k] += erHomeAmt(e);
+  });
+  return totals;
+}
+
+function erBillableTotal()    { return erData.expenses.filter(e => e.billable).reduce((s,e) => s + erHomeAmt(e), 0); }
+function erNonBillableTotal() { return erData.expenses.filter(e => !e.billable).reduce((s,e) => s + erHomeAmt(e), 0); }
+function erReimbursableTotal(){ return erData.expenses.filter(e => (e.pay||'personal') !== 'corporate').reduce((s,e) => s + erHomeAmt(e), 0); }
+
+function erGroupByDate() {
+  const byDate = {};
+  erData.expenses.forEach(e => {
+    if (!byDate[e.date]) byDate[e.date] = [];
+    byDate[e.date].push(e);
+  });
+  Object.keys(byDate).forEach(k => byDate[k].sort((a,b) => (a.ts||0) - (b.ts||0)));
+  return byDate;
+}
+
+function erTripDays() {
+  // Prefer explicit start/end; else count unique expense dates
+  if (erData.startDate && erData.endDate) {
+    const a = new Date(erData.startDate + 'T00:00:00');
+    const b = new Date(erData.endDate   + 'T00:00:00');
+    if (!isNaN(a) && !isNaN(b) && b >= a) {
+      return Math.round((b - a) / 864e5) + 1;
+    }
+  }
+  return Object.keys(erGroupByDate()).length || 0;
+}
+
+/* ── Render ────────────────────────────────── */
+function erRender() {
+  if (!erData) return;
+  erRenderSummary();
+  erRenderCategoryBreakdown();
+  erRenderPaymentBreakdown();
+  erRenderPerDiemCompare();
+  erRenderLog();
+  erUpdateConvPreview();
+  erUpdateMileagePreview();
+}
+
+function erRenderSummary() {
+  const home = erData.homeCurrency;
+  const total = erGrandTotal();
+  document.getElementById('er-stat-total').textContent    = etFmt(total, home);
+  document.getElementById('er-stat-billable').textContent = etFmt(erBillableTotal(), home);
+  document.getElementById('er-stat-nonbill').textContent  = etFmt(erNonBillableTotal(), home);
+  document.getElementById('er-stat-reimb').textContent    = etFmt(erReimbursableTotal(), home);
+  const days = erTripDays();
+  const meta = document.getElementById('er-sum-meta');
+  if (!erData.expenses.length) {
+    meta.textContent = 'No expenses logged yet';
+  } else {
+    meta.textContent = `${erData.expenses.length} ${erData.expenses.length===1?'entry':'entries'}${days?' · '+days+' day'+(days===1?'':'s'):''}`;
+  }
+}
+
+function erRenderCategoryBreakdown() {
+  const home = erData.homeCurrency;
+  const total = erGrandTotal();
+  const cats  = erByCategory();
+  const wrap  = document.getElementById('er-cat-bd');
+  const entries = ER_CATS.map(c => ({ cat: c, val: cats[c.id] || 0 }))
+                         .filter(x => x.val > 0)
+                         .sort((a,b) => b.val - a.val);
+  if (!entries.length) {
+    wrap.innerHTML = `<div style="font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.06em">No spending logged yet</div>`;
+    return;
+  }
+  wrap.innerHTML = entries.map(e => {
+    const pct = total > 0 ? Math.round(e.val / total * 100) : 0;
+    return `<div class="er-cat-row">
+      <span class="er-cat-name">${e.cat.emoji} ${e.cat.name}</span>
+      <span class="er-cat-bar-wrap"><span class="er-cat-bar" style="width:${pct}%"></span></span>
+      <span class="er-cat-val">${etFmt(e.val, home)} <span style="color:var(--muted)">· ${pct}%</span></span>
+    </div>`;
+  }).join('');
+}
+
+function erRenderPaymentBreakdown() {
+  const home = erData.homeCurrency;
+  const totals = erByPayment();
+  const wrap = document.getElementById('er-pay-bd');
+  const rows = [
+    { k:'corporate', lbl:'Corporate Card' },
+    { k:'personal',  lbl:'Personal Card'  },
+    { k:'cash',      lbl:'Cash'           },
+  ];
+  wrap.innerHTML = rows.filter(r => totals[r.k] > 0).map(r =>
+    `<div class="er-pay-row"><span>${r.lbl}</span><b>${etFmt(totals[r.k], home)}</b></div>`
+  ).join('') || `<div style="font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.06em;padding:4px 0">No payment activity yet</div>`;
+}
+
+function erRenderPerDiemCompare() {
+  const wrap = document.getElementById('er-pd-compare');
+  const home = erData.homeCurrency;
+  const pdLodging = parseFloat(erData.pdLodging) || 0;
+  const pdMIE     = parseFloat(erData.pdMIE) || 0;
+  const days = erTripDays();
+
+  if ((!pdLodging && !pdMIE) || !days) {
+    wrap.innerHTML = '';
+    return;
+  }
+
+  const cats = erByCategory();
+  const lodgingActual = cats['lodging'] || 0;
+  // M&IE = breakfast + lunch + dinner + tips (categories tagged pdGroup === 'mie')
+  let mieActual = 0;
+  ER_CATS.filter(c => c.pdGroup === 'mie').forEach(c => mieActual += (cats[c.id] || 0));
+
+  const block = (label, actual, perDay, daysCount) => {
+    const allowance = perDay * daysCount;
+    if (!perDay) return '';
+    const pct = allowance > 0 ? Math.min(100, (actual / allowance) * 100) : 0;
+    const over = actual > allowance;
+    const near = !over && pct >= 80;
+    const diff = actual - allowance;
+    const diffTxt = over
+      ? `<span class="over">${etFmt(diff, home)} over</span>`
+      : `<span class="under">${etFmt(-diff, home)} under</span>`;
+    return `<div class="er-pd-block">
+      <div class="er-pd-block-hdr"><span>${label}</span><span>${etFmt(actual, home)} / ${etFmt(allowance, home)}</span></div>
+      <div class="er-pd-bar-wrap"><div class="er-pd-bar ${over?'over':(near?'near':'')}" style="width:${pct}%"></div></div>
+      <div class="er-pd-foot">
+        <span>${daysCount} day${daysCount===1?'':'s'} × ${etFmt(perDay, home)}</span>
+        ${diffTxt}
+      </div>
+    </div>`;
+  };
+
+  let html = `<div class="er-sub-lbl">Per Diem vs. Actual</div><div class="er-pd-grid">`;
+  html += block('🏨 Lodging', lodgingActual, pdLodging, days);
+  html += block('🍽 M&IE',     mieActual,     pdMIE,     days);
+  html += `</div>`;
+  if (erData.pdNote) html += `<div class="er-pd-note">${escHtml(erData.pdNote)}</div>`;
+  wrap.innerHTML = html;
+}
+
+function erRenderLog() {
+  const home = erData.homeCurrency;
+  const wrap = document.getElementById('er-log');
+  if (!erData.expenses.length) {
+    wrap.innerHTML = `<div class="er-empty"><span>🧾</span>No expenses logged yet.<br><span style="font-size:13px">Add your first entry above, or import from the Daily Expense Tracker.</span></div>`;
+    document.getElementById('er-log-meta').textContent = '';
+    return;
+  }
+  const byDate = erGroupByDate();
+  const sortedDates = Object.keys(byDate).sort((a,b) => b.localeCompare(a));
+  document.getElementById('er-log-meta').textContent =
+    `${erData.expenses.length} ${erData.expenses.length===1?'entry':'entries'} across ${sortedDates.length} day${sortedDates.length===1?'':'s'}`;
+
+  wrap.innerHTML = sortedDates.map(date => {
+    const items = byDate[date];
+    const dayTotal = items.reduce((s,e) => s + erHomeAmt(e), 0);
+    return `<div class="er-day-blk" data-date="${date}">
+      <div class="er-day-hdr" onclick="erToggleDay('${date}')">
+        <div>
+          <span class="er-day-date">${etFmtDate(date)}</span>
+          <span class="er-day-sub">${items.length} ${items.length===1?'item':'items'}</span>
+        </div>
+        <span class="er-day-total">${etFmt(dayTotal, home)}</span>
+      </div>
+      ${erCollapsed[date] ? '' : `<div class="er-day-items">${
+        items.map(e => erRowHTML(e, home)).join('')
+      }</div>`}
+    </div>`;
+  }).join('');
+}
+
+function erRowHTML(e, home) {
+  const cat = erCatById(e.cat);
+  const homeAmt = erHomeAmt(e);
+  const tags = [];
+  if (e.billable) tags.push(`<span class="er-tag bill">Billable</span>`);
+  if (e.pay === 'corporate') tags.push(`<span class="er-tag ok">Corp card</span>`);
+  else if (e.pay === 'cash') tags.push(`<span class="er-tag">Cash</span>`);
+  else                       tags.push(`<span class="er-tag">Personal</span>`);
+  if (e.isMileage) {
+    tags.push(`<span class="er-tag">${e.miles} mi × ${etFmt(e.mileageRate, home)}</span>`);
+  }
+  if (e.receipt) {
+    tags.push(`<span class="er-tag ok">Receipt ✓</span>`);
+  } else if (homeAmt >= ER_RECEIPT_THRESHOLD && !e.isMileage) {
+    tags.push(`<span class="er-tag warn">Receipt needed</span>`);
+  }
+  if (e.importedFrom) tags.push(`<span class="er-tag">↘ Tracker</span>`);
+  const foreignTag = e.curr !== home
+    ? `<span class="er-row-amt-foreign">${etFmt(e.amt, e.curr)} ${e.curr}${e.rate?' @ '+e.rate.toFixed(4):''}</span>`
+    : '';
+  return `<div class="er-row">
+    <div class="er-row-icon">${cat.emoji}</div>
+    <div class="er-row-main">
+      <div class="er-row-desc">${escHtml(e.desc)}</div>
+      <div class="er-row-meta"><span>${cat.name}</span>${tags.join('')}</div>
+    </div>
+    <div class="er-row-amt">
+      ${etFmt(homeAmt, home)}
+      ${foreignTag}
+    </div>
+    <button class="er-row-del" onclick="erDeleteExpense('${e.id}')" title="Delete entry" aria-label="Delete entry">✕</button>
+  </div>`;
+}
+
+function erToggleDay(date) {
+  erCollapsed[date] = !erCollapsed[date];
+  erRenderLog();
+}
+
+/* ── CSV export ─────────────────────────────── */
+function erExportCSV() {
+  if (!erData.expenses.length) { alert('Nothing to export — add at least one expense first.'); return; }
+  const home = erData.homeCurrency;
+  const total = erGrandTotal();
+  const byDate = erGroupByDate();
+  const days = Object.keys(byDate).sort();
+  const days_count = erTripDays();
+
+  const payLabel = { personal:'Personal Card', corporate:'Corporate Card', cash:'Cash' };
+
+  let csv = `Expense Report — ${erData.reportName || 'Untitled'}\n`;
+  csv += `Client,"${(erData.client||'').replace(/"/g,'""')}"\n`;
+  csv += `Project,"${(erData.project||'').replace(/"/g,'""')}"\n`;
+  csv += `Trip Dates,${erData.startDate || ''} to ${erData.endDate || ''}\n`;
+  csv += `Home Currency,${home}\n`;
+  csv += `Mileage Rate,${erData.mileageRate || ER_DEFAULT_MILEAGE_RATE} ${home}/mi\n`;
+  csv += `Generated,${new Date().toISOString()}\n\n`;
+
+  csv += `Date,Category,Description,Amount,Currency,Rate,Home Amount (${home}),Payment Method,Billable,Receipt,Miles,Notes\n`;
+  days.forEach(d => {
+    byDate[d].forEach(e => {
+      const cat = erCatById(e.cat).name;
+      const rateStr = e.curr === home ? '1' : (e.rate != null ? e.rate.toFixed(6) : '');
+      const homeAmt = erHomeAmt(e);
+      const miles = e.isMileage ? e.miles : '';
+      const notes = e.isMileage ? `@ ${e.mileageRate}/mi` : (e.importedFrom ? 'Imported from Expense Tracker' : '');
+      csv += `${d},"${cat}","${(e.desc||'').replace(/"/g,'""')}",${(+e.amt).toFixed(2)},${e.curr},${rateStr},${homeAmt.toFixed(2)},"${payLabel[e.pay]||e.pay}",${e.billable?'Yes':'No'},${e.receipt?'Yes':'No'},${miles},"${notes}"\n`;
+    });
+    const dayTotal = byDate[d].reduce((s,e) => s + erHomeAmt(e), 0);
+    csv += `${d},,DAILY TOTAL,,,,${dayTotal.toFixed(2)},,,,,\n\n`;
+  });
+
+  // Category breakdown
+  csv += `\nCategory Breakdown\nCategory,Total (${home}),% of Report\n`;
+  const cats = erByCategory();
+  ER_CATS.forEach(c => {
+    const v = cats[c.id] || 0;
+    if (v > 0) {
+      const pct = total > 0 ? (v/total*100).toFixed(1) : '0';
+      csv += `"${c.name}",${v.toFixed(2)},${pct}%\n`;
+    }
+  });
+
+  // Payment summary
+  csv += `\nPayment Summary\nMethod,Total (${home})\n`;
+  const pay = erByPayment();
+  Object.keys(pay).forEach(k => {
+    if (pay[k] > 0) csv += `"${payLabel[k]||k}",${pay[k].toFixed(2)}\n`;
+  });
+  csv += `Reimbursable (Personal + Cash),${erReimbursableTotal().toFixed(2)}\n`;
+  csv += `Billable to Client,${erBillableTotal().toFixed(2)}\n`;
+
+  // Per diem comparison
+  const pdL = parseFloat(erData.pdLodging) || 0;
+  const pdM = parseFloat(erData.pdMIE) || 0;
+  if ((pdL || pdM) && days_count) {
+    csv += `\nPer Diem vs. Actual (${days_count} day${days_count===1?'':'s'})\nCategory,Allowance,Actual,Difference\n`;
+    if (pdL) {
+      const a = pdL * days_count;
+      const x = cats['lodging'] || 0;
+      csv += `Lodging,${a.toFixed(2)},${x.toFixed(2)},${(x-a).toFixed(2)}\n`;
+    }
+    if (pdM) {
+      const a = pdM * days_count;
+      let x = 0;
+      ER_CATS.filter(c => c.pdGroup === 'mie').forEach(c => x += (cats[c.id] || 0));
+      csv += `M&IE,${a.toFixed(2)},${x.toFixed(2)},${(x-a).toFixed(2)}\n`;
+    }
+    if (erData.pdNote) csv += `Notes,"${erData.pdNote.replace(/"/g,'""')}"\n`;
+  }
+
+  csv += `\nGRAND TOTAL,,${total.toFixed(2)}\n`;
+
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const safe = (erData.reportName || 'expense-report').replace(/[^a-z0-9]+/gi,'-').toLowerCase();
+  a.href = url; a.download = `${safe}-${erTodayISO()}.csv`; a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* ── Copy plain-text summary ───────────────── */
+function erCopySummary() {
+  if (!erData.expenses.length) { alert('Nothing to summarize — add at least one expense first.'); return; }
+  const home = erData.homeCurrency;
+  const total = erGrandTotal();
+  const cats = erByCategory();
+  const days = erTripDays();
+  const lines = [];
+  lines.push(`Expense Report: ${erData.reportName || 'Untitled'}`);
+  if (erData.client)  lines.push(`Client:  ${erData.client}`);
+  if (erData.project) lines.push(`Project: ${erData.project}`);
+  if (erData.startDate || erData.endDate) lines.push(`Dates:   ${erData.startDate || '?'} to ${erData.endDate || '?'}${days?` (${days} day${days===1?'':'s'})`:''}`);
+  lines.push(`Total:   ${etFmt(total, home)}`);
+  lines.push('');
+  lines.push('Category Breakdown:');
+  ER_CATS.forEach(c => {
+    const v = cats[c.id] || 0;
+    if (v > 0) lines.push(`  ${c.emoji} ${c.name.padEnd(22)} ${etFmt(v, home)}`);
+  });
+  lines.push('');
+  lines.push(`Billable to client: ${etFmt(erBillableTotal(), home)}`);
+  lines.push(`Reimbursable:       ${etFmt(erReimbursableTotal(), home)}`);
+  const pdL = parseFloat(erData.pdLodging) || 0;
+  const pdM = parseFloat(erData.pdMIE) || 0;
+  if ((pdL || pdM) && days) {
+    lines.push('');
+    lines.push('Per Diem vs. Actual:');
+    if (pdL) {
+      const a = pdL * days, x = cats['lodging'] || 0;
+      lines.push(`  Lodging: ${etFmt(x, home)} actual / ${etFmt(a, home)} allowance (${x>a?'+':''}${etFmt(x-a, home)})`);
+    }
+    if (pdM) {
+      const a = pdM * days; let x = 0;
+      ER_CATS.filter(c => c.pdGroup === 'mie').forEach(c => x += (cats[c.id] || 0));
+      lines.push(`  M&IE:    ${etFmt(x, home)} actual / ${etFmt(a, home)} allowance (${x>a?'+':''}${etFmt(x-a, home)})`);
+    }
+  }
+
+  const text = lines.join('\n');
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(
+      () => alert('Summary copied to clipboard — paste into an email to your manager.'),
+      () => erFallbackCopy(text)
+    );
+  } else {
+    erFallbackCopy(text);
+  }
+}
+function erFallbackCopy(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); alert('Summary copied to clipboard.'); }
+  catch(_) { prompt('Copy the summary below:', text); }
+  document.body.removeChild(ta);
+}
+
+function erPrint() {
+  // Ensure all day blocks render expanded for the print
+  erCollapsed = {};
+  erRenderLog();
+  setTimeout(() => window.print(), 50);
 }
 
 </script>
