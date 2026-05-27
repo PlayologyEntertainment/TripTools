@@ -2982,16 +2982,284 @@ body.no-scroll { overflow: hidden; }
     </div>
   </div>
 </div>
-<div id="view-placeholder-tsa-guide" class="view">
-  <nav class="tool-topbar">
+<style>
+/* ── TSA & SECURITY GUIDE ── */
+.tsa-search-wrap{position:relative;margin-bottom:8px}
+.tsa-search-input{width:100%;padding:12px 14px;border:1.5px solid var(--ink);border-radius:var(--r);font-size:15px;font-family:var(--sans);background:var(--paper);color:var(--ink);box-sizing:border-box;outline:none;min-height:46px}
+.tsa-search-input:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(255,77,46,.15)}
+.tsa-search-hint{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:6px;margin-bottom:14px}
+.tsa-results{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.tsa-card{border:1.5px solid var(--ink);border-radius:var(--r);background:var(--paper);overflow:hidden;break-inside:avoid}
+.tsa-card-top{display:flex;align-items:flex-start;gap:12px;padding:13px 16px}
+.tsa-card-ico{font-size:26px;line-height:1;flex-shrink:0;width:32px;text-align:center}
+.tsa-card-main{flex:1;min-width:0}
+.tsa-card-name{font-family:var(--serif);font-size:18px;font-weight:600;letter-spacing:-.01em;line-height:1.2;color:var(--ink)}
+.tsa-card-cat{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:3px}
+.tsa-verdicts{display:grid;grid-template-columns:1fr 1fr;border-top:1.5px solid var(--ink)}
+.tsa-verdict{padding:11px 14px;border-right:1.5px solid var(--ink);display:flex;align-items:center;gap:9px;font-size:13px;font-family:var(--sans);background:var(--paper-2);min-height:44px}
+.tsa-verdict:last-child{border-right:none}
+.tsa-verdict-ico{font-size:18px;line-height:1;flex-shrink:0}
+.tsa-verdict-lbl{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);display:block}
+.tsa-verdict-val{font-weight:600;color:var(--ink);font-size:13px;line-height:1.25}
+.tsa-v-yes  .tsa-verdict-val{color:var(--green)}
+.tsa-v-no   .tsa-verdict-val{color:var(--accent)}
+.tsa-v-cond .tsa-verdict-val{color:#B8860B}
+.tsa-card-notes{padding:11px 16px;border-top:1.5px solid var(--rule);font-size:13px;color:var(--ink-2);line-height:1.55;background:var(--paper)}
+.tsa-card-notes strong{font-weight:600;color:var(--ink)}
+.tsa-empty{padding:22px 18px;border:1.5px dashed var(--ink);border-radius:var(--r);color:var(--muted);text-align:center;font-size:14px;background:var(--paper-2)}
+.tsa-empty strong{display:block;font-family:var(--serif);font-size:17px;color:var(--ink);margin-bottom:4px;font-weight:600}
+.tsa-cat-pills{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 4px}
+.tsa-cat-pill{padding:7px 12px;border:1.5px solid var(--ink);border-radius:999px;background:var(--paper);font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);cursor:pointer;transition:background .12s,color .12s;min-height:32px;display:inline-flex;align-items:center}
+.tsa-cat-pill:hover{background:var(--paper-2)}
+.tsa-cat-pill.active{background:var(--ink);color:var(--paper)}
+.tsa-section{margin-top:30px}
+.tsa-section-hdr{display:flex;align-items:center;gap:10px;padding:0 0 10px;border-bottom:2px solid var(--ink);margin-bottom:16px}
+.tsa-section-num{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase}
+.tsa-section-hdr h3{font-family:var(--serif);font-size:22px;font-weight:600;letter-spacing:-.02em;margin:0;line-height:1.1}
+.tsa-311-card{border:2px solid var(--ink);border-radius:var(--r);background:var(--paper);overflow:hidden}
+.tsa-311-top{padding:18px 20px;background:var(--ink);color:var(--paper);display:flex;align-items:center;gap:14px}
+.tsa-311-ico{font-size:36px;line-height:1}
+.tsa-311-title{font-family:var(--serif);font-size:24px;font-weight:700;letter-spacing:-.02em;line-height:1.1}
+.tsa-311-sub{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.7);margin-top:4px}
+.tsa-311-rules{display:grid;grid-template-columns:repeat(3,1fr)}
+.tsa-311-rule{padding:18px 16px;border-right:1.5px solid var(--ink);text-align:center}
+.tsa-311-rule:last-child{border-right:none}
+.tsa-311-big{font-family:var(--serif);font-size:46px;font-weight:700;line-height:1;color:var(--accent);letter-spacing:-.04em}
+.tsa-311-lbl{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:6px}
+.tsa-311-desc{font-size:13px;color:var(--ink-2);line-height:1.45;margin-top:6px}
+.tsa-311-notes{padding:14px 18px;border-top:1.5px solid var(--ink);background:var(--paper-2);font-size:13px;color:var(--ink-2);line-height:1.55}
+.tsa-311-notes ul{margin:6px 0 0;padding-left:20px}
+.tsa-311-notes li{margin-bottom:4px}
+.tsa-311-notes strong{font-weight:600;color:var(--ink)}
+@media(max-width:540px){
+  .tsa-311-rules{grid-template-columns:1fr}
+  .tsa-311-rule{border-right:none;border-bottom:1.5px solid var(--ink)}
+  .tsa-311-rule:last-child{border-bottom:none}
+}
+.tsa-pre-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media(max-width:760px){.tsa-pre-grid{grid-template-columns:1fr}}
+.tsa-pre-card{border:1.5px solid var(--ink);border-radius:var(--r);background:var(--paper);overflow:hidden;display:flex;flex-direction:column}
+.tsa-pre-hdr{padding:14px 16px;border-bottom:1.5px solid var(--ink);background:var(--paper-2)}
+.tsa-pre-name{font-family:var(--serif);font-size:20px;font-weight:700;letter-spacing:-.02em;line-height:1.1}
+.tsa-pre-tag{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+.tsa-pre-body{padding:14px 16px;flex:1;display:flex;flex-direction:column;gap:10px}
+.tsa-pre-row{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding-bottom:8px;border-bottom:1px solid var(--rule);font-size:13px}
+.tsa-pre-row:last-of-type{border-bottom:none;padding-bottom:0}
+.tsa-pre-k{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.tsa-pre-v{font-weight:600;color:var(--ink);text-align:right;font-size:13.5px}
+.tsa-pre-bullets{font-size:13px;color:var(--ink-2);line-height:1.5;padding:0;margin:6px 0 0;list-style:none}
+.tsa-pre-bullets li{padding-left:18px;position:relative;margin-bottom:4px}
+.tsa-pre-bullets li::before{content:"✓";position:absolute;left:0;color:var(--green);font-weight:700}
+.tsa-pre-cost{padding:10px 16px;background:var(--ink);color:var(--paper);font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;display:flex;justify-content:space-between;align-items:center}
+.tsa-pre-cost b{font-family:var(--serif);font-size:18px;color:var(--yellow);text-transform:none;letter-spacing:-.01em;font-weight:700}
+.tsa-tips-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.tsa-tip{border:1.5px solid var(--ink);border-radius:var(--r);background:var(--paper);padding:12px 14px;display:flex;gap:11px;align-items:flex-start}
+.tsa-tip-ico{font-size:22px;line-height:1;flex-shrink:0;width:28px;text-align:center}
+.tsa-tip-body{flex:1;font-size:13px;color:var(--ink-2);line-height:1.5}
+.tsa-tip-body strong{display:block;font-family:var(--serif);font-size:15px;color:var(--ink);font-weight:600;margin-bottom:2px;letter-spacing:-.01em}
+@media print{
+  .tsa-search-wrap, .tsa-cat-pills, .tsa-search-hint { display:none !important; }
+  .tsa-card, .tsa-311-card, .tsa-pre-card, .tsa-tip { break-inside: avoid; border:1.5px solid #000 !important; }
+  .tsa-311-top, .tsa-pre-cost { background:#000 !important; color:#fff !important; }
+}
+</style>
+<div id="view-tsa-guide" class="view">
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="window.print()">🖨 Print</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">🔒</span>
-    <h2>TSA & Security Guide</h2>
-    <p style="margin-bottom:24px">Search any item for carry-on / checked / prohibited status. Liquids rules & PreCheck.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-tsa-guide"></div>
+
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>TSA &amp; Security Guide</h1>
+    <p class="tool-sub">Search any item to see if it's allowed in your carry-on, checked bag, or prohibited entirely. Plus the 3-1-1 liquids rule, PreCheck explainer, and security tips.</p>
+  </div>
+
+  <div class="tool-body">
+
+    <!-- ── ITEM SEARCH ── -->
+    <div class="fg">
+      <label>What are you packing?</label>
+      <div class="tsa-search-wrap">
+        <input type="search" id="tsa-q" class="tsa-search-input" placeholder="🔍 Search any item — knife, lighter, vape, shampoo…" autocomplete="off">
+      </div>
+      <div class="tsa-search-hint">Tap a category to browse, or type any item</div>
+      <div class="tsa-cat-pills" id="tsa-cats"></div>
+    </div>
+
+    <div id="tsa-results" class="tsa-results"></div>
+
+    <!-- ── 3-1-1 LIQUIDS RULE ── -->
+    <div class="tsa-section">
+      <div class="tsa-section-hdr">
+        <span class="tsa-section-num">§ 01</span>
+        <h3>The 3-1-1 Liquids Rule</h3>
+      </div>
+      <div class="tsa-311-card">
+        <div class="tsa-311-top">
+          <span class="tsa-311-ico">💧</span>
+          <div>
+            <div class="tsa-311-title">3-1-1 at a glance</div>
+            <div class="tsa-311-sub">For liquids, gels, aerosols, creams &amp; pastes in carry-on</div>
+          </div>
+        </div>
+        <div class="tsa-311-rules">
+          <div class="tsa-311-rule">
+            <div class="tsa-311-big">3.4</div>
+            <div class="tsa-311-lbl">oz max per container</div>
+            <div class="tsa-311-desc">100 ml or less. The container size matters — not how full it is.</div>
+          </div>
+          <div class="tsa-311-rule">
+            <div class="tsa-311-big">1</div>
+            <div class="tsa-311-lbl">Clear quart bag</div>
+            <div class="tsa-311-desc">All containers must fit in one transparent zip-top bag, roughly 6×9 inches.</div>
+          </div>
+          <div class="tsa-311-rule">
+            <div class="tsa-311-big">1</div>
+            <div class="tsa-311-lbl">Bag per passenger</div>
+            <div class="tsa-311-desc">One quart-size bag per traveler. Pull it out at the X-ray belt.</div>
+          </div>
+        </div>
+        <div class="tsa-311-notes">
+          <strong>Exceptions to 3-1-1</strong> (declare at the checkpoint):
+          <ul>
+            <li>Prescription medications (liquid or pills) — reasonable quantities</li>
+            <li>Baby formula, breast milk &amp; juice for infants/toddlers</li>
+            <li>Medically necessary liquids, gels &amp; aerosols</li>
+            <li>Ice packs for medical or baby items (frozen solid at the checkpoint)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PRECHECK / GLOBAL ENTRY / CLEAR ── -->
+    <div class="tsa-section">
+      <div class="tsa-section-hdr">
+        <span class="tsa-section-num">§ 02</span>
+        <h3>Trusted-Traveler Programs</h3>
+      </div>
+      <div class="tsa-pre-grid">
+
+        <div class="tsa-pre-card">
+          <div class="tsa-pre-hdr">
+            <div class="tsa-pre-name">TSA PreCheck</div>
+            <div class="tsa-pre-tag">For domestic US flights</div>
+          </div>
+          <div class="tsa-pre-body">
+            <div class="tsa-pre-row"><span class="tsa-pre-k">Valid for</span><span class="tsa-pre-v">5 years</span></div>
+            <div class="tsa-pre-row"><span class="tsa-pre-k">Apply at</span><span class="tsa-pre-v">tsa.gov/precheck</span></div>
+            <div class="tsa-pre-row"><span class="tsa-pre-k">Processing</span><span class="tsa-pre-v">3–5 days typical</span></div>
+            <ul class="tsa-pre-bullets">
+              <li>Keep shoes, belt &amp; light jacket on</li>
+              <li>Laptops &amp; liquids stay in your bag</li>
+              <li>Dedicated faster lane at 200+ US airports</li>
+              <li>Children 12 &amp; under can join a parent</li>
+            </ul>
+          </div>
+          <div class="tsa-pre-cost"><span>5-Year Cost</span><b>$77.95</b></div>
+        </div>
+
+        <div class="tsa-pre-card">
+          <div class="tsa-pre-hdr">
+            <div class="tsa-pre-name">Global Entry</div>
+            <div class="tsa-pre-tag">For international arrivals</div>
+          </div>
+          <div class="tsa-pre-body">
+            <div class="tsa-pre-row"><span class="tsa-pre-k">Valid for</span><span class="tsa-pre-v">5 years</span></div>
+            <div class="tsa-pre-row"><span class="tsa-pre-k">Apply at</span><span class="tsa-pre-v">ttp.cbp.dhs.gov</span></div>
+            <div class="tsa-pre-row"><span class="tsa-pre-k">Processing</span><span class="tsa-pre-v">4–6 months + interview</span></div>
+            <ul class="tsa-pre-bullets">
+              <li>Includes TSA PreCheck benefits</li>
+              <li>Skip US Customs lines on return</li>
+              <li>Kiosk or facial-comparison entry</li>
+              <li>Often free with premium credit cards</li>
+            </ul>
+          </div>
+          <div class="tsa-pre-cost"><span>5-Year Cost</span><b>$120</b></div>
+        </div>
+
+        <div class="tsa-pre-card">
+          <div class="tsa-pre-hdr">
+            <div class="tsa-pre-name">CLEAR Plus</div>
+            <div class="tsa-pre-tag">Identity verification only</div>
+          </div>
+          <div class="tsa-pre-body">
+            <div class="tsa-pre-row"><span class="tsa-pre-k">Valid for</span><span class="tsa-pre-v">Annual subscription</span></div>
+            <div class="tsa-pre-row"><span class="tsa-pre-k">Apply at</span><span class="tsa-pre-v">clearme.com</span></div>
+            <div class="tsa-pre-row"><span class="tsa-pre-k">Processing</span><span class="tsa-pre-v">Same-day at airport</span></div>
+            <ul class="tsa-pre-bullets">
+              <li>Skips the ID-check line, not security</li>
+              <li>Walks you to the front of PreCheck/standard</li>
+              <li>Available at 50+ US airports &amp; stadiums</li>
+              <li>Pairs best <em>with</em> PreCheck — not a replacement</li>
+            </ul>
+          </div>
+          <div class="tsa-pre-cost"><span>Annual</span><b>$199</b></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── SECURITY TIPS ── -->
+    <div class="tsa-section">
+      <div class="tsa-section-hdr">
+        <span class="tsa-section-num">§ 03</span>
+        <h3>Smooth-Screening Tips</h3>
+      </div>
+      <div class="tsa-tips-grid">
+        <div class="tsa-tip">
+          <span class="tsa-tip-ico">🪪</span>
+          <div class="tsa-tip-body"><strong>REAL ID by May 2025</strong>Standard driver's licenses are no longer accepted for domestic flights. Use a REAL ID, passport, or another approved ID.</div>
+        </div>
+        <div class="tsa-tip">
+          <span class="tsa-tip-ico">💻</span>
+          <div class="tsa-tip-body"><strong>Laptops out (standard lane)</strong>Larger than a phone goes in its own bin. PreCheck travelers leave them in the bag.</div>
+        </div>
+        <div class="tsa-tip">
+          <span class="tsa-tip-ico">🍶</span>
+          <div class="tsa-tip-body"><strong>Empty your water bottle</strong>Fill at a fountain past security. Frozen-solid water counts as a solid until it melts.</div>
+        </div>
+        <div class="tsa-tip">
+          <span class="tsa-tip-ico">🔋</span>
+          <div class="tsa-tip-body"><strong>Lithium batteries in carry-on</strong>Spare lithium-ion batteries, power banks &amp; vapes must fly in the cabin — never checked.</div>
+        </div>
+        <div class="tsa-tip">
+          <span class="tsa-tip-ico">🎁</span>
+          <div class="tsa-tip-body"><strong>Don't wrap gifts</strong>TSA may need to unwrap any package. Pack gifts loose and wrap at your destination.</div>
+        </div>
+        <div class="tsa-tip">
+          <span class="tsa-tip-ico">💊</span>
+          <div class="tsa-tip-body"><strong>Meds keep in original bottles</strong>Not legally required by TSA, but smooths screening and avoids problems at the destination.</div>
+        </div>
+        <div class="tsa-tip">
+          <span class="tsa-tip-ico">🍱</span>
+          <div class="tsa-tip-body"><strong>Solid food is fine</strong>Sandwiches, sealed snacks, baked goods all welcome. Spreads &amp; dips count as liquids.</div>
+        </div>
+        <div class="tsa-tip">
+          <span class="tsa-tip-ico">⏰</span>
+          <div class="tsa-tip-body"><strong>Arrive 2 hr domestic, 3 hr international</strong>Add 30 min for major hubs (ATL, LAX, JFK, ORD) during peak travel periods.</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:24px;padding:12px 16px;background:var(--paper-2);border-left:3px solid var(--yellow);border-radius:var(--r);font-size:13px;color:var(--muted);line-height:1.55">
+      ⚠️ <strong>Final call is the officer's.</strong> TSA agents have the final say at the checkpoint regardless of any guide. When uncertain, pack in checked baggage — or leave it home. Rules current as of 2025; verify at <em>tsa.gov</em> before travel.
+    </div>
+  </div>
+
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    For the fastest screening: wear slip-on shoes, keep ID + boarding pass in one hand, pull out the quart bag and any laptop <em>before</em> reaching the belt, and empty pockets into your carry-on rather than a separate bin. You'll move twice as fast as the person fumbling at the front of the line.
+  </div>
+
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('packing')">📝 Smart Packing List</button>
+      <button class="rel-btn" onclick="openTool('baggage')">💸 Baggage Fee Calculator</button>
+      <button class="rel-btn" onclick="openTool('carry-on')">📐 Carry-On Size Checker</button>
+      <button class="rel-btn" onclick="openTool('doc-checklist')">✅ Document Checklist</button>
     </div>
   </div>
 </div>
@@ -6860,7 +7128,7 @@ const TOOLS = [
   {id:'customs-decl',  nm:'Customs Declaration Helper', ico:'📦', ph:'docs',      on:false, live:false, ds:"What you can & can't bring in. Duty-free limits by country."},
   {id:'ff-tracker',    nm:'Frequent Flyer Tracker',     ico:'🏆', ph:'docs',      on:false, live:false, ds:'Log miles/points across programs. Track expiry & redemption value.'},
   {id:'vaccination',   nm:'Vaccination Requirements',   ico:'💉', ph:'docs',      on:false, live:false, ds:'Required & recommended vaccines for 100+ destinations.'},
-  {id:'tsa-guide',     nm:'TSA & Security Guide',       ico:'🔒', ph:'docs',      on:false, live:false, ds:'Search any item for carry-on / checked / prohibited status.'},
+  {id:'tsa-guide',     nm:'TSA & Security Guide',       ico:'🔒', ph:'docs',      on:false, live:true,  ds:'Search any item for carry-on / checked / prohibited status.'},
   {id:'packing',       nm:'Smart Packing List',         ico:'📝', ph:'packing',   on:false, live:true,  ds:'Generate a list by trip type, duration & climate. Check off as you go.'},
   {id:'baggage',       nm:'Baggage Fee Calculator',     ico:'💸', ph:'packing',   on:false, live:true,  ds:'Carry-on & checked bag fees for 35 major airlines.'},
   {id:'carry-on',      nm:'Carry-On Size Checker',      ico:'📐', ph:'packing',   on:false, live:false, ds:'Enter dimensions + airline → fits / borderline / too large.'},
@@ -7573,6 +7841,7 @@ function injectTripCtx(id) {
   if(id==='power-plug') ppInit();
   if(id==='toll-est')   teInit();
   if(id==='road-planner') rpInit();
+  if(id==='tsa-guide')  tsaInit();
 }
 
 /* ── HUB RENDER ── */
@@ -18573,6 +18842,286 @@ function rpHandoffFuel() {
     } catch(_) {}
   }
   openTool('fuel-cost');
+}
+
+/* ════════════════════════════════════════════════════════
+   TSA & SECURITY GUIDE
+   ════════════════════════════════════════════════════════ */
+
+const TSA_CATS = [
+  {id:'all',         lbl:'All Items',       ico:'🔎'},
+  {id:'liquids',     lbl:'Liquids & Gels',  ico:'💧'},
+  {id:'electronics', lbl:'Electronics',     ico:'💻'},
+  {id:'batteries',   lbl:'Batteries',       ico:'🔋'},
+  {id:'sharp',       lbl:'Sharp Objects',   ico:'🔪'},
+  {id:'tools',       lbl:'Tools',           ico:'🔧'},
+  {id:'sports',      lbl:'Sports & Outdoor',ico:'⚾'},
+  {id:'food',        lbl:'Food & Drink',    ico:'🥪'},
+  {id:'medical',     lbl:'Medical',         ico:'💊'},
+  {id:'firearms',    lbl:'Firearms',        ico:'🔫'},
+  {id:'hazardous',   lbl:'Hazardous',       ico:'☣️'},
+  {id:'misc',        lbl:'Other',           ico:'📦'}
+];
+
+/* verdict codes: yes = allowed, no = prohibited, cond = conditional/restricted */
+const TSA_ITEMS = [
+  // ── LIQUIDS, GELS, AEROSOLS ──
+  {n:'Shampoo',                ico:'🧴', cat:'liquids',     co:'cond', ck:'yes', note:'Carry-on: 3.4 oz / 100 ml or less, in your quart bag. Larger sizes go in checked.', tags:'soap conditioner hair'},
+  {n:'Conditioner',            ico:'🧴', cat:'liquids',     co:'cond', ck:'yes', note:'3.4 oz / 100 ml limit in carry-on. Pack travel sizes or check it.', tags:'hair'},
+  {n:'Body wash',              ico:'🧴', cat:'liquids',     co:'cond', ck:'yes', note:'3.4 oz / 100 ml in carry-on. Bar soap has no liquid limit.', tags:'shower gel'},
+  {n:'Toothpaste',             ico:'🪥', cat:'liquids',     co:'cond', ck:'yes', note:'Counts as a gel — 3.4 oz / 100 ml limit in your quart bag.', tags:'paste dental'},
+  {n:'Mouthwash',              ico:'🪥', cat:'liquids',     co:'cond', ck:'yes', note:'Liquid — 3.4 oz / 100 ml in carry-on.', tags:'breath'},
+  {n:'Deodorant (stick)',      ico:'🧼', cat:'liquids',     co:'yes',  ck:'yes', note:'Solid stick deodorant has no size limit and does not go in the quart bag.', tags:'antiperspirant'},
+  {n:'Deodorant (spray/gel)',  ico:'🧴', cat:'liquids',     co:'cond', ck:'yes', note:'Aerosol or gel forms must be 3.4 oz / 100 ml in carry-on.', tags:'antiperspirant aerosol'},
+  {n:'Sunscreen',              ico:'☀️', cat:'liquids',     co:'cond', ck:'yes', note:'3.4 oz / 100 ml in carry-on. Larger bottles in checked.', tags:'spf sunblock'},
+  {n:'Perfume / cologne',      ico:'💐', cat:'liquids',     co:'cond', ck:'yes', note:'3.4 oz / 100 ml limit in carry-on. Aftershave too.', tags:'fragrance scent eau de toilette'},
+  {n:'Liquid makeup',          ico:'💄', cat:'liquids',     co:'cond', ck:'yes', note:'Foundation, mascara, liquid eyeliner — 3.4 oz / 100 ml in carry-on.', tags:'cosmetics foundation mascara'},
+  {n:'Powder makeup',          ico:'💄', cat:'liquids',     co:'yes',  ck:'yes', note:'Powders over 12 oz / 350 ml may need additional screening in carry-on.', tags:'cosmetics blush'},
+  {n:'Lip balm / chapstick',   ico:'💋', cat:'liquids',     co:'yes',  ck:'yes', note:'Solid sticks are fine without limits. Lip gloss counts as a liquid (3.4 oz).', tags:'lipstick lip gloss'},
+  {n:'Nail polish',            ico:'💅', cat:'liquids',     co:'cond', ck:'yes', note:'3.4 oz / 100 ml limit in carry-on. Nail polish remover with acetone also OK in carry-on under 3.4 oz.', tags:'manicure'},
+  {n:'Contact lens solution',  ico:'👁️', cat:'liquids',     co:'cond', ck:'yes', note:'3.4 oz / 100 ml in your quart bag. Travel-size bottles are widely available.', tags:'saline'},
+  {n:'Hand sanitizer',         ico:'🧴', cat:'liquids',     co:'cond', ck:'yes', note:'Up to 12 oz / 350 ml per container is currently allowed in carry-on (temporary TSA rule). Declare it.', tags:'gel purell'},
+  {n:'Aerosol spray',          ico:'💨', cat:'liquids',     co:'cond', ck:'cond', note:'Carry-on: 3.4 oz / 100 ml. Checked: toiletry/personal-care aerosols up to 70 oz total / 18 oz per container, with caps secured.', tags:'hairspray'},
+  {n:'Snow globe',             ico:'❄️', cat:'liquids',     co:'cond', ck:'yes', note:'Allowed in carry-on only if visibly smaller than a tennis ball and fits in your quart bag. Larger ones go in checked.', tags:''},
+  {n:'Bottled water',          ico:'💧', cat:'liquids',     co:'no',   ck:'yes', note:'Empty your bottle before security and refill at a fountain past the checkpoint.', tags:'drink beverage'},
+  {n:'Coffee / tea (liquid)',  ico:'☕', cat:'liquids',     co:'cond', ck:'yes', note:'Bring an empty cup through and buy past security. Sealed drinks under 3.4 oz are fine.', tags:'beverage hot drink'},
+  {n:'Wine / liquor (≤24% ABV)',ico:'🍷',cat:'liquids',     co:'cond', ck:'yes', note:'Carry-on: 3.4 oz / 100 ml per container. Checked: no quantity limit (24% ABV or under).', tags:'alcohol beer wine'},
+  {n:'Liquor (24–70% ABV)',    ico:'🥃', cat:'liquids',     co:'cond', ck:'cond', note:'Carry-on: 3.4 oz only. Checked: up to 5 L per person in unopened retail packaging.', tags:'alcohol whiskey vodka spirits'},
+  {n:'Liquor (>70% ABV)',      ico:'🥃', cat:'liquids',     co:'no',   ck:'no', note:'Anything over 140 proof (70% ABV) is prohibited in both carry-on and checked baggage.', tags:'alcohol everclear overproof'},
+
+  // ── ELECTRONICS ──
+  {n:'Laptop',                 ico:'💻', cat:'electronics', co:'yes',  ck:'yes', note:'Carry-on preferred (theft + damage risk in checked). Remove from bag in standard lane; keep in bag with PreCheck.', tags:'computer macbook notebook'},
+  {n:'Tablet / iPad',          ico:'📱', cat:'electronics', co:'yes',  ck:'yes', note:'Treat as a smaller laptop — leave in your bag with PreCheck, remove in standard lane.', tags:'ipad'},
+  {n:'Smartphone',             ico:'📱', cat:'electronics', co:'yes',  ck:'yes', note:'Stays on you. Don\'t check it — too easy to lose or damage.', tags:'phone cell mobile iphone android'},
+  {n:'E-reader (Kindle)',      ico:'📖', cat:'electronics', co:'yes',  ck:'yes', note:'Carry-on is fine. Treat like a tablet.', tags:'ebook'},
+  {n:'Camera (DSLR/mirrorless)',ico:'📷',cat:'electronics', co:'yes',  ck:'yes', note:'Carry-on strongly recommended. Film over ISO 800 should be hand-inspected, not X-rayed.', tags:'photo'},
+  {n:'GoPro / action cam',     ico:'📷', cat:'electronics', co:'yes',  ck:'yes', note:'Carry-on preferred. Lithium battery rules apply.', tags:'video'},
+  {n:'Drone',                  ico:'🚁', cat:'electronics', co:'yes',  ck:'cond', note:'Carry-on is best because the lithium battery must come with you. Check destination drone laws too.', tags:'quadcopter uav'},
+  {n:'Headphones',             ico:'🎧', cat:'electronics', co:'yes',  ck:'yes', note:'Wired or wireless — no restrictions.', tags:'earbuds airpods'},
+  {n:'Hair dryer',             ico:'💨', cat:'electronics', co:'yes',  ck:'yes', note:'No special rules. Most hotels provide one.', tags:'blow dryer'},
+  {n:'Curling iron (corded)',  ico:'💇', cat:'electronics', co:'yes',  ck:'yes', note:'Plug-in curling/flat irons are fine in either bag.', tags:'flat iron straightener'},
+  {n:'Curling iron (butane)',  ico:'💇', cat:'electronics', co:'cond', ck:'no', note:'One butane-powered cordless device allowed in carry-on only, with the safety cover on. Spare gas cartridges prohibited.', tags:'cordless'},
+  {n:'Electric shaver',        ico:'🪒', cat:'electronics', co:'yes',  ck:'yes', note:'Allowed in both bags without restriction.', tags:'razor electric'},
+  {n:'Gaming console',         ico:'🎮', cat:'electronics', co:'yes',  ck:'yes', note:'Switch, Steam Deck, etc. Carry-on recommended for protection.', tags:'nintendo playstation xbox steam deck'},
+  {n:'Smart luggage',          ico:'🧳', cat:'electronics', co:'yes',  ck:'cond', note:'Built-in lithium battery must be removable. Battery comes with you in the cabin if you check the bag.', tags:'away rimowa'},
+
+  // ── BATTERIES & POWER ──
+  {n:'Power bank',             ico:'🔋', cat:'batteries',   co:'yes',  ck:'no', note:'Must be in carry-on only. Under 100 Wh: no airline approval needed. 100–160 Wh: airline approval required, 2 max.', tags:'portable charger lithium'},
+  {n:'Spare lithium battery',  ico:'🔋', cat:'batteries',   co:'yes',  ck:'no', note:'All spare lithium-ion and lithium-metal batteries fly in carry-on only. Terminals must be protected (in original packaging or taped).', tags:''},
+  {n:'AA / AAA batteries',     ico:'🔋', cat:'batteries',   co:'yes',  ck:'yes', note:'Standard alkaline and NiMH batteries are fine in either bag.', tags:'alkaline'},
+  {n:'Car battery / wet cell', ico:'🔋', cat:'batteries',   co:'no',   ck:'no', note:'Spillable wet-cell batteries are prohibited from passenger flights.', tags:''},
+  {n:'Vape / e-cigarette',     ico:'💨', cat:'batteries',   co:'yes',  ck:'no', note:'Vapes, e-cigs and spare pods/vials must travel in carry-on only. Do not use or charge them in flight.', tags:'juul ecig pod vaping'},
+
+  // ── SHARP OBJECTS ──
+  {n:'Pocket knife',           ico:'🔪', cat:'sharp',       co:'no',   ck:'yes', note:'Any blade is prohibited in carry-on. Sheathe or wrap securely in checked.', tags:'knife folding swiss army'},
+  {n:'Swiss Army knife',       ico:'🔪', cat:'sharp',       co:'no',   ck:'yes', note:'Even the small one — must go in checked baggage.', tags:'multi-tool victorinox'},
+  {n:'Kitchen knife',          ico:'🔪', cat:'sharp',       co:'no',   ck:'yes', note:'Chef\'s knives, steak knives, all blades — checked only, sheathed.', tags:'chef cooking'},
+  {n:'Box cutter / utility',   ico:'📦', cat:'sharp',       co:'no',   ck:'yes', note:'Prohibited in carry-on. Razor-blade utility knives allowed in checked.', tags:'razor blade'},
+  {n:'Scissors (<4")',         ico:'✂️', cat:'sharp',       co:'yes',  ck:'yes', note:'Scissors with blades 4 inches (10 cm) or shorter from the pivot are allowed in carry-on.', tags:'craft sewing'},
+  {n:'Scissors (≥4")',         ico:'✂️', cat:'sharp',       co:'no',   ck:'yes', note:'Anything longer than 4 inches at the blade must go in checked.', tags:''},
+  {n:'Razor (disposable)',     ico:'🪒', cat:'sharp',       co:'yes',  ck:'yes', note:'Disposable razors and cartridge razors are allowed in carry-on.', tags:'shave bic gillette'},
+  {n:'Safety razor',           ico:'🪒', cat:'sharp',       co:'cond', ck:'yes', note:'OK in carry-on with the blade <em>removed</em>. Loose double-edge blades belong in checked.', tags:'double edge'},
+  {n:'Straight razor',         ico:'🪒', cat:'sharp',       co:'no',   ck:'yes', note:'Checked only.', tags:'cut throat'},
+  {n:'Multi-tool (with blade)',ico:'🛠️', cat:'sharp',       co:'no',   ck:'yes', note:'Any multi-tool with a blade — even a small one — must be checked.', tags:'leatherman'},
+  {n:'Multi-tool (no blade)',  ico:'🛠️', cat:'sharp',       co:'yes',  ck:'yes', note:'Bladeless multi-tools (pliers, screwdriver) allowed in carry-on, but check tool-length rules below.', tags:'pliers'},
+  {n:'Knitting needles',       ico:'🧶', cat:'sharp',       co:'yes',  ck:'yes', note:'Allowed in both bags. Crochet hooks too.', tags:'crochet'},
+  {n:'Nail clippers',          ico:'💅', cat:'sharp',       co:'yes',  ck:'yes', note:'Standard nail clippers and tweezers are fine in carry-on.', tags:'tweezers'},
+  {n:'Nail file (metal)',      ico:'💅', cat:'sharp',       co:'yes',  ck:'yes', note:'Metal nail files allowed in either bag.', tags:''},
+
+  // ── TOOLS ──
+  {n:'Screwdriver (<7")',      ico:'🔧', cat:'tools',       co:'yes',  ck:'yes', note:'Tools shorter than 7 inches (17.8 cm) are allowed in carry-on.', tags:'phillips flathead'},
+  {n:'Screwdriver (≥7")',      ico:'🔧', cat:'tools',       co:'no',   ck:'yes', note:'Tools 7 inches or longer must be checked.', tags:''},
+  {n:'Wrench (<7")',           ico:'🔧', cat:'tools',       co:'yes',  ck:'yes', note:'Under 7 inches OK in carry-on.', tags:'spanner'},
+  {n:'Wrench (≥7")',           ico:'🔧', cat:'tools',       co:'no',   ck:'yes', note:'Longer wrenches must go in checked baggage.', tags:''},
+  {n:'Hammer',                 ico:'🔨', cat:'tools',       co:'no',   ck:'yes', note:'Checked only — could be used as a weapon.', tags:''},
+  {n:'Drill / drill bits',     ico:'🔧', cat:'tools',       co:'no',   ck:'yes', note:'Power drills and bits must be checked. Remove the battery and pack it in carry-on.', tags:''},
+  {n:'Saw',                    ico:'🪚', cat:'tools',       co:'no',   ck:'yes', note:'All saws (hand, hacksaw, power) belong in checked baggage.', tags:'hacksaw'},
+  {n:'Crowbar',                ico:'🔧', cat:'tools',       co:'no',   ck:'yes', note:'Checked only.', tags:'pry bar'},
+
+  // ── SPORTS & OUTDOOR ──
+  {n:'Baseball bat',           ico:'⚾', cat:'sports',      co:'no',   ck:'yes', note:'All bats (baseball, softball, cricket) must be checked.', tags:'softball cricket'},
+  {n:'Golf clubs',             ico:'⛳', cat:'sports',      co:'no',   ck:'yes', note:'Checked only. Most airlines require a hard travel case and may charge an oversize fee.', tags:''},
+  {n:'Ski poles',              ico:'🎿', cat:'sports',      co:'no',   ck:'yes', note:'Skis, snowboards and poles all go in checked.', tags:'snowboard skiing'},
+  {n:'Hockey stick',           ico:'🏒', cat:'sports',      co:'no',   ck:'yes', note:'Checked only.', tags:''},
+  {n:'Tennis racquet',         ico:'🎾', cat:'sports',      co:'yes',  ck:'yes', note:'Allowed in either bag. Some airlines treat as a sports item with size limits — check with carrier.', tags:'racket badminton squash'},
+  {n:'Yoga mat',               ico:'🧘', cat:'sports',      co:'yes',  ck:'yes', note:'Allowed without restriction in either bag.', tags:'mat'},
+  {n:'Fishing rod',            ico:'🎣', cat:'sports',      co:'yes',  ck:'yes', note:'Carry-on allowed but subject to airline overhead-bin size limits. Hooks and lures should be checked or covered.', tags:'fishing pole'},
+  {n:'Fishing tackle / hooks', ico:'🎣', cat:'sports',      co:'cond', ck:'yes', note:'Sharp hooks should be wrapped or in a tackle box. Larger hooks often required to be checked.', tags:'lure'},
+  {n:'Bicycle',                ico:'🚲', cat:'sports',      co:'no',   ck:'yes', note:'Checked as oversize baggage. Most airlines require it boxed or in a bike case; fees vary.', tags:'bike'},
+  {n:'Bow & arrows',           ico:'🏹', cat:'sports',      co:'no',   ck:'yes', note:'Archery equipment must be checked, ideally in a hard-sided case.', tags:'archery'},
+  {n:'Climbing gear',          ico:'🧗', cat:'sports',      co:'yes',  ck:'yes', note:'Carabiners, harnesses, rope OK in either bag. Ice axes and crampons checked only.', tags:'carabiner harness rope'},
+  {n:'Ice skates',             ico:'⛸️', cat:'sports',      co:'yes',  ck:'yes', note:'Carry-on allowed — cover the blades. Hockey skates same.', tags:''},
+  {n:'Snow globe (souvenir)',  ico:'❄️', cat:'sports',      co:'cond', ck:'yes', note:'See Liquids section — must be very small for carry-on.', tags:''},
+  {n:'Surfboard',              ico:'🏄', cat:'sports',      co:'no',   ck:'yes', note:'Checked as oversize baggage. Pad fins, remove wax for some airlines.', tags:''},
+  {n:'Scuba tank (empty)',     ico:'🤿', cat:'sports',      co:'cond', ck:'cond', note:'Allowed only if completely empty with valve open or removed and visibly inspectable. Pressurized tanks prohibited.', tags:'diving'},
+  {n:'Helmet',                 ico:'⛑️', cat:'sports',      co:'yes',  ck:'yes', note:'Bike, ski, motorcycle helmets all allowed in either bag.', tags:''},
+
+  // ── FOOD & DRINK ──
+  {n:'Sandwich / wrap',        ico:'🥪', cat:'food',        co:'yes',  ck:'yes', note:'Solid foods are fine. Pack in a clear container for faster screening.', tags:'lunch bread'},
+  {n:'Chips / snacks (sealed)',ico:'🍿', cat:'food',        co:'yes',  ck:'yes', note:'Solid snacks have no restrictions.', tags:'pretzel crackers'},
+  {n:'Fresh fruit',            ico:'🍎', cat:'food',        co:'yes',  ck:'yes', note:'Allowed for domestic US flights. International travel — some destinations (Hawaii, Australia, NZ) restrict produce.', tags:'banana apple orange'},
+  {n:'Baby food / formula',    ico:'🍼', cat:'food',        co:'yes',  ck:'yes', note:'Exempt from 3-1-1. Declare at the checkpoint — "reasonable quantities" for the trip.', tags:'breast milk formula juice infant'},
+  {n:'Peanut butter / spreads',ico:'🥜', cat:'food',        co:'cond', ck:'yes', note:'Counts as a liquid/gel — 3.4 oz / 100 ml in carry-on. Larger jars must be checked.', tags:'nutella jam jelly'},
+  {n:'Soup / chili',           ico:'🍲', cat:'food',        co:'cond', ck:'yes', note:'Liquid — 3.4 oz / 100 ml limit. Empty thermoses can travel; soup itself must go in checked or be tiny.', tags:'broth stew'},
+  {n:'Yogurt',                 ico:'🥛', cat:'food',        co:'cond', ck:'yes', note:'Counts as a gel — 3.4 oz / 100 ml in carry-on.', tags:''},
+  {n:'Cheese (hard)',          ico:'🧀', cat:'food',        co:'yes',  ck:'yes', note:'Solid blocks of cheese are unrestricted in either bag.', tags:''},
+  {n:'Cheese (soft/spreadable)',ico:'🧀',cat:'food',        co:'cond', ck:'yes', note:'Brie, cream cheese, hummus, dips — count as gels under 3.4 oz in carry-on.', tags:'hummus dip'},
+  {n:'Cake / pie',             ico:'🍰', cat:'food',        co:'yes',  ck:'yes', note:'Whole cakes and pies are allowed — but may need to be inspected for liquid/gel layers.', tags:'dessert'},
+  {n:'Ice (frozen solid)',     ico:'🧊', cat:'food',        co:'cond', ck:'yes', note:'Allowed in carry-on only if frozen completely solid at the checkpoint. Partially melted ice = liquid.', tags:''},
+  {n:'Dry ice',                ico:'🧊', cat:'hazardous',   co:'cond', ck:'cond', note:'Up to 5.5 lb / 2.5 kg per person, with airline approval. Package must allow CO₂ to vent.', tags:'co2'},
+  {n:'Live lobster / seafood', ico:'🦞', cat:'food',        co:'cond', ck:'cond', note:'Allowed in a clear, leak-proof, hard-sided container. Confirm with your airline first.', tags:'fish crab'},
+
+  // ── MEDICAL ──
+  {n:'Prescription pills',     ico:'💊', cat:'medical',     co:'yes',  ck:'yes', note:'No size limit, no quart-bag requirement. Original labeled bottle recommended for international travel.', tags:'medication rx'},
+  {n:'Liquid medications',     ico:'💊', cat:'medical',     co:'yes',  ck:'yes', note:'Exempt from 3-1-1 in "reasonable quantities" — declare them at the checkpoint for separate screening.', tags:'syrup medication'},
+  {n:'Over-the-counter meds',  ico:'💊', cat:'medical',     co:'yes',  ck:'yes', note:'Pills unrestricted. Liquids/gels (cough syrup, etc.) follow 3-1-1 unless medically necessary.', tags:'tylenol advil ibuprofen'},
+  {n:'Insulin & syringes',     ico:'💉', cat:'medical',     co:'yes',  ck:'yes', note:'Allowed with insulin or other injectable medication. Declare at the checkpoint.', tags:'diabetes needle'},
+  {n:'EpiPen',                 ico:'💉', cat:'medical',     co:'yes',  ck:'yes', note:'Allowed in carry-on. Tell the TSA officer.', tags:'epinephrine allergy auto-injector'},
+  {n:'CPAP machine',           ico:'😴', cat:'medical',     co:'yes',  ck:'yes', note:'Does not count toward your carry-on bag limit. Bring the original bag with you.', tags:'sleep apnea'},
+  {n:'Inhaler',                ico:'🫁', cat:'medical',     co:'yes',  ck:'yes', note:'Allowed in carry-on; keep it accessible.', tags:'asthma'},
+  {n:'Wheelchair / mobility',  ico:'♿', cat:'medical',     co:'yes',  ck:'yes', note:'Mobility aids fly free and don\'t count toward your bag limit. Battery rules apply for powered chairs.', tags:'walker cane crutches'},
+  {n:'Service animal',         ico:'🐕‍🦺', cat:'medical',  co:'yes',  ck:'no', note:'Travels in the cabin with their handler under DOT rules. Documentation may be required.', tags:'guide dog assistance'},
+  {n:'Medical marijuana',      ico:'🌿', cat:'medical',     co:'no',   ck:'no', note:'Cannabis remains illegal under federal law — TSA must report any quantity. Even with a state medical card.', tags:'cannabis cbd thc weed'},
+  {n:'CBD oil (hemp-derived)', ico:'🌿', cat:'medical',     co:'cond', ck:'cond', note:'Allowed only if hemp-derived with <0.3% THC, in 3.4 oz containers for carry-on. Avoid for international travel.', tags:''},
+
+  // ── FIREARMS & SELF-DEFENSE ──
+  {n:'Firearm / handgun',      ico:'🔫', cat:'firearms',    co:'no',   ck:'cond', note:'Checked only. Must be unloaded, in a locked hard-sided case, declared at check-in. Ammo packed separately.', tags:'gun pistol rifle'},
+  {n:'Ammunition',             ico:'🔫', cat:'firearms',    co:'no',   ck:'cond', note:'Checked only. Securely boxed (original retail packaging or fiber/wood/metal box). Quantity limits vary by airline.', tags:'bullets cartridges'},
+  {n:'BB / pellet gun',        ico:'🔫', cat:'firearms',    co:'no',   ck:'yes', note:'Checked only, even if it looks like a toy.', tags:'airsoft paintball'},
+  {n:'Replica / toy gun',      ico:'🔫', cat:'firearms',    co:'no',   ck:'yes', note:'Realistic replicas must be checked. Cap guns and clearly-toy water guns OK in carry-on.', tags:'cap gun'},
+  {n:'Pepper spray',           ico:'🌶️', cat:'firearms',    co:'no',   ck:'cond', note:'One container ≤4 fl oz with a safety mechanism, in checked baggage only. Banned to NYC, MA, HI, and most international destinations.', tags:'mace defense spray'},
+  {n:'Stun gun / Taser',       ico:'⚡', cat:'firearms',    co:'no',   ck:'cond', note:'Checked only, with safety on or battery removed. Banned in some states/countries — check destination law.', tags:'electroshock'},
+  {n:'Brass knuckles',         ico:'👊', cat:'firearms',    co:'no',   ck:'yes', note:'Checked only.', tags:''},
+  {n:'Martial arts weapons',   ico:'🥋', cat:'firearms',    co:'no',   ck:'yes', note:'Nunchucks, throwing stars, kubatons, batons all must be checked.', tags:'nunchaku shuriken'},
+  {n:'Flare gun',              ico:'🔫', cat:'firearms',    co:'no',   ck:'cond', note:'Treated like a firearm — unloaded, locked case, declared. Flares themselves are prohibited.', tags:''},
+
+  // ── HAZARDOUS ──
+  {n:'Lighter (disposable)',   ico:'🔥', cat:'hazardous',   co:'yes',  ck:'no', note:'One disposable BIC-style lighter on your person or in carry-on. Not allowed in checked.', tags:'bic'},
+  {n:'Lighter (torch)',        ico:'🔥', cat:'hazardous',   co:'no',   ck:'no', note:'Torch lighters, plasma lighters and arc lighters are prohibited from both bags.', tags:'jet flame'},
+  {n:'Zippo (empty)',           ico:'🔥', cat:'hazardous',  co:'yes',  ck:'yes', note:'Empty fluid-burning Zippo lighters allowed in both. Filled ones — carry-on only, and only one.', tags:''},
+  {n:'Matches (safety)',       ico:'🔥', cat:'hazardous',   co:'yes',  ck:'no', note:'One book of safety matches on your person. Strike-anywhere matches are prohibited everywhere.', tags:'fire'},
+  {n:'Fireworks',              ico:'🎆', cat:'hazardous',   co:'no',   ck:'no', note:'All fireworks, sparklers and pyrotechnics are prohibited from both carry-on and checked.', tags:'firecracker sparkler'},
+  {n:'Gasoline / fuel',        ico:'⛽', cat:'hazardous',   co:'no',   ck:'no', note:'All flammable liquids and fuels are prohibited from passenger aircraft.', tags:'kerosene'},
+  {n:'Bleach / strong cleaners',ico:'🧪',cat:'hazardous',   co:'no',   ck:'no', note:'Chlorine bleach and other corrosive cleaners are prohibited from passenger flights.', tags:'ammonia'},
+  {n:'Paint (oil-based)',      ico:'🎨', cat:'hazardous',   co:'no',   ck:'no', note:'Flammable paints and solvents are prohibited. Water-based artist paint is OK.', tags:''},
+  {n:'Bug spray (insect)',     ico:'🦟', cat:'hazardous',   co:'cond', ck:'cond', note:'Personal-use insect repellent OK under 3.4 oz in carry-on. Larger or pesticide-strength spray is prohibited.', tags:'repellent deet'},
+  {n:'Bear spray',             ico:'🐻', cat:'hazardous',   co:'no',   ck:'no', note:'Banned from both carry-on and checked — too concentrated.', tags:''},
+  {n:'Lithium battery (damaged)',ico:'🔋',cat:'hazardous',  co:'no',   ck:'no', note:'Damaged, defective or recalled lithium batteries are prohibited entirely.', tags:''},
+
+  // ── MISC / EVERYDAY ──
+  {n:'Umbrella',               ico:'☂️', cat:'misc',        co:'yes',  ck:'yes', note:'Standard and compact umbrellas allowed in either bag.', tags:''},
+  {n:'Walking stick / cane',   ico:'🦯', cat:'misc',        co:'yes',  ck:'yes', note:'Allowed in either bag. Trekking poles often must be checked.', tags:'trekking pole hiking'},
+  {n:'Tripod',                 ico:'📷', cat:'misc',        co:'yes',  ck:'yes', note:'Most tripods are fine in carry-on if they fit overhead. Large studio tripods must be checked.', tags:'monopod'},
+  {n:'Selfie stick',           ico:'🤳', cat:'misc',        co:'yes',  ck:'yes', note:'Allowed in either bag.', tags:''},
+  {n:'Musical instrument (small)',ico:'🎻',cat:'misc',      co:'yes',  ck:'yes', note:'Violin, ukulele, flute — fits in overhead bin. Carry-on strongly recommended.', tags:'guitar violin ukulele flute'},
+  {n:'Cash',                   ico:'💵', cat:'misc',        co:'yes',  ck:'yes', note:'No limit in carry-on. Over $10,000 USD must be declared to CBP on international flights.', tags:'money currency'},
+  {n:'Important documents',    ico:'📄', cat:'misc',        co:'yes',  ck:'yes', note:'Always carry passport, ID, tickets and valuables in your carry-on — never check them.', tags:'passport id'},
+  {n:'Jewelry',                ico:'💍', cat:'misc',        co:'yes',  ck:'yes', note:'Carry-on strongly recommended for any valuable jewelry — checked bags get lost or pilfered.', tags:'ring necklace watch'},
+  {n:'Pet (small)',            ico:'🐈', cat:'misc',        co:'cond', ck:'no', note:'Small dogs/cats may fly in a carrier under the seat — airline-specific rules and fees. Service animals separate.', tags:'cat dog animal'},
+  {n:'Magnets',                ico:'🧲', cat:'misc',        co:'cond', ck:'cond', note:'Souvenir magnets fine. Strong neodymium/industrial magnets may require declaration as dangerous goods.', tags:''},
+  {n:'Bottle opener',          ico:'🍾', cat:'misc',        co:'yes',  ck:'yes', note:'Plain bottle openers (no blade) are fine in either bag.', tags:'corkscrew'},
+  {n:'Corkscrew (no blade)',   ico:'🍷', cat:'misc',        co:'yes',  ck:'yes', note:'Waiters\' friend without the foil blade is OK in carry-on.', tags:''},
+  {n:'Corkscrew (with blade)', ico:'🍷', cat:'misc',        co:'no',   ck:'yes', note:'If it has a foil-cutting blade, check it.', tags:''},
+  {n:'Skateboard',             ico:'🛹', cat:'misc',        co:'cond', ck:'yes', note:'Allowed in carry-on if it fits the airline\'s overhead-bin size. Electric skateboards = checked is also disallowed because of the lithium battery rules.', tags:''},
+  {n:'Hoverboard / e-scooter', ico:'🛴', cat:'misc',        co:'no',   ck:'no', note:'Most major US airlines prohibit hoverboards and e-scooters entirely due to the lithium battery hazard.', tags:'segway'},
+  {n:'Coffee maker / kettle',  ico:'☕', cat:'misc',        co:'yes',  ck:'yes', note:'Allowed in either bag once empty of water.', tags:''},
+  {n:'Drone (no battery)',     ico:'🚁', cat:'misc',        co:'yes',  ck:'yes', note:'Drone frame may be checked; the battery must travel in carry-on.', tags:''}
+];
+
+let tsaActiveCat = 'all';
+
+function tsaInit() {
+  const trip = getActiveTrip();
+  const ctx  = document.getElementById('ctx-tsa-guide');
+  if (trip && ctx) {
+    ctx.textContent = `✈ Using context from: ${trip.name} — tap to edit ↗`;
+    ctx.classList.add('show');
+    ctx.onclick = () => showView('mytrip');
+  } else if (ctx) { ctx.classList.remove('show'); }
+
+  // Category pills
+  const cats = document.getElementById('tsa-cats');
+  cats.innerHTML = TSA_CATS.map(c =>
+    `<button class="tsa-cat-pill${c.id===tsaActiveCat?' active':''}" data-cat="${c.id}" onclick="tsaSetCat('${c.id}')">${c.ico} ${c.lbl}</button>`
+  ).join('');
+
+  const q = document.getElementById('tsa-q');
+  q.value = '';
+  q.oninput = () => tsaRender();
+
+  tsaActiveCat = 'all';
+  tsaRender();
+}
+
+function tsaSetCat(id) {
+  tsaActiveCat = id;
+  document.querySelectorAll('#tsa-cats .tsa-cat-pill').forEach(p => {
+    p.classList.toggle('active', p.dataset.cat === id);
+  });
+  tsaRender();
+}
+
+function tsaRender() {
+  const q = (document.getElementById('tsa-q').value || '').toLowerCase().trim();
+  const res = document.getElementById('tsa-results');
+
+  let list = TSA_ITEMS.filter(it => {
+    if (tsaActiveCat !== 'all' && it.cat !== tsaActiveCat) return false;
+    if (!q) return true;
+    const hay = (it.n + ' ' + (it.tags || '') + ' ' + it.cat).toLowerCase();
+    return hay.includes(q);
+  });
+
+  // Default state with no search and no cat filter — show a placeholder prompt
+  if (!q && tsaActiveCat === 'all') {
+    res.innerHTML = `<div class="tsa-empty"><strong>Start typing or pick a category</strong>Search by item name (lighter, knife, vape, sunscreen…) or browse one of the categories above.</div>`;
+    return;
+  }
+
+  if (!list.length) {
+    res.innerHTML = `<div class="tsa-empty"><strong>No matches for "${q.replace(/[<>]/g,'')}"</strong>Try a simpler keyword, or browse by category. When in doubt, pack in checked.</div>`;
+    return;
+  }
+
+  // Sort: exact match first, then alpha
+  if (q) {
+    list.sort((a, b) => {
+      const aExact = a.n.toLowerCase() === q ? 0 : (a.n.toLowerCase().startsWith(q) ? 1 : 2);
+      const bExact = b.n.toLowerCase() === q ? 0 : (b.n.toLowerCase().startsWith(q) ? 1 : 2);
+      if (aExact !== bExact) return aExact - bExact;
+      return a.n.localeCompare(b.n);
+    });
+  } else {
+    list.sort((a, b) => a.n.localeCompare(b.n));
+  }
+
+  res.innerHTML = list.map(it => tsaCard(it)).join('');
+}
+
+function tsaVerdictCell(verdict, lblPrefix) {
+  let ico, txt, cls;
+  if (verdict === 'yes')      { ico = '✅'; txt = 'Allowed';     cls = 'tsa-v-yes'; }
+  else if (verdict === 'no')  { ico = '🚫'; txt = 'Prohibited';  cls = 'tsa-v-no'; }
+  else                        { ico = '⚠️'; txt = 'Conditional'; cls = 'tsa-v-cond'; }
+  return `<div class="tsa-verdict ${cls}"><span class="tsa-verdict-ico">${ico}</span><div><span class="tsa-verdict-lbl">${lblPrefix}</span><span class="tsa-verdict-val">${txt}</span></div></div>`;
+}
+
+function tsaCard(it) {
+  const catLabel = (TSA_CATS.find(c => c.id === it.cat) || {}).lbl || it.cat;
+  return `<div class="tsa-card">
+    <div class="tsa-card-top">
+      <span class="tsa-card-ico">${it.ico}</span>
+      <div class="tsa-card-main">
+        <div class="tsa-card-name">${it.n}</div>
+        <div class="tsa-card-cat">${catLabel}</div>
+      </div>
+    </div>
+    <div class="tsa-verdicts">
+      ${tsaVerdictCell(it.co, 'Carry-on')}
+      ${tsaVerdictCell(it.ck, 'Checked')}
+    </div>
+    <div class="tsa-card-notes">${it.note}</div>
+  </div>`;
 }
 
 </script>
