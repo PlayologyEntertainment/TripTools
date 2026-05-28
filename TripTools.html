@@ -5025,16 +5025,254 @@ body.no-scroll { overflow: hidden; }
     <span id="et-print-date"></span>
   </div>
 </div>
-<div id="view-placeholder-bill-split" class="view">
-  <nav class="tool-topbar">
+<style>
+/* ── BILL SPLITTER ── */
+.bs-opt{font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted)}
+.bs-setup-row{grid-template-columns:1.6fr 1fr;align-items:end}
+.bs-setup-row .fg{margin-bottom:0}
+@media(max-width:520px){.bs-setup-row{grid-template-columns:1fr}}
+.bs-input-cur{position:relative}
+.bs-cur-prefix{position:absolute;left:14px;top:50%;transform:translateY(-50%);pointer-events:none;font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.04em}
+.bs-input-cur input{padding-left:38px!important}
+.bs-mode-toggle{display:flex;gap:0;margin:20px 0 4px;border:1.5px solid var(--ink);border-radius:var(--r);overflow:hidden}
+.bs-mode-btn{flex:1;padding:11px 10px;border:none;background:var(--paper);color:var(--ink-2);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background .12s,color .12s}
+.bs-mode-btn+.bs-mode-btn{border-left:1.5px solid var(--ink)}
+.bs-mode-btn.active{background:var(--ink);color:var(--paper)}
+.bs-mode-btn:not(.active):hover{background:var(--paper-2)}
+.bs-count{font-family:var(--sans);font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);font-size:11px}
+.bs-people{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.bs-person-chip{display:inline-flex;align-items:center;gap:6px;background:var(--paper-2);border:1.5px solid var(--ink);border-radius:20px;padding:5px 6px 5px 12px}
+.bs-person-chip input{border:none;background:transparent;font-family:var(--sans);font-size:14px;font-weight:500;color:var(--ink);width:auto;max-width:140px;min-width:40px;padding:0;outline:none}
+.bs-person-chip .bs-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.bs-person-rm{border:none;background:transparent;color:var(--muted);cursor:pointer;font-size:16px;line-height:1;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.bs-person-rm:hover{background:var(--accent);color:#fff}
+.bs-add-person{display:flex;gap:8px;margin-bottom:6px;max-width:340px}
+.bs-add-person input{flex:1;padding:9px 12px;border:1.5px solid var(--ink);border-radius:var(--r);font-family:var(--sans);font-size:14px;background:var(--paper);color:var(--ink);outline:none;box-sizing:border-box}
+.bs-add-person input:focus{border-color:var(--accent)}
+.bs-add-person .btn{white-space:nowrap}
+/* adjustments */
+.bs-adj-wrap{margin-top:16px}
+.bs-adj-hdr{font-family:var(--sans);font-size:13px;font-weight:600;color:var(--ink-2);margin-bottom:10px}
+.bs-adj-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--rule)}
+.bs-adj-row:last-child{border-bottom:none}
+.bs-adj-name{display:flex;align-items:center;gap:8px;flex:1;font-family:var(--sans);font-size:14px;font-weight:500;min-width:0}
+.bs-adj-name .bs-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.bs-adj-input{position:relative;width:120px;flex-shrink:0}
+.bs-adj-input .bs-cur-prefix{left:12px}
+.bs-adj-input input{width:100%;padding:8px 10px 8px 30px;border:1.5px solid var(--rule);border-radius:var(--r);font-family:var(--sans);font-size:14px;background:var(--paper);color:var(--ink);outline:none;box-sizing:border-box}
+.bs-adj-input input:focus{border-color:var(--accent)}
+/* itemized */
+.bs-item-add{background:var(--paper-2);border:1.5px solid var(--rule);border-radius:var(--r);padding:14px;margin-bottom:14px}
+.bs-item-add-grid{display:grid;grid-template-columns:1.6fr 1fr;gap:12px}
+.bs-item-add-grid .fg{margin-bottom:0}
+@media(max-width:520px){.bs-item-add-grid{grid-template-columns:1fr}}
+.bs-item-assign{margin-top:12px}
+.bs-assign-lbl{display:block;font-family:var(--sans);font-weight:600;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-2);margin-bottom:8px}
+.bs-assign-chips{display:flex;flex-wrap:wrap;gap:7px}
+.bs-assign-chip{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--ink);border-radius:20px;padding:5px 12px;background:var(--paper);color:var(--ink-2);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;user-select:none;transition:background .12s,color .12s}
+.bs-assign-chip .bs-dot{width:9px;height:9px;border-radius:50%}
+.bs-assign-chip.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.bs-assign-all{border-style:dashed}
+.bs-item-add-btn{margin-top:12px;width:100%}
+.bs-item-list{display:flex;flex-direction:column;gap:8px}
+.bs-item{display:flex;align-items:flex-start;gap:10px;padding:12px;border:1.5px solid var(--rule);border-radius:var(--r);background:var(--paper)}
+.bs-item-main{flex:1;min-width:0}
+.bs-item-top{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.bs-item-desc{font-family:var(--sans);font-size:15px;font-weight:600;color:var(--ink)}
+.bs-item-amt{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--ink);white-space:nowrap}
+.bs-item-who{margin-top:7px;display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+.bs-item-who .bs-mini-chip{display:inline-flex;align-items:center;gap:4px;font-family:var(--sans);font-size:11px;color:var(--ink-2);background:var(--paper-2);border-radius:12px;padding:2px 9px}
+.bs-item-who .bs-mini-chip .bs-dot{width:7px;height:7px;border-radius:50%}
+.bs-item-who .bs-mini-chip.add{cursor:pointer;border:1px dashed var(--muted);background:transparent}
+.bs-item-who .bs-mini-chip.add:hover{border-color:var(--accent);color:var(--accent)}
+.bs-item-each{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.bs-item-rm{border:none;background:transparent;color:var(--muted);cursor:pointer;font-size:18px;line-height:1;flex-shrink:0;padding:2px 4px}
+.bs-item-rm:hover{color:var(--accent)}
+.bs-item.unassigned{border-color:var(--orange);border-style:dashed}
+.bs-item-warn{font-family:var(--sans);font-size:11px;color:var(--orange);font-weight:600;margin-top:4px}
+/* tip & tax */
+.bs-tip-row{display:flex;gap:8px;align-items:stretch}
+.bs-tip-quick{display:flex;gap:5px;flex-wrap:wrap}
+.bs-tip-btn{padding:0 11px;border:1.5px solid var(--ink);border-radius:var(--r);background:var(--paper);color:var(--ink-2);font-family:var(--mono);font-size:13px;font-weight:600;cursor:pointer;min-height:44px;transition:background .12s,color .12s}
+.bs-tip-btn:hover:not(.active){background:var(--paper-2)}
+.bs-tip-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.bs-input-pct{position:relative;flex:1;min-width:74px}
+.bs-input-pct input{width:100%;padding:0 26px 0 12px;border:1.5px solid var(--ink);border-radius:var(--r);font-family:var(--sans);font-size:15px;background:var(--paper);color:var(--ink);outline:none;box-sizing:border-box;min-height:44px}
+.bs-input-pct input:focus{border-color:var(--accent)}
+.bs-pct-suffix{position:absolute;right:11px;top:50%;transform:translateY(-50%);pointer-events:none;font-family:var(--mono);font-size:13px;color:var(--muted)}
+.bs-check-row{display:flex;align-items:center;gap:8px;margin-top:14px;font-size:13px;color:var(--ink-2);font-family:var(--sans);cursor:pointer;user-select:none}
+.bs-check-row input{accent-color:var(--accent);cursor:pointer;width:16px;height:16px;flex-shrink:0}
+.bs-round-row{display:flex;align-items:center;gap:10px;margin-top:14px;font-size:13px;color:var(--ink-2);font-family:var(--sans)}
+.bs-round-row select{padding:7px 10px;border:1.5px solid var(--ink);border-radius:var(--r);font-family:var(--sans);font-size:13px;background:var(--paper);color:var(--ink);outline:none}
+/* results */
+.bs-results{margin-top:26px}
+.bs-result-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:18px}
+.bs-pcard{border:1.5px solid var(--ink);border-radius:var(--r);padding:14px;background:var(--paper)}
+.bs-pcard-top{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.bs-pcard-top .bs-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.bs-pcard-name{font-family:var(--serif);font-size:17px;font-weight:600;color:var(--ink);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bs-pcard-total{font-family:var(--mono);font-size:24px;font-weight:700;color:var(--ink);margin-bottom:8px}
+.bs-pcard-break{font-family:var(--mono);font-size:11px;color:var(--muted);line-height:1.7}
+.bs-pcard-break .row{display:flex;justify-content:space-between;gap:8px}
+.bs-totals{border-top:2px solid var(--ink);border-bottom:2px solid var(--ink);padding:14px 4px;display:flex;flex-direction:column;gap:7px}
+.bs-tot-row{display:flex;justify-content:space-between;font-family:var(--sans);font-size:14px;color:var(--ink-2)}
+.bs-tot-row.grand{font-family:var(--serif);font-size:20px;font-weight:700;color:var(--ink);padding-top:7px;border-top:1px solid var(--rule);margin-top:3px}
+.bs-tot-row .v{font-family:var(--mono);font-weight:600}
+.bs-recon{font-family:var(--sans);font-size:12px;color:var(--muted);margin-top:10px;font-style:italic}
+.bs-actions{display:flex;align-items:center;gap:16px;margin-top:18px;flex-wrap:wrap}
+.bs-copy-btn{padding:11px 20px;border:1.5px solid var(--ink);border-radius:var(--r);background:var(--ink);color:var(--paper);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer}
+.bs-copy-btn:hover{background:var(--accent);border-color:var(--accent)}
+.bs-empty{margin-top:20px;padding:24px;text-align:center;color:var(--muted);font-family:var(--sans);font-size:14px;font-style:italic;border:1.5px dashed var(--rule);border-radius:var(--r)}
+.bs-print-header{display:none}
+@media print{
+  .bs-mode-toggle,.bs-add-person,.bs-person-rm,.bs-item-add,.bs-item-rm,.bs-tip-quick,.bs-round-row,.bs-actions,.bs-empty{display:none!important}
+  .bs-print-header{display:flex!important;justify-content:space-between;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#666;padding:0 0 12px;border-bottom:1px solid #ccc;margin-bottom:16px}
+  .bs-pcard{break-inside:avoid}
+}
+</style>
+<div id="view-bill-split" class="view">
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="window.print()">🖨 Print</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">➗</span>
-    <h2>Bill Splitter</h2>
-    <p style="margin-bottom:24px">Split any bill equally or unevenly, with tip. Supports individual adjustments.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-bill-split"></div>
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>Bill Splitter</h1>
+    <p class="tool-sub">Split any bill fairly — evenly with per-person extras, or item by item. Tip and tax are shared in proportion to what each person actually owes.</p>
+  </div>
+
+  <div class="tool-body">
+
+    <!-- ── SETUP ── -->
+    <div class="frow bs-setup-row">
+      <div class="fg">
+        <label for="bs-title">Bill name <span class="bs-opt">(optional)</span></label>
+        <input type="text" id="bs-title" placeholder="e.g. Dinner at Le Comptoir" oninput="bsSaveMeta()">
+      </div>
+      <div class="fg">
+        <label for="bs-currency">Currency</label>
+        <select id="bs-currency" onchange="bsOnCurrencyChange()"></select>
+      </div>
+    </div>
+
+    <!-- ── MODE TOGGLE ── -->
+    <div class="bs-mode-toggle">
+      <button class="bs-mode-btn active" id="bs-mode-even" onclick="bsSetMode('even')">⚖️ Even split</button>
+      <button class="bs-mode-btn" id="bs-mode-itemized" onclick="bsSetMode('itemized')">🧾 Itemized</button>
+    </div>
+
+    <!-- ── PEOPLE ── -->
+    <div class="sec-lbl">People <span id="bs-people-count" class="bs-count"></span></div>
+    <div class="bs-people" id="bs-people"></div>
+    <div class="bs-add-person">
+      <input type="text" id="bs-new-person" placeholder="Add a person…" maxlength="24" autocomplete="off"
+             onkeydown="if(event.key==='Enter'){event.preventDefault();bsAddPerson()}">
+      <button class="btn btn-s btn-sm" onclick="bsAddPerson()">+ Add</button>
+    </div>
+
+    <!-- ── EVEN MODE ── -->
+    <div id="bs-even-section">
+      <div class="sec-lbl">The Bill</div>
+      <div class="fg">
+        <label for="bs-subtotal">Shared subtotal <span class="bs-opt">— the part split evenly, before tax &amp; tip</span></label>
+        <div class="bs-input-cur">
+          <span class="bs-cur-prefix" id="bs-sub-sym">$</span>
+          <input type="number" id="bs-subtotal" placeholder="0.00" min="0" step="any" oninput="bsSaveMeta();bsRender()">
+        </div>
+      </div>
+      <div class="bs-adj-wrap" id="bs-adj-wrap" style="display:none">
+        <div class="bs-adj-hdr">Individual extras <span class="bs-opt">— charge one person for something only they had (a cocktail, dessert…). Use a minus sign for a discount.</span></div>
+        <div id="bs-adj-rows"></div>
+      </div>
+    </div>
+
+    <!-- ── ITEMIZED MODE ── -->
+    <div id="bs-item-section" style="display:none">
+      <div class="sec-lbl">Line Items</div>
+      <div class="bs-item-add">
+        <div class="bs-item-add-grid">
+          <div class="fg">
+            <label for="bs-item-desc">Item</label>
+            <input type="text" id="bs-item-desc" placeholder="e.g. Margherita pizza" autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault();bsAddItem()}">
+          </div>
+          <div class="fg">
+            <label for="bs-item-amt">Amount</label>
+            <div class="bs-input-cur">
+              <span class="bs-cur-prefix" id="bs-item-sym">$</span>
+              <input type="number" id="bs-item-amt" placeholder="0.00" min="0" step="any" onkeydown="if(event.key==='Enter'){event.preventDefault();bsAddItem()}">
+            </div>
+          </div>
+        </div>
+        <div class="bs-item-assign">
+          <span class="bs-assign-lbl">Who shares this item?</span>
+          <div id="bs-item-assign-chips" class="bs-assign-chips"></div>
+        </div>
+        <button class="btn btn-p bs-item-add-btn" onclick="bsAddItem()">+ Add item</button>
+      </div>
+      <div id="bs-item-list" class="bs-item-list"></div>
+    </div>
+
+    <!-- ── TAX & TIP ── -->
+    <div class="sec-lbl">Tax &amp; Tip</div>
+    <div class="frow">
+      <div class="fg">
+        <label for="bs-tax">Tax <span class="bs-opt">(amount, optional)</span></label>
+        <div class="bs-input-cur">
+          <span class="bs-cur-prefix" id="bs-tax-sym">$</span>
+          <input type="number" id="bs-tax" placeholder="0.00" min="0" step="any" oninput="bsSaveMeta();bsRender()">
+        </div>
+      </div>
+      <div class="fg">
+        <label>Tip</label>
+        <div class="bs-tip-row">
+          <div class="bs-tip-quick" id="bs-tip-quick"></div>
+          <div class="bs-input-pct">
+            <input type="number" id="bs-tip-pct" placeholder="0" min="0" step="any" oninput="bsOnTipInput()">
+            <span class="bs-pct-suffix">%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <label class="bs-check-row">
+      <input type="checkbox" id="bs-tip-on-total" onchange="bsSaveMeta();bsRender()">
+      <span>Calculate tip on the post-tax total (default tips on the pre-tax subtotal)</span>
+    </label>
+    <div class="bs-round-row">
+      <span>Round each person</span>
+      <select id="bs-round" onchange="bsSaveMeta();bsRender()">
+        <option value="cent">to the cent</option>
+        <option value="up">up to a whole number</option>
+        <option value="nearest">to the nearest whole number</option>
+      </select>
+    </div>
+
+    <!-- ── RESULTS ── -->
+    <div class="bs-results" id="bs-results" style="display:none">
+      <div class="bs-print-header"><strong>TripTools — Bill Splitter</strong><span id="bs-print-date"></span></div>
+      <div class="bs-result-cards" id="bs-result-cards"></div>
+      <div class="bs-totals" id="bs-totals"></div>
+      <div class="bs-recon" id="bs-recon"></div>
+      <div class="bs-actions">
+        <button class="bs-copy-btn" id="bs-copy-btn" onclick="bsCopy()">📋 Copy summary</button>
+        <button class="btn-ghost" onclick="bsReset()" style="color:var(--accent);font-size:13px">↺ Reset bill</button>
+      </div>
+    </div>
+    <div class="bs-empty" id="bs-empty">Enter a bill amount above to see who owes what.</div>
+
+  </div><!-- /tool-body -->
+
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    Splitting tip and tax in proportion to what each person ordered is fairer than dividing them equally — the friend who had a $9 salad shouldn't subsidize the tip on someone's $40 steak. If you round each person up so the total always covers the bill, those few spare cents quietly become a slightly more generous tip.
+  </div>
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('tip-calc')">🤝 Tip Calculator</button>
+      <button class="rel-btn" onclick="openTool('expense-track')">📊 Expense Tracker</button>
+      <button class="rel-btn" onclick="openTool('currency')">💱 Currency Converter</button>
+      <button class="rel-btn" onclick="openTool('group-trip')">👥 Group Trip Organizer</button>
     </div>
   </div>
 </div>
@@ -8690,7 +8928,7 @@ const TOOLS = [
   {id:'currency',      nm:'Currency Converter',         ico:'💱', ph:'money',     on:true,  live:true,  ds:'Live rates for 150+ currencies. Cached for offline use.'},
   {id:'tip-calc',      nm:'Tip Calculator by Country',  ico:'🤝', ph:'money',     on:false, live:true,  ds:'Local tipping culture + standard % by venue. Exact tip calculator.'},
   {id:'expense-track', nm:'Daily Expense Tracker',      ico:'📊', ph:'money',     on:false, live:true,  ds:'Log expenses by category. Auto-converts to home currency. Running total vs. daily budget.'},
-  {id:'bill-split',    nm:'Bill Splitter',              ico:'➗', ph:'money',     on:false, live:false, ds:'Split any bill equally or unevenly, tip included.'},
+  {id:'bill-split',    nm:'Bill Splitter',              ico:'➗', ph:'money',     on:false, live:true,  ds:'Split any bill evenly or item-by-item. Names, per-person extras, tip & tax shared fairly.'},
   {id:'atm-fee',       nm:'ATM Fee Estimator',          ico:'🏧', ph:'money',     on:false, live:false, ds:'True cost of foreign ATM withdrawals including DCC.'},
   {id:'cost-living',   nm:'Cost of Living Comparison',  ico:'🌐', ph:'money',     on:false, live:false, ds:'How far will $100/day go in Bangkok vs. Paris vs. Tokyo?'},
   {id:'vat-refund',    nm:'VAT & Tax Refund Guide',     ico:'🧾', ph:'money',     on:false, live:false, ds:'Country-by-country guide to claiming VAT refunds as a tourist.'},
@@ -9386,6 +9624,7 @@ function injectTripCtx(id) {
   if(id==='visa-guide') vgInit();
   if(id==='passport')   paInit();
   if(id==='expense-track') etInit();
+  if(id==='bill-split') bsInit();
   if(id==='expense-report') erInit();
   if(id==='baggage')    bfcInit();
   if(id==='carry-on')   cosInit();
@@ -20668,6 +20907,467 @@ function tcCopy(){
       setTimeout(()=>{ btn.textContent = orig; }, 1400);
     });
   }
+}
+
+/* ══════════════════════════════════════════════════════
+   BILL SPLITTER
+   ══════════════════════════════════════════════════════ */
+
+const BS_CUR = [
+  {c:'USD',s:'$',  n:'US Dollar'},        {c:'EUR',s:'€',  n:'Euro'},
+  {c:'GBP',s:'£',  n:'British Pound'},     {c:'JPY',s:'¥',  n:'Japanese Yen'},
+  {c:'CAD',s:'CA$',n:'Canadian Dollar'},   {c:'AUD',s:'A$', n:'Australian Dollar'},
+  {c:'CHF',s:'Fr', n:'Swiss Franc'},       {c:'CNY',s:'¥',  n:'Chinese Yuan'},
+  {c:'INR',s:'₹',  n:'Indian Rupee'},      {c:'MXN',s:'MX$',n:'Mexican Peso'},
+  {c:'BRL',s:'R$', n:'Brazilian Real'},    {c:'KRW',s:'₩',  n:'South Korean Won'},
+  {c:'THB',s:'฿',  n:'Thai Baht'},         {c:'SGD',s:'S$', n:'Singapore Dollar'},
+  {c:'NZD',s:'NZ$',n:'New Zealand Dollar'},{c:'ZAR',s:'R',  n:'South African Rand'},
+  {c:'AED',s:'د.إ',n:'UAE Dirham'},        {c:'HKD',s:'HK$',n:'Hong Kong Dollar'},
+  {c:'TWD',s:'NT$',n:'Taiwan Dollar'},     {c:'SEK',s:'kr', n:'Swedish Krona'},
+  {c:'NOK',s:'kr', n:'Norwegian Krone'},   {c:'DKK',s:'kr', n:'Danish Krone'},
+  {c:'PLN',s:'zł', n:'Polish Zloty'},      {c:'TRY',s:'₺',  n:'Turkish Lira'},
+  {c:'IDR',s:'Rp', n:'Indonesian Rupiah'}, {c:'PHP',s:'₱',  n:'Philippine Peso'},
+  {c:'MYR',s:'RM', n:'Malaysian Ringgit'}, {c:'VND',s:'₫',  n:'Vietnamese Dong'},
+];
+const BS_NO_DEC = ['JPY','KRW','VND','IDR'];
+const BS_COLORS = ['#FF4D2E','#1565C0','#2E7D32','#E65100','#6A1B9A','#00838F','#AD1457','#827717','#37474F','#C62828','#0277BD','#558B2F'];
+const BS_QUICK_TIPS = [0,15,18,20,25];
+
+let bsData = null;                 // persisted state
+let bsItemFormWho = null;          // Set<personId> — assignees selected for the add-item form
+
+function bsKey(){
+  const trip = getActiveTrip();
+  return 'tt_billsplit_' + (trip ? trip.id : 'default');
+}
+function bsUid(){ return 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+function bsEsc(s){ return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function bsCurMeta(code){ return BS_CUR.find(x => x.c === code) || {c:code,s:code+' ',n:code}; }
+function bsSym(){ return bsCurMeta(bsData.currency).s; }
+function bsFmt(n){
+  n = (typeof n === 'number' && isFinite(n)) ? n : 0;
+  const neg = n < 0; n = Math.abs(n);
+  const body = BS_NO_DEC.includes(bsData.currency)
+    ? Math.round(n).toLocaleString('en-US')
+    : n.toFixed(2);
+  return (neg ? '−' : '') + bsSym() + body;
+}
+function bsNum(v){ const n = parseFloat(v); return isFinite(n) ? n : 0; }
+
+function bsDefault(){
+  const trip = getActiveTrip();
+  let n = trip && trip.travelers ? Math.max(1, Math.min(12, parseInt(trip.travelers) || 2)) : 2;
+  const people = [];
+  for (let i = 0; i < n; i++) people.push({ id: bsUid(), name: 'Person ' + (i + 1) });
+  return {
+    title: '',
+    currency: (trip && trip.homeCurrency && bsCurMeta(trip.homeCurrency).c === trip.homeCurrency) ? trip.homeCurrency : 'USD',
+    mode: 'even',
+    people,
+    subtotal: '',
+    adj: {},
+    items: [],
+    tax: '',
+    tipPct: 0,
+    tipOnTotal: false,
+    round: 'cent',
+  };
+}
+
+function bsLoad(){
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(bsKey()) || 'null'); } catch(e){}
+  if (saved && Array.isArray(saved.people) && saved.people.length){
+    bsData = Object.assign(bsDefault(), saved);
+    if (!bsData.adj) bsData.adj = {};
+    if (!Array.isArray(bsData.items)) bsData.items = [];
+  } else {
+    bsData = bsDefault();
+  }
+}
+function bsSave(){ try { localStorage.setItem(bsKey(), JSON.stringify(bsData)); } catch(e){} }
+
+function bsInit(){
+  bsLoad();
+  // Currency select
+  const sel = document.getElementById('bs-currency');
+  sel.innerHTML = BS_CUR.map(x => `<option value="${x.c}">${x.c} ${x.s} · ${x.n}</option>`).join('');
+  sel.value = bsData.currency;
+  // Scalar inputs
+  document.getElementById('bs-title').value = bsData.title || '';
+  document.getElementById('bs-subtotal').value = bsData.subtotal || '';
+  document.getElementById('bs-tax').value = bsData.tax || '';
+  document.getElementById('bs-tip-pct').value = bsData.tipPct ? bsData.tipPct : '';
+  document.getElementById('bs-tip-on-total').checked = !!bsData.tipOnTotal;
+  document.getElementById('bs-round').value = bsData.round || 'cent';
+  // New-item assignee form defaults to everyone
+  bsItemFormWho = new Set(bsData.people.map(p => p.id));
+  // Print date
+  const pd = document.getElementById('bs-print-date');
+  if (pd) pd.textContent = new Date().toLocaleDateString();
+
+  bsApplySymbols();
+  bsApplyMode();
+  bsRenderPeople();
+  bsRenderTipQuick();
+  bsRender();
+}
+
+function bsApplySymbols(){
+  const s = bsSym();
+  ['bs-sub-sym','bs-item-sym','bs-tax-sym'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.textContent = s;
+  });
+}
+function bsOnCurrencyChange(){
+  bsData.currency = document.getElementById('bs-currency').value;
+  bsSave(); bsApplySymbols(); bsRender();
+}
+
+/* ── MODE ── */
+function bsSetMode(mode){
+  if (bsData.mode === mode) return;
+  bsData.mode = mode; bsSave(); bsApplyMode(); bsRender();
+}
+function bsApplyMode(){
+  const even = bsData.mode === 'even';
+  document.getElementById('bs-even-section').style.display = even ? '' : 'none';
+  document.getElementById('bs-item-section').style.display = even ? 'none' : '';
+  document.getElementById('bs-mode-even').classList.toggle('active', even);
+  document.getElementById('bs-mode-itemized').classList.toggle('active', !even);
+  if (!even) bsRenderItemForm();
+}
+
+/* ── PEOPLE ── */
+function bsColor(idx){ return BS_COLORS[idx % BS_COLORS.length]; }
+function bsPersonIndex(id){ return bsData.people.findIndex(p => p.id === id); }
+
+function bsRenderPeople(){
+  const wrap = document.getElementById('bs-people');
+  wrap.innerHTML = bsData.people.map((p, i) =>
+    `<span class="bs-person-chip">
+       <span class="bs-dot" style="background:${bsColor(i)}"></span>
+       <input type="text" value="${bsEsc(p.name)}" maxlength="24" aria-label="Person name"
+              oninput="bsRenamePerson('${p.id}', this.value)">
+       ${bsData.people.length > 1 ? `<button class="bs-person-rm" title="Remove" onclick="bsRemovePerson('${p.id}')">×</button>` : ''}
+     </span>`).join('');
+  document.getElementById('bs-people-count').textContent = `· splitting ${bsData.people.length} way${bsData.people.length === 1 ? '' : 's'}`;
+}
+function bsAddPerson(){
+  const inp = document.getElementById('bs-new-person');
+  let name = (inp.value || '').trim();
+  if (!name) name = 'Person ' + (bsData.people.length + 1);
+  const id = bsUid();
+  bsData.people.push({ id, name });
+  bsItemFormWho.add(id);
+  inp.value = '';
+  bsSave(); bsRenderPeople(); bsRenderItemForm(); bsRender();
+  inp.focus();
+}
+function bsRemovePerson(id){
+  if (bsData.people.length <= 1) return;
+  bsData.people = bsData.people.filter(p => p.id !== id);
+  delete bsData.adj[id];
+  bsData.items.forEach(it => { it.who = it.who.filter(w => w !== id); });
+  bsItemFormWho.delete(id);
+  bsSave(); bsRenderPeople(); bsRenderItemForm(); bsRender();
+}
+function bsRenamePerson(id, val){
+  const p = bsData.people.find(x => x.id === id);
+  if (!p) return;
+  p.name = val;
+  bsSave();
+  bsRender(); // refresh result labels (names appear there); chips keep focus, not re-rendered
+}
+
+/* ── EVEN MODE: adjustments ── */
+function bsSetAdj(id, val){
+  bsData.adj[id] = val;
+  bsSave(); bsRenderResultsOnly();
+}
+function bsRenderAdjRows(){
+  const wrap = document.getElementById('bs-adj-wrap');
+  const rows = document.getElementById('bs-adj-rows');
+  if (bsData.people.length < 1){ wrap.style.display = 'none'; return; }
+  wrap.style.display = '';
+  rows.innerHTML = bsData.people.map((p, i) =>
+    `<div class="bs-adj-row">
+       <span class="bs-adj-name"><span class="bs-dot" style="background:${bsColor(i)}"></span>${bsEsc(p.name)}</span>
+       <span class="bs-adj-input">
+         <span class="bs-cur-prefix">${bsSym()}</span>
+         <input type="number" step="any" placeholder="0.00" value="${bsData.adj[p.id] != null ? bsEsc(String(bsData.adj[p.id])) : ''}"
+                oninput="bsSetAdj('${p.id}', this.value)">
+       </span>
+     </div>`).join('');
+}
+
+/* ── ITEMIZED MODE ── */
+function bsRenderItemForm(){
+  const chips = document.getElementById('bs-item-assign-chips');
+  if (!chips) return;
+  const allOn = bsData.people.length > 0 && bsData.people.every(p => bsItemFormWho.has(p.id));
+  let html = `<span class="bs-assign-chip bs-assign-all${allOn ? ' on' : ''}" onclick="bsItemFormToggleAll()">Everyone</span>`;
+  html += bsData.people.map((p, i) =>
+    `<span class="bs-assign-chip${bsItemFormWho.has(p.id) ? ' on' : ''}" onclick="bsItemFormToggle('${p.id}')">
+       <span class="bs-dot" style="background:${bsColor(i)}"></span>${bsEsc(p.name)}
+     </span>`).join('');
+  chips.innerHTML = html;
+}
+function bsItemFormToggle(id){
+  if (bsItemFormWho.has(id)) bsItemFormWho.delete(id); else bsItemFormWho.add(id);
+  bsRenderItemForm();
+}
+function bsItemFormToggleAll(){
+  const allOn = bsData.people.every(p => bsItemFormWho.has(p.id));
+  bsItemFormWho = allOn ? new Set() : new Set(bsData.people.map(p => p.id));
+  bsRenderItemForm();
+}
+function bsAddItem(){
+  const descEl = document.getElementById('bs-item-desc');
+  const amtEl = document.getElementById('bs-item-amt');
+  const desc = (descEl.value || '').trim();
+  const amt = bsNum(amtEl.value);
+  if (amt <= 0){ amtEl.focus(); return; }
+  bsData.items.push({
+    id: bsUid(),
+    desc: desc || 'Item',
+    amt,
+    who: bsData.people.filter(p => bsItemFormWho.has(p.id)).map(p => p.id),
+  });
+  descEl.value = ''; amtEl.value = '';
+  bsItemFormWho = new Set(bsData.people.map(p => p.id)); // reset to everyone
+  bsSave(); bsRenderItemForm(); bsRenderItemList(); bsRender();
+  descEl.focus();
+}
+function bsRemoveItem(id){
+  bsData.items = bsData.items.filter(it => it.id !== id);
+  bsSave(); bsRenderItemList(); bsRender();
+}
+function bsItemToggleWho(itemId, personId){
+  const it = bsData.items.find(x => x.id === itemId);
+  if (!it) return;
+  if (it.who.includes(personId)) it.who = it.who.filter(w => w !== personId);
+  else it.who.push(personId);
+  bsSave(); bsRenderItemList(); bsRender();
+}
+function bsRenderItemList(){
+  const list = document.getElementById('bs-item-list');
+  if (!bsData.items.length){
+    list.innerHTML = `<div class="bs-empty" style="margin-top:0">No items yet — add what was ordered above.</div>`;
+    return;
+  }
+  list.innerHTML = bsData.items.map(it => {
+    const n = it.who.length;
+    const each = n > 0 ? it.amt / n : 0;
+    const chips = bsData.people.map((p, i) =>
+      `<span class="bs-mini-chip" style="cursor:pointer;${it.who.includes(p.id) ? '' : 'opacity:.32;text-decoration:line-through'}"
+             onclick="bsItemToggleWho('${it.id}','${p.id}')" title="Toggle ${bsEsc(p.name)}">
+         <span class="bs-dot" style="background:${bsColor(i)}"></span>${bsEsc(p.name)}
+       </span>`).join('');
+    return `<div class="bs-item${n === 0 ? ' unassigned' : ''}">
+       <div class="bs-item-main">
+         <div class="bs-item-top">
+           <span class="bs-item-desc">${bsEsc(it.desc)}</span>
+           <span class="bs-item-amt">${bsFmt(it.amt)}${n > 1 ? ` <span class="bs-item-each">(${bsFmt(each)} ea)</span>` : ''}</span>
+         </div>
+         <div class="bs-item-who">${chips}</div>
+         ${n === 0 ? `<div class="bs-item-warn">⚠ Not assigned to anyone — not counted. Tap a name above.</div>` : ''}
+       </div>
+       <button class="bs-item-rm" title="Remove item" onclick="bsRemoveItem('${it.id}')">×</button>
+     </div>`;
+  }).join('');
+}
+
+/* ── TIP ── */
+function bsRenderTipQuick(){
+  const wrap = document.getElementById('bs-tip-quick');
+  wrap.innerHTML = BS_QUICK_TIPS.map(t =>
+    `<button class="bs-tip-btn${Number(bsData.tipPct) === t ? ' active' : ''}" onclick="bsSetTip(${t})">${t === 0 ? 'No tip' : t + '%'}</button>`).join('');
+}
+function bsSetTip(pct){
+  bsData.tipPct = pct;
+  document.getElementById('bs-tip-pct').value = pct ? pct : '';
+  bsSave(); bsRenderTipQuick(); bsRenderResultsOnly();
+}
+function bsOnTipInput(){
+  bsData.tipPct = bsNum(document.getElementById('bs-tip-pct').value);
+  bsSave(); bsRenderTipQuick(); bsRenderResultsOnly();
+}
+
+/* ── META (scalar fields) ── */
+function bsSaveMeta(){
+  bsData.title      = document.getElementById('bs-title').value;
+  bsData.subtotal   = document.getElementById('bs-subtotal').value;
+  bsData.tax        = document.getElementById('bs-tax').value;
+  bsData.tipOnTotal = document.getElementById('bs-tip-on-total').checked;
+  bsData.round      = document.getElementById('bs-round').value;
+  bsSave();
+}
+
+/* ── ROUNDING ── */
+function bsRoundVal(n){
+  switch (bsData.round){
+    case 'up':      return Math.ceil(n - 1e-9);
+    case 'nearest': return Math.round(n);
+    default:        return Math.round(n * 100) / 100; // cent
+  }
+}
+
+/* ── COMPUTE ── */
+function bsCompute(){
+  const people = bsData.people.map((p, i) => ({ id: p.id, name: p.name || ('Person ' + (i + 1)), color: bsColor(i), preTax: 0, base: 0, extra: 0 }));
+  const byId = {}; people.forEach(p => byId[p.id] = p);
+  const N = people.length;
+  let unassigned = 0;
+
+  if (bsData.mode === 'even'){
+    const subtotal = bsNum(bsData.subtotal);
+    const perHead = N > 0 ? subtotal / N : 0;
+    people.forEach(p => {
+      p.base = perHead;
+      p.extra = bsNum(bsData.adj[p.id]);
+      p.preTax = p.base + p.extra;
+    });
+  } else {
+    bsData.items.forEach(it => {
+      const valid = it.who.filter(w => byId[w]);
+      if (valid.length === 0){ if (it.amt > 0) unassigned++; return; }
+      const share = it.amt / valid.length;
+      valid.forEach(w => { byId[w].preTax += share; byId[w].base += share; });
+    });
+  }
+
+  const preTaxTotal = people.reduce((s, p) => s + p.preTax, 0);
+  const taxAmt = bsNum(bsData.tax);
+  const tipPct = bsNum(bsData.tipPct);
+  const tipBase = bsData.tipOnTotal ? (preTaxTotal + taxAmt) : preTaxTotal;
+  const tipAmt = tipBase * tipPct / 100;
+
+  people.forEach(p => {
+    const share = preTaxTotal > 0 ? p.preTax / preTaxTotal : (N > 0 ? 1 / N : 0);
+    p.tax = taxAmt * share;
+    p.tip = tipAmt * share;
+    p.raw = p.preTax + p.tax + p.tip;
+    p.total = bsRoundVal(p.raw);
+  });
+
+  const billTotal = preTaxTotal + taxAmt + tipAmt;
+  let collected = people.reduce((s, p) => s + p.total, 0);
+
+  // In cent mode, nudge the largest payer so the splits add up exactly to the bill.
+  if (bsData.round === 'cent' && N > 0){
+    const residual = Math.round((billTotal - collected) * 100) / 100;
+    if (Math.abs(residual) >= 0.01){
+      let big = people[0];
+      people.forEach(p => { if (p.raw > big.raw) big = p; });
+      big.total = Math.round((big.total + residual) * 100) / 100;
+      collected = people.reduce((s, p) => s + p.total, 0);
+    }
+  }
+
+  return { people, preTaxTotal, taxAmt, tipAmt, tipPct, billTotal, collected, unassigned, N };
+}
+
+function bsHasBill(){
+  if (bsData.mode === 'even') return bsNum(bsData.subtotal) > 0 || bsData.people.some(p => bsNum(bsData.adj[p.id]) !== 0);
+  return bsData.items.some(it => it.who.length > 0 && it.amt > 0);
+}
+
+/* ── RENDER ── */
+function bsRender(){
+  if (bsData.mode === 'even') bsRenderAdjRows(); else bsRenderItemList();
+  bsRenderResultsOnly();
+}
+function bsRenderResultsOnly(){
+  const results = document.getElementById('bs-results');
+  const empty = document.getElementById('bs-empty');
+  if (!bsHasBill() || bsData.people.length < 1){
+    results.style.display = 'none';
+    empty.style.display = '';
+    empty.textContent = bsData.mode === 'even'
+      ? 'Enter a shared subtotal above to see who owes what.'
+      : 'Add at least one assigned item to see who owes what.';
+    return;
+  }
+  empty.style.display = 'none';
+  results.style.display = '';
+
+  const c = bsCompute();
+
+  // Per-person cards
+  document.getElementById('bs-result-cards').innerHTML = c.people.map(p => {
+    let rows = '';
+    if (bsData.mode === 'even'){
+      rows += `<div class="row"><span>Even share</span><span>${bsFmt(p.base)}</span></div>`;
+      if (Math.abs(p.extra) > 0.0001) rows += `<div class="row"><span>${p.extra < 0 ? 'Discount' : 'Extras'}</span><span>${bsFmt(p.extra)}</span></div>`;
+    } else {
+      rows += `<div class="row"><span>Items</span><span>${bsFmt(p.preTax)}</span></div>`;
+    }
+    if (c.taxAmt > 0) rows += `<div class="row"><span>Tax</span><span>${bsFmt(p.tax)}</span></div>`;
+    if (c.tipAmt > 0) rows += `<div class="row"><span>Tip</span><span>${bsFmt(p.tip)}</span></div>`;
+    return `<div class="bs-pcard">
+       <div class="bs-pcard-top"><span class="bs-dot" style="background:${p.color}"></span><span class="bs-pcard-name">${bsEsc(p.name)}</span></div>
+       <div class="bs-pcard-total">${bsFmt(p.total)}</div>
+       <div class="bs-pcard-break">${rows}</div>
+     </div>`;
+  }).join('');
+
+  // Totals
+  let tot = `<div class="bs-tot-row"><span>Subtotal</span><span class="v">${bsFmt(c.preTaxTotal)}</span></div>`;
+  if (c.taxAmt > 0) tot += `<div class="bs-tot-row"><span>Tax</span><span class="v">${bsFmt(c.taxAmt)}</span></div>`;
+  tot += `<div class="bs-tot-row"><span>Tip${c.tipPct ? ` (${(+c.tipPct)}%${bsData.tipOnTotal ? ' of total' : ''})` : ''}</span><span class="v">${bsFmt(c.tipAmt)}</span></div>`;
+  tot += `<div class="bs-tot-row grand"><span>Bill total</span><span class="v">${bsFmt(c.billTotal)}</span></div>`;
+  if (Math.abs(c.collected - c.billTotal) >= 0.005)
+    tot += `<div class="bs-tot-row"><span>Collected from everyone</span><span class="v">${bsFmt(c.collected)}</span></div>`;
+  document.getElementById('bs-totals').innerHTML = tot;
+
+  // Reconciliation note
+  let note = '';
+  const diff = c.collected - c.billTotal;
+  if (bsData.round === 'cent'){
+    note = `Splits add up exactly to the ${bsFmt(c.billTotal)} bill.`;
+  } else if (diff > 0.005){
+    note = `Rounded ${bsData.round === 'up' ? 'up' : 'to the nearest whole ' + bsData.currency} — you'll collect ${bsFmt(c.collected)}, about ${bsFmt(diff)} over the bill (a little extra tip).`;
+  } else if (diff < -0.005){
+    note = `Rounded to the nearest whole ${bsData.currency} — you'll collect ${bsFmt(c.collected)}, about ${bsFmt(-diff)} short of the bill.`;
+  } else {
+    note = `Splits add up to the ${bsFmt(c.billTotal)} bill.`;
+  }
+  if (c.unassigned > 0) note += ` ⚠ ${c.unassigned} unassigned item${c.unassigned === 1 ? '' : 's'} not included.`;
+  document.getElementById('bs-recon').textContent = note;
+}
+
+/* ── COPY / RESET ── */
+function bsCopy(){
+  const c = bsCompute();
+  const lines = [];
+  lines.push(bsData.title ? `${bsData.title} — split ${c.N} ways` : `Bill split ${c.N} ways`);
+  lines.push('');
+  c.people.forEach(p => lines.push(`${p.name}: ${bsFmt(p.total)}`));
+  lines.push('');
+  lines.push(`Subtotal: ${bsFmt(c.preTaxTotal)}`);
+  if (c.taxAmt > 0) lines.push(`Tax: ${bsFmt(c.taxAmt)}`);
+  lines.push(`Tip${c.tipPct ? ` (${+c.tipPct}%)` : ''}: ${bsFmt(c.tipAmt)}`);
+  lines.push(`Bill total: ${bsFmt(c.billTotal)}`);
+  if (Math.abs(c.collected - c.billTotal) >= 0.005) lines.push(`Collected: ${bsFmt(c.collected)}`);
+  const txt = lines.join('\n');
+  const btn = document.getElementById('bs-copy-btn');
+  const done = () => { const o = btn.textContent; btn.textContent = '✓ Copied!'; setTimeout(() => btn.textContent = o, 1400); };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done).catch(done);
+  else done();
+}
+function bsReset(){
+  if (!confirm('Clear the bill amounts, items and tip? People and currency are kept.')) return;
+  bsData.title = ''; bsData.subtotal = ''; bsData.tax = '';
+  bsData.adj = {}; bsData.items = []; bsData.tipPct = 0; bsData.tipOnTotal = false;
+  bsItemFormWho = new Set(bsData.people.map(p => p.id));
+  bsSave();
+  document.getElementById('bs-title').value = '';
+  document.getElementById('bs-subtotal').value = '';
+  document.getElementById('bs-tax').value = '';
+  document.getElementById('bs-tip-pct').value = '';
+  document.getElementById('bs-tip-on-total').checked = false;
+  bsRenderTipQuick(); bsRenderItemForm(); bsRender();
 }
 
 /* ══════════════════════════════════════════════════════
