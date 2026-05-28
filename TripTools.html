@@ -909,6 +909,78 @@ body {
 .tc-dest { font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .tc-badge { font-family: var(--mono); font-size: 9px; letter-spacing: .12em; background: var(--accent); color: #fff; padding: 2px 6px; border-radius: 2px; flex-shrink: 0; }
 
+/* ── DESTINATION COMPARISON ── */
+.cmp-pick-wrap { margin-bottom: 18px; }
+.cmp-lbl { display:block; font-family:var(--sans); font-weight:600; font-size:12px; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-2); margin-bottom:8px; }
+.cmp-lbl-sub { color:var(--muted); font-weight:500; text-transform:none; letter-spacing:0; }
+.cmp-search-inner { position:relative; }
+.cmp-input { width:100%; box-sizing:border-box; font-family:var(--sans); font-size:15px; padding:12px 40px 12px 14px; border:1.5px solid var(--ink); border-radius:var(--r); background:var(--paper); color:var(--ink); }
+.cmp-input:focus { outline:none; box-shadow:2px 2px 0 var(--accent); }
+.cmp-search-ico { position:absolute; right:14px; top:50%; transform:translateY(-50%); pointer-events:none; opacity:.5; }
+.cmp-suggest { position:absolute; left:0; right:0; top:calc(100% + 4px); z-index:30; background:var(--paper); border:1.5px solid var(--ink); border-radius:var(--r); box-shadow:4px 4px 0 rgba(23,21,20,.12); max-height:320px; overflow:auto; }
+.cmp-sug-item { display:flex; align-items:center; gap:10px; padding:9px 12px; cursor:pointer; border-bottom:1px solid var(--rule); }
+.cmp-sug-item:last-child { border-bottom:none; }
+.cmp-sug-item:hover, .cmp-sug-item.active { background:var(--paper-2); }
+.cmp-sug-flag { width:30px; height:22px; flex-shrink:0; background:var(--ink); color:var(--paper); border-radius:3px; display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:10px; font-weight:600; }
+.cmp-sug-name { font-weight:600; }
+.cmp-sug-country { color:var(--muted); font-size:13px; margin-left:auto; }
+.cmp-sug-empty { padding:11px 12px; color:var(--muted); font-size:13px; }
+.cmp-sug-in { margin-left:auto; font-family:var(--mono); font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--green); }
+
+.cmp-favs { display:flex; flex-wrap:wrap; gap:7px; margin-top:11px; align-items:center; }
+.cmp-fav-lbl { font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-right:2px; }
+.cmp-fav-chip { font-family:var(--sans); font-size:12px; padding:5px 11px; border:1.5px solid var(--rule); border-radius:20px; cursor:pointer; color:var(--ink-2); background:var(--paper); transition:background .1s,border-color .1s; }
+.cmp-fav-chip:hover { border-color:var(--ink); background:var(--paper-2); }
+.cmp-fav-chip.added { opacity:.4; pointer-events:none; }
+
+.cmp-slots { display:flex; flex-wrap:wrap; gap:12px; margin-bottom:24px; }
+.cmp-slot { flex:1 1 160px; min-width:150px; display:flex; align-items:center; gap:11px; border:2px solid var(--ink); border-top:6px solid var(--sc); border-radius:var(--r); background:var(--paper); padding:12px 13px; box-shadow:3px 3px 0 var(--ink); position:relative; }
+.cmp-slot-flag { width:42px; height:42px; flex-shrink:0; border-radius:4px; display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-weight:600; font-size:12px; color:#fff; background:var(--sc); }
+.cmp-slot-meta { min-width:0; flex:1; }
+.cmp-slot-name { font-family:var(--serif); font-weight:600; font-size:18px; line-height:1.1; }
+.cmp-slot-country { font-size:12px; color:var(--muted); margin-top:2px; }
+.cmp-slot-x { position:absolute; top:6px; right:8px; cursor:pointer; border:none; background:none; font-size:14px; color:var(--muted); line-height:1; padding:2px; }
+.cmp-slot-x:hover { color:var(--accent); }
+.cmp-slot.add { border:2px dashed var(--rule); box-shadow:none; color:var(--muted); justify-content:center; cursor:pointer; font-family:var(--mono); font-size:12px; letter-spacing:.06em; text-transform:uppercase; }
+.cmp-slot.add:hover { border-color:var(--accent); color:var(--accent); }
+
+.cmp-empty { text-align:center; padding:38px 20px; border:1.5px dashed var(--rule); border-radius:var(--r); color:var(--muted); }
+.cmp-empty-ico { font-size:34px; display:block; margin-bottom:10px; opacity:.55; }
+.cmp-empty p { margin:0; }
+
+.cmp-verdict { border:2px solid var(--ink); border-radius:var(--r); background:var(--paper-2); box-shadow:3px 3px 0 var(--ink); padding:16px 18px; margin-bottom:26px; }
+.cmp-verdict-line { display:block; font-size:14px; line-height:1.55; }
+.cmp-verdict-line + .cmp-verdict-line { margin-top:6px; }
+.cmp-win { font-family:var(--serif); }
+
+.cmp-chart-wrap { max-width:440px; margin:0 auto 14px; }
+.cmp-legend { display:flex; flex-wrap:wrap; gap:16px; justify-content:center; margin-bottom:8px; }
+.cmp-leg-item { display:flex; align-items:center; gap:7px; font-size:13px; font-weight:600; }
+.cmp-leg-sw { width:14px; height:14px; border-radius:3px; border:1.5px solid var(--ink); }
+.cmp-chart-note { text-align:center; font-size:12px; color:var(--muted); margin:0 0 6px; }
+
+.cmp-table-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; margin-bottom:8px; }
+.cmp-table { width:100%; border-collapse:collapse; font-size:13px; }
+.cmp-table th, .cmp-table td { padding:9px 10px; text-align:left; border-bottom:1px solid var(--rule); vertical-align:middle; }
+.cmp-table thead th { font-family:var(--mono); font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); border-bottom:1.5px solid var(--ink); white-space:nowrap; }
+.cmp-table thead th.cmp-dest-h { font-size:13px; font-weight:700; letter-spacing:0; text-transform:none; }
+.cmp-dim-cell { white-space:nowrap; }
+.cmp-dim-emoji { margin-right:6px; }
+.cmp-dim-name { font-weight:600; }
+.cmp-dim-desc { display:block; font-size:11px; color:var(--muted); font-weight:400; margin-top:1px; }
+.cmp-score { display:flex; align-items:center; gap:8px; min-width:96px; }
+.cmp-bar { flex:1; min-width:48px; height:8px; background:var(--rule); border-radius:4px; overflow:hidden; }
+.cmp-bar-fill { height:100%; border-radius:4px; }
+.cmp-score-num { font-family:var(--mono); font-size:12px; white-space:nowrap; flex-shrink:0; }
+.cmp-td.lead { background:rgba(255,210,63,.30); }
+.cmp-lead-tick { color:var(--green); font-weight:700; margin-left:3px; }
+.cmp-facts .cmp-fact-lbl { font-weight:600; white-space:nowrap; color:var(--ink-2); }
+.cmp-total-row td { border-top:1.5px solid var(--ink); border-bottom:none; font-family:var(--mono); font-weight:700; }
+.cmp-total-row td:first-child { font-family:var(--sans); }
+.cmp-actions { margin-top:16px; }
+
+@media (max-width:520px){ .cmp-slot { flex-basis:100%; } }
+
 /* ── DESTINATION PICKER ── */
 .dp-filters-wrap { margin-bottom: 28px; }
 .dp-filter-row { margin-bottom: 18px; }
@@ -2079,16 +2151,77 @@ body.no-scroll { overflow: hidden; }
     </div>
   </div>
 </div>
-<div id="view-placeholder-dest-compare" class="view">
-  <nav class="tool-topbar">
+<div id="view-dest-compare" class="view">
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="window.print()">🖨 Print</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">⚖️</span>
-    <h2>Destination Comparison</h2>
-    <p style="margin-bottom:24px">Side-by-side comparison of 2–3 destinations across 10 dimensions with a radar chart.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-dest-compare"></div>
+  <div class="print-header">TripTools · Destination Comparison &nbsp;·&nbsp; Printed <span id="cmp-print-date"></span></div>
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>Destination Comparison</h1>
+    <p class="tool-sub">Put 2–3 destinations head-to-head across 10 travel dimensions — see the trade-offs on a radar chart and find your best match.</p>
+  </div>
+  <div class="tool-body">
+
+    <!-- PICKER -->
+    <div class="cmp-pick-wrap">
+      <label class="cmp-lbl" for="cmp-search">Add a destination <span class="cmp-lbl-sub">(compare 2–3)</span></label>
+      <div class="cmp-search-inner">
+        <input id="cmp-search" class="cmp-input" type="text" placeholder="Search 100+ destinations…" autocomplete="off"
+               oninput="cmpOnSearch()" onfocus="cmpOnSearch()" onkeydown="cmpSearchKey(event)" />
+        <span class="cmp-search-ico">🔍</span>
+        <div class="cmp-suggest" id="cmp-suggest" style="display:none"></div>
+      </div>
+      <div class="cmp-favs" id="cmp-favs"></div>
+    </div>
+
+    <!-- SELECTED SLOTS -->
+    <div class="cmp-slots" id="cmp-slots"></div>
+
+    <!-- EMPTY STATE -->
+    <div class="cmp-empty" id="cmp-empty">
+      <span class="cmp-empty-ico">⚖️</span>
+      <p>Add at least <b>two</b> destinations above to see them compared side by side.</p>
+    </div>
+
+    <!-- COMPARISON -->
+    <div class="cmp-compare" id="cmp-compare" style="display:none">
+
+      <div class="cmp-verdict" id="cmp-verdict"></div>
+
+      <div class="sec-lbl">📊 The radar</div>
+      <div class="cmp-chart-wrap"><canvas id="cmp-radar"></canvas></div>
+      <div class="cmp-legend" id="cmp-legend"></div>
+      <p class="cmp-chart-note">Every axis is scored 1–5 from TripTools' bundled destination data. A bigger shape means a stronger all-round match.</p>
+
+      <div class="sec-lbl">🧮 Dimension by dimension</div>
+      <div class="cmp-table-scroll"><table class="cmp-table" id="cmp-table"></table></div>
+
+      <div class="sec-lbl">📋 The facts</div>
+      <div class="cmp-table-scroll"><table class="cmp-table cmp-facts" id="cmp-facts"></table></div>
+
+      <div class="cmp-actions">
+        <button class="btn btn-s" onclick="cmpClear()">↺ Clear comparison</button>
+      </div>
+    </div>
+
+    <div class="bt-data-note">Scores are derived from TripTools' bundled destination dataset for planning guidance — they're directional, not absolute. Confirm specifics before you book.</div>
+
+  </div><!-- /tool-body -->
+
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    There's rarely one "best" destination — only the best fit for <em>this</em> trip. Decide which two or three dimensions matter most for the people you're travelling with, then watch which destination's shape bulges toward the axes you care about.
+  </div>
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('dest-picker')">🌐 Destination Picker</button>
+      <button class="rel-btn" onclick="openTool('best-time')">📅 Best Time to Visit</button>
+      <button class="rel-btn" onclick="openTool('budget-plan')">💰 Budget Planner</button>
+      <button class="rel-btn" onclick="openTool('bucket-list')">⭐ Bucket List Builder</button>
     </div>
   </div>
 </div>
@@ -8378,7 +8511,7 @@ input:checked + .pb-toggle-box::after { transform:translateX(16px);background:#f
 /* ── TOOL REGISTRY ── */
 const TOOLS = [
   {id:'dest-picker',   nm:'Destination Picker',         ico:'🌐', ph:'discovery', on:false, live:true,  ds:'Spin-the-globe randomizer filtered by continent, budget & vibe.'},
-  {id:'dest-compare',  nm:'Destination Comparison',     ico:'⚖️', ph:'discovery', on:false, live:false, ds:'Side-by-side comparison of 2–3 destinations across 10 dimensions.'},
+  {id:'dest-compare',  nm:'Destination Comparison',     ico:'⚖️', ph:'discovery', on:false, live:true,  ds:'Side-by-side comparison of 2–3 destinations across 10 dimensions.'},
   {id:'best-time',     nm:'Best Time to Visit',         ico:'📅', ph:'discovery', on:false, live:true,  ds:'Month-by-month weather, crowd & cost heat map for 100+ destinations.'},
   {id:'travel-quiz',   nm:'Travel Style Quiz',          ico:'🧠', ph:'discovery', on:false, live:false, ds:'10-question quiz to discover your travel personality.'},
   {id:'bucket-list',   nm:'Bucket List Builder',        ico:'⭐', ph:'discovery', on:false, live:false, ds:'Create, organize & check off dream destinations. Printable.'},
@@ -9088,6 +9221,7 @@ function injectTripCtx(id) {
   } else if(ctx){ ctx.classList.remove('show'); }
   if(id==='doc-checklist') dcInit();
   if(id==='dest-picker') dpInit();
+  if(id==='dest-compare') cmpInit();
   if(id==='best-time')   btInit();
   if(id==='currency') fxInit();
   if(id==='unit-conv') ucInit();
@@ -12317,6 +12451,264 @@ function btRenderMatrix(){
   const cName = btMatrixCont==='all' ? 'all regions' : (BT_CONT_NAMES[btMatrixCont]||btMatrixCont);
   document.getElementById('bt-matrix-count').textContent =
     `${list.length} destinations · ${cName}` + (m!==null ? ` · ranked for ${BT_MONTHS_FULL[m]}` : '');
+}
+
+/* ── DESTINATION COMPARISON ── */
+const CMP_DIMS = [
+  {key:'afford',    short:'Affordability', label:'Affordability',     emoji:'💰', desc:'How far your money goes'},
+  {key:'weather',   short:'Weather',       label:'Weather',           emoji:'☀️', desc:'In-season daytime comfort'},
+  {key:'food',      short:'Food',          label:'Food & Dining',     emoji:'🍽️', desc:'Culinary scene & street eats'},
+  {key:'culture',   short:'Culture',       label:'Culture & History', emoji:'🏛️', desc:'Museums, heritage & arts'},
+  {key:'nature',    short:'Nature',        label:'Nature & Scenery',  emoji:'🏞️', desc:'Landscapes & the outdoors'},
+  {key:'beach',     short:'Beaches',       label:'Beaches',           emoji:'🏖️', desc:'Coastline & swimming'},
+  {key:'family',    short:'Family',        label:'Family & Fun',      emoji:'🎢', desc:'Kid-friendly attractions'},
+  {key:'adventure', short:'Adventure',     label:'Adventure',         emoji:'🥾', desc:'Active & thrill-seeking'},
+  {key:'calm',      short:'Low Crowds',    label:'Low Crowds',        emoji:'🧘', desc:'Tranquility in peak season'},
+  {key:'entry',     short:'Easy Entry',    label:'Ease of Entry',     emoji:'🛂', desc:'Visa & border simplicity'},
+];
+const CMP_COLORS = ['#FF4D2E','#1565C0','#2E7D32'];      // accent, blue, green
+const CMP_SCORE_WORD = ['','Low','Fair','Good','Great','Top'];
+let cmpSel = [], cmpChart = null, cmpWired = false, cmpSugList = [], cmpSugActive = -1, cmpScoreCache = {};
+
+function cmpClampR(v){ return Math.max(1, Math.min(5, Math.round(v))); }
+function cmpAvg(arr, months){ const m=(months&&months.length)?months:[...Array(12).keys()]; return m.reduce((s,i)=>s+arr[i],0)/m.length; }
+function cmpRecMonths(dest){
+  const rec=btParseSeason(dest.season);
+  if(rec.size) return [...rec];
+  const data=btGetData(dest), mx=Math.max(...data.overall), best=[];
+  for(let i=0;i<12;i++) if(data.overall[i]===mx) best.push(i);
+  return best;
+}
+function cmpVisaScore(visa){
+  const v=(visa||'').toLowerCase();
+  if(v.includes('visa-free')||v.includes('visa free')) return 5;
+  if(v.includes('on arrival')) return 4;
+  if(v.includes('eta')||v.includes('e-visa')||v.includes('esta')||v.includes('tourist card')||v.includes('pass')) return 4;
+  if(v.includes('permit')||v.includes('visa required')||v.includes('tourist visa')) return 2;
+  return 3;
+}
+function cmpIsTropical(dest){
+  const cl=BT_CLIMATE[dest.id];
+  return !!cl && (cl.a==='tropical_monsoon'||cl.a==='tropical_equatorial'||cl.a==='savanna');
+}
+function cmpScores(dest){
+  if(cmpScoreCache[dest.id]) return cmpScoreCache[dest.id];
+  const t=dest.types||[], has=x=>t.includes(x);
+  const data=btGetData(dest), rec=cmpRecMonths(dest), tropical=cmpIsTropical(dest);
+  const s={
+    afford:    cmpClampR(6 - dest.budget),
+    weather:   cmpClampR(cmpAvg(data.weather, rec)),
+    food:      cmpClampR(1.6 + (has('foodie')?2.6:0) + (has('city')?1:0) + (has('culture')?0.6:0)),
+    culture:   cmpClampR(1.0 + (has('culture')?2.4:0) + (has('history')?2:0) + (has('city')?0.6:0)),
+    nature:    cmpClampR(1.0 + (has('nature')?2.6:0) + (has('adventure')?1.4:0) + (has('beach')?0.5:0)),
+    beach:     cmpClampR(has('beach') ? 3.6 + (tropical?1:0) : (tropical?2.2:1)),
+    family:    cmpClampR(1.0 + (has('family')?2.2:0) + (has('themepark')?2.4:0) + (has('beach')?0.4:0)),
+    adventure: cmpClampR(1.0 + (has('adventure')?2.6:0) + (has('nature')?1.2:0) + (has('ski')?1.2:0)),
+    calm:      cmpClampR(6 - cmpAvg(data.crowd, rec)),
+    entry:     cmpVisaScore(dest.visa),
+  };
+  s.total = CMP_DIMS.reduce((sum,d)=>sum+s[d.key], 0);
+  cmpScoreCache[dest.id]=s;
+  return s;
+}
+
+function cmpSave(){ localStorage.setItem('tt_cmp_sel', JSON.stringify(cmpSel)); }
+function cmpAllFavs(){
+  const a=JSON.parse(localStorage.getItem('tt_dp_favs')||'[]');
+  const b=JSON.parse(localStorage.getItem('tt_bt_favs')||'[]');
+  const seen=new Set(), out=[];
+  [...a,...b].forEach(id=>{ if(!seen.has(id) && DP_DESTINATIONS.some(d=>d.id===id)){ seen.add(id); out.push(id); } });
+  return out;
+}
+
+function cmpInit(){
+  if(!cmpSel.length){
+    const saved=JSON.parse(localStorage.getItem('tt_cmp_sel')||'[]').filter(id=>DP_DESTINATIONS.some(d=>d.id===id));
+    if(saved.length) cmpSel=saved.slice(0,3);
+  }
+  if(!cmpSel.length){
+    const match=btMatchTripDest();
+    if(match) cmpSel.push(match.id);
+    cmpAllFavs().forEach(id=>{ if(cmpSel.length<2 && !cmpSel.includes(id)) cmpSel.push(id); });
+    if(cmpSel.length) cmpSave();
+  }
+  if(!cmpWired){
+    cmpWired=true;
+    document.addEventListener('click', e=>{ if(!e.target.closest('.cmp-search-inner')) cmpHideSuggest(); });
+  }
+  const pd=document.getElementById('cmp-print-date'); if(pd) pd.textContent=new Date().toLocaleDateString();
+  cmpRenderFavs();
+  cmpRender();
+}
+
+function cmpOnSearch(){
+  const q=(document.getElementById('cmp-search').value||'').toLowerCase().trim();
+  let list;
+  if(!q) list=BT_POPULAR.map(id=>DP_DESTINATIONS.find(d=>d.id===id)).filter(Boolean);
+  else   list=DP_DESTINATIONS.filter(d=>d.name.toLowerCase().includes(q)||d.country.toLowerCase().includes(q)).slice(0,12);
+  cmpSugList=list; cmpSugActive=-1;
+  const box=document.getElementById('cmp-suggest');
+  if(!list.length){ box.innerHTML='<div class="cmp-sug-empty">No destinations found</div>'; box.style.display='block'; return; }
+  box.innerHTML=(!q?'<div class="cmp-sug-empty">Popular destinations</div>':'') + list.map((d,i)=>{
+    const inSel=cmpSel.includes(d.id);
+    return `<div class="cmp-sug-item" data-i="${i}" onmousedown="event.preventDefault();cmpAdd('${d.id}')"><span class="cmp-sug-flag">${d.flag}</span><span class="cmp-sug-name">${d.name}</span>${inSel?'<span class="cmp-sug-in">✓ added</span>':`<span class="cmp-sug-country">${d.country}</span>`}</div>`;
+  }).join('');
+  box.style.display='block';
+}
+function cmpHideSuggest(){ const b=document.getElementById('cmp-suggest'); if(b) b.style.display='none'; }
+function cmpHighlightSug(){ document.querySelectorAll('#cmp-suggest .cmp-sug-item').forEach(el=>el.classList.toggle('active', +el.dataset.i===cmpSugActive)); }
+function cmpSearchKey(e){
+  const box=document.getElementById('cmp-suggest');
+  if(!box || box.style.display==='none') return;
+  if(e.key==='ArrowDown'){ e.preventDefault(); cmpSugActive=Math.min(cmpSugList.length-1, cmpSugActive+1); cmpHighlightSug(); }
+  else if(e.key==='ArrowUp'){ e.preventDefault(); cmpSugActive=Math.max(0, cmpSugActive-1); cmpHighlightSug(); }
+  else if(e.key==='Enter'){ e.preventDefault(); const p=cmpSugActive>=0?cmpSugList[cmpSugActive]:cmpSugList[0]; if(p) cmpAdd(p.id); }
+  else if(e.key==='Escape'){ cmpHideSuggest(); }
+}
+
+function cmpAdd(id){
+  if(cmpSel.includes(id)){ cmpHideSuggest(); return; }
+  if(cmpSel.length>=3){ alert('You can compare up to 3 destinations at once — remove one first.'); return; }
+  if(!DP_DESTINATIONS.some(d=>d.id===id)) return;
+  cmpSel.push(id); cmpSave();
+  const inp=document.getElementById('cmp-search'); if(inp) inp.value='';
+  cmpHideSuggest(); cmpRenderFavs(); cmpRender();
+}
+function cmpRemove(id){ cmpSel=cmpSel.filter(x=>x!==id); cmpSave(); cmpRenderFavs(); cmpRender(); }
+function cmpClear(){ cmpSel=[]; cmpSave(); cmpRenderFavs(); cmpRender(); }
+
+function cmpRenderFavs(){
+  const wrap=document.getElementById('cmp-favs'); if(!wrap) return;
+  const favs=cmpAllFavs();
+  if(!favs.length){ wrap.innerHTML=''; return; }
+  wrap.innerHTML='<span class="cmp-fav-lbl">★ Saved</span>'+favs.map(id=>{
+    const d=DP_DESTINATIONS.find(x=>x.id===id); if(!d) return '';
+    return `<span class="cmp-fav-chip${cmpSel.includes(id)?' added':''}" onclick="cmpAdd('${d.id}')">${d.name}</span>`;
+  }).join('');
+}
+
+function cmpRenderSlots(){
+  const wrap=document.getElementById('cmp-slots'); if(!wrap) return;
+  let html=cmpSel.map((id,idx)=>{
+    const d=DP_DESTINATIONS.find(x=>x.id===id); if(!d) return '';
+    return `<div class="cmp-slot" style="--sc:${CMP_COLORS[idx]}">
+      <div class="cmp-slot-flag">${d.flag}</div>
+      <div class="cmp-slot-meta">
+        <div class="cmp-slot-name">${d.name}</div>
+        <div class="cmp-slot-country">${BT_CONT_NAMES[d.continent]||''} · ${d.country}</div>
+      </div>
+      <button class="cmp-slot-x" onclick="cmpRemove('${d.id}')" title="Remove">✕</button>
+    </div>`;
+  }).join('');
+  if(cmpSel.length<3) html+=`<div class="cmp-slot add" onclick="document.getElementById('cmp-search').focus()">＋ Add destination</div>`;
+  wrap.innerHTML=html;
+}
+
+function cmpRender(){
+  cmpRenderSlots();
+  const empty=document.getElementById('cmp-empty'), comp=document.getElementById('cmp-compare');
+  if(!empty||!comp) return;
+  if(cmpSel.length<2){
+    empty.style.display='block'; comp.style.display='none';
+    if(cmpChart){ cmpChart.destroy(); cmpChart=null; }
+    return;
+  }
+  empty.style.display='none'; comp.style.display='block';
+  const dests=cmpSel.map(id=>DP_DESTINATIONS.find(d=>d.id===id)).filter(Boolean);
+  const scores=dests.map(cmpScores);
+  cmpRenderLegend(dests);
+  cmpRenderChart(dests, scores);
+  cmpRenderTable(dests, scores);
+  cmpRenderFacts(dests);
+  cmpRenderVerdict(dests, scores);
+}
+
+function cmpRenderLegend(dests){
+  document.getElementById('cmp-legend').innerHTML=dests.map((d,i)=>
+    `<span class="cmp-leg-item"><span class="cmp-leg-sw" style="background:${CMP_COLORS[i]}"></span>${d.name}</span>`).join('');
+}
+
+function cmpHexA(hex,a){ const n=parseInt(hex.slice(1),16); return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${a})`; }
+function cmpRenderChart(dests, scores){
+  const canvas=document.getElementById('cmp-radar'); if(!canvas) return;
+  if(cmpChart){ cmpChart.destroy(); cmpChart=null; }
+  const datasets=dests.map((d,i)=>({
+    label:d.name,
+    data:CMP_DIMS.map(dim=>scores[i][dim.key]),
+    backgroundColor:cmpHexA(CMP_COLORS[i],0.14),
+    borderColor:CMP_COLORS[i], borderWidth:2,
+    pointBackgroundColor:CMP_COLORS[i], pointBorderColor:'#fff', pointRadius:3, pointHoverRadius:5,
+  }));
+  cmpChart=new Chart(canvas.getContext('2d'),{
+    type:'radar',
+    data:{ labels:CMP_DIMS.map(d=>d.short), datasets },
+    options:{
+      responsive:true, maintainAspectRatio:true, aspectRatio:1,
+      plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:ctx=>` ${ctx.dataset.label}: ${ctx.raw}/5 · ${CMP_SCORE_WORD[ctx.raw]}` } } },
+      scales:{ r:{ min:0, max:5, ticks:{ stepSize:1, display:false }, pointLabels:{ font:{size:11, family:"'Inter Tight', sans-serif"}, color:'#3A3631' }, grid:{color:'rgba(23,21,20,.12)'}, angleLines:{color:'rgba(23,21,20,.12)'} } },
+      animation:{duration:350},
+    }
+  });
+}
+
+function cmpRenderTable(dests, scores){
+  let html='<thead><tr><th>Dimension</th>'+dests.map((d,i)=>`<th class="cmp-dest-h" style="color:${CMP_COLORS[i]}">${d.name}</th>`).join('')+'</tr></thead><tbody>';
+  CMP_DIMS.forEach(dim=>{
+    const vals=scores.map(s=>s[dim.key]), mx=Math.max(...vals), leaders=vals.filter(v=>v===mx).length;
+    html+=`<tr><td class="cmp-dim-cell"><span class="cmp-dim-emoji">${dim.emoji}</span><span class="cmp-dim-name">${dim.label}</span><span class="cmp-dim-desc">${dim.desc}</span></td>`;
+    vals.forEach((v,i)=>{
+      const isLead = v===mx && leaders<dests.length;
+      html+=`<td class="cmp-td${isLead?' lead':''}"><div class="cmp-score"><div class="cmp-bar"><div class="cmp-bar-fill" style="width:${v/5*100}%;background:${CMP_COLORS[i]}"></div></div><span class="cmp-score-num">${v}/5${isLead?'<span class="cmp-lead-tick">▲</span>':''}</span></div></td>`;
+    });
+    html+='</tr>';
+  });
+  const totals=scores.map(s=>s.total), tmx=Math.max(...totals), tlead=totals.filter(v=>v===tmx).length;
+  html+='<tr class="cmp-total-row"><td>Overall match</td>'+totals.map(tv=>{
+    const isLead = tv===tmx && tlead<dests.length;
+    return `<td class="cmp-td${isLead?' lead':''}">${tv}/50${isLead?'<span class="cmp-lead-tick">★</span>':''}</td>`;
+  }).join('')+'</tr>';
+  html+='</tbody>';
+  document.getElementById('cmp-table').innerHTML=html;
+}
+
+function cmpTypeName(t){
+  const map={beach:'Beaches',city:'City',adventure:'Adventure',culture:'Culture',nature:'Nature',roadtrip:'Road trip',cruise:'Cruise',family:'Family',ski:'Ski',foodie:'Food',themepark:'Theme parks',history:'History',romance:'Romance',romantic:'Romance'};
+  return map[t]||t;
+}
+function cmpRenderFacts(dests){
+  const rows=[
+    {lbl:'💵 Daily budget', get:d=>d.dailyRange||'—'},
+    {lbl:'📅 Best season',  get:d=>d.season||'—'},
+    {lbl:'🛂 Visa',         get:d=>d.visa||'—'},
+    {lbl:'🌍 Region',       get:d=>BT_CONT_NAMES[d.continent]||d.continent},
+    {lbl:'🏷 Known for',    get:d=>(d.types||[]).slice(0,4).map(cmpTypeName).join(', ')||'—'},
+  ];
+  let html='<thead><tr><th></th>'+dests.map((d,i)=>`<th class="cmp-dest-h" style="color:${CMP_COLORS[i]}">${d.name}</th>`).join('')+'</tr></thead><tbody>';
+  rows.forEach(r=>{ html+=`<tr><td class="cmp-fact-lbl">${r.lbl}</td>`+dests.map(d=>`<td>${r.get(d)}</td>`).join('')+'</tr>'; });
+  html+='</tbody>';
+  document.getElementById('cmp-facts').innerHTML=html;
+}
+
+function cmpRenderVerdict(dests, scores){
+  let best=0; for(let i=1;i<scores.length;i++) if(scores[i].total>scores[best].total) best=i;
+  const tie = scores.filter(s=>s.total===scores[best].total).length>1;
+  const wins=dests.map(()=>0);
+  CMP_DIMS.forEach(dim=>{
+    const vals=scores.map(s=>s[dim.key]), mx=Math.max(...vals);
+    if(vals.filter(v=>v===mx).length<dests.length) vals.forEach((v,i)=>{ if(v===mx) wins[i]++; });
+  });
+  let html='';
+  if(tie){
+    html+=`<span class="cmp-verdict-line">🤝 It's neck and neck — these destinations score evenly overall (<b>${scores[best].total}/50</b>). Let the dimensions that matter most to you break the tie.</span>`;
+  } else {
+    html+=`<span class="cmp-verdict-line">🏆 <span class="cmp-win" style="color:${CMP_COLORS[best]}"><b>${dests[best].name}</b></span> is the strongest all-rounder at <b>${scores[best].total}/50</b>, leading in ${wins[best]} of 10 dimensions.</span>`;
+  }
+  dests.forEach((d,i)=>{
+    const s=scores[i]; let topDim=CMP_DIMS[0];
+    CMP_DIMS.forEach(dim=>{ if(s[dim.key]>s[topDim.key]) topDim=dim; });
+    html+=`<span class="cmp-verdict-line">${topDim.emoji} <b style="color:${CMP_COLORS[i]}">${d.name}</b> shines on <b>${topDim.label}</b> (${s[topDim.key]}/5)${wins[i]?` and wins ${wins[i]} categor${wins[i]===1?'y':'ies'}`:''}.</span>`;
+  });
+  document.getElementById('cmp-verdict').innerHTML=html;
 }
 
 /* ── SPLASH ── */
