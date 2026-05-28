@@ -3569,16 +3569,145 @@ body.no-scroll { overflow: hidden; }
     </div>
   </div>
 </div>
-<div id="view-placeholder-carry-on" class="view">
-  <nav class="tool-topbar">
+<style>
+/* ── CARRY-ON SIZE CHECKER ── */
+.cos-search-wrap{position:relative}
+.cos-search-input{width:100%;padding:10px 12px;border:1.5px solid var(--ink);border-radius:var(--r);font-size:14px;font-family:var(--sans);background:var(--paper);color:var(--ink);box-sizing:border-box;outline:none;display:block;min-height:44px}
+.cos-search-input:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(255,77,46,.15)}
+.cos-drop{position:absolute;top:100%;left:0;right:0;max-height:260px;overflow-y:auto;background:var(--paper);border:1.5px solid var(--ink);border-top:none;border-radius:0 0 var(--r) var(--r);z-index:200;box-shadow:0 4px 12px rgba(0,0,0,.12)}
+.cos-drop-item{padding:9px 12px;cursor:pointer;font-size:14px;font-family:var(--sans);color:var(--ink);border-bottom:1px solid var(--rule);display:flex;align-items:center;gap:8px}
+.cos-drop-item:last-child{border-bottom:none}
+.cos-drop-item:hover{background:var(--paper-2)}
+.cos-drop-flag{font-size:18px;width:24px;text-align:center;flex-shrink:0}
+.cos-drop-name{flex:1}
+.cos-drop-region{font-size:11px;font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.cos-toggle{display:flex;gap:8px}
+.cos-toggle-btn{flex:1;padding:10px;border:1.5px solid var(--ink);border-radius:var(--r);background:var(--paper);font-family:var(--sans);font-size:14px;cursor:pointer;color:var(--ink-2);transition:background .12s,color .12s;min-height:44px}
+.cos-toggle-btn.active{background:var(--ink);color:var(--paper)}
+.cos-toggle-btn:hover:not(.active){background:var(--paper-2)}
+.cos-dim-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media(max-width:520px){.cos-dim-row{grid-template-columns:1fr 1fr}.cos-dim-row .fg:last-child{grid-column:1/-1}}
+.cos-unit-tag{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin-left:4px}
+.cos-tip{font-size:12px;color:var(--muted);font-family:var(--sans);padding:9px 12px;background:var(--paper-2);border-left:3px solid var(--ink);border-radius:2px;line-height:1.5;margin-top:4px}
+.cos-card{border:2px solid var(--ink);border-radius:var(--r);overflow:hidden}
+.cos-card-header{padding:16px 18px;display:flex;align-items:center;gap:12px;border-bottom:1.5px solid var(--ink)}
+.cos-card-flag{font-size:30px;line-height:1;flex-shrink:0}
+.cos-card-airline{font-family:var(--serif);font-size:22px;font-weight:700;letter-spacing:-.02em;line-height:1.1}
+.cos-card-sub{font-size:11px;font-family:var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:3px}
+.cos-verdict{padding:24px 20px;text-align:center;border-bottom:1.5px solid var(--ink)}
+.cos-verdict.fits{background:#e8f5e9}
+.cos-verdict.borderline{background:#fff8e1}
+.cos-verdict.fail{background:#ffebee}
+.cos-verdict-ico{font-size:48px;line-height:1;margin-bottom:6px}
+.cos-verdict-lbl{font-family:var(--serif);font-size:30px;font-weight:700;letter-spacing:-.02em;line-height:1.1}
+.cos-verdict.fits .cos-verdict-lbl{color:var(--green)}
+.cos-verdict.borderline .cos-verdict-lbl{color:#b8860b}
+.cos-verdict.fail .cos-verdict-lbl{color:var(--accent)}
+.cos-verdict-sub{margin-top:8px;font-size:13px;font-family:var(--sans);color:var(--ink-2);line-height:1.5;max-width:380px;margin-left:auto;margin-right:auto}
+.cos-svg-wrap{padding:18px;background:var(--paper-2);border-bottom:1.5px solid var(--ink);display:flex;justify-content:center;align-items:center}
+.cos-svg-wrap svg{max-width:100%;height:auto;max-height:220px;display:block}
+.cos-legend{display:flex;gap:18px;justify-content:center;padding:10px 16px;border-bottom:1.5px solid var(--ink);font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--ink-2);flex-wrap:wrap}
+.cos-legend-item{display:flex;align-items:center;gap:6px}
+.cos-legend-sw{width:18px;height:12px;border:1.5px solid var(--ink);display:inline-block}
+.cos-legend-sw.bag-fit{background:#a8d5b1}
+.cos-legend-sw.bag-warn{background:#f3d27a}
+.cos-legend-sw.bag-fail{background:#f5a698}
+.cos-legend-sw.limit{background:transparent;border:1.5px dashed var(--ink)}
+.cos-dims-grid{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1.5px solid var(--ink)}
+.cos-dim-cell{padding:14px 12px;border-right:1.5px solid var(--ink);text-align:center}
+.cos-dim-cell:last-child{border-right:none}
+.cos-dim-cell-lbl{font-size:10px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:4px}
+.cos-dim-cell-val{font-family:var(--serif);font-size:20px;font-weight:600;letter-spacing:-.01em;line-height:1.1}
+.cos-dim-cell-cap{font-size:11px;font-family:var(--mono);color:var(--muted);margin-top:4px}
+.cos-dim-cell-diff{margin-top:4px;font-size:11px;font-family:var(--mono);font-weight:600;display:inline-block;padding:2px 7px;border-radius:10px}
+.cos-dim-cell-diff.ok{color:var(--green);background:#e8f5e9}
+.cos-dim-cell-diff.warn{color:#b8860b;background:#fff8e1}
+.cos-dim-cell-diff.bad{color:var(--accent);background:#ffebee}
+.cos-info-row{padding:12px 18px;font-size:13px;color:var(--ink-2);line-height:1.6;border-bottom:1.5px solid var(--ink)}
+.cos-info-row:last-child{border-bottom:none}
+.cos-info-row strong{font-family:var(--serif);font-weight:600;color:var(--ink)}
+.cos-notes-row{padding:12px 18px;font-size:12px;font-family:var(--mono);color:var(--muted);line-height:1.6;background:var(--paper-2)}
+.cos-err{color:var(--accent);font-size:13px;font-family:var(--sans);margin-top:8px;padding:8px 12px;background:#ffebee;border-left:3px solid var(--accent);border-radius:2px}
+@media print{.cos-toggle,.cos-search-wrap,.cos-drop{display:none!important}.cos-card{border:1.5px solid #000!important}}
+</style>
+<div id="view-carry-on" class="view">
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="window.print()">🖨 Print</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">📐</span>
-    <h2>Carry-On Size Checker</h2>
-    <p style="margin-bottom:24px">Enter your bag dimensions + airline → fits / borderline / too large. Inches & cm.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-carry-on"></div>
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>Carry-On Size Checker</h1>
+    <p class="tool-sub">Enter your bag's dimensions, pick an airline, and find out if it fits — before you get to the gate. Carry-on or personal-item limits for 35 major airlines, in inches or centimeters.</p>
+  </div>
+  <div class="tool-body">
+    <div class="fg">
+      <label>Airline</label>
+      <div class="cos-search-wrap">
+        <input type="search" id="cos-airline-search" class="cos-search-input" placeholder="🔍 Search airline…" autocomplete="off">
+        <div id="cos-airline-drop" class="cos-drop" style="display:none"></div>
+        <input type="hidden" id="cos-airline-val">
+      </div>
+    </div>
+
+    <div class="fg">
+      <label>Bag Type</label>
+      <div class="cos-toggle">
+        <button class="cos-toggle-btn active" id="cos-co-btn" onclick="cosSetBag('co')">🧳 Carry-On</button>
+        <button class="cos-toggle-btn" id="cos-pi-btn" onclick="cosSetBag('pi')">👜 Personal Item</button>
+      </div>
+    </div>
+
+    <div class="fg">
+      <label>Units</label>
+      <div class="cos-toggle">
+        <button class="cos-toggle-btn active" id="cos-in-btn" onclick="cosSetUnit('in')">📏 Inches</button>
+        <button class="cos-toggle-btn" id="cos-cm-btn" onclick="cosSetUnit('cm')">📐 Centimeters</button>
+      </div>
+    </div>
+
+    <div class="fg">
+      <label>Your Bag Dimensions <span class="cos-unit-tag" id="cos-unit-lbl">in inches</span></label>
+      <div class="cos-dim-row">
+        <div class="fg">
+          <label for="cos-d1" style="font-size:11px">Length (longest)</label>
+          <input type="number" id="cos-d1" inputmode="decimal" min="0" step="0.1" placeholder="22">
+        </div>
+        <div class="fg">
+          <label for="cos-d2" style="font-size:11px">Width</label>
+          <input type="number" id="cos-d2" inputmode="decimal" min="0" step="0.1" placeholder="14">
+        </div>
+        <div class="fg">
+          <label for="cos-d3" style="font-size:11px">Depth</label>
+          <input type="number" id="cos-d3" inputmode="decimal" min="0" step="0.1" placeholder="9">
+        </div>
+      </div>
+      <div class="cos-tip">↳ <strong>Measure including wheels, handles, and pockets.</strong> Airlines size at the bag's largest points — what fits the sizer is what counts.</div>
+    </div>
+
+    <button class="btn btn-p" style="width:100%;margin-top:8px" onclick="cosCheck()">📐 Check Fit</button>
+
+    <div id="cos-err" style="display:none"></div>
+    <div id="cos-result" style="display:none;margin-top:24px"></div>
+
+    <div style="margin-top:16px;padding:12px 16px;background:var(--paper-2);border-left:3px solid var(--yellow);border-radius:var(--r);font-size:13px;color:var(--muted);line-height:1.55">
+      ⚠️ <strong>Borderline is not guaranteed.</strong> Gate-sizer boxes are usually a hair tighter than the published max. Soft-sided bags compress; hard shells don't. Limits also assume you're not on a basic-economy fare that restricts cabin baggage.
+    </div>
+  </div>
+
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    For low-cost carriers (Ryanair, Wizz, Spirit, Frontier), assume the sizer <em>is</em> the law and that the gate agent <em>is</em> looking for upsells. A bag that's within spec on paper but bulging at the seams will get pulled. If you measure borderline, plan to gate-check rather than fight it — a $0 gate-check beats a $79 oversized-bag fee every time.
+  </div>
+
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('baggage')">💸 Baggage Fee Calculator</button>
+      <button class="rel-btn" onclick="openTool('luggage-wt')">⚖️ Luggage Weight Calculator</button>
+      <button class="rel-btn" onclick="openTool('packing')">📝 Smart Packing List</button>
+      <button class="rel-btn" onclick="openTool('tsa-guide')">🔒 TSA &amp; Security Guide</button>
     </div>
   </div>
 </div>
@@ -7674,7 +7803,7 @@ const TOOLS = [
   {id:'tsa-guide',     nm:'TSA & Security Guide',       ico:'🔒', ph:'docs',      on:false, live:true,  ds:'Search any item for carry-on / checked / prohibited status.'},
   {id:'packing',       nm:'Smart Packing List',         ico:'📝', ph:'packing',   on:false, live:true,  ds:'Generate a list by trip type, duration & climate. Check off as you go.'},
   {id:'baggage',       nm:'Baggage Fee Calculator',     ico:'💸', ph:'packing',   on:false, live:true,  ds:'Carry-on & checked bag fees for 35 major airlines.'},
-  {id:'carry-on',      nm:'Carry-On Size Checker',      ico:'📐', ph:'packing',   on:false, live:false, ds:'Enter dimensions + airline → fits / borderline / too large.'},
+  {id:'carry-on',      nm:'Carry-On Size Checker',      ico:'📐', ph:'packing',   on:false, live:true,  ds:'Enter dimensions + airline → fits / borderline / too large.'},
   {id:'luggage-wt',    nm:'Luggage Weight Calculator',  ico:'⚖️', ph:'packing',   on:false, live:false, ds:'Virtual baggage scale. Add items & see remaining allowance.'},
   {id:'wardrobe',      nm:'Weather-Based Wardrobe',     ico:'🌤', ph:'packing',   on:true,  live:false, ds:'14-day forecast → packing suggestions per condition.'},
   {id:'power-plug',    nm:'Power Plug & Adapter Guide', ico:'🔌', ph:'packing',   on:false, live:true,  ds:'Home + destination = plug types needed, voltage & converter advice.'},
@@ -8377,6 +8506,7 @@ function injectTripCtx(id) {
   if(id==='expense-track') etInit();
   if(id==='expense-report') erInit();
   if(id==='baggage')    bfcInit();
+  if(id==='carry-on')   cosInit();
   if(id==='car-kit')    ckInit();
   if(id==='emergency')  emInit();
   if(id==='timezone')   tzInit();
@@ -15711,6 +15841,400 @@ function bfcCalculate() {
   </div>`;
   res.style.display = 'block';
   res.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+/* ══════════════════════════════════════════════════════
+   CARRY-ON SIZE CHECKER  (id: carry-on)
+   Dimensions stored in cm. Compares user vs. airline limit
+   sorted-largest-first so bag orientation in sizer is ignored.
+   ══════════════════════════════════════════════════════ */
+const COS_TOL_CM = 2.5; // borderline tolerance: ~1 inch
+const COS_AIRLINES = [
+  // US Carriers
+  {id:'aa', name:'American Airlines',    flag:'🇺🇸', region:'US',
+   co:[56,36,23], coW:'No weight limit (US)',
+   pi:[46,36,20], piW:'No weight limit',
+   notes:'Main Cabin. American does not weigh carry-ons on US mainline flights, but partner regional jets may enforce stricter limits. Sizer at gate is final word.'},
+  {id:'dl', name:'Delta Air Lines',      flag:'🇺🇸', region:'US',
+   co:[56,36,23], coW:'No weight limit (US)',
+   pi:[46,36,20], piW:'No weight limit',
+   notes:'Main Cabin. Delta is generally lenient on size at the gate but stricter on transatlantic short-haul partner flights operated by KLM/Air France.'},
+  {id:'ua', name:'United Airlines',      flag:'🇺🇸', region:'US',
+   co:[56,36,23], coW:'No weight limit (US)',
+   pi:[43,25,22], piW:'No weight limit',
+   notes:'Economy fare. United Basic Economy passengers may NOT bring a full-size carry-on — only a personal item — unless they have status or a co-branded card.'},
+  {id:'wn', name:'Southwest Airlines',   flag:'🇺🇸', region:'US',
+   co:[61,41,25], coW:'No weight limit (US)',
+   pi:[47,22,34], piW:'No weight limit',
+   notes:'Southwest has the most generous US carry-on limits. Open seating means overhead access is first-come, first-served — board in the A group to guarantee bin space.'},
+  {id:'nk', name:'Spirit Airlines',      flag:'🇺🇸', region:'US',
+   co:[56,46,25], coW:'No weight limit (US)',
+   pi:[46,36,20], piW:'No weight limit',
+   notes:'Carry-on is paid (free personal item only). Gate agents enforce strictly — a bag that doesn\'t fit the sizer is $79–$99 at the gate, vs. $40–$60 if pre-purchased.'},
+  {id:'f9', name:'Frontier Airlines',    flag:'🇺🇸', region:'US',
+   co:[61,41,25], coW:'15.9 kg (35 lb)',
+   pi:[36,46,20], piW:'15.9 kg (35 lb)',
+   notes:'Carry-on is paid. Frontier weighs carry-ons at 35 lb max and is strict at the gate. Personal item is unusually generous in one dimension (46 cm).'},
+  {id:'as', name:'Alaska Airlines',      flag:'🇺🇸', region:'US',
+   co:[56,36,23], coW:'No weight limit (US)',
+   pi:[43,33,18], piW:'No weight limit',
+   notes:'Main Cabin. Alaska is among the more lenient US carriers on size at the gate. Saver fare passengers still get a free carry-on.'},
+  {id:'b6', name:'JetBlue Airways',      flag:'🇺🇸', region:'US',
+   co:[56,36,23], coW:'No weight limit (US)',
+   pi:[43,33,20], piW:'No weight limit',
+   notes:'Blue fare and above. Blue Basic passengers do NOT get a free carry-on — only a personal item — unless they hold Mosaic status or a JetBlue Plus credit card.'},
+  {id:'g4', name:'Allegiant Air',        flag:'🇺🇸', region:'US',
+   co:[56,41,25], coW:'9.1 kg (20 lb)',
+   pi:[41,38,18], piW:'9.1 kg (20 lb)',
+   notes:'Carry-on is paid; only personal item is free. Allegiant enforces a 20 lb (9 kg) max on carry-on bags — uncommon for a US carrier — and gate fees are steep.'},
+  {id:'ha', name:'Hawaiian Airlines',    flag:'🇺🇸', region:'US/Pacific',
+   co:[56,36,23], coW:'11.3 kg (25 lb)',
+   pi:[43,33,20], piW:'11.3 kg (25 lb)',
+   notes:'Hawaiian enforces a 25 lb (11.3 kg) max on carry-ons — one of the few US carriers with a weight limit. Inter-island flights are stricter than trans-Pacific.'},
+  {id:'sy', name:'Sun Country Airlines', flag:'🇺🇸', region:'US',
+   co:[61,41,28], coW:'15.9 kg (35 lb)',
+   pi:[43,33,23], piW:'15.9 kg (35 lb)',
+   notes:'Carry-on is paid; only personal item is free. Sun Country is generous on size but enforces a 35 lb weight limit on both bag types.'},
+  // Canadian
+  {id:'ac', name:'Air Canada',           flag:'🇨🇦', region:'Canada',
+   co:[55,40,23], coW:'No weight limit',
+   pi:[43,33,16], piW:'No weight limit',
+   notes:'Standard (Flex/Comfort) fare. Basic fare passengers do not get a free carry-on. Air Canada is strict on size at the gate, especially on regional Jazz flights.'},
+  {id:'ws', name:'WestJet',             flag:'🇨🇦', region:'Canada',
+   co:[53,38,23], coW:'10 kg (22 lb)',
+   pi:[41,33,16], piW:'10 kg (22 lb)',
+   notes:'Econo and above. Basic Econo passengers may NOT bring a full carry-on. WestJet enforces a 10 kg combined weight limit on carry-on + personal item.'},
+  // European
+  {id:'ba', name:'British Airways',      flag:'🇬🇧', region:'Europe',
+   co:[56,45,25], coW:'23 kg (51 lb)',
+   pi:[40,30,15], piW:'23 kg (51 lb)',
+   notes:'BA has unusually generous size limits AND a 23 kg weight allowance per bag. Hand Baggage Only (HBO) economy fares still include both pieces.'},
+  {id:'vs', name:'Virgin Atlantic',      flag:'🇬🇧', region:'Europe',
+   co:[56,36,23], coW:'10 kg (22 lb)',
+   pi:[40,30,15], piW:'3 kg (6.6 lb)',
+   notes:'Economy fares: 10 kg cabin bag. Virgin is reasonably lenient on size but enforces the 10 kg cabin weight — pack heavy items in the personal item if possible.'},
+  {id:'fr', name:'Ryanair',              flag:'🇮🇪', region:'Europe',
+   co:[55,40,20], coW:'10 kg (22 lb)',
+   pi:[40,25,20], piW:'No weight limit',
+   notes:'Cabin bag requires Priority boarding or Plus/Flexi/Family fare. Without it: only the small under-seat bag (40×25×20 cm) is free. Gate fees are among the most punitive in aviation.'},
+  {id:'u2', name:'easyJet',              flag:'🇬🇧', region:'Europe',
+   co:[56,45,25], coW:'15 kg (33 lb)',
+   pi:[45,36,20], piW:'15 kg (33 lb)',
+   notes:'Large cabin bag requires FLEXI fare, Up Front/Extra Legroom seat, or paid Hands Free / Large Cabin Bag add-on. Otherwise: only the small under-seat bag is free.'},
+  {id:'w6', name:'Wizz Air',             flag:'🇭🇺', region:'Europe',
+   co:[55,40,23], coW:'10 kg (22 lb)',
+   pi:[40,30,20], piW:'No weight limit',
+   notes:'Cabin bag requires WIZZ Priority boarding. Without it: only the small under-seat bag (40×30×20 cm) is free. Wizz is famously strict at the gate — bags get weighed AND sized.'},
+  {id:'lh', name:'Lufthansa',            flag:'🇩🇪', region:'Europe',
+   co:[55,40,23], coW:'8 kg (18 lb)',
+   pi:[40,30,10], piW:'No weight limit',
+   notes:'Economy. Lufthansa enforces the 8 kg weight limit fairly consistently — particularly at smaller German airports (MUC, FRA short-haul gates).'},
+  {id:'af', name:'Air France',           flag:'🇫🇷', region:'Europe',
+   co:[55,35,25], coW:'12 kg (26 lb) combined',
+   pi:[40,30,15], piW:'12 kg combined w/ carry-on',
+   notes:'12 kg total for cabin + personal item combined. Light economy fare may not include a cabin bag — only personal item.'},
+  {id:'kl', name:'KLM',                  flag:'🇳🇱', region:'Europe',
+   co:[55,35,25], coW:'12 kg (26 lb) combined',
+   pi:[40,30,15], piW:'12 kg combined w/ carry-on',
+   notes:'12 kg total for cabin + personal item combined. Light fare passengers carry-on only, no checked bag included.'},
+  {id:'ei', name:'Aer Lingus',           flag:'🇮🇪', region:'Europe',
+   co:[55,40,24], coW:'10 kg (22 lb)',
+   pi:[33,25,20], piW:'No weight limit',
+   notes:'SAVER fare: small under-seat bag only. PLUS and Advantage fares: cabin bag included. North America routes generally allow both pieces.'},
+  // Middle East
+  {id:'ek', name:'Emirates',             flag:'🇦🇪', region:'Middle East',
+   co:[55,38,20], coW:'7 kg (15 lb)',
+   pi:[45,35,20], piW:'No weight limit',
+   notes:'Economy: 1 cabin bag + 1 laptop bag or handbag. Emirates is generous in space but enforces the 7 kg cabin weight at check-in counters at DXB.'},
+  {id:'qr', name:'Qatar Airways',        flag:'🇶🇦', region:'Middle East',
+   co:[50,37,25], coW:'7 kg (15 lb)',
+   pi:[40,30,15], piW:'No weight limit',
+   notes:'Economy: 1 piece, 7 kg max. Qatar is increasingly strict at DOH — bags are weighed at the gate, especially for US-bound flights.'},
+  {id:'ey', name:'Etihad Airways',       flag:'🇦🇪', region:'Middle East',
+   co:[56,45,25], coW:'7 kg (15 lb)',
+   pi:[40,30,15], piW:'No weight limit',
+   notes:'Economy: 1 piece, 7 kg max. Etihad enforces the cabin weight limit at check-in for AUH-departing flights.'},
+  {id:'tk', name:'Turkish Airlines',     flag:'🇹🇷', region:'Europe/Middle East',
+   co:[55,40,23], coW:'8 kg (17 lb)',
+   pi:[40,30,15], piW:'No weight limit',
+   notes:'Economy: 1 cabin bag (8 kg) + 1 small accessory. Turkish enforces the cabin weight at IST — particularly on short-haul European routes.'},
+  // Asia-Pacific
+  {id:'sq', name:'Singapore Airlines',   flag:'🇸🇬', region:'Asia-Pacific',
+   co:[55,38,23], coW:'7 kg (15 lb)',
+   pi:[40,30,15], piW:'No weight limit',
+   notes:'Economy: combined sum of L+W+D must not exceed 115 cm. 7 kg cabin weight is enforced at SIN check-in counters.'},
+  {id:'cx', name:'Cathay Pacific',       flag:'🇭🇰', region:'Asia-Pacific',
+   co:[56,36,23], coW:'7 kg (15 lb)',
+   pi:[40,30,15], piW:'No weight limit',
+   notes:'Economy: 1 cabin bag + 1 small item (laptop bag or handbag). HKG check-in is strict on the 7 kg limit.'},
+  {id:'qf', name:'Qantas',              flag:'🇦🇺', region:'Asia-Pacific',
+   co:[56,36,23], coW:'7 kg (15 lb) each, 14 kg total',
+   pi:[40,30,15], piW:'7 kg (15 lb)',
+   notes:'Domestic Economy: 2 cabin bags up to 14 kg combined — unusually generous. International: same. Qantas is fairly lenient on weight enforcement.'},
+  {id:'nz', name:'Air New Zealand',      flag:'🇳🇿', region:'Asia-Pacific',
+   co:[55,35,25], coW:'7 kg (15 lb)',
+   pi:[40,28,14], piW:'No weight limit',
+   notes:'Economy: 1 cabin bag (7 kg) + 1 small handbag. Air NZ uses sizer cages at most gates and enforces the weight on regional ATR/Q300 flights.'},
+  {id:'nh', name:'ANA (All Nippon)',     flag:'🇯🇵', region:'Asia-Pacific',
+   co:[55,40,25], coW:'10 kg (22 lb)',
+   pi:[35,45,20], piW:'10 kg combined w/ carry-on',
+   notes:'Economy: 1 cabin bag + 1 small item, 10 kg combined. ANA is reasonably lenient but enforces at NRT/HND for international flights.'},
+  {id:'jl', name:'Japan Airlines',       flag:'🇯🇵', region:'Asia-Pacific',
+   co:[55,40,25], coW:'10 kg (22 lb)',
+   pi:[40,30,15], piW:'10 kg combined w/ carry-on',
+   notes:'Economy: 1 cabin bag + 1 small item, 10 kg combined. JAL\'s sum-of-dimensions cap is 115 cm.'},
+  {id:'ak', name:'AirAsia',              flag:'🇲🇾', region:'Asia-Pacific',
+   co:[56,36,23], coW:'7 kg (15 lb) combined',
+   pi:[40,30,10], piW:'7 kg combined w/ carry-on',
+   notes:'Cabin bag + small bag, 7 kg combined. AirAsia weighs carry-ons at check-in and enforces strictly — overweight = forced check-in at a steep fee.'},
+  // South America
+  {id:'la', name:'LATAM Airlines',       flag:'🇧🇷', region:'S. America',
+   co:[55,35,25], coW:'10 kg (22 lb)',
+   pi:[45,35,20], piW:'No weight limit',
+   notes:'Economy: 1 cabin bag (10 kg) + 1 personal item. Light fare may exclude cabin bag on some intra-South America routes.'},
+  {id:'av', name:'Avianca',              flag:'🇨🇴', region:'S. America',
+   co:[55,35,25], coW:'10 kg (22 lb)',
+   pi:[45,35,25], piW:'No weight limit',
+   notes:'Economy: 1 cabin bag (10 kg) + 1 personal item. Avianca\'s personal item allowance is unusually generous in size.'},
+];
+
+let cosBag = 'co';   // 'co' = carry-on, 'pi' = personal item
+let cosUnit = 'in';  // 'in' or 'cm'
+
+function cosInit() {
+  cosBag = 'co';
+  cosUnit = 'in';
+  cosSyncToggles();
+  document.getElementById('cos-airline-search').value = '';
+  document.getElementById('cos-airline-val').value = '';
+  document.getElementById('cos-d1').value = '';
+  document.getElementById('cos-d2').value = '';
+  document.getElementById('cos-d3').value = '';
+  document.getElementById('cos-result').style.display = 'none';
+  document.getElementById('cos-err').style.display = 'none';
+  document.getElementById('cos-unit-lbl').textContent = 'in inches';
+  const search = document.getElementById('cos-airline-search');
+  const drop   = document.getElementById('cos-airline-drop');
+  search.oninput = () => {
+    document.getElementById('cos-airline-val').value = '';
+    cosRenderDrop(drop, search.value);
+    drop.style.display = 'block';
+  };
+  search.onfocus = () => {
+    cosRenderDrop(drop, search.value);
+    drop.style.display = 'block';
+  };
+  search.onblur = () => setTimeout(() => { drop.style.display = 'none'; }, 160);
+}
+
+function cosSyncToggles() {
+  document.getElementById('cos-co-btn').classList.toggle('active', cosBag === 'co');
+  document.getElementById('cos-pi-btn').classList.toggle('active', cosBag === 'pi');
+  document.getElementById('cos-in-btn').classList.toggle('active', cosUnit === 'in');
+  document.getElementById('cos-cm-btn').classList.toggle('active', cosUnit === 'cm');
+}
+
+function cosRenderDrop(drop, q) {
+  const query = (q || '').toLowerCase().trim();
+  const items = query
+    ? COS_AIRLINES.filter(a => a.name.toLowerCase().includes(query) || a.region.toLowerCase().includes(query) || a.id === query)
+    : COS_AIRLINES;
+  if (!items.length) {
+    drop.innerHTML = '<div class="cos-drop-item" style="color:var(--muted);cursor:default">No airlines found</div>';
+    return;
+  }
+  drop.innerHTML = items.map(a =>
+    `<div class="cos-drop-item" onmousedown="cosSelect(event,'${a.id}')">
+      <span class="cos-drop-flag">${a.flag}</span>
+      <span class="cos-drop-name">${a.name}</span>
+      <span class="cos-drop-region">${a.region}</span>
+    </div>`
+  ).join('');
+}
+
+function cosSelect(e, id) {
+  e.preventDefault();
+  const a = COS_AIRLINES.find(x => x.id === id);
+  if (!a) return;
+  document.getElementById('cos-airline-search').value = a.flag + '  ' + a.name;
+  document.getElementById('cos-airline-val').value = id;
+  document.getElementById('cos-airline-drop').style.display = 'none';
+  document.getElementById('cos-result').style.display = 'none';
+  document.getElementById('cos-err').style.display = 'none';
+}
+
+function cosSetBag(b) {
+  cosBag = b;
+  cosSyncToggles();
+  document.getElementById('cos-result').style.display = 'none';
+}
+
+function cosSetUnit(u) {
+  if (u === cosUnit) return;
+  const inputs = ['cos-d1','cos-d2','cos-d3'].map(i => document.getElementById(i));
+  inputs.forEach(inp => {
+    const v = parseFloat(inp.value);
+    if (!isNaN(v) && v > 0) {
+      inp.value = u === 'cm' ? (v * 2.54).toFixed(1) : (v / 2.54).toFixed(1);
+    }
+  });
+  cosUnit = u;
+  document.getElementById('cos-unit-lbl').textContent = u === 'cm' ? 'in centimeters' : 'in inches';
+  cosSyncToggles();
+  document.getElementById('cos-result').style.display = 'none';
+}
+
+function cosToCm(v) { return cosUnit === 'cm' ? v : v * 2.54; }
+function cosFromCm(cm) { return cosUnit === 'cm' ? cm : cm / 2.54; }
+function cosFmt(v) {
+  const n = cosUnit === 'cm' ? Math.round(v * 10) / 10 : Math.round(v * 10) / 10;
+  return n.toFixed(1).replace(/\.0$/, '') + (cosUnit === 'cm' ? ' cm' : '"');
+}
+
+function cosShowErr(msg) {
+  const e = document.getElementById('cos-err');
+  e.innerHTML = '<div class="cos-err">⚠️ ' + msg + '</div>';
+  e.style.display = 'block';
+}
+
+function cosCheck() {
+  document.getElementById('cos-err').style.display = 'none';
+  const id = document.getElementById('cos-airline-val').value;
+  if (!id) {
+    cosShowErr('Pick an airline first.');
+    const drop = document.getElementById('cos-airline-drop');
+    cosRenderDrop(drop, '');
+    drop.style.display = 'block';
+    document.getElementById('cos-airline-search').focus();
+    return;
+  }
+  const a = COS_AIRLINES.find(x => x.id === id);
+  if (!a) return;
+
+  const d1 = parseFloat(document.getElementById('cos-d1').value);
+  const d2 = parseFloat(document.getElementById('cos-d2').value);
+  const d3 = parseFloat(document.getElementById('cos-d3').value);
+  if (!d1 || !d2 || !d3 || d1 <= 0 || d2 <= 0 || d3 <= 0) {
+    cosShowErr('Enter all three dimensions (greater than zero).');
+    return;
+  }
+
+  // Convert everything to cm for math, sort largest-first so bag orientation doesn't matter
+  const userCm  = [cosToCm(d1), cosToCm(d2), cosToCm(d3)].sort((a,b) => b - a);
+  const limitCm = (cosBag === 'co' ? a.co : a.pi).slice().sort((a,b) => b - a);
+  const diffs   = userCm.map((v, i) => v - limitCm[i]); // positive = over
+
+  const maxOver = Math.max(...diffs);
+  let status, ico, label, sub, bagFill;
+  if (maxOver <= 0) {
+    status = 'fits';
+    ico = '✅';
+    label = 'FITS';
+    sub = `Your bag is within ${a.name}'s ${cosBag === 'co' ? 'carry-on' : 'personal-item'} limits on every dimension. You\'re cleared for the cabin.`;
+    bagFill = '#a8d5b1';
+  } else if (maxOver <= COS_TOL_CM) {
+    status = 'borderline';
+    ico = '⚠️';
+    label = 'BORDERLINE';
+    sub = `Over the limit by less than ${cosUnit === 'cm' ? '2.5 cm' : '1 inch'} on at least one dimension. Soft-sided bags may compress through the sizer — hard shells won\'t.`;
+    bagFill = '#f3d27a';
+  } else {
+    status = 'fail';
+    ico = '❌';
+    label = 'TOO LARGE';
+    sub = `Over the ${cosBag === 'co' ? 'carry-on' : 'personal-item'} limit by more than ${cosUnit === 'cm' ? '2.5 cm' : '1 inch'}. Expect to gate-check (best case) or pay an oversized-bag fee.`;
+    bagFill = '#f5a698';
+  }
+
+  // Per-dimension cells (display sorted longest → shortest)
+  const dimLbls = ['Longest', 'Mid', 'Shortest'];
+  const cellsHtml = userCm.map((u, i) => {
+    const lim = limitCm[i];
+    const over = u - lim;
+    let cls = 'ok', txt = '✓ fits';
+    if (over > COS_TOL_CM)       { cls = 'bad';  txt = '+ ' + cosFmt(cosFromCm(over)) + ' over'; }
+    else if (over > 0)            { cls = 'warn'; txt = '+ ' + cosFmt(cosFromCm(over)) + ' over'; }
+    else if (over === 0)          { cls = 'warn'; txt = 'at limit'; }
+    else                          { cls = 'ok';   txt = cosFmt(cosFromCm(-over)) + ' to spare'; }
+    return `<div class="cos-dim-cell">
+      <div class="cos-dim-cell-lbl">${dimLbls[i]}</div>
+      <div class="cos-dim-cell-val">${cosFmt(cosFromCm(u))}</div>
+      <div class="cos-dim-cell-cap">max ${cosFmt(cosFromCm(lim))}</div>
+      <div class="cos-dim-cell-diff ${cls}">${txt}</div>
+    </div>`;
+  }).join('');
+
+  // SVG diagram: front view using the two largest dimensions
+  const svg = cosBuildSvg(userCm[0], userCm[1], limitCm[0], limitCm[1], bagFill);
+
+  const bagLbl = cosBag === 'co' ? 'Carry-On' : 'Personal Item';
+  const limitStr = `${cosFmt(cosFromCm(limitCm[0]))} × ${cosFmt(cosFromCm(limitCm[1]))} × ${cosFmt(cosFromCm(limitCm[2]))}`;
+  const weightStr = cosBag === 'co' ? a.coW : a.piW;
+
+  const res = document.getElementById('cos-result');
+  res.innerHTML = `<div class="cos-card">
+    <div class="cos-card-header">
+      <span class="cos-card-flag">${a.flag}</span>
+      <div>
+        <div class="cos-card-airline">${a.name}</div>
+        <div class="cos-card-sub">${bagLbl} · ${a.region}</div>
+      </div>
+    </div>
+    <div class="cos-verdict ${status}">
+      <div class="cos-verdict-ico">${ico}</div>
+      <div class="cos-verdict-lbl">${label}</div>
+      <div class="cos-verdict-sub">${sub}</div>
+    </div>
+    <div class="cos-svg-wrap">${svg}</div>
+    <div class="cos-legend">
+      <div class="cos-legend-item"><span class="cos-legend-sw limit"></span>Airline max</div>
+      <div class="cos-legend-item"><span class="cos-legend-sw ${status==='fits'?'bag-fit':status==='borderline'?'bag-warn':'bag-fail'}"></span>Your bag</div>
+    </div>
+    <div class="cos-dims-grid">${cellsHtml}</div>
+    <div class="cos-info-row">📐 <strong>${bagLbl} max:</strong> ${limitStr} &nbsp;·&nbsp; ⚖️ <strong>Weight:</strong> ${weightStr}</div>
+    <div class="cos-notes-row">ℹ️ ${a.notes}</div>
+  </div>`;
+  res.style.display = 'block';
+  res.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function cosBuildSvg(userH, userW, limH, limW, bagFill) {
+  // Front view: vertical = largest dim, horizontal = 2nd largest
+  const padding = 24;
+  const cw = 320, ch = 200;
+  const maxH = Math.max(userH, limH);
+  const maxW = Math.max(userW, limW);
+  // scale: fit both into the canvas with padding
+  const scaleH = (ch - padding * 2) / maxH;
+  const scaleW = (cw - padding * 2 - 40) / maxW; // leave room for labels
+  const s = Math.min(scaleH, scaleW);
+  const cx = cw / 2, cy = ch / 2;
+
+  const lW = limW * s, lH = limH * s;
+  const uW = userW * s, uH = userH * s;
+  const lX = cx - lW / 2, lY = cy - lH / 2;
+  const uX = cx - uW / 2, uY = cy - uH / 2;
+
+  // Dimension labels for the bag (in current unit)
+  const userHLbl = cosFmt(cosFromCm(userH));
+  const userWLbl = cosFmt(cosFromCm(userW));
+  const limHLbl  = cosFmt(cosFromCm(limH));
+  const limWLbl  = cosFmt(cosFromCm(limW));
+
+  return `<svg viewBox="0 0 ${cw} ${ch}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Bag dimensions vs. airline limit">
+    <!-- Airline limit (dashed) -->
+    <rect x="${lX.toFixed(1)}" y="${lY.toFixed(1)}" width="${lW.toFixed(1)}" height="${lH.toFixed(1)}"
+          fill="none" stroke="#1a1a1a" stroke-width="1.5" stroke-dasharray="6 4"/>
+    <!-- Your bag -->
+    <rect x="${uX.toFixed(1)}" y="${uY.toFixed(1)}" width="${uW.toFixed(1)}" height="${uH.toFixed(1)}"
+          fill="${bagFill}" stroke="#1a1a1a" stroke-width="1.5" opacity="0.85"/>
+    <!-- Bag labels -->
+    <text x="${cx}" y="${(uY + uH/2 + 4).toFixed(1)}" text-anchor="middle"
+          font-family="Georgia, serif" font-size="14" font-weight="600" fill="#1a1a1a">${userWLbl} × ${userHLbl}</text>
+    <!-- Limit label (top-left) -->
+    <text x="${(lX).toFixed(1)}" y="${(lY - 6).toFixed(1)}" text-anchor="start"
+          font-family="ui-monospace, monospace" font-size="10" fill="#666" letter-spacing="0.06em">MAX ${limWLbl} × ${limHLbl}</text>
+  </svg>`;
 }
 
 /* ══════════════════════════════════════════════════════
