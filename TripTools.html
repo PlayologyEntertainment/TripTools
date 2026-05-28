@@ -1427,6 +1427,142 @@ body {
 .print-header { display: none; font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; border-bottom: 1.5px solid #ccc; padding-bottom: 8px; }
 
 /* =========================================================
+   BEST TIME TO VISIT
+   ========================================================= */
+#view-best-time {
+  --bt-c5: #1B7F3B;  /* ideal  */
+  --bt-c4: #7CB342;  /* good   */
+  --bt-c3: #E8B22B;  /* ok     */
+  --bt-c2: #E8732B;  /* fair   */
+  --bt-c1: #D23A2E;  /* avoid  */
+}
+.bt-lbl { font-family: var(--mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 6px; }
+
+.bt-search-wrap { margin-bottom: 22px; }
+.bt-search-inner { position: relative; }
+.bt-input {
+  width: 100%; box-sizing: border-box; padding: 12px 38px 12px 14px;
+  background: var(--paper-2); border: 1.5px solid var(--ink); border-radius: var(--r);
+  font-family: var(--sans); font-size: 15px; color: var(--ink);
+}
+.bt-input:focus { outline: none; box-shadow: 2px 2px 0 var(--ink); }
+.bt-search-ico { position: absolute; right: 13px; top: 50%; transform: translateY(-50%); font-size: 15px; opacity: .55; pointer-events: none; }
+.bt-suggest {
+  position: absolute; z-index: 30; left: 0; right: 0; top: calc(100% + 4px);
+  background: var(--paper); border: 1.5px solid var(--ink); border-radius: var(--r);
+  box-shadow: 3px 3px 0 var(--ink); max-height: 320px; overflow-y: auto;
+}
+.bt-sug-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; cursor: pointer; border-bottom: 1px solid var(--rule); }
+.bt-sug-item:last-child { border-bottom: 0; }
+.bt-sug-item:hover, .bt-sug-item.active { background: var(--paper-2); }
+.bt-sug-flag { width: 26px; height: 19px; border-radius: 2px; background: var(--ink); color: #fff; font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-family: var(--mono); }
+.bt-sug-name { font-weight: 600; font-size: 14px; }
+.bt-sug-country { font-size: 12px; color: var(--muted); margin-left: auto; }
+.bt-sug-empty { padding: 12px; color: var(--muted); font-style: italic; font-size: 13px; }
+
+.bt-favs { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.bt-fav-chip { display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; background: rgba(255,210,63,.16); border: 1.5px solid var(--yellow); border-radius: 100px; font-size: 12px; font-weight: 600; cursor: pointer; }
+.bt-fav-chip:hover { background: var(--yellow); }
+.bt-fav-chip .x { opacity: .55; font-size: 13px; }
+.bt-fav-chip .x:hover { opacity: 1; }
+
+.bt-detail { border: 1.5px solid var(--ink); border-radius: var(--r); background: var(--paper); padding: 18px; margin-bottom: 30px; box-shadow: 3px 3px 0 var(--ink); }
+.bt-detail-top { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+.bt-flag { width: 52px; height: 38px; border-radius: 3px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 14px; font-family: var(--mono); flex-shrink: 0; background: var(--ink); }
+.bt-detail-meta { flex: 1; min-width: 0; }
+.bt-continent { font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.bt-name { font-family: var(--serif); font-size: 26px; line-height: 1.1; margin: 1px 0 1px; }
+.bt-country { font-size: 13px; color: var(--ink-2); }
+.bt-fav-btn { width: 44px; height: 44px; flex-shrink: 0; border: 1.5px solid var(--ink); background: var(--paper); border-radius: var(--r); font-size: 20px; cursor: pointer; color: var(--accent); line-height: 1; }
+.bt-fav-btn:hover { background: var(--paper-2); }
+.bt-fav-btn.saved { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+.bt-verdict { font-size: 14px; line-height: 1.6; background: var(--paper-2); border-left: 3px solid var(--bt-c5); padding: 11px 14px; border-radius: 0 var(--r) var(--r) 0; margin-bottom: 16px; }
+.bt-verdict .bt-v-line { display: block; }
+.bt-verdict b { font-weight: 700; }
+.bt-verdict .bt-v-sweet b { color: var(--green); }
+.bt-verdict .bt-v-avoid b { color: var(--accent); }
+.bt-verdict .bt-v-trip { margin-top: 4px; font-family: var(--mono); font-size: 11px; letter-spacing: .04em; text-transform: uppercase; color: var(--blue); }
+
+.bt-heat-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0 -2px; padding: 2px; }
+.bt-heat { display: grid; grid-template-columns: 76px repeat(12, minmax(30px, 1fr)); gap: 3px; min-width: 460px; }
+.bt-h-corner { }
+.bt-h-month { font-family: var(--mono); font-size: 10px; font-weight: 700; text-align: center; padding: 3px 0; color: var(--ink-2); cursor: pointer; border-radius: 3px; text-transform: uppercase; letter-spacing: .02em; }
+.bt-h-month:hover { background: var(--paper-2); }
+.bt-h-month.sel { background: var(--ink); color: var(--paper); }
+.bt-h-month.trip { box-shadow: inset 0 -3px 0 var(--blue); }
+.bt-h-rowlbl { font-family: var(--mono); font-size: 10px; letter-spacing: .02em; text-transform: uppercase; color: var(--ink-2); display: flex; align-items: center; gap: 3px; white-space: nowrap; }
+.bt-cell { aspect-ratio: 1 / 1; min-height: 30px; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #fff; cursor: pointer; line-height: 1; text-align: center; font-family: var(--mono); border: 2px solid transparent; transition: transform .08s; white-space: nowrap; overflow: hidden; }
+.bt-cell:hover { transform: scale(1.08); }
+.bt-cell.sel { border-color: var(--ink); }
+.bt-cell.trip { box-shadow: 0 0 0 2px var(--blue); }
+.bt-cell.overall { font-size: 12px; }
+
+.bt-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin: 14px 0 6px; font-size: 12px; color: var(--ink-2); }
+.bt-leg-grp { display: inline-flex; align-items: center; gap: 5px; }
+.bt-leg-sw { width: 13px; height: 13px; border-radius: 3px; display: inline-block; }
+.bt-leg-note { color: var(--muted); font-size: 11px; flex-basis: 100%; }
+
+.bt-month-detail { margin-top: 14px; border: 1.5px solid var(--rule); border-radius: var(--r); padding: 14px; background: var(--paper-2); }
+.bt-md-hdr { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+.bt-md-title { font-family: var(--serif); font-size: 20px; }
+.bt-md-overall { font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 3px 9px; border-radius: 100px; color: #fff; }
+.bt-md-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.bt-md-stat { background: var(--paper); border: 1px solid var(--rule); border-radius: var(--r); padding: 9px 11px; }
+.bt-md-stat-lbl { font-family: var(--mono); font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); display: flex; align-items: center; gap: 4px; }
+.bt-md-stat-val { font-family: var(--serif); font-weight: 600; font-size: 17px; margin-top: 2px; }
+.bt-md-stat-sub { font-size: 12px; color: var(--ink-2); }
+
+.bt-detail-actions { margin-top: 16px; }
+
+.bt-matrix-count { font-family: var(--sans); font-size: 11px; font-weight: 400; letter-spacing: 0; text-transform: none; color: var(--muted); }
+.bt-matrix-controls { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+.bt-matrix-controls .chip-grp { margin: 0; flex: 1; }
+.bt-month-pick-row { display: flex; flex-direction: column; }
+.bt-select {
+  padding: 8px 10px; background: var(--paper-2); border: 1.5px solid var(--ink); border-radius: var(--r);
+  font-family: var(--sans); font-size: 13px; color: var(--ink); cursor: pointer; min-width: 170px;
+}
+.bt-select:focus { outline: none; box-shadow: 2px 2px 0 var(--ink); }
+
+.bt-matrix-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1.5px solid var(--rule); border-radius: var(--r); }
+.bt-matrix { border-collapse: separate; border-spacing: 0; width: 100%; font-family: var(--mono); }
+.bt-matrix th, .bt-matrix td { padding: 0; }
+.bt-matrix thead th { position: sticky; top: 0; z-index: 2; background: var(--paper); }
+.bt-matrix .bt-mx-dest-h { text-align: left; padding: 8px 10px; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); position: sticky; left: 0; z-index: 3; background: var(--paper); border-bottom: 1.5px solid var(--rule); min-width: 134px; }
+.bt-matrix .bt-mx-mh { text-align: center; font-size: 9px; font-weight: 700; color: var(--ink-2); width: 30px; padding: 6px 0; border-bottom: 1.5px solid var(--rule); text-transform: uppercase; }
+.bt-matrix .bt-mx-mh.sel { background: var(--ink); color: var(--paper); }
+.bt-mx-dest { text-align: left; padding: 6px 10px; font-family: var(--sans); font-size: 13px; font-weight: 600; cursor: pointer; position: sticky; left: 0; z-index: 1; background: var(--paper); border-bottom: 1px solid var(--rule); white-space: nowrap; }
+.bt-mx-dest:hover { color: var(--accent); }
+.bt-mx-dest .bt-mx-rank { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-right: 6px; }
+.bt-matrix tbody tr:hover .bt-mx-dest { background: var(--paper-2); }
+.bt-mx-cell { width: 30px; height: 26px; border-bottom: 1px solid rgba(255,255,255,.25); border-right: 1px solid rgba(255,255,255,.25); cursor: pointer; }
+.bt-mx-cell.sel { box-shadow: inset 0 0 0 2px var(--ink); }
+
+.bt-data-note { margin-top: 14px; font-family: var(--mono); font-size: 10px; letter-spacing: .04em; color: var(--muted); line-height: 1.6; }
+
+@media (max-width: 480px) {
+  .bt-matrix-controls { flex-direction: column; align-items: stretch; }
+  .bt-month-pick-row { width: 100%; }
+  .bt-select { width: 100%; }
+}
+
+/* Print — Best Time to Visit */
+@media print {
+  #view-best-time .tool-bar, #view-best-time .ctx-banner, #view-best-time .pro-tip,
+  #view-best-time .related, #view-best-time .bt-search-wrap, #view-best-time .bt-favs,
+  #view-best-time .bt-fav-btn, #view-best-time .bt-detail-actions,
+  #view-best-time .bt-matrix-controls, #view-best-time .bt-matrix-scroll,
+  #view-best-time .sec-lbl { display: none !important; }
+  #view-best-time .print-header { display: block !important; }
+  #view-best-time .bt-detail { box-shadow: none !important; border-color: #999; break-inside: avoid; }
+  #view-best-time .bt-cell, #view-best-time .bt-leg-sw, #view-best-time .bt-md-overall {
+    -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;
+  }
+  #view-best-time .bt-heat { min-width: 0; }
+}
+
+/* =========================================================
    SPLASH SCREEN — TripTools dark edition
    Dark ink background (matches header), warm-ink text,
    logo via mix-blend-mode:lighten to knock out black BG.
@@ -1956,16 +2092,112 @@ body.no-scroll { overflow: hidden; }
     </div>
   </div>
 </div>
-<div id="view-placeholder-best-time" class="view">
-  <nav class="tool-topbar">
+<div id="view-best-time" class="view">
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="window.print()">🖨 Print</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">📅</span>
-    <h2>Best Time to Visit</h2>
-    <p style="margin-bottom:24px">Month-by-month weather, crowd & cost heat map for 100+ destinations.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-best-time"></div>
+  <div class="print-header">TripTools · Best Time to Visit &nbsp;·&nbsp; Printed <span id="bt-print-date"></span></div>
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>Best Time to Visit</h1>
+    <p class="tool-sub">Month-by-month weather, crowds &amp; cost for 100+ destinations — find the sweet spot to go.</p>
+  </div>
+  <div class="tool-body">
+
+    <!-- DESTINATION SEARCH -->
+    <div class="bt-search-wrap">
+      <label class="bt-lbl" for="bt-search">Pick a destination</label>
+      <div class="bt-search-inner">
+        <input id="bt-search" class="bt-input" type="text" placeholder="Search destinations…" autocomplete="off"
+               oninput="btOnSearch()" onfocus="btOnSearch()" onkeydown="btSearchKey(event)" />
+        <span class="bt-search-ico">🔍</span>
+        <div class="bt-suggest" id="bt-suggest" style="display:none"></div>
+      </div>
+      <div class="bt-favs" id="bt-favs"></div>
+    </div>
+
+    <!-- DESTINATION DETAIL -->
+    <div class="bt-detail" id="bt-detail" style="display:none">
+      <div class="bt-detail-top">
+        <div class="bt-flag" id="bt-flag"></div>
+        <div class="bt-detail-meta">
+          <div class="bt-continent" id="bt-continent"></div>
+          <h2 class="bt-name" id="bt-name"></h2>
+          <div class="bt-country" id="bt-country"></div>
+        </div>
+        <button class="bt-fav-btn" id="bt-fav-btn" onclick="btToggleFav()" title="Save to favorites">♡</button>
+      </div>
+
+      <div class="bt-verdict" id="bt-verdict"></div>
+
+      <!-- HEAT MAP -->
+      <div class="bt-heat-scroll">
+        <div class="bt-heat" id="bt-heat"></div>
+      </div>
+
+      <div class="bt-legend">
+        <span class="bt-leg-grp"><span class="bt-leg-sw" style="background:var(--bt-c5)"></span> Ideal</span>
+        <span class="bt-leg-grp"><span class="bt-leg-sw" style="background:var(--bt-c4)"></span> Good</span>
+        <span class="bt-leg-grp"><span class="bt-leg-sw" style="background:var(--bt-c3)"></span> OK</span>
+        <span class="bt-leg-grp"><span class="bt-leg-sw" style="background:var(--bt-c2)"></span> Fair</span>
+        <span class="bt-leg-grp"><span class="bt-leg-sw" style="background:var(--bt-c1)"></span> Avoid</span>
+        <span class="bt-leg-note">Crowd &amp; cost are colored by value — green = low/cheap. Tap any month for detail.</span>
+      </div>
+
+      <!-- MONTH DETAIL -->
+      <div class="bt-month-detail" id="bt-month-detail" style="display:none"></div>
+
+      <div class="bt-detail-actions">
+        <button class="btn btn-s" onclick="btSetAsMyTrip()">✈ Set as My Trip</button>
+      </div>
+    </div>
+
+    <!-- OVERVIEW MATRIX -->
+    <div class="sec-lbl" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+      <span>🗺 Browse the matrix</span>
+      <span class="bt-matrix-count" id="bt-matrix-count"></span>
+    </div>
+
+    <div class="bt-matrix-controls">
+      <div class="chip-grp" id="bt-cont-chips">
+        <span class="chip on" data-v="all"            onclick="btSetCont(this)">🌐 All</span>
+        <span class="chip"    data-v="europe"         onclick="btSetCont(this)">🏰 Europe</span>
+        <span class="chip"    data-v="asia"           onclick="btSetCont(this)">🐉 Asia</span>
+        <span class="chip"    data-v="northamerica"   onclick="btSetCont(this)">🗽 N. America</span>
+        <span class="chip"    data-v="centralamerica" onclick="btSetCont(this)">🌴 C. America</span>
+        <span class="chip"    data-v="southamerica"   onclick="btSetCont(this)">🦜 S. America</span>
+        <span class="chip"    data-v="africa"         onclick="btSetCont(this)">🦁 Africa</span>
+        <span class="chip"    data-v="oceania"        onclick="btSetCont(this)">🦘 Oceania</span>
+        <span class="chip"    data-v="middleeast"     onclick="btSetCont(this)">🕌 Middle East</span>
+      </div>
+      <div class="bt-month-pick-row">
+        <span class="bt-lbl">Going in</span>
+        <select id="bt-month-sort" class="bt-select" onchange="btRenderMatrix()">
+          <option value="">— any month (A→Z) —</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="bt-matrix-scroll">
+      <table class="bt-matrix" id="bt-matrix"></table>
+    </div>
+
+    <div class="bt-data-note" id="bt-data-note"></div>
+  </div><!-- /tool-body -->
+
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    The smartest time to travel is usually the "shoulder season" — the month or two just before or after the peak. You trade a little weather for big savings and far smaller crowds. Hunt for the green cells in the ★ Overall row.
+  </div>
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('dest-picker')">🌐 Destination Picker</button>
+      <button class="rel-btn" onclick="openTool('budget-plan')">💰 Budget Planner</button>
+      <button class="rel-btn" onclick="openTool('weather')">⛅ Live Weather</button>
+      <button class="rel-btn" onclick="openTool('bucket-list')">⭐ Bucket List Builder</button>
     </div>
   </div>
 </div>
@@ -8147,7 +8379,7 @@ input:checked + .pb-toggle-box::after { transform:translateX(16px);background:#f
 const TOOLS = [
   {id:'dest-picker',   nm:'Destination Picker',         ico:'🌐', ph:'discovery', on:false, live:true,  ds:'Spin-the-globe randomizer filtered by continent, budget & vibe.'},
   {id:'dest-compare',  nm:'Destination Comparison',     ico:'⚖️', ph:'discovery', on:false, live:false, ds:'Side-by-side comparison of 2–3 destinations across 10 dimensions.'},
-  {id:'best-time',     nm:'Best Time to Visit',         ico:'📅', ph:'discovery', on:false, live:false, ds:'Month-by-month weather, crowd & cost heat map for 100+ destinations.'},
+  {id:'best-time',     nm:'Best Time to Visit',         ico:'📅', ph:'discovery', on:false, live:true,  ds:'Month-by-month weather, crowd & cost heat map for 100+ destinations.'},
   {id:'travel-quiz',   nm:'Travel Style Quiz',          ico:'🧠', ph:'discovery', on:false, live:false, ds:'10-question quiz to discover your travel personality.'},
   {id:'bucket-list',   nm:'Bucket List Builder',        ico:'⭐', ph:'discovery', on:false, live:false, ds:'Create, organize & check off dream destinations. Printable.'},
   {id:'trip-duration', nm:'Trip Duration Calculator',   ico:'🗓', ph:'discovery', on:false, live:false, ds:'How many days do you really need? Accounts for jet lag & transit.'},
@@ -8856,6 +9088,7 @@ function injectTripCtx(id) {
   } else if(ctx){ ctx.classList.remove('show'); }
   if(id==='doc-checklist') dcInit();
   if(id==='dest-picker') dpInit();
+  if(id==='best-time')   btInit();
   if(id==='currency') fxInit();
   if(id==='unit-conv') ucInit();
   if(id==='fuel-cost') fcInit();
@@ -11663,6 +11896,427 @@ function dpTypeName(t) {
     romance:'Romance', romantic:'Romantic', history:'History'
   };
   return map[t] || t;
+}
+
+/* ══════════════════════════════════════════
+   BEST TIME TO VISIT
+   Offline month-by-month weather / crowd / cost
+   model derived from a bundled climate dataset.
+   Data version 1.0 · last verified May 2026.
+   ══════════════════════════════════════════ */
+const BT_DATA_VERSION = '1.0';
+const BT_DATA_VERIFIED = 'May 2026';
+const BT_MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const BT_MONTHS_FULL = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const BT_WEATHER_LABEL = ['','Poor','Rough','Fair','Pleasant','Ideal'];
+const BT_CROWD_LABEL   = ['','Very quiet','Quiet','Moderate','Busy','Peak'];
+const BT_COST_LABEL    = ['','Bargain','Cheap','Average','Pricey','Premium'];
+const BT_OVERALL_LABEL = ['','Avoid','Fair','Decent','Great','Ideal'];
+const BT_OVERALL_PHRASE = ['','Best avoided','Fair — go in prepared','A decent time to go','A great time to go','An ideal time to go'];
+const BT_OVERALL_GLYPH = ['','✕','·','~','✓','★'];
+const BT_CROWD_ABBR    = ['','VL','Lo','Md','Hi','Pk'];
+const BT_POPULAR = ['paris','tokyo','rome','bali','new-york','barcelona','dubai','bangkok','santorini','iceland'];
+const BT_CONT_NAMES = {europe:'Europe', asia:'Asia', northamerica:'North America', centralamerica:'Central America & Caribbean', southamerica:'South America', africa:'Africa', oceania:'Oceania', middleeast:'Middle East'};
+const BT_CONT_COLORS = {europe:'#1565C0', asia:'#2E7D32', northamerica:'#E65100', centralamerica:'#BF360C', southamerica:'#F9A825', africa:'#AD1457', oceania:'#00838F', middleeast:'#6A1B9A'};
+
+/* Climate archetypes — Northern-Hemisphere oriented monthly daytime highs (°C)
+   and a "wet"/poor-weather flag per month. Southern destinations flip by 6. */
+const BT_ARCH = {
+  mediterranean:       { temps:[13,14,16,19,23,28,31,31,27,22,17,14], wet:[0,0,0,0,0,0,0,0,0,0,0,0] },
+  temperate_oceanic:   { temps:[8,8,11,14,18,21,23,22,19,15,11,8],     wet:[1,1,1,0,0,0,0,0,0,1,1,1] },
+  continental:         { temps:[2,4,10,16,21,25,27,26,21,14,7,3],      wet:[0,0,0,0,0,0,0,0,0,0,0,0] },
+  humid_subtropical:   { temps:[11,13,17,22,26,29,32,32,29,24,18,13],  wet:[0,0,0,0,1,1,1,1,0,0,0,0] },
+  tropical_monsoon:    { temps:[31,32,33,34,33,32,31,31,31,31,31,30],  wet:[0,0,0,0,1,1,1,1,1,1,0,0] },
+  tropical_equatorial: { temps:[31,31,32,32,31,31,30,31,31,31,31,30],  wet:[1,0,0,0,0,1,1,1,1,1,1,1] },
+  desert_hot:          { temps:[21,23,27,32,38,41,42,42,39,34,27,22],  wet:[0,0,0,0,0,0,0,0,0,0,0,0] },
+  alpine:              { temps:[1,2,6,11,16,20,22,21,16,10,5,2],       wet:[0,0,0,0,0,0,0,0,0,0,0,0] },
+  subtropical_highland:{ temps:[22,24,25,26,25,24,23,23,23,22,22,21],  wet:[0,0,0,0,1,1,1,1,1,0,0,0] },
+  subarctic:           { temps:[2,3,5,8,12,15,17,16,12,7,4,2],         wet:[1,1,1,0,0,0,0,0,0,1,1,1] },
+  savanna:             { temps:[29,30,30,28,26,24,24,26,29,30,29,28],  wet:[1,1,1,1,0,0,0,0,0,0,1,1] },
+};
+
+/* Per-destination climate assignment (archetype + hemisphere). */
+const BT_CLIMATE = {
+  /* Europe */
+  paris:{a:'temperate_oceanic',h:'N'}, rome:{a:'mediterranean',h:'N'}, barcelona:{a:'mediterranean',h:'N'},
+  amsterdam:{a:'temperate_oceanic',h:'N'}, lisbon:{a:'mediterranean',h:'N'}, santorini:{a:'mediterranean',h:'N'},
+  prague:{a:'continental',h:'N'}, 'swiss-alps':{a:'alpine',h:'N'}, vienna:{a:'continental',h:'N'},
+  amalfi:{a:'mediterranean',h:'N'}, iceland:{a:'subarctic',h:'N'}, edinburgh:{a:'temperate_oceanic',h:'N'},
+  dubrovnik:{a:'mediterranean',h:'N'}, 'norwegian-fjords':{a:'subarctic',h:'N'}, budapest:{a:'continental',h:'N'},
+  tuscany:{a:'mediterranean',h:'N'},
+  /* Asia */
+  tokyo:{a:'humid_subtropical',h:'N'}, bali:{a:'tropical_monsoon',h:'S'}, bangkok:{a:'tropical_monsoon',h:'N'},
+  kyoto:{a:'humid_subtropical',h:'N'}, singapore:{a:'tropical_equatorial',h:'N'}, vietnam:{a:'tropical_monsoon',h:'N'},
+  nepal:{a:'subtropical_highland',h:'N'}, phuket:{a:'tropical_monsoon',h:'N'}, maldives:{a:'tropical_monsoon',h:'N'},
+  'hong-kong':{a:'humid_subtropical',h:'N'}, cambodia:{a:'tropical_monsoon',h:'N'}, 'sri-lanka':{a:'tropical_equatorial',h:'N'},
+  taiwan:{a:'humid_subtropical',h:'N'}, 'georgia-tb':{a:'continental',h:'N'}, philippines:{a:'tropical_monsoon',h:'N'},
+  bhutan:{a:'subtropical_highland',h:'N'}, uzbekistan:{a:'continental',h:'N'}, 'japan-rural':{a:'humid_subtropical',h:'N'},
+  myanmar:{a:'tropical_monsoon',h:'N'}, laos:{a:'tropical_monsoon',h:'N'},
+  /* North America */
+  'new-york':{a:'continental',h:'N'}, oaxaca:{a:'subtropical_highland',h:'N'}, 'new-orleans':{a:'humid_subtropical',h:'N'},
+  'us-parks':{a:'continental',h:'N'}, 'canadian-rockies':{a:'alpine',h:'N'}, alaska:{a:'subarctic',h:'N'},
+  'grand-canyon':{a:'continental',h:'N'}, 'mexico-city':{a:'subtropical_highland',h:'N'}, yucatan:{a:'tropical_monsoon',h:'N'},
+  orlando:{a:'humid_subtropical',h:'N'}, 'los-angeles':{a:'mediterranean',h:'N'}, 'magic-kingdom':{a:'humid_subtropical',h:'N'},
+  epcot:{a:'humid_subtropical',h:'N'}, 'hollywood-studios':{a:'humid_subtropical',h:'N'}, 'animal-kingdom':{a:'humid_subtropical',h:'N'},
+  'universal-orlando':{a:'humid_subtropical',h:'N'}, 'islands-adventure':{a:'humid_subtropical',h:'N'},
+  'disneyland-ca':{a:'mediterranean',h:'N'}, 'california-adventure':{a:'mediterranean',h:'N'},
+  'universal-hollywood':{a:'mediterranean',h:'N'}, 'seaworld-orlando':{a:'humid_subtropical',h:'N'},
+  'knotts-berry-farm':{a:'mediterranean',h:'N'}, 'busch-gardens-tb':{a:'humid_subtropical',h:'N'},
+  /* Central America & Caribbean */
+  'costa-rica':{a:'tropical_monsoon',h:'N'}, cuba:{a:'tropical_monsoon',h:'N'}, colombia:{a:'tropical_monsoon',h:'N'},
+  'trinidad-cuba':{a:'tropical_monsoon',h:'N'},
+  /* South America */
+  'machu-picchu':{a:'subtropical_highland',h:'S'}, patagonia:{a:'subarctic',h:'S'}, rio:{a:'humid_subtropical',h:'S'},
+  galapagos:{a:'tropical_equatorial',h:'N'}, 'buenos-aires':{a:'humid_subtropical',h:'S'}, 'beto-carrero':{a:'humid_subtropical',h:'S'},
+  /* Asia parks */
+  'tokyo-disneyland':{a:'humid_subtropical',h:'N'}, 'tokyo-disneysea':{a:'humid_subtropical',h:'N'}, usj:{a:'humid_subtropical',h:'N'},
+  'shanghai-disney':{a:'humid_subtropical',h:'N'}, 'chimelong-ocean':{a:'humid_subtropical',h:'N'}, 'lotte-world':{a:'continental',h:'N'},
+  everland:{a:'continental',h:'N'}, 'universal-singapore':{a:'tropical_equatorial',h:'N'}, 'ocean-park-hk':{a:'humid_subtropical',h:'N'},
+  /* Europe parks */
+  'disneyland-paris':{a:'temperate_oceanic',h:'N'}, 'europa-park':{a:'continental',h:'N'}, efteling:{a:'temperate_oceanic',h:'N'},
+  'puy-du-fou':{a:'temperate_oceanic',h:'N'}, portaventura:{a:'mediterranean',h:'N'}, phantasialand:{a:'temperate_oceanic',h:'N'},
+  'tivoli-gardens':{a:'temperate_oceanic',h:'N'}, 'alton-towers':{a:'temperate_oceanic',h:'N'}, gardaland:{a:'mediterranean',h:'N'},
+  /* Middle East */
+  'ferrari-world':{a:'desert_hot',h:'N'}, 'img-worlds':{a:'desert_hot',h:'N'}, 'warner-abu-dhabi':{a:'desert_hot',h:'N'},
+  dubai:{a:'desert_hot',h:'N'}, 'abu-dhabi':{a:'desert_hot',h:'N'}, oman:{a:'desert_hot',h:'N'}, alula:{a:'desert_hot',h:'N'},
+  istanbul:{a:'mediterranean',h:'N'}, jordan:{a:'desert_hot',h:'N'}, israel:{a:'mediterranean',h:'N'},
+  /* Africa */
+  serengeti:{a:'savanna',h:'N'}, morocco:{a:'mediterranean',h:'N'}, 'cape-town':{a:'mediterranean',h:'S'},
+  egypt:{a:'desert_hot',h:'N'}, zanzibar:{a:'tropical_monsoon',h:'S'}, kenya:{a:'savanna',h:'N'},
+  madagascar:{a:'tropical_monsoon',h:'S'}, ethiopia:{a:'subtropical_highland',h:'N'}, namibia:{a:'desert_hot',h:'S'},
+  rwanda:{a:'subtropical_highland',h:'S'},
+  /* Oceania */
+  sydney:{a:'humid_subtropical',h:'S'}, 'great-barrier-reef':{a:'tropical_monsoon',h:'S'}, 'new-zealand':{a:'temperate_oceanic',h:'S'},
+  fiji:{a:'tropical_monsoon',h:'S'}, queensland:{a:'humid_subtropical',h:'S'}, 'dreamworld-au':{a:'humid_subtropical',h:'S'},
+};
+
+/* Theme-park style destinations: crowds are driven by school holidays, not weather. */
+const BT_PARKS = new Set(['orlando','magic-kingdom','epcot','hollywood-studios','animal-kingdom','universal-orlando','islands-adventure','disneyland-ca','california-adventure','universal-hollywood','seaworld-orlando','knotts-berry-farm','busch-gardens-tb','tokyo-disneyland','tokyo-disneysea','usj','disneyland-paris','europa-park','efteling','puy-du-fou','portaventura','phantasialand','tivoli-gardens','alton-towers','gardaland','shanghai-disney','chimelong-ocean','lotte-world','everland','universal-singapore','ocean-park-hk','beto-carrero','dreamworld-au','ferrari-world','img-worlds','warner-abu-dhabi']);
+
+let btCurDest=null, btCurData=null, btSelMonth=null, btTripSet=new Set();
+let btFavs=[], btMatrixCont='all', btMatrixMonth='', btSugList=[], btSugActive=-1;
+let btData={}, btWired=false;
+
+function btClamp(v,lo,hi){ return Math.max(lo,Math.min(hi,v)); }
+function btR(v){ return btClamp(Math.round(v),1,5); }
+
+function btComfortFromTemp(t){
+  if(t>=20 && t<=28) return 5;
+  if((t>=15 && t<20) || (t>28 && t<=31)) return 4;
+  if((t>=10 && t<15) || (t>31 && t<=34)) return 3;
+  if((t>=4 && t<10)  || (t>34 && t<=38)) return 2;
+  return 1;
+}
+function btParkCrowd(hemi){
+  const N=[3,3,4,4,3,5,5,5,2,3,3,5];
+  if(hemi!=='S') return N.slice();
+  const S=[]; for(let i=0;i<12;i++) S[i]=N[(i+6)%12]; return S;
+}
+/* Turn the curated "best season" string into the set of recommended months. */
+function btParseSeason(str){
+  const set=new Set();
+  if(!str) return set;
+  const s=str.toLowerCase().replace(/\([^)]*\)/g,' ');           // drop parentheticals like "(ski)"
+  if(s.includes('year-round')||s.includes('year round')){ for(let i=0;i<12;i++) set.add(i); return set; }
+  const MON={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
+  s.split(',').forEach(seg=>{
+    const m=(seg.match(/jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec/g))||[];
+    if(m.length>=2){ let i=MON[m[0]]; const b=MON[m[1]]; for(let g=0;g<12;g++){ set.add(i); if(i===b) break; i=(i+1)%12; } }
+    else if(m.length===1){ set.add(MON[m[0]]); }
+  });
+  return set;
+}
+/* Overall "best time" rating from recommended months, with smooth month-distance falloff. */
+function btOverallFromSeason(rec){
+  const ov=[];
+  for(let i=0;i<12;i++){
+    if(rec.has(i)){ ov.push(5); continue; }
+    let dist=12;
+    rec.forEach(r=>{ let d=Math.abs(i-r); d=Math.min(d,12-d); if(d<dist) dist=d; });
+    ov.push(dist<=1?4 : dist<=2?3 : dist<=3?2 : 1);
+  }
+  return ov;
+}
+function btCompute(dest){
+  const cl = BT_CLIMATE[dest.id] || {a:'temperate_oceanic',h:'N'};
+  const A  = BT_ARCH[cl.a] || BT_ARCH.temperate_oceanic;
+  const isPark = BT_PARKS.has(dest.id);
+  const tropical = (cl.a==='tropical_monsoon'||cl.a==='tropical_equatorial'||cl.a==='desert_hot'||cl.a==='savanna');
+  const temps=[], wet=[], weather=[], crowd=[], cost=[], overall=[];
+  for(let i=0;i<12;i++){
+    const idx = cl.h==='S' ? (i+6)%12 : i;
+    const t = A.temps[idx], w = A.wet[idx]===1;
+    temps[i]=t; wet[i]=w;
+    let c = btComfortFromTemp(t);
+    if(w) c = Math.max(1, c-1);
+    weather[i]=c;
+  }
+  for(let i=0;i<12;i++){
+    let cr, ct;
+    if(isPark){
+      const pc = btParkCrowd(cl.h);
+      cr = pc[i];
+      ct = pc[i];
+      if(i===11) ct = btClamp(ct+0.3,1,5); // holiday ticket premiums
+    } else {
+      cr = 1.4 + (weather[i]-1)*0.85;          // people travel when weather is good
+      const summerN = (i===6||i===7), summerS = (i===0||i===1);
+      if(!tropical && cl.h==='N' && summerN) cr += 0.8;   // northern summer holidays
+      if(!tropical && cl.h==='S' && summerS) cr += 0.8;   // southern summer holidays
+      if(tropical && (i===11||i===0||i===1)) cr += 0.6;   // winter-sun escape season
+      if(i===11) cr += 0.35;                              // year-end holidays everywhere
+      cr = btClamp(cr,1,5);
+      ct = cr;                                             // cost tracks demand
+      if(i===11) ct += 0.4;
+      if(!tropical && cl.h==='N' && summerN) ct += 0.3;
+      if(!tropical && cl.h==='S' && summerS) ct += 0.3;
+      ct = btClamp(ct,1,5);
+    }
+    crowd[i]=btR(cr); cost[i]=btR(ct);
+  }
+  const rec = btParseSeason(dest.season);
+  const ov  = rec.size ? btOverallFromSeason(rec) : weather.map(btR);
+  for(let i=0;i<12;i++) overall[i]=ov[i];
+  return { temps, wet, weather, crowd, cost, overall };
+}
+function btGetData(dest){ return btData[dest.id] || (btData[dest.id]=btCompute(dest)); }
+
+function btConditions(t, wet){
+  let base;
+  if(t<5) base='Cold'; else if(t<12) base='Chilly'; else if(t<18) base='Mild';
+  else if(t<27) base='Warm'; else if(t<32) base='Hot'; else base='Very hot';
+  return base + ' ' + (wet ? '& wet' : (t>=18 ? '& dry' : '& crisp'));
+}
+function btSeasonName(i, dest){
+  const hemi = (BT_CLIMATE[dest.id]||{}).h || 'N';
+  let s = (i===11||i<=1) ? 'Winter' : (i<=4 ? 'Spring' : (i<=7 ? 'Summer' : 'Autumn'));
+  if(hemi==='S') s = {Winter:'Summer',Spring:'Autumn',Summer:'Winter',Autumn:'Spring'}[s];
+  return s;
+}
+function btCrowdSub(c){ return ['','You\'ll nearly have it to yourself','Pleasantly uncrowded','Comfortable, normal footfall','Lines build & hotels fill','Booked out — reserve well ahead'][c]; }
+function btCostSub(k){ return ['','Lowest fares & rates of the year','Below-average prices','Typical pricing','Above average — book ahead','Peak pricing — premiums everywhere'][k]; }
+
+function btMonthRanges(idxs){
+  const s=[...new Set(idxs)].sort((a,b)=>a-b);
+  if(!s.length) return '';
+  const groups=[]; let start=s[0], prev=s[0];
+  for(let k=1;k<s.length;k++){
+    if(s[k]===prev+1){ prev=s[k]; }
+    else { groups.push([start,prev]); start=s[k]; prev=s[k]; }
+  }
+  groups.push([start,prev]);
+  if(groups.length>1 && groups[0][0]===0 && groups[groups.length-1][1]===11){
+    const last=groups.pop(); groups[0][0]=last[0];   // wrap across year-end, e.g. Nov–Feb
+  }
+  return groups.map(g => g[0]===g[1] ? BT_MONTHS[g[0]] : BT_MONTHS[g[0]]+'–'+BT_MONTHS[g[1]]).join(', ');
+}
+
+function btTripMonths(){
+  const t=getActiveTrip(); const s=new Set();
+  if(t && t.departDate){
+    const d1=new Date(t.departDate);
+    if(!isNaN(d1)){
+      const d2 = t.returnDate ? new Date(t.returnDate) : d1;
+      const end = isNaN(d2) ? d1 : d2;
+      let cur=new Date(d1.getFullYear(), d1.getMonth(), 1), guard=0;
+      while(cur<=end && guard<24){ s.add(cur.getMonth()); cur.setMonth(cur.getMonth()+1); guard++; }
+    }
+  }
+  return s;
+}
+function btMatchTripDest(){
+  const t=getActiveTrip(); if(!t || !t.destination) return null;
+  const q=t.destination.toLowerCase();
+  return DP_DESTINATIONS.find(d => q.includes(d.name.toLowerCase()) || q.includes(d.country.toLowerCase())) || null;
+}
+
+function btInit(){
+  document.getElementById('bt-print-date').textContent =
+    new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+  document.getElementById('bt-data-note').textContent =
+    `Bundled climate dataset v${BT_DATA_VERSION} · last verified ${BT_DATA_VERIFIED}. Figures are typical seasonal estimates for planning — confirm current conditions and live prices before you book.`;
+  btFavs = JSON.parse(localStorage.getItem('tt_bt_favs')||'[]');
+  const sel=document.getElementById('bt-month-sort');
+  if(sel.options.length<=1){
+    for(let i=0;i<12;i++){ const o=document.createElement('option'); o.value=i; o.textContent='Going in '+BT_MONTHS_FULL[i]; sel.appendChild(o); }
+  }
+  if(!btWired){
+    btWired=true;
+    document.addEventListener('click', function(e){ if(!e.target.closest('.bt-search-inner')) btHideSuggest(); });
+  }
+  btTripSet = btTripMonths();
+  btRenderFavs();
+  btRenderMatrix();
+  const match = btMatchTripDest();
+  if(match) btSelectDest(match.id, true);
+  else if(btCurDest) btRenderDetail(btCurDest);
+  else btSelectDest('paris', true);
+}
+
+function btOnSearch(){
+  const q=(document.getElementById('bt-search').value||'').toLowerCase().trim();
+  let list;
+  if(!q) list = BT_POPULAR.map(id=>DP_DESTINATIONS.find(d=>d.id===id)).filter(Boolean);
+  else   list = DP_DESTINATIONS.filter(d => d.name.toLowerCase().includes(q) || d.country.toLowerCase().includes(q)).slice(0,12);
+  btSugList=list; btSugActive=-1;
+  const box=document.getElementById('bt-suggest');
+  if(!list.length){ box.innerHTML='<div class="bt-sug-empty">No destinations found</div>'; box.style.display='block'; return; }
+  box.innerHTML = (!q ? '<div class="bt-sug-empty" style="padding:7px 12px">Popular destinations</div>' : '') +
+    list.map((d,i)=>`<div class="bt-sug-item" data-i="${i}" onmousedown="event.preventDefault();btSelectDest('${d.id}')"><span class="bt-sug-flag">${d.flag}</span><span class="bt-sug-name">${d.name}</span><span class="bt-sug-country">${d.country}</span></div>`).join('');
+  box.style.display='block';
+}
+function btHideSuggest(){ const b=document.getElementById('bt-suggest'); if(b) b.style.display='none'; }
+function btHighlightSug(){ document.querySelectorAll('#bt-suggest .bt-sug-item').forEach(el=>el.classList.toggle('active', +el.dataset.i===btSugActive)); }
+function btSearchKey(e){
+  const box=document.getElementById('bt-suggest');
+  if(!box || box.style.display==='none') return;
+  if(e.key==='ArrowDown'){ e.preventDefault(); btSugActive=Math.min(btSugList.length-1, btSugActive+1); btHighlightSug(); }
+  else if(e.key==='ArrowUp'){ e.preventDefault(); btSugActive=Math.max(0, btSugActive-1); btHighlightSug(); }
+  else if(e.key==='Enter'){ e.preventDefault(); const pick = btSugActive>=0 ? btSugList[btSugActive] : btSugList[0]; if(pick) btSelectDest(pick.id); }
+  else if(e.key==='Escape'){ btHideSuggest(); }
+}
+
+function btSelectDest(id, noScroll){
+  const dest=DP_DESTINATIONS.find(d=>d.id===id); if(!dest) return;
+  btCurDest=dest; btSelMonth=null;
+  document.getElementById('bt-search').value=dest.name;
+  btHideSuggest();
+  btRenderDetail(dest);
+  if(!noScroll) document.getElementById('bt-detail').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function btRenderDetail(dest){
+  const data=btGetData(dest); btCurData=data;
+  document.getElementById('bt-detail').style.display='block';
+  const flag=document.getElementById('bt-flag');
+  flag.textContent=dest.flag; flag.style.background=BT_CONT_COLORS[dest.continent]||'var(--ink)';
+  document.getElementById('bt-continent').textContent=BT_CONT_NAMES[dest.continent]||dest.continent;
+  document.getElementById('bt-name').textContent=dest.name;
+  document.getElementById('bt-country').textContent=dest.country;
+  const fb=document.getElementById('bt-fav-btn'), isFav=btFavs.includes(dest.id);
+  fb.textContent=isFav?'♥':'♡'; fb.classList.toggle('saved',isFav);
+  btTripSet=btTripMonths();
+  btRenderVerdict(data);
+  btRenderHeat(data);
+  document.getElementById('bt-month-detail').style.display='none';
+}
+
+function btRenderVerdict(data){
+  const sweet=[], avoid=[];
+  for(let i=0;i<12;i++){ if(data.overall[i]>=4) sweet.push(i); if(data.overall[i]<=1) avoid.push(i); }
+  let html='';
+  if(sweet.length) html+=`<span class="bt-v-line bt-v-sweet">🟢 Sweet spot: <b>${btMonthRanges(sweet)}</b> — the best balance of weather, smaller crowds &amp; value.</span>`;
+  else {
+    const max=Math.max(...data.overall), best=[]; for(let i=0;i<12;i++) if(data.overall[i]===max) best.push(i);
+    html+=`<span class="bt-v-line bt-v-sweet">🟢 Best of the year: <b>${btMonthRanges(best)}</b>.</span>`;
+  }
+  if(avoid.length) html+=`<span class="bt-v-line bt-v-avoid">🔴 Hardest months: <b>${btMonthRanges(avoid)}</b> — weather, crowds or cost work against you.</span>`;
+  if(btTripSet.size) html+=`<span class="bt-v-line bt-v-trip">✈ Your trip: ${btMonthRanges([...btTripSet])} (highlighted below)</span>`;
+  document.getElementById('bt-verdict').innerHTML=html;
+}
+
+function btCell(good, text, i, cls){
+  const sel=(i===btSelMonth)?' sel':'', tr=btTripSet.has(i)?' trip':'';
+  return `<div class="bt-cell ${cls}${sel}${tr}" style="background:var(--bt-c${good})" onclick="btShowMonth(${i})">${text}</div>`;
+}
+function btRenderHeat(data){
+  let h='<div class="bt-h-corner"></div>';
+  for(let i=0;i<12;i++){ const sel=(i===btSelMonth)?' sel':'', tr=btTripSet.has(i)?' trip':''; h+=`<div class="bt-h-month${sel}${tr}" onclick="btShowMonth(${i})">${BT_MONTHS[i]}</div>`; }
+  h+='<div class="bt-h-rowlbl">☀ Weather</div>';
+  for(let i=0;i<12;i++) h+=btCell(data.weather[i], data.temps[i]+'°', i, '');
+  h+='<div class="bt-h-rowlbl">👥 Crowds</div>';
+  for(let i=0;i<12;i++) h+=btCell(6-data.crowd[i], BT_CROWD_ABBR[data.crowd[i]], i, '');
+  h+='<div class="bt-h-rowlbl">💰 Cost</div>';
+  for(let i=0;i<12;i++) h+=btCell(6-data.cost[i], '$'.repeat(data.cost[i]), i, '');
+  h+='<div class="bt-h-rowlbl">★ Overall</div>';
+  for(let i=0;i<12;i++) h+=btCell(data.overall[i], BT_OVERALL_GLYPH[data.overall[i]], i, 'overall');
+  document.getElementById('bt-heat').innerHTML=h;
+}
+
+function btShowMonth(i){
+  if(!btCurData) return;
+  btSelMonth=i; btRenderHeat(btCurData);
+  const d=btCurData, dest=btCurDest;
+  const w=d.weather[i], c=d.crowd[i], k=d.cost[i], o=d.overall[i];
+  const panel=document.getElementById('bt-month-detail');
+  panel.style.display='block';
+  panel.innerHTML=`
+    <div class="bt-md-hdr">
+      <div class="bt-md-title">${BT_MONTHS_FULL[i]} · ${btSeasonName(i,dest)}</div>
+      <span class="bt-md-overall" style="background:var(--bt-c${o})">${BT_OVERALL_PHRASE[o]}</span>
+    </div>
+    <div class="bt-md-grid">
+      <div class="bt-md-stat"><div class="bt-md-stat-lbl">☀ Weather</div><div class="bt-md-stat-val">${BT_WEATHER_LABEL[w]}</div><div class="bt-md-stat-sub">~${d.temps[i]}°C high · ${btConditions(d.temps[i], d.wet[i])}</div></div>
+      <div class="bt-md-stat"><div class="bt-md-stat-lbl">👥 Crowds</div><div class="bt-md-stat-val">${BT_CROWD_LABEL[c]}</div><div class="bt-md-stat-sub">${btCrowdSub(c)}</div></div>
+      <div class="bt-md-stat"><div class="bt-md-stat-lbl">💰 Relative cost</div><div class="bt-md-stat-val">${BT_COST_LABEL[k]} <span style="color:var(--muted)">${'$'.repeat(k)}</span></div><div class="bt-md-stat-sub">${btCostSub(k)}</div></div>
+    </div>`;
+}
+
+function btToggleFav(){
+  if(!btCurDest) return;
+  const i=btFavs.indexOf(btCurDest.id);
+  if(i>=0) btFavs.splice(i,1); else btFavs.push(btCurDest.id);
+  localStorage.setItem('tt_bt_favs', JSON.stringify(btFavs));
+  const fb=document.getElementById('bt-fav-btn'), isFav=btFavs.includes(btCurDest.id);
+  fb.textContent=isFav?'♥':'♡'; fb.classList.toggle('saved',isFav);
+  btRenderFavs();
+}
+function btRemoveFav(id){
+  btFavs=btFavs.filter(x=>x!==id);
+  localStorage.setItem('tt_bt_favs', JSON.stringify(btFavs));
+  btRenderFavs();
+  if(btCurDest && btCurDest.id===id){ const fb=document.getElementById('bt-fav-btn'); fb.textContent='♡'; fb.classList.remove('saved'); }
+}
+function btRenderFavs(){
+  const wrap=document.getElementById('bt-favs');
+  if(!btFavs.length){ wrap.innerHTML=''; return; }
+  wrap.innerHTML = btFavs.map(id=>{
+    const d=DP_DESTINATIONS.find(x=>x.id===id); if(!d) return '';
+    return `<span class="bt-fav-chip" onclick="btSelectDest('${d.id}')">★ ${d.name}<span class="x" onclick="event.stopPropagation();btRemoveFav('${d.id}')">✕</span></span>`;
+  }).join('');
+}
+
+function btSetAsMyTrip(){
+  if(!btCurDest) return;
+  const trips=getTrips(), activeId=getActiveTripId(), trip=trips.find(t=>t.id===activeId);
+  if(trip){
+    trip.destination=btCurDest.name+', '+btCurDest.country;
+    trip.updatedAt=new Date().toISOString();
+    saveTrips(trips); updHdrTrip();
+    btRenderDetail(btCurDest);
+    alert('✈ Destination set to "'+btCurDest.name+'" in your active trip.');
+  } else if(confirm('No active trip yet. Create one with this destination?')){
+    showView('mytrip');
+    setTimeout(()=>{ const di=document.getElementById('mt-dest'); if(di) di.value=btCurDest.name+', '+btCurDest.country; }, 100);
+  }
+}
+
+function btSetCont(el){
+  document.querySelectorAll('#bt-cont-chips .chip').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on'); btMatrixCont=el.dataset.v; btRenderMatrix();
+}
+function btSortByMonth(i){ document.getElementById('bt-month-sort').value=String(i); btRenderMatrix(); }
+function btRenderMatrix(){
+  btMatrixMonth=document.getElementById('bt-month-sort').value;
+  const m = btMatrixMonth==='' ? null : parseInt(btMatrixMonth,10);
+  let list=DP_DESTINATIONS.filter(d => btMatrixCont==='all' || d.continent===btMatrixCont);
+  list.forEach(d=>d._bt=btGetData(d));
+  if(m===null) list.sort((a,b)=>a.name.localeCompare(b.name));
+  else list.sort((a,b)=> b._bt.overall[m]-a._bt.overall[m] || a.name.localeCompare(b.name));
+  let html='<thead><tr><th class="bt-mx-dest-h">Destination</th>';
+  for(let i=0;i<12;i++){ const s=(m===i)?' sel':''; html+=`<th class="bt-mx-mh${s}" title="${BT_MONTHS_FULL[i]} — click to rank" onclick="btSortByMonth(${i})">${BT_MONTHS[i][0]}</th>`; }
+  html+='</tr></thead><tbody>';
+  list.forEach((d,idx)=>{
+    const rank = (m===null) ? '' : `<span class="bt-mx-rank">${idx+1}</span>`;
+    html+=`<tr><td class="bt-mx-dest" onclick="btSelectDest('${d.id}')">${rank}${d.name}</td>`;
+    for(let i=0;i<12;i++){ const g=d._bt.overall[i], s=(m===i)?' sel':''; html+=`<td class="bt-mx-cell${s}" style="background:var(--bt-c${g})" title="${d.name} · ${BT_MONTHS_FULL[i]}: ${BT_OVERALL_LABEL[g]}" onclick="btSelectDest('${d.id}')"></td>`; }
+    html+='</tr>';
+  });
+  html+='</tbody>';
+  document.getElementById('bt-matrix').innerHTML=html;
+  const cName = btMatrixCont==='all' ? 'all regions' : (BT_CONT_NAMES[btMatrixCont]||btMatrixCont);
+  document.getElementById('bt-matrix-count').textContent =
+    `${list.length} destinations · ${cName}` + (m!==null ? ` · ranked for ${BT_MONTHS_FULL[m]}` : '');
 }
 
 /* ── SPLASH ── */
