@@ -7643,16 +7643,227 @@ input:checked + .pb-toggle-box::after { transform:translateX(16px);background:#f
     </div>
   </div>
 </div>
-<div id="view-placeholder-trip-recap" class="view">
-  <nav class="tool-topbar">
+<style>
+/* ══════════════════════════════════════════════════════
+   TRIP COST RECAP CSS
+   ══════════════════════════════════════════════════════ */
+.tcr-source-status { display:flex; gap:8px; align-items:center; flex-wrap:wrap; padding:10px 14px; background:var(--paper-2); border:1.5px solid var(--ink); border-radius:var(--r); margin-bottom:18px; font-family:var(--mono); font-size:11px; letter-spacing:.06em; color:var(--ink-2); }
+.tcr-src-pill { display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:2px; border:1px solid var(--rule); background:var(--paper); }
+.tcr-src-pill.ok { border-color:#2E7D32; color:var(--ink); }
+.tcr-src-pill.miss { color:var(--muted); border-style:dashed; }
+.tcr-src-pill.miss button { background:none; border:none; color:var(--accent); font-family:var(--mono); font-size:11px; cursor:pointer; padding:0 0 0 4px; text-decoration:underline; }
+
+.tcr-empty { padding:40px 24px; text-align:center; background:var(--paper-2); border:1.5px solid var(--ink); border-radius:var(--r); }
+.tcr-empty .em { font-size:42px; display:block; margin-bottom:10px; }
+.tcr-empty h3 { font-family:var(--serif); font-weight:600; font-size:22px; margin:0 0 8px; }
+.tcr-empty p { color:var(--muted); margin:0 auto 16px; max-width:440px; font-size:14px; line-height:1.5; }
+.tcr-empty-actions { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+
+.tcr-warn { background:rgba(255,77,46,.08); border-left:3px solid var(--accent); border-radius:0 var(--r) var(--r) 0; padding:10px 14px; font-size:13px; color:var(--ink-2); margin-bottom:18px; line-height:1.5; }
+.tcr-warn strong { color:var(--accent); }
+
+.tcr-headline { display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:10px; margin-bottom:20px; }
+@media(max-width:680px){ .tcr-headline { grid-template-columns:repeat(2, 1fr); } }
+.tcr-metric { border:1.5px solid var(--ink); border-radius:var(--r); background:var(--paper-2); padding:14px 16px; }
+.tcr-metric .lbl { font-family:var(--mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
+.tcr-metric .val { font-family:var(--serif); font-weight:600; font-size:26px; letter-spacing:-.02em; color:var(--ink); line-height:1.05; font-variation-settings:"opsz" 48,"SOFT" 30; }
+.tcr-metric .sub { font-family:var(--mono); font-size:10px; color:var(--muted); margin-top:4px; letter-spacing:.06em; }
+.tcr-metric.under .val { color:#2E7D32; }
+.tcr-metric.over  .val { color:var(--accent); }
+
+.tcr-averages { display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin-bottom:22px; }
+@media(max-width:560px){ .tcr-averages { grid-template-columns:1fr 1fr; } }
+.tcr-avg { background:var(--paper); border:1px solid var(--rule); border-radius:2px; padding:10px 12px; }
+.tcr-avg .lbl { font-family:var(--mono); font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-bottom:4px; display:block; }
+.tcr-avg .val { font-family:var(--serif); font-weight:600; font-size:18px; color:var(--ink); display:block; }
+
+.tcr-section { border:2px solid var(--ink); border-radius:var(--r); background:var(--paper-2); padding:20px; margin-bottom:22px; }
+.tcr-section h3 { font-family:var(--serif); font-weight:600; font-size:20px; margin:0 0 14px; }
+
+.tcr-chart-wrap { position:relative; height:340px; width:100%; }
+@media(max-width:600px){ .tcr-chart-wrap { height:380px; } }
+
+.tcr-table { width:100%; border-collapse:collapse; font-size:13px; margin-top:6px; }
+.tcr-table th, .tcr-table td { padding:8px 10px; border-bottom:1px solid var(--rule); text-align:left; }
+.tcr-table th { font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); border-bottom:1.5px solid var(--ink); }
+.tcr-table td.amt { font-family:var(--mono); text-align:right; white-space:nowrap; }
+.tcr-table th.amt { text-align:right; }
+.tcr-table tr.total-row td { border-top:1.5px solid var(--ink); border-bottom:none; font-weight:600; font-family:var(--mono); padding-top:10px; }
+.tcr-table tr.total-row td.label { font-family:var(--serif); font-size:14px; }
+.tcr-table td.over { color:var(--accent); }
+.tcr-table td.under { color:#2E7D32; }
+.tcr-cat-cell { display:flex; align-items:center; gap:8px; }
+.tcr-cat-cell .em { font-size:16px; }
+.tcr-table-scroll { overflow-x:auto; }
+
+.tcr-callouts { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+@media(max-width:560px){ .tcr-callouts { grid-template-columns:1fr; } }
+.tcr-callout { border:1.5px solid var(--ink); border-radius:var(--r); padding:14px 16px; background:var(--paper); }
+.tcr-callout .tag { font-family:var(--mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-bottom:6px; display:block; }
+.tcr-callout .nm { font-family:var(--serif); font-weight:600; font-size:18px; line-height:1.2; margin-bottom:4px; }
+.tcr-callout .delta { font-family:var(--mono); font-size:13px; }
+.tcr-callout.over { border-color:var(--accent); }
+.tcr-callout.over .delta { color:var(--accent); }
+.tcr-callout.under { border-color:#2E7D32; }
+.tcr-callout.under .delta { color:#2E7D32; }
+.tcr-callout.empty { border-style:dashed; color:var(--muted); }
+.tcr-callout.empty .nm { color:var(--muted); }
+
+.tcr-top3 { display:flex; flex-direction:column; gap:8px; }
+.tcr-top-row { display:flex; align-items:center; gap:10px; padding:10px 12px; background:var(--paper); border:1px solid var(--rule); border-radius:2px; }
+.tcr-top-rank { font-family:var(--mono); font-size:11px; letter-spacing:.06em; color:var(--muted); width:22px; flex-shrink:0; }
+.tcr-top-main { flex:1; min-width:0; }
+.tcr-top-desc { font-size:14px; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.tcr-top-meta { font-family:var(--mono); font-size:10px; letter-spacing:.05em; color:var(--muted); margin-top:2px; }
+.tcr-top-amt { font-family:var(--mono); font-weight:600; font-size:14px; color:var(--ink); white-space:nowrap; }
+
+.tcr-actions { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:6px; }
+.tcr-copy-ok { font-family:var(--mono); font-size:11px; color:#2E7D32; align-self:center; opacity:0; transition:opacity .2s; }
+.tcr-copy-ok.show { opacity:1; }
+
+.tcr-print-hdr { display:none; }
+@media print {
+  #view-trip-recap .tool-bar,
+  #view-trip-recap .ctx-banner,
+  #view-trip-recap .pro-tip,
+  #view-trip-recap .related,
+  #view-trip-recap .tcr-source-status,
+  #view-trip-recap .tcr-actions { display:none !important; }
+  #view-trip-recap .tcr-print-hdr { display:flex !important; justify-content:space-between; font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:#555; padding-bottom:10px; border-bottom:2px solid #000; margin-bottom:18px; }
+  body { background:#fff !important; background-image:none !important; }
+  .tcr-section, .tcr-metric, .tcr-callout, .tcr-top-row { break-inside:avoid; }
+}
+</style>
+<div id="view-trip-recap" class="view">
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="window.print()">🖨 Print</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">📊</span>
-    <h2>Trip Cost Recap</h2>
-    <p style="margin-bottom:24px">Actual vs. budgeted expenses. Visual summary: total spent, by category, over/under.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-trip-recap"></div>
+
+  <!-- Print-only header -->
+  <div class="tcr-print-hdr">
+    <strong>TripTools — Trip Cost Recap</strong>
+    <span id="tcr-print-date"></span>
+  </div>
+
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>Trip Cost Recap</h1>
+    <p class="tool-sub">Close the books on your trip. Pulls budget from the Travel Budget Planner and actual spending from the Daily Expense Tracker, then shows you the over/under at a glance.</p>
+  </div>
+
+  <div class="tool-body">
+
+    <!-- Source status -->
+    <div class="tcr-source-status" id="tcr-sources"></div>
+
+    <!-- Currency / FX warning (shown when needed) -->
+    <div class="tcr-warn" id="tcr-fx-warn" style="display:none"></div>
+
+    <!-- Empty state -->
+    <div class="tcr-empty" id="tcr-empty" style="display:none">
+      <span class="em">📊</span>
+      <h3>No data to recap yet</h3>
+      <p id="tcr-empty-msg">Build a budget in the Travel Budget Planner and log some expenses in the Daily Expense Tracker, then come back here for the recap.</p>
+      <div class="tcr-empty-actions">
+        <button class="btn btn-p" onclick="openTool('budget-plan')">💰 Open Budget Planner</button>
+        <button class="btn btn-s" onclick="openTool('expense-track')">📊 Open Expense Tracker</button>
+      </div>
+    </div>
+
+    <!-- Main recap content (hidden when empty) -->
+    <div id="tcr-content" style="display:none">
+
+      <!-- Headline metrics -->
+      <div class="tcr-headline">
+        <div class="tcr-metric">
+          <div class="lbl">Budgeted</div>
+          <div class="val" id="tcr-m-budget">—</div>
+          <div class="sub" id="tcr-m-budget-sub">&nbsp;</div>
+        </div>
+        <div class="tcr-metric">
+          <div class="lbl">Actual Spent</div>
+          <div class="val" id="tcr-m-actual">—</div>
+          <div class="sub" id="tcr-m-actual-sub">&nbsp;</div>
+        </div>
+        <div class="tcr-metric" id="tcr-m-variance-box">
+          <div class="lbl">Variance</div>
+          <div class="val" id="tcr-m-variance">—</div>
+          <div class="sub" id="tcr-m-variance-sub">&nbsp;</div>
+        </div>
+        <div class="tcr-metric">
+          <div class="lbl">% of Budget Used</div>
+          <div class="val" id="tcr-m-pct">—</div>
+          <div class="sub" id="tcr-m-pct-sub">&nbsp;</div>
+        </div>
+      </div>
+
+      <!-- Per-person & per-day averages -->
+      <div class="tcr-averages">
+        <div class="tcr-avg"><span class="lbl">Per Person</span><span class="val" id="tcr-avg-pp">—</span></div>
+        <div class="tcr-avg"><span class="lbl">Per Day</span><span class="val" id="tcr-avg-pd">—</span></div>
+        <div class="tcr-avg"><span class="lbl">Per Person / Day</span><span class="val" id="tcr-avg-ppd">—</span></div>
+      </div>
+
+      <!-- Bar chart -->
+      <div class="tcr-section">
+        <h3>Budgeted vs. Spent by Category</h3>
+        <div class="tcr-chart-wrap"><canvas id="tcr-bar"></canvas></div>
+      </div>
+
+      <!-- Category breakdown table -->
+      <div class="tcr-section">
+        <h3>Category Breakdown</h3>
+        <div class="tcr-table-scroll">
+          <table class="tcr-table" id="tcr-table">
+            <thead><tr>
+              <th>Category</th>
+              <th class="amt">Budgeted</th>
+              <th class="amt">Spent</th>
+              <th class="amt">Variance</th>
+              <th class="amt">% Used</th>
+            </tr></thead>
+            <tbody id="tcr-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Biggest over / under callouts -->
+      <div class="tcr-section">
+        <h3>Biggest Over &amp; Under</h3>
+        <div class="tcr-callouts" id="tcr-callouts"></div>
+      </div>
+
+      <!-- Top 3 most expensive entries -->
+      <div class="tcr-section" id="tcr-top3-section">
+        <h3>Top 3 Most Expensive Entries</h3>
+        <div class="tcr-top3" id="tcr-top3"></div>
+      </div>
+
+      <!-- Actions -->
+      <div class="tcr-actions">
+        <button class="btn btn-p" onclick="tcrExportCSV()" style="font-size:13px;padding:10px 18px">⬇ Export CSV</button>
+        <button class="btn btn-s" onclick="tcrCopySummary()" style="font-size:13px;padding:10px 18px">📋 Copy Summary</button>
+        <button class="btn-ghost" onclick="tcrRefresh()" style="font-size:13px">↺ Refresh</button>
+        <span class="tcr-copy-ok" id="tcr-copy-ok">✓ Copied</span>
+      </div>
+
+    </div><!-- /tcr-content -->
+
+  </div><!-- /tool-body -->
+
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    Categories are mapped automatically — Budget Planner's "Flights" rolls into Travel, Tracker's "Tips" into Food, and so on. Custom Budget Planner categories are matched by keyword (e.g. "souvenir" → Shopping). Rename a Budget Planner category to nudge it into a different bucket if needed.
+  </div>
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('budget-plan')">💰 Travel Budget Planner</button>
+      <button class="rel-btn" onclick="openTool('expense-track')">📊 Daily Expense Tracker</button>
+      <button class="rel-btn" onclick="openTool('trip-journal')">📔 Trip Journal</button>
+      <button class="rel-btn" onclick="openTool('souvenir')">🎁 Souvenir Tracker</button>
     </div>
   </div>
 </div>
@@ -7847,7 +8058,7 @@ const TOOLS = [
   {id:'lounge-guide',  nm:'Airport Lounge Guide',       ico:'🛋', ph:'business',   on:false,live:false, ds:'Lounge access by credit card, status or paid entry at 50+ airports.'},
   {id:'biz-packing',   nm:'Business Trip Packing',      ico:'👔', ph:'business',   on:false,live:true,  ds:'Professional carry-on-only checklist. Tech, attire, docs & wrinkle tips.'},
   {id:'customs-duty',  nm:'Customs Duty Calculator',    ico:'🛃', ph:'home',       on:false,live:false, ds:'Estimate US customs duties on goods purchased abroad.'},
-  {id:'trip-recap',    nm:'Trip Cost Recap',            ico:'📊', ph:'home',       on:false,live:false, ds:'Actual vs. budgeted expenses. Visual summary by category.'},
+  {id:'trip-recap',    nm:'Trip Cost Recap',            ico:'📊', ph:'home',       on:false,live:true,  ds:'Actual vs. budgeted expenses. Visual summary by category.'},
   {id:'souvenir',      nm:'Souvenir & Gift Tracker',    ico:'🎁', ph:'home',       on:false,live:false, ds:'Gift list with person, idea, cost & purchased checkbox.'},
   {id:'health-check',  nm:'Post-Trip Health Checklist', ico:'🏥', ph:'home',       on:false,live:false, ds:'Symptom awareness for common post-travel illnesses.'},
   {id:'trip-journal',  nm:'Trip Journal',               ico:'📔', ph:'home',       on:false,live:true,  ds:'Day-by-day journal. Star ratings, mood emoji, highlights.'},
@@ -8518,6 +8729,7 @@ function injectTripCtx(id) {
   if(id==='tsa-guide')  tsaInit();
   if(id==='vaccination') vacInit();
   if(id==='weather')    wxInit();
+  if(id==='trip-recap') tcrInit();
 }
 
 /* ── HUB RENDER ── */
@@ -9476,6 +9688,462 @@ function etExportCSV() {
   const safe = (etData.tripName || 'trip').replace(/[^a-z0-9]+/gi,'-').toLowerCase();
   a.href = url; a.download = `expenses-${safe}-${etTodayISO()}.csv`; a.click();
   URL.revokeObjectURL(url);
+}
+
+/* ══════════════════════════════════════════
+   TRIP COST RECAP  (tcr*)
+   Pulls budget from tt_budget_{tripId} (Travel Budget Planner)
+   and actual spending from tt_expenses_{tripId} (Daily Expense Tracker).
+   ══════════════════════════════════════════ */
+
+const TCR_CATS = [
+  { id:'travel',   emoji:'✈️', name:'Flights & Transport',  color:'#FF4D2E' },
+  { id:'lodging',  emoji:'🏨', name:'Accommodation',         color:'#1565C0' },
+  { id:'food',     emoji:'🍽', name:'Food & Drink',          color:'#2E7D32' },
+  { id:'activity', emoji:'🎭', name:'Activities',            color:'#FFD23F' },
+  { id:'shopping', emoji:'🛍', name:'Shopping & Souvenirs',  color:'#6A1B9A' },
+  { id:'other',    emoji:'💼', name:'Other & Misc',          color:'#E65100' },
+];
+const TCR_ET_MAP = { food:'food', transport:'travel', lodging:'lodging', activity:'activity', shopping:'shopping', groceries:'food', tips:'food', fees:'other', misc:'other' };
+const TCR_BP_MAP = { flights:'travel', transport:'travel', accommodation:'lodging', food:'food', activities:'activity', other:'shopping' };
+
+let tcrChart = null;
+let tcrSnapshot = null;
+
+function tcrCat(id) { return TCR_CATS.find(c => c.id === id) || TCR_CATS[TCR_CATS.length-1]; }
+
+function tcrMapBp(cat) {
+  if (TCR_BP_MAP[cat.id]) return TCR_BP_MAP[cat.id];
+  const n = (cat.name || '').toLowerCase();
+  if (/flight|trans(it|port)|car|gas|fuel|train|taxi|metro|uber|rideshare|rental/.test(n)) return 'travel';
+  if (/hotel|lodg|stay|airbnb|hostel|accom|rental property|resort/.test(n)) return 'lodging';
+  if (/food|restaurant|dining|drink|meal|groceries|coffee|cafe|bar|brunch|breakfast|lunch|dinner/.test(n)) return 'food';
+  if (/activit|tour|sight|entertain|tick|event|museum|attraction|excursion|spa/.test(n)) return 'activity';
+  if (/shop|souvenir|gift|clothes|cloth/.test(n)) return 'shopping';
+  return 'other';
+}
+
+function tcrLoadSources() {
+  const tripId = getActiveTripId() || 'default';
+  let bp = null, et = null;
+  try { const r = localStorage.getItem('tt_budget_' + tripId);   if (r) bp = JSON.parse(r); } catch(_) {}
+  try { const r = localStorage.getItem('tt_expenses_' + tripId); if (r) et = JSON.parse(r); } catch(_) {}
+  return { bp, et, tripId };
+}
+
+function tcrExpenseHomeAmt(e, home) {
+  if (e.curr === home) return e.amt;
+  if (e.homeAmt != null && !isNaN(e.homeAmt) && (!e.curr || e.curr === home || e.rate)) return e.homeAmt;
+  if (typeof etConvert === 'function') {
+    const c = etConvert(e.amt, e.curr, home);
+    if (c != null) return c;
+  }
+  return e.homeAmt != null && !isNaN(e.homeAmt) ? e.homeAmt : e.amt;
+}
+
+function tcrConvert(amt, from, to) {
+  if (from === to) return amt;
+  if (typeof etConvert === 'function') {
+    const c = etConvert(amt, from, to);
+    if (c != null) return c;
+  }
+  return null;
+}
+
+function tcrCompute() {
+  const { bp, et } = tcrLoadSources();
+  const home = (et && et.homeCurrency) || (bp && bp.currency) || 'USD';
+
+  // Init per-category buckets
+  const cats = {};
+  TCR_CATS.forEach(c => cats[c.id] = { id:c.id, budgeted:0, actual:0, bpItems:[], expenses:[] });
+
+  // Budget Planner → budgeted
+  let bpFxIssue = false;
+  if (bp && Array.isArray(bp.categories)) {
+    bp.categories.forEach(cat => {
+      const tcrId = tcrMapBp(cat);
+      const subtotal = (cat.items || []).reduce((s,i) => s + (parseFloat(i.amt) || 0), 0);
+      let homeAmt = subtotal;
+      if (bp.currency && bp.currency !== home) {
+        const conv = tcrConvert(subtotal, bp.currency, home);
+        if (conv == null) bpFxIssue = true;
+        else homeAmt = conv;
+      }
+      cats[tcrId].budgeted += homeAmt;
+      cats[tcrId].bpItems.push({ name: cat.name, amount: homeAmt, original: subtotal, currency: bp.currency || home });
+    });
+  }
+
+  // Expense Tracker → actual
+  if (et && Array.isArray(et.expenses)) {
+    et.expenses.forEach(e => {
+      const tcrId = TCR_ET_MAP[e.cat] || 'other';
+      const homeAmt = tcrExpenseHomeAmt(e, home);
+      cats[tcrId].actual += homeAmt;
+      cats[tcrId].expenses.push({ desc: e.desc, amt: homeAmt, date: e.date, cat: e.cat, origAmt: e.amt, origCurr: e.curr });
+    });
+  }
+
+  // Trip-level
+  const totalBudgeted = Object.values(cats).reduce((s,c) => s + c.budgeted, 0);
+  const totalActual   = Object.values(cats).reduce((s,c) => s + c.actual, 0);
+
+  // Travelers & days
+  const trip = getActiveTrip();
+  const travelers = (bp && parseInt(bp.travelers)) || (trip && parseInt(trip.travelers)) || 1;
+  let days = (bp && parseInt(bp.days)) || null;
+  if (!days && trip && trip.departDate && trip.returnDate) {
+    days = Math.max(1, Math.round((new Date(trip.returnDate) - new Date(trip.departDate)) / 864e5));
+  }
+  if (!days && et && et.expenses) {
+    const u = new Set(et.expenses.map(e => e.date));
+    if (u.size) days = u.size;
+  }
+  if (!days) days = 1;
+
+  // Top 3 expenses
+  const top3 = (et && et.expenses ? et.expenses : [])
+    .map(e => ({ ...e, _home: tcrExpenseHomeAmt(e, home) }))
+    .sort((a,b) => b._home - a._home)
+    .slice(0, 3);
+
+  // Variances
+  const variances = TCR_CATS.map(c => {
+    const data = cats[c.id];
+    return { ...c, ...data, variance: data.actual - data.budgeted };
+  });
+  const active = variances.filter(c => c.budgeted > 0 || c.actual > 0);
+  const overs  = active.filter(c => c.variance > 0).sort((a,b) => b.variance - a.variance);
+  const unders = active.filter(c => c.variance < 0 && c.budgeted > 0).sort((a,b) => a.variance - b.variance);
+
+  return {
+    home, totalBudgeted, totalActual,
+    travelers, days,
+    cats, variances, active,
+    top3,
+    biggestOver:  overs[0]  || null,
+    biggestUnder: unders[0] || null,
+    hasBP: !!(bp && bp.categories),
+    hasET: !!(et && et.expenses && et.expenses.length),
+    bpCurrency: bp && bp.currency,
+    etCurrency: et && et.homeCurrency,
+    bpFxIssue,
+    tripName: (et && et.tripName) || (bp && bp.tripName) || (trip && trip.name) || '',
+  };
+}
+
+function tcrFmt(n, code) {
+  if (n == null || isNaN(n)) return '—';
+  if (typeof etFmt === 'function') return etFmt(n, code);
+  return (code || 'USD') + ' ' + Number(n).toFixed(2);
+}
+
+function tcrFmtSigned(n, code) {
+  const sign = n > 0 ? '+' : (n < 0 ? '−' : '');
+  return sign + tcrFmt(Math.abs(n), code);
+}
+
+function tcrInit() {
+  const trip = getActiveTrip();
+  const ctx = document.getElementById('ctx-trip-recap');
+  if (trip && ctx) {
+    ctx.textContent = `✈ Using context from: ${trip.name} — tap to edit ↗`;
+    ctx.classList.add('show');
+    ctx.onclick = () => showView('mytrip');
+  } else if (ctx) {
+    ctx.classList.remove('show');
+  }
+  document.getElementById('tcr-print-date').textContent =
+    'Printed ' + new Date().toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+  tcrRender();
+}
+
+function tcrRefresh() { tcrRender(); }
+
+function tcrRender() {
+  const data = tcrCompute();
+  tcrSnapshot = data;
+
+  // Source status pills
+  const sources = document.getElementById('tcr-sources');
+  const bpPill = data.hasBP
+    ? `<span class="tcr-src-pill ok">✓ Budget Planner${data.bpCurrency ? ' · ' + data.bpCurrency : ''}</span>`
+    : `<span class="tcr-src-pill miss">⚠ No budget set <button onclick="openTool('budget-plan')">add →</button></span>`;
+  const etPill = data.hasET
+    ? `<span class="tcr-src-pill ok">✓ Expense Tracker · ${data.etCurrency}</span>`
+    : `<span class="tcr-src-pill miss">⚠ No expenses logged <button onclick="openTool('expense-track')">log →</button></span>`;
+  sources.innerHTML = `<span style="color:var(--muted);margin-right:2px">Sources:</span> ${bpPill} ${etPill} <span style="margin-left:auto;color:var(--muted)">Display: ${data.home}</span>`;
+
+  // FX warning
+  const warn = document.getElementById('tcr-fx-warn');
+  if (data.bpFxIssue) {
+    warn.style.display = 'block';
+    warn.innerHTML = `<strong>Heads up:</strong> Your budget is in ${data.bpCurrency} but you're spending in ${data.home}, and live exchange rates aren't cached. Budget totals shown are in the original currency — open the Currency Converter while online to cache rates for accurate comparison.`;
+  } else {
+    warn.style.display = 'none';
+  }
+
+  // Empty state?
+  const isEmpty = !data.hasBP && !data.hasET;
+  document.getElementById('tcr-empty').style.display  = isEmpty ? 'block' : 'none';
+  document.getElementById('tcr-content').style.display = isEmpty ? 'none'  : 'block';
+  if (isEmpty) {
+    if (tcrChart) { tcrChart.destroy(); tcrChart = null; }
+    return;
+  }
+
+  // Headline metrics
+  document.getElementById('tcr-m-budget').textContent  = tcrFmt(data.totalBudgeted, data.home);
+  document.getElementById('tcr-m-actual').textContent  = tcrFmt(data.totalActual,   data.home);
+  const bpLineCount = Object.values(data.cats).reduce((s,c)=>s+c.bpItems.length,0);
+  document.getElementById('tcr-m-budget-sub').textContent = data.hasBP ? `from ${bpLineCount} budget line${bpLineCount===1?'':'s'}` : 'no budget set';
+  document.getElementById('tcr-m-actual-sub').textContent = data.hasET
+    ? `${Object.values(data.cats).reduce((s,c)=>s+c.expenses.length,0)} expense entries`
+    : 'no expenses logged';
+
+  const variance = data.totalActual - data.totalBudgeted;
+  const varBox = document.getElementById('tcr-m-variance-box');
+  varBox.classList.remove('over','under');
+  const varEl = document.getElementById('tcr-m-variance');
+  const varSub = document.getElementById('tcr-m-variance-sub');
+  if (!data.hasBP) {
+    varEl.textContent = '—';
+    varSub.textContent = 'set a budget to track variance';
+  } else if (Math.abs(variance) < 0.005) {
+    varEl.textContent = tcrFmt(0, data.home);
+    varSub.textContent = 'spot on!';
+  } else {
+    varEl.textContent = tcrFmtSigned(variance, data.home);
+    if (variance > 0) { varBox.classList.add('over');  varSub.textContent = 'over budget'; }
+    else              { varBox.classList.add('under'); varSub.textContent = 'under budget'; }
+  }
+
+  const pctEl = document.getElementById('tcr-m-pct');
+  const pctSub = document.getElementById('tcr-m-pct-sub');
+  if (data.hasBP && data.totalBudgeted > 0) {
+    const pct = Math.round((data.totalActual / data.totalBudgeted) * 100);
+    pctEl.textContent = pct + '%';
+    pctSub.textContent = pct > 100 ? `${pct - 100}% above plan` : (pct === 100 ? 'exactly on plan' : `${100 - pct}% remaining`);
+  } else {
+    pctEl.textContent = '—';
+    pctSub.textContent = data.hasBP ? 'budget total is $0' : 'no budget set';
+  }
+
+  // Averages
+  document.getElementById('tcr-avg-pp').textContent  = tcrFmt(data.totalActual / Math.max(1, data.travelers), data.home);
+  document.getElementById('tcr-avg-pd').textContent  = tcrFmt(data.totalActual / Math.max(1, data.days), data.home);
+  document.getElementById('tcr-avg-ppd').textContent = tcrFmt(data.totalActual / Math.max(1, data.travelers) / Math.max(1, data.days), data.home);
+
+  // Bar chart
+  tcrRenderChart(data);
+
+  // Breakdown table
+  tcrRenderTable(data);
+
+  // Callouts
+  tcrRenderCallouts(data);
+
+  // Top 3
+  tcrRenderTop3(data);
+}
+
+function tcrRenderChart(data) {
+  const canvas = document.getElementById('tcr-bar');
+  if (!canvas) return;
+  if (tcrChart) { tcrChart.destroy(); tcrChart = null; }
+  const ctx = canvas.getContext('2d');
+
+  // Only show categories with any data
+  const rows = data.active.length ? data.active : data.variances;
+  const labels = rows.map(c => `${c.emoji} ${c.name}`);
+  const budgeted = rows.map(c => +c.budgeted.toFixed(2));
+  const actual   = rows.map(c => +c.actual.toFixed(2));
+
+  tcrChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label:'Budgeted', data:budgeted, backgroundColor:'rgba(21,101,192,.55)', borderColor:'#1565C0', borderWidth:1.5, borderRadius:3 },
+        { label:'Spent',    data:actual,   backgroundColor:'rgba(255,77,46,.7)',   borderColor:'#FF4D2E', borderWidth:1.5, borderRadius:3 },
+      ],
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: { beginAtZero:true, grid:{ color:'rgba(23,21,20,.08)' }, ticks:{ callback:(v)=>tcrFmt(v, data.home), font:{ family:'ui-monospace, monospace', size:11 }, color:'#6B6660' } },
+        y: { grid:{ display:false }, ticks:{ font:{ size:12 }, color:'#171514' } },
+      },
+      plugins: {
+        legend: { position:'bottom', labels:{ font:{ size:12 }, color:'#171514', boxWidth:14 } },
+        tooltip: { callbacks: { label: (c) => ` ${c.dataset.label}: ${tcrFmt(c.raw, data.home)}` } },
+      },
+      animation: { duration: 350 },
+    },
+  });
+}
+
+function tcrRenderTable(data) {
+  const tbody = document.getElementById('tcr-tbody');
+  const rows = data.variances.filter(c => c.budgeted > 0 || c.actual > 0);
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:18px">No category data yet.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = rows.map(c => {
+    const variance = c.variance;
+    const varClass = Math.abs(variance) < 0.005 ? '' : (variance > 0 ? 'over' : 'under');
+    const varDisp  = Math.abs(variance) < 0.005 ? tcrFmt(0, data.home) : tcrFmtSigned(variance, data.home);
+    const pct = c.budgeted > 0 ? Math.round((c.actual / c.budgeted) * 100) + '%' : '—';
+    return `<tr>
+      <td><div class="tcr-cat-cell"><span class="em">${c.emoji}</span>${c.name}</div></td>
+      <td class="amt">${tcrFmt(c.budgeted, data.home)}</td>
+      <td class="amt">${tcrFmt(c.actual,   data.home)}</td>
+      <td class="amt ${varClass}">${varDisp}</td>
+      <td class="amt">${pct}</td>
+    </tr>`;
+  }).join('') + `<tr class="total-row">
+    <td class="label">Trip Total</td>
+    <td class="amt">${tcrFmt(data.totalBudgeted, data.home)}</td>
+    <td class="amt">${tcrFmt(data.totalActual,   data.home)}</td>
+    <td class="amt ${data.totalActual - data.totalBudgeted > 0 ? 'over' : (data.totalActual - data.totalBudgeted < 0 ? 'under' : '')}">${data.hasBP ? tcrFmtSigned(data.totalActual - data.totalBudgeted, data.home) : '—'}</td>
+    <td class="amt">${data.hasBP && data.totalBudgeted > 0 ? Math.round((data.totalActual / data.totalBudgeted) * 100) + '%' : '—'}</td>
+  </tr>`;
+}
+
+function tcrRenderCallouts(data) {
+  const wrap = document.getElementById('tcr-callouts');
+  const over  = data.biggestOver;
+  const under = data.biggestUnder;
+  const overHTML = over
+    ? `<div class="tcr-callout over">
+        <span class="tag">📈 Biggest Over</span>
+        <div class="nm">${over.emoji} ${over.name}</div>
+        <div class="delta">${tcrFmtSigned(over.variance, data.home)} (spent ${tcrFmt(over.actual, data.home)} vs. budget ${tcrFmt(over.budgeted, data.home)})</div>
+      </div>`
+    : `<div class="tcr-callout empty"><span class="tag">📈 Biggest Over</span><div class="nm">— none —</div><div class="delta">${data.hasBP ? 'You stayed under budget in every category.' : 'Set a budget to see overages.'}</div></div>`;
+  const underHTML = under
+    ? `<div class="tcr-callout under">
+        <span class="tag">📉 Biggest Under</span>
+        <div class="nm">${under.emoji} ${under.name}</div>
+        <div class="delta">${tcrFmtSigned(under.variance, data.home)} (spent ${tcrFmt(under.actual, data.home)} vs. budget ${tcrFmt(under.budgeted, data.home)})</div>
+      </div>`
+    : `<div class="tcr-callout empty"><span class="tag">📉 Biggest Under</span><div class="nm">— none —</div><div class="delta">${data.hasBP ? 'Every category came in at or over its budget.' : 'Set a budget to see savings.'}</div></div>`;
+  wrap.innerHTML = overHTML + underHTML;
+}
+
+function tcrRenderTop3(data) {
+  const wrap = document.getElementById('tcr-top3');
+  const section = document.getElementById('tcr-top3-section');
+  if (!data.top3.length) {
+    section.style.display = 'none';
+    return;
+  }
+  section.style.display = '';
+  wrap.innerHTML = data.top3.map((e, i) => {
+    const cat = (typeof etCatById === 'function') ? etCatById(e.cat) : { emoji:'•', name:e.cat||'' };
+    const dateStr = e.date ? (typeof etFmtDate === 'function' ? etFmtDate(e.date) : e.date) : '';
+    const foreign = e.curr && e.curr !== data.home ? ` · ${tcrFmt(e.origAmt != null ? e.origAmt : e.amt, e.curr)} ${e.curr}` : '';
+    return `<div class="tcr-top-row">
+      <div class="tcr-top-rank">#${i+1}</div>
+      <div class="tcr-top-main">
+        <div class="tcr-top-desc">${cat.emoji} ${escHtml(e.desc || cat.name || 'Expense')}</div>
+        <div class="tcr-top-meta">${escHtml(dateStr)}${foreign}</div>
+      </div>
+      <div class="tcr-top-amt">${tcrFmt(e._home, data.home)}</div>
+    </div>`;
+  }).join('');
+}
+
+function tcrExportCSV() {
+  const d = tcrSnapshot || tcrCompute();
+  const home = d.home;
+  let csv = `Trip Cost Recap — ${d.tripName || 'My Trip'}\n`;
+  csv += `Display Currency,${home}\n`;
+  csv += `Travelers,${d.travelers}\nDays,${d.days}\n`;
+  csv += `Generated,${new Date().toISOString()}\n\n`;
+
+  csv += `Category,Budgeted (${home}),Spent (${home}),Variance (${home}),% Used\n`;
+  d.variances.forEach(c => {
+    if (c.budgeted === 0 && c.actual === 0) return;
+    const v = c.actual - c.budgeted;
+    const pct = c.budgeted > 0 ? Math.round((c.actual / c.budgeted) * 100) + '%' : '';
+    csv += `"${c.name}",${c.budgeted.toFixed(2)},${c.actual.toFixed(2)},${v.toFixed(2)},${pct}\n`;
+  });
+  const trVar = d.totalActual - d.totalBudgeted;
+  const trPct = d.totalBudgeted > 0 ? Math.round((d.totalActual / d.totalBudgeted) * 100) + '%' : '';
+  csv += `TRIP TOTAL,${d.totalBudgeted.toFixed(2)},${d.totalActual.toFixed(2)},${trVar.toFixed(2)},${trPct}\n\n`;
+
+  csv += `Per Person,${(d.totalActual / Math.max(1, d.travelers)).toFixed(2)}\n`;
+  csv += `Per Day,${(d.totalActual / Math.max(1, d.days)).toFixed(2)}\n`;
+  csv += `Per Person/Day,${(d.totalActual / Math.max(1, d.travelers) / Math.max(1, d.days)).toFixed(2)}\n\n`;
+
+  if (d.biggestOver)  csv += `Biggest Over,"${d.biggestOver.name}",${d.biggestOver.variance.toFixed(2)}\n`;
+  if (d.biggestUnder) csv += `Biggest Under,"${d.biggestUnder.name}",${d.biggestUnder.variance.toFixed(2)}\n`;
+  if (d.top3.length) {
+    csv += `\nTop 3 Expenses\nRank,Date,Description,Amount (${home})\n`;
+    d.top3.forEach((e,i) => {
+      const desc = (e.desc || '').replace(/"/g,'""');
+      csv += `${i+1},${e.date || ''},"${desc}",${e._home.toFixed(2)}\n`;
+    });
+  }
+
+  const blob = new Blob([csv], { type:'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const safe = (d.tripName || 'trip').replace(/[^a-z0-9]+/gi,'-').toLowerCase() || 'trip';
+  a.href = url; a.download = `trip-cost-recap-${safe}.csv`; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function tcrCopySummary() {
+  const d = tcrSnapshot || tcrCompute();
+  const home = d.home;
+  const variance = d.totalActual - d.totalBudgeted;
+  const lines = [];
+  lines.push(`📊 Trip Cost Recap — ${d.tripName || 'My Trip'}`);
+  lines.push('');
+  lines.push(`Budgeted: ${tcrFmt(d.totalBudgeted, home)}`);
+  lines.push(`Spent:    ${tcrFmt(d.totalActual,   home)}`);
+  if (d.hasBP) {
+    const verdict = Math.abs(variance) < 0.005 ? 'right on budget' : (variance > 0 ? `${tcrFmt(variance, home)} over` : `${tcrFmt(Math.abs(variance), home)} under`);
+    lines.push(`Verdict:  ${verdict}`);
+    if (d.totalBudgeted > 0) lines.push(`% Used:   ${Math.round((d.totalActual / d.totalBudgeted) * 100)}%`);
+  }
+  lines.push('');
+  lines.push(`Per Person:     ${tcrFmt(d.totalActual / Math.max(1, d.travelers), home)} (${d.travelers} traveler${d.travelers === 1 ? '' : 's'})`);
+  lines.push(`Per Day:        ${tcrFmt(d.totalActual / Math.max(1, d.days), home)} (${d.days} day${d.days === 1 ? '' : 's'})`);
+  lines.push(`Per Person/Day: ${tcrFmt(d.totalActual / Math.max(1, d.travelers) / Math.max(1, d.days), home)}`);
+  lines.push('');
+  lines.push('By category:');
+  d.variances.forEach(c => {
+    if (c.budgeted === 0 && c.actual === 0) return;
+    const v = c.actual - c.budgeted;
+    const vStr = d.hasBP ? ` (${v >= 0 ? '+' : '−'}${tcrFmt(Math.abs(v), home)})` : '';
+    lines.push(`  ${c.emoji} ${c.name}: ${tcrFmt(c.actual, home)}${vStr}`);
+  });
+  if (d.biggestOver)  lines.push('', `Biggest over:  ${d.biggestOver.emoji} ${d.biggestOver.name} (+${tcrFmt(d.biggestOver.variance, home)})`);
+  if (d.biggestUnder) lines.push(`Biggest under: ${d.biggestUnder.emoji} ${d.biggestUnder.name} (−${tcrFmt(Math.abs(d.biggestUnder.variance), home)})`);
+
+  const text = lines.join('\n');
+  const ok = document.getElementById('tcr-copy-ok');
+  const showOk = () => { ok.classList.add('show'); setTimeout(() => ok.classList.remove('show'), 1800); };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(showOk).catch(() => { tcrCopyFallback(text); showOk(); });
+  } else {
+    tcrCopyFallback(text); showOk();
+  }
+}
+
+function tcrCopyFallback(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text; ta.style.position = 'fixed'; ta.style.top = '-1000px';
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); } catch(_) {}
+  document.body.removeChild(ta);
 }
 
 /* ── MYTRIP ── */
