@@ -4280,19 +4280,214 @@ body.no-scroll { overflow: hidden; }
     </div>
   </div>
 </div>
-<div id="view-placeholder-cruise-grat" class="view">
-  <nav class="tool-topbar">
+<div id="view-cruise-grat" class="view">
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="window.print()">🖨 Print</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">🚢</span>
-    <h2>Cruise Gratuity Calculator</h2>
-    <p style="margin-bottom:24px">Daily gratuity per person by cruise line and cabin type.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-cruise-grat"></div>
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>Cruise Gratuity Calculator</h1>
+    <p class="tool-sub">Daily auto-gratuities by cruise line and cabin, plus optional bar, specialty dining, and spa tip estimates. Total for trip duration and party size.</p>
+  </div>
+
+  <div class="tool-body">
+
+    <!-- STEP 1: CRUISE LINE -->
+    <div class="sec-lbl">Step 1 — Cruise Line</div>
+    <div class="fg">
+      <label for="cg-line">Select your cruise line</label>
+      <select id="cg-line" onchange="cgOnLineChange()"></select>
+    </div>
+    <div id="cg-line-note" class="cg-line-note" style="display:none"></div>
+
+    <!-- STEP 2: CABIN -->
+    <div class="sec-lbl" style="margin-top:24px">Step 2 — Cabin Category</div>
+    <div class="cg-cabin-grid">
+      <button class="cg-cabin on" data-tier="standard" onclick="cgSetCabin(this,'standard')">
+        <span class="cg-cabin-ico">🛏</span>
+        <div class="cg-cabin-nm">Standard</div>
+        <div class="cg-cabin-sub">Interior · Oceanview · Balcony</div>
+        <div class="cg-cabin-rate" id="cg-rate-standard">—</div>
+      </button>
+      <button class="cg-cabin" data-tier="suite" onclick="cgSetCabin(this,'suite')">
+        <span class="cg-cabin-ico">🛋</span>
+        <div class="cg-cabin-nm">Suite</div>
+        <div class="cg-cabin-sub">Mini-Suite · Junior Suite · Concierge</div>
+        <div class="cg-cabin-rate" id="cg-rate-suite">—</div>
+      </button>
+      <button class="cg-cabin" data-tier="penthouse" onclick="cgSetCabin(this,'penthouse')">
+        <span class="cg-cabin-ico">👑</span>
+        <div class="cg-cabin-nm">Penthouse</div>
+        <div class="cg-cabin-sub">Owner's · Royal · Haven · Retreat</div>
+        <div class="cg-cabin-rate" id="cg-rate-penthouse">—</div>
+      </button>
+    </div>
+
+    <!-- STEP 3: PARTY + NIGHTS -->
+    <div class="sec-lbl" style="margin-top:24px">Step 3 — Trip Details</div>
+    <div class="frow" style="margin-bottom:14px">
+      <div class="fg">
+        <label for="cg-nights">Nights</label>
+        <input type="number" id="cg-nights" min="1" max="180" value="7" oninput="cgCalc()">
+      </div>
+      <div class="fg">
+        <label for="cg-adults">Adults <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);font-size:11px">(13+)</span></label>
+        <input type="number" id="cg-adults" min="0" max="20" value="2" oninput="cgCalc()">
+      </div>
+    </div>
+    <div class="frow">
+      <div class="fg">
+        <label for="cg-kids">Children <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);font-size:11px">(3–12)</span></label>
+        <input type="number" id="cg-kids" min="0" max="20" value="0" oninput="cgCalc()">
+      </div>
+      <div class="fg">
+        <label for="cg-tots">Toddlers <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);font-size:11px">(0–2 — typically free)</span></label>
+        <input type="number" id="cg-tots" min="0" max="20" value="0" oninput="cgCalc()">
+      </div>
+    </div>
+
+    <!-- STEP 4: ADD-ON GRATUITIES -->
+    <div class="sec-lbl" style="margin-top:24px">Step 4 — Add-On Gratuities <span style="font-family:var(--sans);font-weight:400;letter-spacing:0;text-transform:none;color:var(--muted);font-size:12px">(optional)</span></div>
+
+    <!-- Drinks -->
+    <div class="fg">
+      <label>Drinks per adult / day <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);font-size:11px">(cocktails, wine, premium coffee)</span></label>
+      <div class="chip-grp">
+        <span class="chip on" data-v="0" onclick="cgSetChip(this,'drinks')">0 — Skip it</span>
+        <span class="chip" data-v="2" onclick="cgSetChip(this,'drinks')">~2 — Light</span>
+        <span class="chip" data-v="5" onclick="cgSetChip(this,'drinks')">~5 — Average</span>
+        <span class="chip" data-v="8" onclick="cgSetChip(this,'drinks')">8+ — Heavy</span>
+      </div>
+    </div>
+
+    <!-- Specialty dining -->
+    <div class="fg">
+      <label>Specialty dining meals (whole party / trip)</label>
+      <div class="chip-grp">
+        <span class="chip on" data-v="0" onclick="cgSetChip(this,'dining')">0 — MDR only</span>
+        <span class="chip" data-v="1" onclick="cgSetChip(this,'dining')">1 meal</span>
+        <span class="chip" data-v="2" onclick="cgSetChip(this,'dining')">2 meals</span>
+        <span class="chip" data-v="4" onclick="cgSetChip(this,'dining')">4+ meals</span>
+      </div>
+    </div>
+
+    <!-- Spa + bump -->
+    <div class="frow">
+      <div class="fg">
+        <label for="cg-spa">Total spa budget <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);font-size:11px">(whole trip, $)</span></label>
+        <input type="number" id="cg-spa" min="0" step="any" value="0" oninput="cgCalc()">
+      </div>
+      <div class="fg">
+        <label>Extra tip on top of auto-grat <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);font-size:11px">(% bump)</span></label>
+        <div class="chip-grp">
+          <span class="chip on" data-v="0" onclick="cgSetChip(this,'bump')">0%</span>
+          <span class="chip" data-v="5" onclick="cgSetChip(this,'bump')">5%</span>
+          <span class="chip" data-v="10" onclick="cgSetChip(this,'bump')">10%</span>
+          <span class="chip" data-v="15" onclick="cgSetChip(this,'bump')">15%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESULTS -->
+    <div class="cg-results" id="cg-results">
+      <div class="cg-results-inner">
+        <div class="cg-result-hdr">
+          <div>
+            <div class="cg-result-label">TOTAL GRATUITIES</div>
+            <div class="cg-big-num" id="cg-total">—</div>
+            <div class="cg-big-sub" id="cg-total-sub"></div>
+          </div>
+          <div class="cg-range-badge" id="cg-included-badge" style="display:none">✔ Included in Fare</div>
+        </div>
+
+        <!-- Breakdown bars -->
+        <div class="cg-breakdown" id="cg-breakdown"></div>
+
+        <!-- Per-person / per-day grid -->
+        <div class="cg-stat-grid" id="cg-stat-grid"></div>
+
+        <!-- Itemized table -->
+        <div class="cg-item-table" id="cg-item-table"></div>
+
+        <!-- Pre-pay tip -->
+        <div class="cg-tier-tip" id="cg-tier-tip"></div>
+      </div>
+    </div>
+
+  </div><!-- /tool-body -->
+
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    Most lines let you pre-pay daily gratuities at booking — this locks in today's rate (lines have raised rates 3+ times in the last 5 years) and avoids the queue at Guest Services on the last night. Bar tabs, spa treatments and specialty dining usually have 18–20% auto-added at checkout, so you only tip extra for exceptional service. Rates shown reflect May 2026 published rates.
+  </div>
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('cruise-compare')">🔍 Cruise Line Comparison</button>
+      <button class="rel-btn" onclick="openTool('shore-exc')">⚓ Shore Excursion Planner</button>
+      <button class="rel-btn" onclick="openTool('packing')">📝 Packing Checklist</button>
+      <button class="rel-btn" onclick="openTool('budget-plan')">💰 Budget Planner</button>
     </div>
   </div>
 </div>
+
+<style>
+/* ── CRUISE GRATUITY CALCULATOR ── */
+#view-cruise-grat select { width:100%; min-height:40px; background:var(--paper); border:1.5px solid var(--ink); border-radius:var(--r); padding:9px 11px; font-family:var(--sans); font-size:14px; color:var(--ink); outline:none; }
+#view-cruise-grat select:focus { border-color:var(--accent); }
+.cg-line-note { background:var(--paper-2); border:1.5px solid var(--ink); border-left:4px solid var(--blue); border-radius:var(--r); padding:10px 14px; font-size:13px; color:var(--ink-2); line-height:1.55; margin-top:-6px; }
+
+/* Cabin selector */
+.cg-cabin-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:4px; }
+@media(max-width:600px){ .cg-cabin-grid { grid-template-columns:1fr; } }
+.cg-cabin { background:var(--paper); border:1.5px solid var(--ink); border-radius:var(--r); padding:14px 12px; cursor:pointer; text-align:left; transition:transform .12s, box-shadow .12s, background .15s, color .15s; font-family:var(--sans); color:var(--ink); }
+.cg-cabin:hover { background:var(--paper-2); }
+.cg-cabin.on { background:var(--ink); color:var(--paper); box-shadow:3px 3px 0 var(--accent); }
+.cg-cabin-ico { font-size:24px; display:block; margin-bottom:6px; line-height:1; }
+.cg-cabin-nm { font-family:var(--serif); font-weight:600; font-size:17px; letter-spacing:-.01em; line-height:1.1; margin-bottom:3px; }
+.cg-cabin-sub { font-family:var(--mono); font-size:10px; letter-spacing:.06em; color:var(--muted); line-height:1.4; margin-bottom:8px; }
+.cg-cabin.on .cg-cabin-sub { color:var(--paper); opacity:.7; }
+.cg-cabin-rate { font-family:var(--mono); font-size:12px; font-weight:600; color:var(--accent); letter-spacing:.02em; }
+.cg-cabin.on .cg-cabin-rate { color:var(--paper); }
+
+/* Results */
+.cg-results { border-top:2px solid var(--ink); margin-top:28px; padding-top:24px; }
+.cg-results-inner { animation:cg-in .22s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes cg-in { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+.cg-result-hdr { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:22px; flex-wrap:wrap; }
+.cg-result-label { font-family:var(--mono); font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); margin-bottom:4px; }
+.cg-big-num { font-family:var(--serif); font-weight:600; font-size:clamp(40px,10vw,64px); letter-spacing:-.03em; line-height:1; color:var(--accent); font-variation-settings:"opsz" 72,"SOFT" 30,"WONK" 1; }
+.cg-big-sub { font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-top:5px; }
+.cg-range-badge { font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; padding:8px 14px; border:1.5px solid var(--green); color:var(--green); background:rgba(46,125,50,.08); border-radius:2px; white-space:nowrap; align-self:flex-start; margin-top:8px; font-weight:600; }
+.cg-breakdown { margin-bottom:20px; }
+.cg-bar-row { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+.cg-bar-label { font-family:var(--mono); font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-2); width:140px; flex-shrink:0; }
+.cg-bar-track { flex:1; height:10px; background:var(--rule); border-radius:5px; overflow:hidden; }
+.cg-bar-fill { height:100%; border-radius:5px; transition:width .4s ease; }
+.cg-bar-amt { font-family:var(--mono); font-size:11px; font-weight:600; color:var(--ink); width:74px; text-align:right; flex-shrink:0; }
+.cg-bar-pct { font-family:var(--mono); font-size:10px; color:var(--muted); width:36px; text-align:right; flex-shrink:0; }
+@media(max-width:520px){
+  .cg-bar-label { width:96px; font-size:9px; }
+  .cg-bar-amt { width:64px; }
+}
+.cg-stat-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:20px; }
+@media(max-width:480px){ .cg-stat-grid { grid-template-columns:1fr 1fr; } }
+.cg-stat-card { border:1.5px solid var(--ink); border-radius:var(--r); background:var(--paper); padding:12px 14px; }
+.cg-stat-lbl { font-family:var(--mono); font-size:9px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-bottom:4px; }
+.cg-stat-val { font-family:var(--serif); font-weight:600; font-size:22px; letter-spacing:-.02em; color:var(--ink); font-variation-settings:"opsz" 48,"SOFT" 30; }
+.cg-item-table { border:1.5px solid var(--ink); border-radius:var(--r); overflow:hidden; margin-bottom:18px; }
+.cg-item-hdr { font-family:var(--mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; background:var(--ink); color:var(--paper); padding:8px 14px; display:flex; justify-content:space-between; }
+.cg-item-row { display:flex; justify-content:space-between; align-items:flex-start; padding:9px 14px; border-bottom:1px solid var(--rule); font-size:13px; color:var(--ink-2); gap:10px; }
+.cg-item-row:nth-child(even) { background:var(--paper-2); }
+.cg-item-desc { flex:1; min-width:0; line-height:1.45; }
+.cg-item-desc small { display:block; font-size:11px; color:var(--muted); font-family:var(--mono); letter-spacing:.04em; margin-top:3px; }
+.cg-item-amt { font-family:var(--mono); font-size:12px; font-weight:600; color:var(--ink); flex-shrink:0; white-space:nowrap; }
+.cg-item-total-row { display:flex; justify-content:space-between; align-items:center; padding:11px 14px; background:var(--ink); color:var(--paper); font-family:var(--mono); font-size:12px; letter-spacing:.06em; text-transform:uppercase; font-weight:600; }
+.cg-tier-tip { border-left:3px solid var(--accent); padding:10px 14px; background:rgba(193,49,34,.06); border-radius:0 var(--r) var(--r) 0; font-size:13px; color:var(--ink-2); line-height:1.55; }
+.cg-tier-tip strong { font-family:var(--mono); font-size:9px; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); display:block; margin-bottom:4px; }
+</style>
 <style>
 /* ── TIME ZONE CONVERTER ── */
 /* Reference time controls */
@@ -7349,7 +7544,7 @@ const TOOLS = [
   {id:'atm-fee',       nm:'ATM Fee Estimator',          ico:'🏧', ph:'money',     on:false, live:false, ds:'True cost of foreign ATM withdrawals including DCC.'},
   {id:'cost-living',   nm:'Cost of Living Comparison',  ico:'🌐', ph:'money',     on:false, live:false, ds:'How far will $100/day go in Bangkok vs. Paris vs. Tokyo?'},
   {id:'vat-refund',    nm:'VAT & Tax Refund Guide',     ico:'🧾', ph:'money',     on:false, live:false, ds:'Country-by-country guide to claiming VAT refunds as a tourist.'},
-  {id:'cruise-grat',   nm:'Cruise Gratuity Calculator', ico:'🚢', ph:'money',     on:false, live:false, ds:'Daily gratuity per person by cruise line and cabin type.'},
+  {id:'cruise-grat',   nm:'Cruise Gratuity Calculator', ico:'🚢', ph:'money',     on:false, live:true,  ds:'Daily gratuity per person by cruise line and cabin type.'},
   {id:'timezone',      nm:'Time Zone Converter',        ico:'🕐', ph:'destination',on:false,live:true,  ds:'Multi-city live clocks + meeting planner with DST awareness.'},
   {id:'jet-lag',       nm:'Jet Lag Calculator',         ico:'😴', ph:'destination',on:false,live:false, ds:'Pre-travel adjustment schedule + post-arrival recovery plan.'},
   {id:'unit-conv',     nm:'Universal Unit Converter',   ico:'📏', ph:'destination',on:false,live:true,  ds:'Temp, distance, weight, volume, speed — all traveler conversions.'},
@@ -8028,6 +8223,7 @@ function injectTripCtx(id) {
   if(id==='unit-conv') ucInit();
   if(id==='fuel-cost') fcInit();
   if(id==='cruise-compare') ccInit();
+  if(id==='cruise-grat')   cgInit();
   if(id==='trip-journal') tjInit();
   if(id==='park-budget') pbInit();
   if(id==='biz-packing') bpInit();
@@ -19847,6 +20043,312 @@ function vacTrackerExport() {
 
 function escapeHtml(s) {
   return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+/* ══════════════════════════════════════════════════════
+   CRUISE GRATUITY CALCULATOR
+   Cabin-tier rates: Standard = Interior/Oceanview/Balcony;
+   Suite = Mini-Suite/Junior/Concierge-class;
+   Penthouse = Owner's/Royal/Haven/Retreat (highest tier).
+   Rates current as of May 2026.
+   ══════════════════════════════════════════════════════ */
+const CG_LINES = [
+  { id:'carnival',       name:'Carnival Cruise Line',   emoji:'🎉',
+    tiers:{ standard:18.00, suite:20.00, penthouse:23.00 },
+    bar:18, spa:18, included:false,
+    note:'Auto-applied daily to your Sail & Sign onboard account. Pre-pay available at booking.',
+    kidsPolicy:'Children 2+ pay full adult rate; under 2 free.' },
+  { id:'royalcaribbean', name:'Royal Caribbean',         emoji:'🌊',
+    tiers:{ standard:18.50, suite:21.00, penthouse:25.50 },
+    bar:18, spa:18, included:false,
+    note:'Auto-applied to your SeaPass account. Star Class suites include all gratuities in the fare.',
+    kidsPolicy:'All ages pay full daily rate; under 2 free.' },
+  { id:'ncl',            name:'Norwegian Cruise Line',   emoji:'🆓',
+    tiers:{ standard:20.00, suite:25.00, penthouse:30.00 },
+    bar:20, spa:20, included:false,
+    note:'"Daily Service Charge" — Haven suites are billed at the highest tier.',
+    kidsPolicy:'Children 3+ charged at adult rate; ages 0–2 free.' },
+  { id:'msc',            name:'MSC Cruises',             emoji:'🇪🇺',
+    tiers:{ standard:14.50, suite:16.00, penthouse:18.00 },
+    bar:15, spa:15, included:false,
+    note:'Hotel Service Charge; varies by region — European sailings often lower.',
+    kidsPolicy:'Children 2–11 charged at half rate; under 2 free.' },
+  { id:'celebrity',      name:'Celebrity Cruises',       emoji:'✨',
+    tiers:{ standard:18.00, suite:19.00, penthouse:23.00 },
+    bar:20, spa:20, included:false,
+    note:'Often pre-paid inside "Always Included" or "All Included" packages.',
+    kidsPolicy:'All guests 2+ pay full rate; under 2 free.' },
+  { id:'princess',       name:'Princess Cruises',        emoji:'👑',
+    tiers:{ standard:16.00, suite:17.00, penthouse:18.00 },
+    bar:18, spa:18, included:false,
+    note:'"Crew Appreciation" — bundled into Princess Plus and Princess Premier packages.',
+    kidsPolicy:'All guests 3+ pay full rate; ages 0–2 free.' },
+  { id:'hollandamerica', name:'Holland America Line',    emoji:'⚓',
+    tiers:{ standard:16.00, suite:17.50, penthouse:19.00 },
+    bar:18, spa:18, included:false,
+    note:'Crew Appreciation; included in the "Have It All" package.',
+    kidsPolicy:'All guests pay full rate; under 2 free.' },
+  { id:'disney',         name:'Disney Cruise Line',      emoji:'🏰',
+    tiers:{ standard:15.50, suite:18.50, penthouse:21.50 },
+    bar:18, spa:18, included:false,
+    note:'Suggested gratuities; distributed by envelope on the last night of your sailing.',
+    kidsPolicy:'All guests 3+ pay full rate; under 3 free.' },
+  { id:'viking',         name:'Viking Ocean Cruises',    emoji:'⛴',
+    tiers:{ standard:0, suite:0, penthouse:0 },
+    bar:0, spa:0, included:true,
+    note:'Gratuities are included in fare. Additional tipping is not expected aboard Viking ships.',
+    kidsPolicy:'Adults only (18+) — no children aboard.' },
+  { id:'regent',         name:'Regent Seven Seas',       emoji:'💎',
+    tiers:{ standard:0, suite:0, penthouse:0 },
+    bar:0, spa:0, included:true,
+    note:'Truly all-inclusive — gratuities, drinks, specialty dining and shore excursions all covered.',
+    kidsPolicy:'Caters to adults; no dedicated kids programming.' },
+  { id:'silversea',      name:'Silversea Cruises',       emoji:'⭐',
+    tiers:{ standard:0, suite:0, penthouse:0 },
+    bar:0, spa:0, included:true,
+    note:'All gratuities included. Butler service and many shore excursions covered as well.',
+    kidsPolicy:'Adult-focused; no kids programming.' },
+  { id:'seabourn',       name:'Seabourn Cruise Line',    emoji:'🥂',
+    tiers:{ standard:0, suite:0, penthouse:0 },
+    bar:0, spa:0, included:true,
+    note:'Gratuities are neither expected nor accepted — already covered in the fare.',
+    kidsPolicy:'Adult-focused; no kids programming.' },
+];
+
+const CG_STATE = {
+  lineId: 'royalcaribbean',
+  cabin:  'standard',
+  drinks: 0,
+  dining: 0,
+  bump:   0,
+};
+
+const CG_AVG_DRINK_USD     = 12;  // Average cocktail/wine pour for bar gratuity estimate
+const CG_AVG_SPECIALTY_USD = 50;  // Per-person specialty restaurant cover charge
+const CG_DINING_TIP_PCT    = 18;  // Suggested extra tip on top of cover charge
+
+function cgInit() {
+  const sel = document.getElementById('cg-line');
+  if(sel && !sel.options.length) {
+    sel.innerHTML = CG_LINES.map(l =>
+      `<option value="${l.id}">${l.emoji}  ${l.name}${l.included?' — All-inclusive':''}</option>`
+    ).join('');
+  }
+  if(sel) sel.value = CG_STATE.lineId;
+
+  // Apply MyTrip context (nights + travelers)
+  const trip = getActiveTrip();
+  if(trip) {
+    if(trip.departDate && trip.returnDate) {
+      const nights = Math.max(1, Math.round((new Date(trip.returnDate)-new Date(trip.departDate))/864e5));
+      document.getElementById('cg-nights').value = nights;
+    }
+    if(trip.travelers && Number(trip.travelers) > 0) {
+      document.getElementById('cg-adults').value = trip.travelers;
+    }
+  }
+
+  // Reset chip groups to defaults
+  CG_STATE.drinks = 0; CG_STATE.dining = 0; CG_STATE.bump = 0;
+  document.querySelectorAll('#view-cruise-grat .chip-grp').forEach(grp => {
+    grp.querySelectorAll('.chip').forEach((c,i) => c.classList.toggle('on', i === 0));
+  });
+
+  // Reset cabin to standard
+  CG_STATE.cabin = 'standard';
+  document.querySelectorAll('#view-cruise-grat .cg-cabin').forEach(b =>
+    b.classList.toggle('on', b.dataset.tier === 'standard')
+  );
+
+  cgOnLineChange();
+}
+
+function cgOnLineChange() {
+  const sel = document.getElementById('cg-line');
+  if(sel) CG_STATE.lineId = sel.value;
+  const line = CG_LINES.find(l => l.id === CG_STATE.lineId) || CG_LINES[0];
+
+  const noteEl = document.getElementById('cg-line-note');
+  if(noteEl) {
+    const hdrLbl = line.included ? '✔ All-Inclusive' : '§ How this line handles gratuities';
+    const hdrColor = line.included ? 'var(--green)' : 'var(--blue)';
+    noteEl.innerHTML =
+      `<strong style="font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:${hdrColor};display:block;margin-bottom:4px">${hdrLbl}</strong>` +
+      escapeHtml(line.note) +
+      `<br><span style="color:var(--muted);font-style:italic">${escapeHtml(line.kidsPolicy)}</span>`;
+    noteEl.style.borderLeftColor = hdrColor;
+    noteEl.style.display = '';
+  }
+
+  ['standard','suite','penthouse'].forEach(t => {
+    const el = document.getElementById('cg-rate-'+t);
+    if(el) el.textContent = line.included ? 'Included' : ('$' + line.tiers[t].toFixed(2) + '/night');
+  });
+
+  cgCalc();
+}
+
+function cgSetCabin(btn, tier) {
+  CG_STATE.cabin = tier;
+  document.querySelectorAll('#view-cruise-grat .cg-cabin').forEach(b => b.classList.toggle('on', b === btn));
+  cgCalc();
+}
+
+function cgSetChip(chip, group) {
+  CG_STATE[group] = Number(chip.dataset.v) || 0;
+  chip.parentElement.querySelectorAll('.chip').forEach(c => c.classList.toggle('on', c === chip));
+  cgCalc();
+}
+
+function cgCalc() {
+  const line = CG_LINES.find(l => l.id === CG_STATE.lineId);
+  if(!line) return;
+
+  const nights = Math.max(0, parseInt(document.getElementById('cg-nights').value) || 0);
+  const adults = Math.max(0, parseInt(document.getElementById('cg-adults').value) || 0);
+  const kids   = Math.max(0, parseInt(document.getElementById('cg-kids').value)   || 0);
+  const tots   = Math.max(0, parseInt(document.getElementById('cg-tots').value)   || 0);
+  const spa    = Math.max(0, parseFloat(document.getElementById('cg-spa').value)  || 0);
+
+  // Daily auto-gratuity. MSC charges half rate for kids 2–11; other lines full rate.
+  const rate = line.tiers[CG_STATE.cabin] || 0;
+  const kidsRate = (line.id === 'msc') ? rate * 0.5 : rate;
+  const autoGrat = (adults * rate + kids * kidsRate) * nights;
+  const bumpExtra = autoGrat * (CG_STATE.bump / 100);
+
+  // Bar / drinks gratuity
+  const drinksTab = CG_STATE.drinks * adults * nights * CG_AVG_DRINK_USD;
+  const barGrat = drinksTab * (line.bar / 100);
+
+  // Specialty dining tip (only relevant when the line charges for it — luxury lines included it)
+  const dineCovers = CG_STATE.dining * adults;
+  const dineSubtotal = dineCovers * CG_AVG_SPECIALTY_USD;
+  const dineGrat = line.included ? 0 : dineSubtotal * (CG_DINING_TIP_PCT / 100);
+
+  // Spa gratuity
+  const spaGrat = spa * (line.spa / 100);
+
+  const total = autoGrat + bumpExtra + barGrat + dineGrat + spaGrat;
+  const payingGuests = adults + kids; // Toddlers free
+
+  // ── TOTAL ──
+  document.getElementById('cg-total').textContent = '$' + total.toFixed(2);
+  const subParts = [];
+  if(nights) subParts.push(nights + ' night' + (nights===1?'':'s'));
+  if(adults) subParts.push(adults + ' adult' + (adults===1?'':'s'));
+  if(kids)   subParts.push(kids + (kids===1?' child':' children'));
+  if(tots)   subParts.push(tots + ' toddler' + (tots===1?'':'s') + ' (free)');
+  document.getElementById('cg-total-sub').textContent = subParts.join(' · ') + ' · ' + line.name;
+
+  const badge = document.getElementById('cg-included-badge');
+  if(badge) badge.style.display = (line.included && total === 0) ? '' : 'none';
+
+  // ── Breakdown bars ──
+  const bdEl = document.getElementById('cg-breakdown');
+  if(bdEl) {
+    const parts = [
+      { lbl:'Daily Auto-Grat',         amt:autoGrat,  color:'var(--accent)' },
+      { lbl:'Extra '+CG_STATE.bump+'%',amt:bumpExtra, color:'var(--pink)'   },
+      { lbl:'Bar Gratuity',            amt:barGrat,   color:'var(--blue)'   },
+      { lbl:'Dining Tip',              amt:dineGrat,  color:'var(--teal)'   },
+      { lbl:'Spa Gratuity',            amt:spaGrat,   color:'var(--green)'  },
+    ].filter(p => p.amt > 0);
+    if(parts.length === 0) {
+      bdEl.innerHTML = '<div style="font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--muted);text-align:center;padding:14px;background:var(--paper-2);border-radius:var(--r)">' +
+        (line.included ? 'No gratuities — all included in your cruise fare.' : 'Set nights and party size above to see your estimate.') +
+        '</div>';
+    } else {
+      const max = Math.max(...parts.map(p=>p.amt));
+      bdEl.innerHTML = parts.map(p => {
+        const pct = max ? Math.round(p.amt / max * 100) : 0;
+        const pctOfTotal = total ? Math.round(p.amt / total * 100) : 0;
+        return `<div class="cg-bar-row">
+          <span class="cg-bar-label">${p.lbl}</span>
+          <span class="cg-bar-track"><span class="cg-bar-fill" style="width:${pct}%;background:${p.color}"></span></span>
+          <span class="cg-bar-amt">$${p.amt.toFixed(2)}</span>
+          <span class="cg-bar-pct">${pctOfTotal}%</span>
+        </div>`;
+      }).join('');
+    }
+  }
+
+  // ── Stat grid ──
+  const sgEl = document.getElementById('cg-stat-grid');
+  if(sgEl) {
+    const perGuest      = payingGuests ? total / payingGuests : 0;
+    const perNight      = nights ? total / nights : 0;
+    const perGuestNight = (payingGuests && nights) ? total / (payingGuests * nights) : 0;
+    sgEl.innerHTML =
+      `<div class="cg-stat-card"><div class="cg-stat-lbl">Per Paying Guest</div><div class="cg-stat-val">$${perGuest.toFixed(0)}</div></div>` +
+      `<div class="cg-stat-card"><div class="cg-stat-lbl">Per Night</div><div class="cg-stat-val">$${perNight.toFixed(0)}</div></div>` +
+      `<div class="cg-stat-card"><div class="cg-stat-lbl">Per Guest / Night</div><div class="cg-stat-val">$${perGuestNight.toFixed(2)}</div></div>`;
+  }
+
+  // ── Itemized table ──
+  const itEl = document.getElementById('cg-item-table');
+  if(itEl) {
+    const rows = [];
+    if(autoGrat > 0) {
+      const kidsClause = kids > 0
+        ? ` + ${kids} child${kids===1?'':'ren'} × $${kidsRate.toFixed(2)}`
+        : '';
+      rows.push({
+        desc: `Daily auto-gratuity (${CG_STATE.cabin === 'standard' ? 'Standard' : CG_STATE.cabin === 'suite' ? 'Suite' : 'Penthouse'} cabin)`,
+        sub:  `${adults} adult${adults===1?'':'s'} × $${rate.toFixed(2)}${kidsClause} × ${nights} night${nights===1?'':'s'}`,
+        amt:  autoGrat
+      });
+    }
+    if(bumpExtra > 0) {
+      rows.push({ desc:`Extra ${CG_STATE.bump}% on top of auto-gratuity`, sub:'Optional bump for excellent service', amt:bumpExtra });
+    }
+    if(barGrat > 0) {
+      rows.push({
+        desc: `Bar gratuity (${line.bar}% auto-added)`,
+        sub:  `${CG_STATE.drinks} drinks/adult/day × ${adults} adult${adults===1?'':'s'} × ${nights} night${nights===1?'':'s'} ≈ $${drinksTab.toFixed(0)} bar tab`,
+        amt:  barGrat
+      });
+    }
+    if(dineGrat > 0) {
+      rows.push({
+        desc: `Specialty dining tip (${CG_DINING_TIP_PCT}%)`,
+        sub:  `${CG_STATE.dining} meal${CG_STATE.dining===1?'':'s'} × ${adults} adult${adults===1?'':'s'} × ~$${CG_AVG_SPECIALTY_USD} cover`,
+        amt:  dineGrat
+      });
+    }
+    if(spaGrat > 0) {
+      rows.push({
+        desc: `Spa gratuity (${line.spa}%)`,
+        sub:  `On $${spa.toFixed(2)} of treatments`,
+        amt:  spaGrat
+      });
+    }
+    if(rows.length === 0) {
+      itEl.style.display = 'none';
+      itEl.innerHTML = '';
+    } else {
+      itEl.style.display = '';
+      itEl.innerHTML =
+        `<div class="cg-item-hdr"><span>Itemized Breakdown</span><span>USD</span></div>` +
+        rows.map(r => `<div class="cg-item-row"><div class="cg-item-desc">${escapeHtml(r.desc)}<small>${escapeHtml(r.sub)}</small></div><div class="cg-item-amt">$${r.amt.toFixed(2)}</div></div>`).join('') +
+        `<div class="cg-item-total-row"><span>Total Gratuities</span><span>$${total.toFixed(2)}</span></div>`;
+    }
+  }
+
+  // ── Contextual tip ──
+  const tipEl = document.getElementById('cg-tier-tip');
+  if(tipEl) {
+    let tip = '';
+    if(line.included) {
+      tip = `<strong>§ Travel Tip</strong>Gratuities are already included in your ${escapeHtml(line.name)} fare. Crew members generally don't accept additional tips — show appreciation with a smile, a compliment in your post-cruise survey, or a thank-you note instead.`;
+    } else if(autoGrat >= 200) {
+      tip = `<strong>§ Pre-Pay Tip</strong>Your daily auto-gratuity alone is <b>$${autoGrat.toFixed(2)}</b>. Pre-paying at booking locks in today's rate and spreads the cost over your deposit + final payment instead of a single hit on your onboard bill at the end of the cruise.`;
+    } else if(autoGrat > 0) {
+      tip = `<strong>§ Heads Up</strong>Auto-gratuities will appear on your onboard account each day. You can adjust at Guest Services on the last evening, but doing so leaves room stewards and dining staff short — only remove for documented service issues.`;
+    } else {
+      tip = `<strong>§ Heads Up</strong>No auto-gratuities calculated yet — pick a cabin tier and add at least one paying guest and one night.`;
+    }
+    tipEl.innerHTML = tip;
+  }
 }
 
 </script>
