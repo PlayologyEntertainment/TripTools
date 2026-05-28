@@ -2565,17 +2565,165 @@ body.no-scroll { overflow: hidden; }
     </div>
   </div>
 </div>
-<div id="view-placeholder-flight-est" class="view">
-  <nav class="tool-topbar">
+<div id="view-flight-est" class="view">
+  <style>
+  /* ── FLIGHT COST ESTIMATOR ── */
+  #view-flight-est .fe-section-lbl { font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 16px 0 8px; }
+  #view-flight-est .fe-swap { background: var(--paper-2); border: 1.5px dashed var(--ink); color: var(--ink); border-radius: var(--r); cursor: pointer; font-family: var(--sans); font-size: 12px; font-weight: 600; padding: 7px 14px; margin: 2px 0 6px; }
+  #view-flight-est .fe-swap:hover { background: var(--ink); color: var(--paper); }
+  #view-flight-est .fe-results { border-top: 2px solid var(--ink); margin-top: 24px; padding-top: 24px; }
+  #view-flight-est .fe-results-inner { animation: fc-result-in .22s cubic-bezier(.2,.8,.2,1) both; }
+  #view-flight-est .fe-range-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 18px; }
+  @media(max-width:540px){ #view-flight-est .fe-range-grid { grid-template-columns: 1fr; } }
+  #view-flight-est .fe-range-card { border: 1.5px solid var(--ink); border-radius: var(--r); background: var(--paper); padding: 16px 18px; position: relative; overflow: hidden; text-align: center; }
+  #view-flight-est .fe-range-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; }
+  #view-flight-est .fe-range-card.low::before  { background: var(--green); }
+  #view-flight-est .fe-range-card.avg::before  { background: var(--accent); }
+  #view-flight-est .fe-range-card.high::before { background: var(--orange); }
+  #view-flight-est .fe-range-card.avg { background: var(--paper-2); border-width: 2px; }
+  #view-flight-est .fe-range-lbl { font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  #view-flight-est .fe-range-num { font-family: var(--serif); font-weight: 600; font-size: clamp(26px,6vw,42px); letter-spacing: -.03em; line-height: 1; color: var(--ink); font-variation-settings: "opsz" 72, "SOFT" 30, "WONK" 1; }
+  #view-flight-est .fe-range-card.avg .fe-range-num { color: var(--accent); }
+  #view-flight-est .fe-range-sub { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-top: 8px; }
+  #view-flight-est .fe-route-strip { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
+  #view-flight-est .fe-route-pill { flex: 1; min-width: 120px; background: var(--paper-2); border: 1.5px solid var(--ink); border-radius: var(--r); padding: 10px 12px; }
+  #view-flight-est .fe-route-pill .k { font-family: var(--mono); font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  #view-flight-est .fe-route-pill .v { font-family: var(--serif); font-size: 18px; color: var(--ink); line-height: 1.2; margin-top: 3px; }
+  #view-flight-est .fe-pp-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(132px,1fr)); gap: 10px; margin-bottom: 16px; }
+  #view-flight-est .fe-pp { background: var(--paper); border: 1px solid var(--rule); border-radius: var(--r); padding: 10px 12px; }
+  #view-flight-est .fe-pp .k { font-family: var(--mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+  #view-flight-est .fe-pp .v { font-family: var(--mono); font-size: 16px; font-weight: 600; color: var(--ink); margin-top: 4px; }
+  #view-flight-est .fe-breakdown-lbl { font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 4px 0 8px; }
+  #view-flight-est .fe-factors { border: 1.5px solid var(--rule); border-radius: var(--r); background: var(--paper); padding: 2px 14px; margin-bottom: 16px; }
+  #view-flight-est .fe-factor-row { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid var(--rule); padding: 9px 0; font-size: 13px; color: var(--ink-2); gap: 12px; }
+  #view-flight-est .fe-factor-row:last-child { border-bottom: none; }
+  #view-flight-est .fe-factor-val { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--ink); white-space: nowrap; }
+  #view-flight-est .fe-factor-val.up   { color: var(--accent); }
+  #view-flight-est .fe-factor-val.down { color: var(--green); }
+  #view-flight-est .fe-disclaimer { font-size: 12px; color: var(--ink-2); line-height: 1.5; border-left: 3px solid var(--blue); padding: 10px 14px; background: rgba(21,101,192,.05); border-radius: 0 var(--r) var(--r) 0; }
+  #view-flight-est .fe-disclaimer .ver { display: block; margin-top: 6px; font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  #view-flight-est .fe-msg { background: rgba(255,77,46,.06); border-left: 3px solid var(--accent); color: var(--accent); padding: 11px 14px; border-radius: 0 var(--r) var(--r) 0; font-size: 13px; margin-top: 14px; display: none; }
+  #view-flight-est .fe-msg.show { display: block; }
+  #view-flight-est .fe-print-header { display: none; }
+  @media print {
+    #view-flight-est .tool-bar, #view-flight-est .ctx-banner, #view-flight-est .pro-tip,
+    #view-flight-est .related, #view-flight-est .btn-ghost, #view-flight-est .fe-swap { display: none !important; }
+    #view-flight-est .fe-print-header { display: flex !important; justify-content: space-between; font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid #ccc; padding-bottom: 8px; margin-bottom: 16px; }
+    #view-flight-est .fe-results { border-top: 1px solid #ccc; }
+    body { background: #fff !important; background-image: none !important; }
+  }
+  </style>
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="window.print()">🖨 Print</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">✈️</span>
-    <h2>Flight Cost Estimator</h2>
-    <p style="margin-bottom:24px">Budget calculator estimating round-trip airfare ranges (low / average / high).</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-flight-est"></div>
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>Flight Cost Estimator</h1>
+    <p class="tool-sub">Estimate airfare before you book — a low / average / high budget range based on distance, cabin, season, and how far ahead you book. This is a planning estimate, not a live fare search.</p>
+  </div>
+
+  <div class="tool-body">
+
+    <!-- ── ROUTE ── -->
+    <div class="fe-section-lbl">Route</div>
+    <div class="frow">
+      <div class="fg" style="margin-bottom:8px">
+        <label for="fe-origin">From</label>
+        <select id="fe-origin" onchange="feCalc()"></select>
+      </div>
+      <div class="fg" style="margin-bottom:8px">
+        <label for="fe-dest">To</label>
+        <select id="fe-dest" onchange="feCalc()"></select>
+      </div>
     </div>
+    <button class="fe-swap" onclick="feSwap()">⇅ Swap origin & destination</button>
+
+    <!-- ── TRIP TYPE ── -->
+    <div class="fg">
+      <label>Trip Type</label>
+      <div class="chip-grp" id="fe-grp-tt">
+        <button class="chip on" data-fe-grp="tt" data-fe-val="rt" onclick="feSetOpt(this)">⇄ Round-trip</button>
+        <button class="chip"    data-fe-grp="tt" data-fe-val="ow" onclick="feSetOpt(this)">→ One-way</button>
+      </div>
+    </div>
+
+    <!-- ── TRAVELERS ── -->
+    <div class="frow">
+      <div class="fg">
+        <label for="fe-adults">Adults</label>
+        <input type="number" id="fe-adults" value="1" min="1" max="20" oninput="feCalc()">
+      </div>
+      <div class="fg">
+        <label for="fe-children">Children (2–11)</label>
+        <input type="number" id="fe-children" value="0" min="0" max="20" oninput="feCalc()">
+      </div>
+    </div>
+
+    <!-- ── CABIN ── -->
+    <div class="fg">
+      <label>Cabin Class</label>
+      <div class="chip-grp" id="fe-grp-cabin">
+        <button class="chip on" data-fe-grp="cabin" data-fe-val="eco"   onclick="feSetOpt(this)">💺 Economy</button>
+        <button class="chip"    data-fe-grp="cabin" data-fe-val="prem"  onclick="feSetOpt(this)">🛋 Premium Eco</button>
+        <button class="chip"    data-fe-grp="cabin" data-fe-val="biz"   onclick="feSetOpt(this)">🥂 Business</button>
+        <button class="chip"    data-fe-grp="cabin" data-fe-val="first" onclick="feSetOpt(this)">👑 First</button>
+      </div>
+    </div>
+
+    <!-- ── SEASON ── -->
+    <div class="fg">
+      <label>When You're Traveling</label>
+      <div class="chip-grp" id="fe-grp-season">
+        <button class="chip"    data-fe-grp="season" data-fe-val="off"      onclick="feSetOpt(this)">🍃 Off-peak</button>
+        <button class="chip on" data-fe-grp="season" data-fe-val="shoulder" onclick="feSetOpt(this)">🌤 Shoulder</button>
+        <button class="chip"    data-fe-grp="season" data-fe-val="peak"     onclick="feSetOpt(this)">🔥 Peak / Holiday</button>
+      </div>
+    </div>
+
+    <!-- ── BOOKING TIMING ── -->
+    <div class="fg">
+      <label>When You'll Book</label>
+      <div class="chip-grp" id="fe-grp-book">
+        <button class="chip"    data-fe-grp="book" data-fe-val="last"  onclick="feSetOpt(this)">⏰ &lt; 2 weeks out</button>
+        <button class="chip on" data-fe-grp="book" data-fe-val="soon"  onclick="feSetOpt(this)">📅 2–8 weeks out</button>
+        <button class="chip"    data-fe-grp="book" data-fe-val="sweet" onclick="feSetOpt(this)">🎯 2–4 months out</button>
+        <button class="chip"    data-fe-grp="book" data-fe-val="early" onclick="feSetOpt(this)">🗓 4+ months out</button>
+      </div>
+    </div>
+
+    <!-- ── RESULTS ── -->
+    <div class="fe-results" id="fe-results" style="display:none" aria-live="polite">
+      <div class="fe-results-inner" id="fe-results-inner"><!-- injected by JS --></div>
+    </div>
+    <div class="fe-msg" id="fe-msg"></div>
+
+    <!-- ── RESET ── -->
+    <div style="margin-top:16px;text-align:right">
+      <button class="btn-ghost" onclick="feReset()">↺ Reset</button>
+    </div>
+
+  </div><!-- /tool-body -->
+
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    For most round-trips, the cheapest fares tend to land 1–3 months ahead for domestic and 2–6 months ahead for international. Midweek departures (Tuesday/Wednesday) and flexible dates usually beat the "average" shown here, while peak holidays and last-minute bookings push you toward the high end. Use this range to set your budget — then watch for fares below it.
+  </div>
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('budget-plan')">💰 Budget Planner</button>
+      <button class="rel-btn" onclick="openTool('dest-picker')">🌐 Destination Picker</button>
+      <button class="rel-btn" onclick="openTool('baggage')">💸 Baggage Fee Calculator</button>
+      <button class="rel-btn" onclick="openTool('currency')">💱 Currency Converter</button>
+    </div>
+  </div>
+
+  <!-- Print-only header -->
+  <div class="fe-print-header">
+    <strong>TripTools — Flight Cost Estimator</strong>
+    <span id="fe-print-date"></span>
   </div>
 </div>
 <div id="view-placeholder-hotel-rental" class="view">
@@ -8518,7 +8666,7 @@ const TOOLS = [
   {id:'trip-duration', nm:'Trip Duration Calculator',   ico:'🗓', ph:'discovery', on:false, live:false, ds:'How many days do you really need? Accounts for jet lag & transit.'},
   {id:'budget-plan',   nm:'Travel Budget Planner',      ico:'💰', ph:'discovery', on:false, live:true,  ds:'Full trip budget builder: flights, hotels, food & activities. Pie chart.'},
   {id:'group-trip',    nm:'Group Trip Organizer',       ico:'👥', ph:'discovery', on:false, live:true,  ds:'Headcounts, preferences & destination voting for groups.'},
-  {id:'flight-est',    nm:'Flight Cost Estimator',      ico:'✈️', ph:'discovery', on:false, live:false, ds:'Budget calculator estimating round-trip airfare (low/avg/high).'},
+  {id:'flight-est',    nm:'Flight Cost Estimator',      ico:'✈️', ph:'discovery', on:false, live:true,  ds:'Budget calculator estimating round-trip airfare (low/avg/high).'},
   {id:'hotel-rental',  nm:'Hotel vs. Vacation Rental',  ico:'🏨', ph:'discovery', on:false, live:false, ds:'Compare hotel vs. Airbnb/VRBO across 8 factors.'},
   {id:'road-planner',  nm:'Road Trip Route Planner',    ico:'🗺', ph:'discovery', on:true,  live:true,  ds:'Waypoints, distance, drive time & map via Leaflet + OSM.'},
   {id:'itinerary',     nm:'Itinerary Builder',          ico:'📋', ph:'discovery', on:false, live:true,  ds:'Day-by-day planner with drag-and-drop scheduling. Printable.'},
@@ -9226,6 +9374,7 @@ function injectTripCtx(id) {
   if(id==='currency') fxInit();
   if(id==='unit-conv') ucInit();
   if(id==='fuel-cost') fcInit();
+  if(id==='flight-est') feInit();
   if(id==='cruise-compare') ccInit();
   if(id==='cruise-grat')   cgInit();
   if(id==='trip-journal') tjInit();
@@ -13611,6 +13760,367 @@ function fcReset() {
     b.classList.toggle('active', b.dataset.fcUnit === 'mpg-us');
   });
   fcApplyUnit();
+}
+
+/* ══════════════════════════════════════════════════════
+   FLIGHT COST ESTIMATOR
+   Offline airfare budget estimator. Computes great-circle
+   distance between bundled airports, applies a tapering
+   per-mile fare model plus route / cabin / season / booking
+   multipliers, and returns a low / average / high range.
+   Not a live fare search.
+   ══════════════════════════════════════════════════════ */
+
+const FE_DATA_VERSION = 'Fare model v1.0 — reviewed May 2026';
+
+/* Bundled airport reference: code, city, country, region, lat, lon */
+const FE_AIRPORTS = [
+  // North America
+  {c:'ATL', city:'Atlanta',        co:'United States', r:'na',      lat:33.64,  lon:-84.43},
+  {c:'JFK', city:'New York',       co:'United States', r:'na',      lat:40.64,  lon:-73.78},
+  {c:'LAX', city:'Los Angeles',    co:'United States', r:'na',      lat:33.94,  lon:-118.41},
+  {c:'ORD', city:'Chicago',        co:'United States', r:'na',      lat:41.98,  lon:-87.90},
+  {c:'SFO', city:'San Francisco',  co:'United States', r:'na',      lat:37.62,  lon:-122.38},
+  {c:'MIA', city:'Miami',          co:'United States', r:'na',      lat:25.80,  lon:-80.29},
+  {c:'SEA', city:'Seattle',        co:'United States', r:'na',      lat:47.45,  lon:-122.31},
+  {c:'DFW', city:'Dallas',         co:'United States', r:'na',      lat:32.90,  lon:-97.04},
+  {c:'DEN', city:'Denver',         co:'United States', r:'na',      lat:39.86,  lon:-104.67},
+  {c:'BOS', city:'Boston',         co:'United States', r:'na',      lat:42.37,  lon:-71.01},
+  {c:'LAS', city:'Las Vegas',      co:'United States', r:'na',      lat:36.08,  lon:-115.15},
+  {c:'IAD', city:'Washington DC',  co:'United States', r:'na',      lat:38.95,  lon:-77.46},
+  {c:'HNL', city:'Honolulu',       co:'United States', r:'na',      lat:21.32,  lon:-157.92},
+  {c:'YYZ', city:'Toronto',        co:'Canada',        r:'na',      lat:43.68,  lon:-79.61},
+  {c:'YVR', city:'Vancouver',      co:'Canada',        r:'na',      lat:49.19,  lon:-123.18},
+  {c:'YUL', city:'Montreal',       co:'Canada',        r:'na',      lat:45.47,  lon:-73.74},
+  {c:'MEX', city:'Mexico City',    co:'Mexico',        r:'na',      lat:19.44,  lon:-99.07},
+  {c:'CUN', city:'Cancun',         co:'Mexico',        r:'na',      lat:21.04,  lon:-86.87},
+  // Latin America
+  {c:'GRU', city:'São Paulo',      co:'Brazil',        r:'latam',   lat:-23.43, lon:-46.47},
+  {c:'GIG', city:'Rio de Janeiro', co:'Brazil',        r:'latam',   lat:-22.81, lon:-43.25},
+  {c:'EZE', city:'Buenos Aires',   co:'Argentina',     r:'latam',   lat:-34.82, lon:-58.54},
+  {c:'BOG', city:'Bogotá',         co:'Colombia',      r:'latam',   lat:4.70,   lon:-74.15},
+  {c:'LIM', city:'Lima',           co:'Peru',          r:'latam',   lat:-12.02, lon:-77.11},
+  {c:'SCL', city:'Santiago',       co:'Chile',         r:'latam',   lat:-33.39, lon:-70.79},
+  {c:'PTY', city:'Panama City',    co:'Panama',        r:'latam',   lat:9.07,   lon:-79.38},
+  {c:'SJO', city:'San José',       co:'Costa Rica',    r:'latam',   lat:9.99,   lon:-84.21},
+  // Europe
+  {c:'LHR', city:'London',         co:'United Kingdom',r:'eu',      lat:51.47,  lon:-0.45},
+  {c:'CDG', city:'Paris',          co:'France',        r:'eu',      lat:49.01,  lon:2.55},
+  {c:'AMS', city:'Amsterdam',      co:'Netherlands',   r:'eu',      lat:52.31,  lon:4.76},
+  {c:'FRA', city:'Frankfurt',      co:'Germany',       r:'eu',      lat:50.04,  lon:8.56},
+  {c:'MUC', city:'Munich',         co:'Germany',       r:'eu',      lat:48.35,  lon:11.79},
+  {c:'MAD', city:'Madrid',         co:'Spain',         r:'eu',      lat:40.49,  lon:-3.57},
+  {c:'BCN', city:'Barcelona',      co:'Spain',         r:'eu',      lat:41.30,  lon:2.08},
+  {c:'FCO', city:'Rome',           co:'Italy',         r:'eu',      lat:41.80,  lon:12.25},
+  {c:'ZRH', city:'Zurich',         co:'Switzerland',   r:'eu',      lat:47.46,  lon:8.55},
+  {c:'VIE', city:'Vienna',         co:'Austria',       r:'eu',      lat:48.11,  lon:16.57},
+  {c:'CPH', city:'Copenhagen',     co:'Denmark',       r:'eu',      lat:55.62,  lon:12.65},
+  {c:'DUB', city:'Dublin',         co:'Ireland',       r:'eu',      lat:53.42,  lon:-6.27},
+  {c:'LIS', city:'Lisbon',         co:'Portugal',      r:'eu',      lat:38.77,  lon:-9.13},
+  {c:'ATH', city:'Athens',         co:'Greece',        r:'eu',      lat:37.94,  lon:23.94},
+  {c:'IST', city:'Istanbul',       co:'Turkey',        r:'eu',      lat:41.28,  lon:28.74},
+  {c:'OSL', city:'Oslo',           co:'Norway',        r:'eu',      lat:60.19,  lon:11.10},
+  {c:'ARN', city:'Stockholm',      co:'Sweden',        r:'eu',      lat:59.65,  lon:17.92},
+  {c:'SVO', city:'Moscow',         co:'Russia',        r:'eu',      lat:55.97,  lon:37.41},
+  // Middle East
+  {c:'DXB', city:'Dubai',          co:'United Arab Emirates', r:'me', lat:25.25, lon:55.36},
+  {c:'AUH', city:'Abu Dhabi',      co:'United Arab Emirates', r:'me', lat:24.43, lon:54.65},
+  {c:'DOH', city:'Doha',           co:'Qatar',         r:'me',      lat:25.27,  lon:51.61},
+  {c:'RUH', city:'Riyadh',         co:'Saudi Arabia',  r:'me',      lat:24.96,  lon:46.70},
+  {c:'TLV', city:'Tel Aviv',       co:'Israel',        r:'me',      lat:32.01,  lon:34.89},
+  // Africa
+  {c:'CAI', city:'Cairo',          co:'Egypt',         r:'africa',  lat:30.11,  lon:31.40},
+  {c:'JNB', city:'Johannesburg',   co:'South Africa',  r:'africa',  lat:-26.13, lon:28.24},
+  {c:'CPT', city:'Cape Town',      co:'South Africa',  r:'africa',  lat:-33.97, lon:18.60},
+  {c:'NBO', city:'Nairobi',        co:'Kenya',         r:'africa',  lat:-1.32,  lon:36.92},
+  {c:'LOS', city:'Lagos',          co:'Nigeria',       r:'africa',  lat:6.58,   lon:3.32},
+  {c:'CMN', city:'Casablanca',     co:'Morocco',       r:'africa',  lat:33.37,  lon:-7.59},
+  {c:'ADD', city:'Addis Ababa',    co:'Ethiopia',      r:'africa',  lat:8.98,   lon:38.80},
+  // Asia
+  {c:'HND', city:'Tokyo',          co:'Japan',         r:'asia',    lat:35.55,  lon:139.78},
+  {c:'KIX', city:'Osaka',          co:'Japan',         r:'asia',    lat:34.43,  lon:135.24},
+  {c:'PEK', city:'Beijing',        co:'China',         r:'asia',    lat:40.08,  lon:116.58},
+  {c:'PVG', city:'Shanghai',       co:'China',         r:'asia',    lat:31.14,  lon:121.81},
+  {c:'HKG', city:'Hong Kong',      co:'Hong Kong',     r:'asia',    lat:22.31,  lon:113.91},
+  {c:'ICN', city:'Seoul',          co:'South Korea',   r:'asia',    lat:37.46,  lon:126.44},
+  {c:'SIN', city:'Singapore',      co:'Singapore',     r:'asia',    lat:1.36,   lon:103.99},
+  {c:'BKK', city:'Bangkok',        co:'Thailand',      r:'asia',    lat:13.69,  lon:100.75},
+  {c:'KUL', city:'Kuala Lumpur',   co:'Malaysia',      r:'asia',    lat:2.75,   lon:101.71},
+  {c:'DEL', city:'Delhi',          co:'India',         r:'asia',    lat:28.56,  lon:77.10},
+  {c:'BOM', city:'Mumbai',         co:'India',         r:'asia',    lat:19.09,  lon:72.87},
+  {c:'CGK', city:'Jakarta',        co:'Indonesia',     r:'asia',    lat:-6.13,  lon:106.66},
+  {c:'MNL', city:'Manila',         co:'Philippines',   r:'asia',    lat:14.51,  lon:121.02},
+  {c:'TPE', city:'Taipei',         co:'Taiwan',        r:'asia',    lat:25.08,  lon:121.23},
+  {c:'SGN', city:'Ho Chi Minh City', co:'Vietnam',     r:'asia',    lat:10.82,  lon:106.65},
+  // Oceania
+  {c:'SYD', city:'Sydney',         co:'Australia',     r:'oceania', lat:-33.95, lon:151.18},
+  {c:'MEL', city:'Melbourne',      co:'Australia',     r:'oceania', lat:-37.67, lon:144.84},
+  {c:'BNE', city:'Brisbane',       co:'Australia',     r:'oceania', lat:-27.38, lon:153.12},
+  {c:'PER', city:'Perth',          co:'Australia',     r:'oceania', lat:-31.94, lon:115.97},
+  {c:'AKL', city:'Auckland',       co:'New Zealand',   r:'oceania', lat:-37.01, lon:174.79},
+  {c:'NAN', city:'Nadi',           co:'Fiji',          r:'oceania', lat:-17.76, lon:177.44},
+];
+
+const FE_REGIONS = [
+  ['na','North America'], ['latam','Latin America'], ['eu','Europe'],
+  ['me','Middle East'], ['africa','Africa'], ['asia','Asia'], ['oceania','Oceania'],
+];
+
+/* Multiplier tables */
+const FE_CABIN  = { eco:1.0,  prem:1.75, biz:3.3,  first:5.2 };
+const FE_SEASON = { off:0.85, shoulder:1.0, peak:1.35 };
+const FE_BOOK   = { last:1.35, soon:1.05, sweet:0.88, early:0.98 };
+const FE_TT     = { rt:1.0,  ow:0.60 };
+
+const FE_LABELS = {
+  cabin:  { eco:'Economy', prem:'Premium Economy', biz:'Business', first:'First class' },
+  season: { off:'Off-peak season', shoulder:'Shoulder season', peak:'Peak / holiday season' },
+  book:   { last:'Booking under 2 weeks out', soon:'Booking 2–8 weeks out', sweet:'Booking 2–4 months out (sweet spot)', early:'Booking 4+ months out' },
+  tt:     { rt:'Round-trip', ow:'One-way' },
+};
+
+const FE_LOW_FACTOR  = 0.72;   // flexible dates / budget carriers / great deal
+const FE_HIGH_FACTOR = 1.55;   // peak day / full-service / last availability
+const FE_CHILD_FACTOR = 0.75;  // child (2–11) fraction of adult fare
+
+let feState = { tt:'rt', cabin:'eco', season:'shoulder', book:'soon' };
+let feBuilt = false;
+
+function feInit() {
+  const pd = document.getElementById('fe-print-date');
+  if(pd) pd.textContent = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+
+  if(!feBuilt) {
+    feBuildOptions();
+    feApplyTripContext();
+    feBuilt = true;
+  }
+  feCalc();
+}
+
+function feBuildOptions() {
+  const sorted = {};
+  FE_REGIONS.forEach(([key]) => { sorted[key] = []; });
+  FE_AIRPORTS.forEach(a => { if(sorted[a.r]) sorted[a.r].push(a); });
+  Object.values(sorted).forEach(list => list.sort((x,y)=>x.city.localeCompare(y.city)));
+
+  let html = '<option value="">Select airport…</option>';
+  FE_REGIONS.forEach(([key,label]) => {
+    if(!sorted[key].length) return;
+    html += `<optgroup label="${label}">`;
+    sorted[key].forEach(a => {
+      html += `<option value="${a.c}">${a.c} — ${a.city}, ${a.co}</option>`;
+    });
+    html += '</optgroup>';
+  });
+  document.getElementById('fe-origin').innerHTML = html;
+  document.getElementById('fe-dest').innerHTML   = html;
+}
+
+function feApplyTripContext() {
+  const trip = getActiveTrip();
+  if(!trip) return;
+
+  // Origin from home airport (IATA)
+  if(trip.homeAirport) {
+    const code = trip.homeAirport.trim().toUpperCase();
+    if(FE_AIRPORTS.some(a => a.c === code)) document.getElementById('fe-origin').value = code;
+  }
+  // Destination by matching the trip destination text to a known city / country
+  if(trip.destination) {
+    const t = trip.destination.toLowerCase();
+    const match = FE_AIRPORTS.find(a => t.includes(a.city.toLowerCase()) || t.includes(a.co.toLowerCase()));
+    if(match) document.getElementById('fe-dest').value = match.c;
+  }
+  // Travelers
+  if(trip.travelers && trip.travelers >= 1) {
+    document.getElementById('fe-adults').value = Math.min(20, trip.travelers);
+  }
+  // Season from departure month (northern-hemisphere leaning heuristic)
+  if(trip.departDate) {
+    const d = new Date(trip.departDate);
+    if(!isNaN(d)) {
+      const mo = d.getMonth();
+      const peak = [5,6,7,11], shoulder = [3,4,8,9];
+      const season = peak.includes(mo) ? 'peak' : shoulder.includes(mo) ? 'shoulder' : 'off';
+      feSelectVal('season', season);
+      // Booking window from days until departure
+      const days = Math.round((d - new Date()) / 864e5);
+      if(days >= 0) {
+        const book = days < 14 ? 'last' : days < 56 ? 'soon' : days < 120 ? 'sweet' : 'early';
+        feSelectVal('book', book);
+      }
+    }
+  }
+}
+
+function feSetOpt(btn) { feSelectVal(btn.dataset.feGrp, btn.dataset.feVal); feCalc(); }
+
+function feSelectVal(grp, val) {
+  if(!(grp in feState)) return;
+  feState[grp] = val;
+  document.querySelectorAll(`#fe-grp-${grp} [data-fe-grp="${grp}"]`).forEach(b => {
+    b.classList.toggle('on', b.dataset.feVal === val);
+  });
+}
+
+function feSwap() {
+  const o = document.getElementById('fe-origin');
+  const d = document.getElementById('fe-dest');
+  const tmp = o.value; o.value = d.value; d.value = tmp;
+  feCalc();
+}
+
+/* Great-circle distance in miles (haversine) */
+function feDistanceMi(a, b) {
+  const R = 3958.8, toRad = x => x * Math.PI / 180;
+  const dLat = toRad(b.lat - a.lat), dLon = toRad(b.lon - a.lon);
+  const s = Math.sin(dLat/2)**2 + Math.cos(toRad(a.lat))*Math.cos(toRad(b.lat))*Math.sin(dLon/2)**2;
+  return 2 * R * Math.asin(Math.min(1, Math.sqrt(s)));
+}
+
+/* Base round-trip economy fare from one-way distance (USD) — tapering per mile */
+function feBaseRT(d) {
+  const bands = [[500,0.30],[1000,0.15],[2500,0.10],[3000,0.09]];
+  let fare = 80, rem = d;
+  for(const [w,rate] of bands) {
+    const use = Math.min(rem, w);
+    fare += use * rate;
+    rem -= use;
+    if(rem <= 0) break;
+  }
+  if(rem > 0) fare += rem * 0.075;   // 7000+ mi tail
+  return fare;
+}
+
+function feRegion(a, b) {
+  if(a.co === b.co) return { m:1.00, label:'Domestic' };
+  if(a.r  === b.r ) return { m:1.12, label:'Regional' };
+  return { m:1.28, label:'Intercontinental' };
+}
+
+function feMoney(n) { return '$' + Math.round(n).toLocaleString('en-US'); }
+function feMx(n)    { return '×' + (Number.isInteger(n*10) ? n.toFixed(1) : n.toFixed(2)); }
+
+function feCalc() {
+  const oCode = document.getElementById('fe-origin').value;
+  const dCode = document.getElementById('fe-dest').value;
+  const resultsEl = document.getElementById('fe-results');
+  const msgEl = document.getElementById('fe-msg');
+
+  const hide = () => { resultsEl.style.display = 'none'; };
+  const showMsg = txt => { msgEl.textContent = txt; msgEl.classList.add('show'); };
+  msgEl.classList.remove('show');
+
+  if(!oCode || !dCode) { hide(); return; }
+
+  const A = FE_AIRPORTS.find(a => a.c === oCode);
+  const B = FE_AIRPORTS.find(a => a.c === dCode);
+  if(!A || !B) { hide(); return; }
+
+  if(A.c === B.c) { hide(); showMsg('Pick two different airports to estimate a fare.'); return; }
+
+  const adults = Math.max(0, parseInt(document.getElementById('fe-adults').value,10) || 0);
+  const children = Math.max(0, parseInt(document.getElementById('fe-children').value,10) || 0);
+  if(adults + children < 1) { hide(); showMsg('Add at least one traveler.'); return; }
+
+  const dist = feDistanceMi(A, B);
+  const region = feRegion(A, B);
+  const cabinM  = FE_CABIN[feState.cabin];
+  const seasonM = FE_SEASON[feState.season];
+  const bookM   = FE_BOOK[feState.book];
+  const ttM     = FE_TT[feState.tt];
+
+  // Average fare per adult
+  const adultAvg = feBaseRT(dist) * region.m * cabinM * seasonM * bookM * ttM;
+  const childAvg = adultAvg * FE_CHILD_FACTOR;
+
+  const partyAvg = adults * adultAvg + children * childAvg;
+  const partyLow  = partyAvg * FE_LOW_FACTOR;
+  const partyHigh = partyAvg * FE_HIGH_FACTOR;
+
+  // ── Build result markup ──
+  const innerEl = document.getElementById('fe-results-inner');
+  innerEl.style.animation = 'none'; innerEl.offsetHeight; innerEl.style.animation = '';
+
+  const travelerStr = [
+    adults + ' adult' + (adults !== 1 ? 's' : ''),
+    children > 0 ? children + ' child' + (children !== 1 ? 'ren' : '') : null,
+  ].filter(Boolean).join(' + ');
+
+  // Per-person cards
+  let ppCards = `<div class="fe-pp"><div class="k">Avg / adult</div><div class="v">${feMoney(adultAvg)}</div></div>`;
+  if(children > 0) ppCards += `<div class="fe-pp"><div class="k">Avg / child</div><div class="v">${feMoney(childAvg)}</div></div>`;
+  ppCards += `<div class="fe-pp"><div class="k">Travelers</div><div class="v">${adults + children}</div></div>`;
+  ppCards += `<div class="fe-pp"><div class="k">Trip</div><div class="v">${feState.tt === 'rt' ? 'Round-trip' : 'One-way'}</div></div>`;
+
+  // Factor breakdown rows
+  const fmtRow = (name, mult, valLabel) => {
+    const cls = mult > 1.001 ? 'up' : mult < 0.999 ? 'down' : '';
+    return `<div class="fe-factor-row"><span>${name}</span><span class="fe-factor-val ${cls}">${valLabel} · ${feMx(mult)}</span></div>`;
+  };
+  let factorRows = '';
+  factorRows += fmtRow('Route', region.m, region.label);
+  factorRows += fmtRow('Cabin', cabinM, FE_LABELS.cabin[feState.cabin]);
+  factorRows += fmtRow('Season', seasonM, FE_LABELS.season[feState.season]);
+  factorRows += fmtRow('Booking window', bookM, FE_LABELS.book[feState.book]);
+  if(feState.tt === 'ow') factorRows += fmtRow('Trip type', ttM, 'One-way (≈60% of round-trip)');
+
+  const distLabel = Math.round(dist).toLocaleString('en-US') + ' mi';
+
+  innerEl.innerHTML = `
+    <div class="fe-range-grid">
+      <div class="fe-range-card low">
+        <div class="fe-range-lbl">Low</div>
+        <div class="fe-range-num">${feMoney(partyLow)}</div>
+        <div class="fe-range-sub">flexible / deal</div>
+      </div>
+      <div class="fe-range-card avg">
+        <div class="fe-range-lbl">Average</div>
+        <div class="fe-range-num">${feMoney(partyAvg)}</div>
+        <div class="fe-range-sub">typical fare</div>
+      </div>
+      <div class="fe-range-card high">
+        <div class="fe-range-lbl">High</div>
+        <div class="fe-range-num">${feMoney(partyHigh)}</div>
+        <div class="fe-range-sub">peak / late</div>
+      </div>
+    </div>
+
+    <div class="fe-route-strip">
+      <div class="fe-route-pill"><div class="k">Route</div><div class="v">${A.c} ${feState.tt === 'rt' ? '⇄' : '→'} ${B.c}</div></div>
+      <div class="fe-route-pill"><div class="k">Distance (one-way)</div><div class="v">${distLabel}</div></div>
+      <div class="fe-route-pill"><div class="k">Type</div><div class="v">${region.label}</div></div>
+    </div>
+
+    <div class="fe-pp-grid">${ppCards}</div>
+
+    <div class="fe-breakdown-lbl">What's driving this estimate</div>
+    <div class="fe-factors">
+      <div class="fe-factor-row"><span>${A.city} (${A.c}) ${feState.tt === 'rt' ? 'round-trip' : 'one-way'} to ${B.city} (${B.c})</span><span class="fe-factor-val">${travelerStr}</span></div>
+      ${factorRows}
+    </div>
+
+    <div class="fe-disclaimer">
+      Planning estimate only — this is <strong>not a live fare search</strong>. Real prices swing with demand, airline, route competition, fuel surcharges, and the exact dates you fly. Use the range to set a budget, then book when you spot a fare near or below the low end. Figures in USD.
+      <span class="ver">${FE_DATA_VERSION}</span>
+    </div>
+  `;
+
+  resultsEl.style.display = 'block';
+}
+
+function feReset() {
+  document.getElementById('fe-origin').value = '';
+  document.getElementById('fe-dest').value = '';
+  document.getElementById('fe-adults').value = '1';
+  document.getElementById('fe-children').value = '0';
+  feSelectVal('tt', 'rt');
+  feSelectVal('cabin', 'eco');
+  feSelectVal('season', 'shoulder');
+  feSelectVal('book', 'soon');
+  document.getElementById('fe-msg').classList.remove('show');
+  document.getElementById('fe-results').style.display = 'none';
 }
 
 /* ══════════════════════════════════════════════════════
