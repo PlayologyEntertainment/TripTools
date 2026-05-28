@@ -3711,19 +3711,174 @@ body.no-scroll { overflow: hidden; }
     </div>
   </div>
 </div>
-<div id="view-placeholder-luggage-wt" class="view">
-  <nav class="tool-topbar">
+<div id="view-luggage-wt" class="view">
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="window.print()">🖨 Print</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">⚖️</span>
-    <h2>Luggage Weight Calculator</h2>
-    <p style="margin-bottom:24px">Virtual baggage scale. Add items with weights & see your remaining allowance.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-luggage-wt"></div>
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>Luggage Weight Calculator</h1>
+    <p class="tool-sub">Your virtual baggage scale. List what's going in the bag, set your airline's weight limit, and watch your remaining allowance — before the check-in counter does the math for you.</p>
+  </div>
+  <div class="tool-body">
+
+    <div class="fg">
+      <label>Weight Units</label>
+      <div class="lwc-toggle">
+        <button class="lwc-toggle-btn active" id="lwc-lb-btn" onclick="lwcSetUnit('lb')">⚖️ Pounds (lb)</button>
+        <button class="lwc-toggle-btn" id="lwc-kg-btn" onclick="lwcSetUnit('kg')">⚖️ Kilograms (kg)</button>
+      </div>
+    </div>
+
+    <div class="fg">
+      <label>Weight Allowance</label>
+      <div class="lwc-search-wrap">
+        <input type="search" id="lwc-airline-search" class="lwc-search-input" placeholder="🔍 Search airline to auto-fill its checked-bag limit…" autocomplete="off">
+        <div id="lwc-airline-drop" class="lwc-drop" style="display:none"></div>
+        <input type="hidden" id="lwc-airline-val">
+      </div>
+      <div class="lwc-num-row">
+        <input type="number" id="lwc-allowance" inputmode="decimal" min="0" step="0.5" placeholder="50" aria-label="Weight allowance" oninput="lwcAllowanceEdited()">
+        <span class="lwc-num-unit" id="lwc-allow-unit">lb</span>
+      </div>
+      <div class="lwc-tip">↳ Pick an airline, or type your own limit. Most economy checked bags are capped at 50 lb (23 kg) — over that, expect a steep overweight fee.</div>
+    </div>
+
+    <div class="fg">
+      <label for="lwc-tare">Empty Bag Weight <span class="lwc-opt">optional</span></label>
+      <div class="lwc-num-row">
+        <input type="number" id="lwc-tare" inputmode="decimal" min="0" step="0.1" placeholder="0" aria-label="Empty bag weight" oninput="lwcTareEdited()">
+        <span class="lwc-num-unit" id="lwc-tare-unit">lb</span>
+      </div>
+      <div class="lwc-tip">↳ The suitcase itself counts toward the limit. A large hardshell runs ~9–11 lb (4–5 kg) empty; a soft duffel ~3 lb (1.5 kg).</div>
+    </div>
+
+    <div class="fg">
+      <label>Add an Item</label>
+      <div class="lwc-add-row">
+        <input type="text" id="lwc-item-name" placeholder="Item name (e.g. Running shoes)" autocomplete="off" aria-label="Item name" onkeydown="if(event.key==='Enter')lwcAddItem()">
+        <input type="number" id="lwc-item-wt" inputmode="decimal" min="0" step="0.1" placeholder="wt" aria-label="Item weight" onkeydown="if(event.key==='Enter')lwcAddItem()">
+        <button class="btn btn-p btn-sm" onclick="lwcAddItem()">＋ Add</button>
+      </div>
+      <div class="lwc-presets-lbl">Quick add — tap to drop in, then adjust:</div>
+      <div class="lwc-presets" id="lwc-presets"></div>
+    </div>
+
+    <div id="lwc-err" style="display:none"></div>
+
+    <div id="lwc-result" aria-live="polite"></div>
+
+    <div class="lwc-disclaimer">
+      ⚠️ <strong>This is an estimate, not a certified scale.</strong> Item weights you don't measure yourself are approximations. Airlines weigh the whole bag at check-in — when you're within a pound or two of the limit, weigh the packed bag on a real luggage scale before you leave.
+    </div>
+  </div>
+
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    Overweight fees are punishing — often $100+ for a bag just a few pounds over, frequently more than a whole second checked bag would have cost. If you're over, the cheapest fix is usually to shift your heaviest dense items (shoes, books, toiletries, chargers) into your carry-on or personal item, which is rarely weighed on full-service carriers.
+  </div>
+
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('baggage')">💸 Baggage Fee Calculator</button>
+      <button class="rel-btn" onclick="openTool('carry-on')">📐 Carry-On Size Checker</button>
+      <button class="rel-btn" onclick="openTool('packing')">📝 Smart Packing List</button>
+      <button class="rel-btn" onclick="openTool('tsa-guide')">🔒 TSA &amp; Security Guide</button>
     </div>
   </div>
 </div>
+<style>
+.lwc-toggle{display:flex;gap:8px}
+.lwc-toggle-btn{flex:1;padding:10px;border:1.5px solid var(--ink);border-radius:var(--r);background:var(--paper);font-family:var(--sans);font-size:14px;cursor:pointer;color:var(--ink-2);transition:background .12s,color .12s;min-height:44px}
+.lwc-toggle-btn.active{background:var(--ink);color:var(--paper)}
+.lwc-toggle-btn:hover:not(.active){background:var(--paper-2)}
+.lwc-search-wrap{position:relative;margin-bottom:10px}
+.lwc-search-input{width:100%;padding:10px 12px;border:1.5px solid var(--ink);border-radius:var(--r);font-size:14px;font-family:var(--sans);background:var(--paper);color:var(--ink);box-sizing:border-box;outline:none;display:block;min-height:44px}
+.lwc-search-input:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(255,77,46,.15)}
+.lwc-drop{position:absolute;top:100%;left:0;right:0;max-height:260px;overflow-y:auto;background:var(--paper);border:1.5px solid var(--ink);border-top:none;border-radius:0 0 var(--r) var(--r);z-index:200;box-shadow:0 4px 12px rgba(0,0,0,.12)}
+.lwc-drop-item{padding:9px 12px;cursor:pointer;font-size:14px;font-family:var(--sans);color:var(--ink);border-bottom:1px solid var(--rule);display:flex;align-items:center;gap:8px}
+.lwc-drop-item:last-child{border-bottom:none}
+.lwc-drop-item:hover{background:var(--paper-2)}
+.lwc-drop-flag{font-size:18px;width:24px;text-align:center;flex-shrink:0}
+.lwc-drop-name{flex:1}
+.lwc-drop-wt{font-size:11px;font-family:var(--mono);letter-spacing:.04em;color:var(--muted)}
+.lwc-num-row{display:flex;align-items:stretch;gap:0;max-width:220px}
+.lwc-num-row input{flex:1;padding:10px 12px;border:1.5px solid var(--ink);border-right:none;border-radius:var(--r) 0 0 var(--r);font-size:16px;font-family:var(--sans);background:var(--paper);color:var(--ink);box-sizing:border-box;outline:none;min-height:44px;width:100%}
+.lwc-num-row input:focus{border-color:var(--accent)}
+.lwc-num-unit{display:flex;align-items:center;padding:0 14px;border:1.5px solid var(--ink);border-radius:0 var(--r) var(--r) 0;background:var(--paper-2);font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2)}
+.lwc-opt{font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;background:var(--paper-2);padding:2px 6px;border-radius:10px;margin-left:4px}
+.lwc-tip{font-size:12px;color:var(--muted);font-family:var(--sans);padding:9px 12px;background:var(--paper-2);border-left:3px solid var(--ink);border-radius:2px;line-height:1.5;margin-top:8px}
+.lwc-add-row{display:grid;grid-template-columns:1fr 90px auto;gap:8px}
+.lwc-add-row input{padding:10px 12px;border:1.5px solid var(--ink);border-radius:var(--r);font-size:16px;font-family:var(--sans);background:var(--paper);color:var(--ink);box-sizing:border-box;outline:none;min-height:44px}
+.lwc-add-row input:focus{border-color:var(--accent)}
+.lwc-add-row .btn{white-space:nowrap}
+@media(max-width:480px){.lwc-add-row{grid-template-columns:1fr 80px}.lwc-add-row .btn{grid-column:1/-1}}
+.lwc-presets-lbl{font-size:11px;font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:14px 0 8px}
+.lwc-presets{display:flex;flex-wrap:wrap;gap:7px}
+.lwc-preset{display:inline-flex;align-items:center;gap:6px;padding:7px 11px;border:1.5px solid var(--ink);border-radius:20px;background:var(--paper);font-family:var(--sans);font-size:13px;color:var(--ink-2);cursor:pointer;transition:background .12s,color .12s;min-height:38px}
+.lwc-preset:hover{background:var(--ink);color:var(--paper)}
+.lwc-preset .lwc-preset-wt{font-family:var(--mono);font-size:10px;color:var(--muted)}
+.lwc-preset:hover .lwc-preset-wt{color:var(--paper)}
+.lwc-err{color:var(--accent);font-size:13px;font-family:var(--sans);margin-top:8px;padding:8px 12px;background:#ffebee;border-left:3px solid var(--accent);border-radius:2px}
+.lwc-scale{border:2px solid var(--ink);border-radius:var(--r);overflow:hidden;margin-top:24px}
+.lwc-scale-top{padding:20px;display:flex;align-items:center;justify-content:space-between;gap:14px;border-bottom:1.5px solid var(--ink)}
+.lwc-scale.ok .lwc-scale-top{background:#e8f5e9}
+.lwc-scale.near .lwc-scale-top{background:#fff8e1}
+.lwc-scale.over .lwc-scale-top{background:#ffebee}
+.lwc-scale.none .lwc-scale-top{background:var(--paper-2)}
+.lwc-scale-num{font-family:var(--serif);font-size:46px;font-weight:700;letter-spacing:-.03em;line-height:.95}
+.lwc-scale-num span{font-size:20px;font-weight:500;color:var(--muted);margin-left:4px}
+.lwc-scale-cap{font-size:11px;font-family:var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:6px}
+.lwc-scale-badge{flex-shrink:0;text-align:center;font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:8px 12px;border:1.5px solid var(--ink);border-radius:var(--r);line-height:1.3;max-width:130px}
+.lwc-scale.ok .lwc-scale-badge{color:var(--green);border-color:var(--green);background:#fff}
+.lwc-scale.near .lwc-scale-badge{color:#b8860b;border-color:#b8860b;background:#fff}
+.lwc-scale.over .lwc-scale-badge{color:var(--accent);border-color:var(--accent);background:#fff}
+.lwc-bar-wrap{padding:18px 20px;border-bottom:1.5px solid var(--ink)}
+.lwc-bar{position:relative;height:22px;background:var(--paper-2);border:1.5px solid var(--ink);border-radius:11px;overflow:hidden}
+.lwc-bar-fill{height:100%;border-radius:9px 0 0 9px;transition:width .35s ease}
+.lwc-bar-fill.ok{background:#a8d5b1}
+.lwc-bar-fill.near{background:#f3d27a}
+.lwc-bar-fill.over{background:#f5a698}
+.lwc-bar-lbls{display:flex;justify-content:space-between;margin-top:7px;font-family:var(--mono);font-size:10px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.lwc-remain{margin-top:12px;text-align:center;font-family:var(--serif);font-size:18px;font-weight:600;letter-spacing:-.01em}
+.lwc-scale.ok .lwc-remain{color:var(--green)}
+.lwc-scale.near .lwc-remain{color:#b8860b}
+.lwc-scale.over .lwc-remain{color:var(--accent)}
+.lwc-bd{padding:12px 20px;display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;font-family:var(--mono);letter-spacing:.02em;color:var(--ink-2);background:var(--paper-2)}
+.lwc-bd b{color:var(--ink);font-weight:600}
+.lwc-noallow{padding:16px 20px;font-size:13px;color:var(--ink-2);line-height:1.5;border-bottom:1.5px solid var(--ink)}
+.lwc-items{margin-top:20px;border:1.5px solid var(--ink);border-radius:var(--r);overflow:hidden}
+.lwc-items-hdr{padding:11px 16px;background:var(--ink);color:var(--paper);font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.lwc-clear{background:none;border:1px solid rgba(255,255,255,.4);color:var(--paper);font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:4px 9px;border-radius:2px;cursor:pointer}
+.lwc-clear:hover{background:rgba(255,255,255,.15)}
+.lwc-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--rule)}
+.lwc-row:last-child{border-bottom:none}
+.lwc-row-ico{font-size:18px;width:24px;text-align:center;flex-shrink:0}
+.lwc-row-name{flex:1;font-size:14px;color:var(--ink);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lwc-qty{display:flex;align-items:center;gap:0;flex-shrink:0}
+.lwc-qty-btn{width:28px;height:28px;border:1.5px solid var(--ink);background:var(--paper);font-size:16px;line-height:1;cursor:pointer;color:var(--ink);display:flex;align-items:center;justify-content:center}
+.lwc-qty-btn:first-child{border-radius:var(--r) 0 0 var(--r)}
+.lwc-qty-btn:last-child{border-radius:0 var(--r) var(--r) 0;border-left:none}
+.lwc-qty-btn:hover{background:var(--paper-2)}
+.lwc-qty-n{min-width:30px;text-align:center;font-family:var(--mono);font-size:13px;border-top:1.5px solid var(--ink);border-bottom:1.5px solid var(--ink);height:28px;line-height:25px}
+.lwc-row-wt{width:64px;flex-shrink:0}
+.lwc-row-wt input{width:100%;padding:6px 6px;border:1.5px solid var(--ink);border-radius:var(--r);font-size:13px;font-family:var(--mono);text-align:right;background:var(--paper);color:var(--ink);box-sizing:border-box;outline:none;min-height:34px}
+.lwc-row-wt input:focus{border-color:var(--accent)}
+.lwc-row-wtu{font-family:var(--mono);font-size:10px;color:var(--muted);width:18px;flex-shrink:0}
+.lwc-row-line{width:62px;text-align:right;font-family:var(--mono);font-size:13px;font-weight:600;color:var(--ink);flex-shrink:0}
+.lwc-row-del{background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;width:28px;height:28px;flex-shrink:0;border-radius:2px}
+.lwc-row-del:hover{color:var(--accent);background:#ffebee}
+.lwc-empty{padding:22px 16px;text-align:center;color:var(--muted);font-size:14px;background:var(--paper-2)}
+.lwc-disclaimer{margin-top:18px;padding:12px 16px;background:var(--paper-2);border-left:3px solid var(--yellow);border-radius:var(--r);font-size:13px;color:var(--muted);line-height:1.55}
+@media print{
+  .lwc-toggle,.lwc-search-wrap,.lwc-add-row,.lwc-presets,.lwc-presets-lbl,.lwc-clear,.lwc-qty-btn,.lwc-row-del,#lwc-err{display:none!important}
+  .lwc-scale,.lwc-items{border:1.5px solid #000!important}
+  .lwc-row-wt input{border:none!important;padding:0!important}
+}
+</style>
 <div id="view-placeholder-wardrobe" class="view">
   <nav class="tool-topbar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
@@ -8015,7 +8170,7 @@ const TOOLS = [
   {id:'packing',       nm:'Smart Packing List',         ico:'📝', ph:'packing',   on:false, live:true,  ds:'Generate a list by trip type, duration & climate. Check off as you go.'},
   {id:'baggage',       nm:'Baggage Fee Calculator',     ico:'💸', ph:'packing',   on:false, live:true,  ds:'Carry-on & checked bag fees for 35 major airlines.'},
   {id:'carry-on',      nm:'Carry-On Size Checker',      ico:'📐', ph:'packing',   on:false, live:true,  ds:'Enter dimensions + airline → fits / borderline / too large.'},
-  {id:'luggage-wt',    nm:'Luggage Weight Calculator',  ico:'⚖️', ph:'packing',   on:false, live:false, ds:'Virtual baggage scale. Add items & see remaining allowance.'},
+  {id:'luggage-wt',    nm:'Luggage Weight Calculator',  ico:'⚖️', ph:'packing',   on:false, live:true,  ds:'Virtual baggage scale. Add items & see remaining allowance.'},
   {id:'wardrobe',      nm:'Weather-Based Wardrobe',     ico:'🌤', ph:'packing',   on:true,  live:false, ds:'14-day forecast → packing suggestions per condition.'},
   {id:'power-plug',    nm:'Power Plug & Adapter Guide', ico:'🔌', ph:'packing',   on:false, live:true,  ds:'Home + destination = plug types needed, voltage & converter advice.'},
   {id:'no-pack',       nm:'What NOT to Pack',           ico:'🚫', ph:'packing',   on:false, live:false, ds:'TSA, customs & cruise prohibited items. Searchable guide.'},
@@ -8718,6 +8873,7 @@ function injectTripCtx(id) {
   if(id==='expense-report') erInit();
   if(id==='baggage')    bfcInit();
   if(id==='carry-on')   cosInit();
+  if(id==='luggage-wt') lwcInit();
   if(id==='car-kit')    ckInit();
   if(id==='emergency')  emInit();
   if(id==='timezone')   tzInit();
@@ -16903,6 +17059,351 @@ function cosBuildSvg(userH, userW, limH, limW, bagFill) {
     <text x="${(lX).toFixed(1)}" y="${(lY - 6).toFixed(1)}" text-anchor="start"
           font-family="ui-monospace, monospace" font-size="10" fill="#666" letter-spacing="0.06em">MAX ${limWLbl} × ${limHLbl}</text>
   </svg>`;
+}
+
+/* ══════════════════════════════════════════════════════
+   LUGGAGE WEIGHT CALCULATOR  (id: luggage-wt)
+   ══════════════════════════════════════════════════════ */
+const LWC_KG_PER_LB = 0.45359237;
+/* Common packing items with typical weights (kg). Starting estimates the user edits. */
+const LWC_PRESETS = [
+  {n:'T-shirt',          ico:'👕', kg:0.2},
+  {n:'Jeans',            ico:'👖', kg:0.6},
+  {n:'Sweater',          ico:'🧶', kg:0.5},
+  {n:'Jacket',           ico:'🧥', kg:0.8},
+  {n:'Dress',            ico:'👗', kg:0.4},
+  {n:'Shoes (pair)',     ico:'👟', kg:0.9},
+  {n:'Sandals',          ico:'🩴', kg:0.4},
+  {n:'Underwear & socks',ico:'🧦', kg:0.4},
+  {n:'Toiletry kit',     ico:'🧴', kg:1.0},
+  {n:'Hair dryer',       ico:'💨', kg:0.6},
+  {n:'Laptop',           ico:'💻', kg:1.5},
+  {n:'Chargers & cables',ico:'🔌', kg:0.5},
+  {n:'Camera',           ico:'📷', kg:0.7},
+  {n:'Book',             ico:'📚', kg:0.4},
+  {n:'Towel',            ico:'🏖', kg:0.5},
+  {n:'Souvenirs',        ico:'🎁', kg:1.0},
+];
+
+let lwcUnit = 'lb';           // 'lb' | 'kg'
+let lwcItems = [];            // [{id, name, ico, kg, qty}]
+let lwcTareKg = 0;
+let lwcAllowKg = 0;           // 0 = no allowance set
+let lwcAirlineId = '';        // selected airline id, '' = custom/none
+let lwcAirlines = null;       // cached, derived from BFC_AIRLINES
+let lwcNextId = 1;
+
+function lwcGetAirlines() {
+  if (lwcAirlines) return lwcAirlines;
+  lwcAirlines = (typeof BFC_AIRLINES !== 'undefined' ? BFC_AIRLINES : []).map(a => {
+    const mk = /([\d.]+)\s*kg/.exec(a.weight || '');
+    const ml = /([\d.]+)\s*lbs?/i.exec(a.weight || '');
+    const kg = mk ? parseFloat(mk[1]) : 23;
+    const lb = ml ? parseFloat(ml[1]) : Math.round(kg / LWC_KG_PER_LB);
+    return { id:a.id, name:a.name, flag:a.flag, region:a.region, kg, lb, wtStr: a.weight || '' };
+  });
+  return lwcAirlines;
+}
+
+function lwcKey() {
+  const id = (typeof getActiveTripId === 'function' && getActiveTripId()) || 'default';
+  return 'tt_luggage_' + id;
+}
+
+function lwcInit() {
+  lwcUnit = 'lb'; lwcItems = []; lwcTareKg = 0; lwcAllowKg = 0; lwcNextId = 1;
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(lwcKey()) || 'null'); } catch(_) {}
+  if (saved) {
+    lwcUnit = saved.unit === 'kg' ? 'kg' : 'lb';
+    lwcTareKg = +saved.tareKg || 0;
+    lwcAllowKg = +saved.allowKg || 0;
+    lwcItems = Array.isArray(saved.items) ? saved.items.map(it => ({
+      id: lwcNextId++, name: String(it.name || 'Item'), ico: it.ico || '',
+      kg: +it.kg || 0, qty: Math.max(1, parseInt(it.qty) || 1)
+    })) : [];
+    lwcAirlineId = saved.airline || '';
+  } else {
+    lwcAirlineId = '';
+  }
+  // Reset transient input fields
+  const nameEl = document.getElementById('lwc-item-name');
+  const wtEl = document.getElementById('lwc-item-wt');
+  if (nameEl) nameEl.value = '';
+  if (wtEl) wtEl.value = '';
+  document.getElementById('lwc-err').style.display = 'none';
+
+  lwcRenderPresets();
+  lwcSyncUnitUI();
+
+  // Airline search field
+  const search = document.getElementById('lwc-airline-search');
+  const drop = document.getElementById('lwc-airline-drop');
+  const air = lwcGetAirlines().find(a => a.id === lwcAirlineId);
+  search.value = air ? air.flag + '  ' + air.name : '';
+  document.getElementById('lwc-airline-val').value = air ? air.id : '';
+  search.oninput = () => { lwcRenderDrop(drop, search.value); drop.style.display = 'block'; };
+  search.onfocus = () => { lwcRenderDrop(drop, search.value); drop.style.display = 'block'; };
+  search.onblur  = () => setTimeout(() => { drop.style.display = 'none'; }, 150);
+
+  // Allowance + tare inputs reflect stored kg in current unit
+  document.getElementById('lwc-allowance').value = lwcAllowKg > 0 ? lwcFromKg(lwcAllowKg) : '';
+  document.getElementById('lwc-tare').value = lwcTareKg > 0 ? lwcFromKg(lwcTareKg) : '';
+
+  lwcRender();
+}
+
+function lwcUnitLbl() { return lwcUnit === 'kg' ? 'kg' : 'lb'; }
+function lwcToKg(v)   { return lwcUnit === 'kg' ? v : v * LWC_KG_PER_LB; }
+function lwcFromKg(kg){ const v = lwcUnit === 'kg' ? kg : kg / LWC_KG_PER_LB; return Math.round(v * 10) / 10; }
+function lwcFmt(kg)   { return lwcFromKg(kg).toFixed(1).replace(/\.0$/, ''); }
+
+function lwcSave() {
+  try {
+    localStorage.setItem(lwcKey(), JSON.stringify({
+      unit: lwcUnit, tareKg: lwcTareKg, allowKg: lwcAllowKg, airline: lwcAirlineId,
+      items: lwcItems.map(it => ({ name: it.name, ico: it.ico, kg: it.kg, qty: it.qty }))
+    }));
+  } catch(_) {}
+}
+
+function lwcSyncUnitUI() {
+  document.getElementById('lwc-lb-btn').classList.toggle('active', lwcUnit === 'lb');
+  document.getElementById('lwc-kg-btn').classList.toggle('active', lwcUnit === 'kg');
+  const u = lwcUnitLbl();
+  document.getElementById('lwc-allow-unit').textContent = u;
+  document.getElementById('lwc-tare-unit').textContent = u;
+}
+
+function lwcSetUnit(u) {
+  if (u === lwcUnit) return;
+  lwcUnit = u;
+  lwcSyncUnitUI();
+  // Re-display stored kg values in the new unit
+  document.getElementById('lwc-allowance').value = lwcAllowKg > 0 ? lwcFromKg(lwcAllowKg) : '';
+  document.getElementById('lwc-tare').value = lwcTareKg > 0 ? lwcFromKg(lwcTareKg) : '';
+  lwcRenderPresets();
+  lwcSave();
+  lwcRender();
+}
+
+function lwcRenderPresets() {
+  const wrap = document.getElementById('lwc-presets');
+  wrap.innerHTML = LWC_PRESETS.map((p, i) =>
+    `<button class="lwc-preset" onclick="lwcAddPreset(${i})">
+       <span>${p.ico} ${p.n}</span>
+       <span class="lwc-preset-wt">${lwcFmt(p.kg)} ${lwcUnitLbl()}</span>
+     </button>`
+  ).join('');
+}
+
+function lwcRenderDrop(drop, q) {
+  const query = (q || '').toLowerCase().trim();
+  const list = lwcGetAirlines();
+  const items = query
+    ? list.filter(a => a.name.toLowerCase().includes(query) || a.region.toLowerCase().includes(query) || a.id === query)
+    : list;
+  if (!items.length) {
+    drop.innerHTML = '<div class="lwc-drop-item" style="color:var(--muted);cursor:default">No airlines found</div>';
+    return;
+  }
+  drop.innerHTML = items.map(a =>
+    `<div class="lwc-drop-item" onmousedown="lwcSelectAirline(event,'${a.id}')">
+       <span class="lwc-drop-flag">${a.flag}</span>
+       <span class="lwc-drop-name">${a.name}</span>
+       <span class="lwc-drop-wt">${a.wtStr || (a.kg + ' kg')}</span>
+     </div>`
+  ).join('');
+}
+
+function lwcSelectAirline(e, id) {
+  e.preventDefault();
+  const a = lwcGetAirlines().find(x => x.id === id);
+  if (!a) return;
+  lwcAirlineId = id;
+  // Use the airline's marketed figure for the active unit (50 lb / 23 kg are rounded equivalents)
+  const native = lwcUnit === 'kg' ? a.kg : a.lb;
+  lwcAllowKg = lwcToKg(native);
+  document.getElementById('lwc-airline-search').value = a.flag + '  ' + a.name;
+  document.getElementById('lwc-airline-val').value = id;
+  document.getElementById('lwc-airline-drop').style.display = 'none';
+  document.getElementById('lwc-allowance').value = lwcFromKg(lwcAllowKg);
+  lwcSave();
+  lwcRender();
+}
+
+function lwcAllowanceEdited() {
+  const v = parseFloat(document.getElementById('lwc-allowance').value);
+  lwcAllowKg = (!isNaN(v) && v > 0) ? lwcToKg(v) : 0;
+  // Manual edit no longer matches the picked airline
+  if (lwcAirlineId) {
+    const a = lwcGetAirlines().find(x => x.id === lwcAirlineId);
+    const aKg = a ? lwcToKg(lwcUnit === 'kg' ? a.kg : a.lb) : 0;
+    if (!a || Math.abs(aKg - lwcAllowKg) > 0.05) {
+      lwcAirlineId = '';
+      document.getElementById('lwc-airline-search').value = '';
+      document.getElementById('lwc-airline-val').value = '';
+    }
+  }
+  lwcSave();
+  lwcRender();
+}
+
+function lwcTareEdited() {
+  const v = parseFloat(document.getElementById('lwc-tare').value);
+  lwcTareKg = (!isNaN(v) && v > 0) ? lwcToKg(v) : 0;
+  lwcSave();
+  lwcRender();
+}
+
+function lwcShowErr(msg) {
+  const e = document.getElementById('lwc-err');
+  e.innerHTML = '<div class="lwc-err">⚠️ ' + msg + '</div>';
+  e.style.display = 'block';
+}
+
+function lwcAddItem() {
+  const nameEl = document.getElementById('lwc-item-name');
+  const wtEl = document.getElementById('lwc-item-wt');
+  const name = nameEl.value.trim();
+  const wt = parseFloat(wtEl.value);
+  if (!name) { lwcShowErr('Give the item a name.'); nameEl.focus(); return; }
+  if (isNaN(wt) || wt <= 0) { lwcShowErr('Enter a weight greater than zero.'); wtEl.focus(); return; }
+  document.getElementById('lwc-err').style.display = 'none';
+  lwcItems.push({ id: lwcNextId++, name, ico: '', kg: lwcToKg(wt), qty: 1 });
+  nameEl.value = ''; wtEl.value = '';
+  nameEl.focus();
+  lwcSave();
+  lwcRender();
+}
+
+function lwcAddPreset(i) {
+  const p = LWC_PRESETS[i];
+  if (!p) return;
+  document.getElementById('lwc-err').style.display = 'none';
+  lwcItems.push({ id: lwcNextId++, name: p.n, ico: p.ico, kg: p.kg, qty: 1 });
+  lwcSave();
+  lwcRender();
+}
+
+function lwcQty(id, delta) {
+  const it = lwcItems.find(x => x.id === id);
+  if (!it) return;
+  it.qty = Math.max(1, it.qty + delta);
+  lwcSave();
+  lwcRender();
+}
+
+function lwcEditWt(id, val) {
+  const it = lwcItems.find(x => x.id === id);
+  if (!it) return;
+  const v = parseFloat(val);
+  it.kg = (!isNaN(v) && v >= 0) ? lwcToKg(v) : 0;
+  lwcSave();
+  lwcRender();
+}
+
+function lwcRemove(id) {
+  lwcItems = lwcItems.filter(x => x.id !== id);
+  lwcSave();
+  lwcRender();
+}
+
+function lwcClearAll() {
+  if (!lwcItems.length) return;
+  if (!confirm('Remove all items from the bag?')) return;
+  lwcItems = [];
+  lwcSave();
+  lwcRender();
+}
+
+function lwcRender() {
+  const u = lwcUnitLbl();
+  const contentsKg = lwcItems.reduce((s, it) => s + it.kg * it.qty, 0);
+  const totalKg = contentsKg + lwcTareKg;
+  const allow = lwcAllowKg;
+  const count = lwcItems.reduce((s, it) => s + it.qty, 0);
+
+  // Status
+  let cls = 'none', badgeIco = '🧳', badgeLbl = 'No limit set';
+  if (allow > 0) {
+    const ratio = totalKg / allow;
+    if (totalKg > allow)      { cls = 'over'; badgeIco = '❌'; badgeLbl = 'Overweight'; }
+    else if (ratio >= 0.9)    { cls = 'near'; badgeIco = '⚠️'; badgeLbl = 'Cutting it close'; }
+    else                      { cls = 'ok';   badgeIco = '✅'; badgeLbl = 'Within limit'; }
+  }
+
+  // Allowance section
+  let allowHtml;
+  if (allow > 0) {
+    const pct = Math.min(100, (totalKg / allow) * 100);
+    const remKg = allow - totalKg;
+    let remLine;
+    if (remKg >= 0) {
+      remLine = `${lwcFmt(remKg)} ${u} of allowance left`;
+    } else {
+      remLine = `Over by ${lwcFmt(-remKg)} ${u} — repack or expect a fee`;
+    }
+    allowHtml = `<div class="lwc-bar-wrap">
+      <div class="lwc-bar"><div class="lwc-bar-fill ${cls === 'none' ? 'ok' : cls}" style="width:${pct.toFixed(1)}%"></div></div>
+      <div class="lwc-bar-lbls"><span>0</span><span>${lwcFmt(allow)} ${u} limit</span></div>
+      <div class="lwc-remain">${remLine}</div>
+    </div>`;
+  } else {
+    allowHtml = `<div class="lwc-noallow">No weight limit set yet — pick an airline or type an allowance above to see how much room you have left.</div>`;
+  }
+
+  // Breakdown line
+  let bd = `<span>Contents: <b>${lwcFmt(contentsKg)} ${u}</b></span>`;
+  if (lwcTareKg > 0) bd += `<span>Empty bag: <b>${lwcFmt(lwcTareKg)} ${u}</b></span>`;
+  if (allow > 0) bd += `<span>Allowance: <b>${lwcFmt(allow)} ${u}</b></span>`;
+
+  // Items list
+  let itemsHtml;
+  if (!lwcItems.length) {
+    itemsHtml = `<div class="lwc-empty">No items yet. Add items above or tap a quick-add chip to start weighing your bag.</div>`;
+  } else {
+    itemsHtml = lwcItems.map(it => {
+      const lineKg = it.kg * it.qty;
+      return `<div class="lwc-row">
+        ${it.ico ? `<span class="lwc-row-ico">${it.ico}</span>` : `<span class="lwc-row-ico">•</span>`}
+        <span class="lwc-row-name" title="${lwcEsc(it.name)}">${lwcEsc(it.name)}</span>
+        <span class="lwc-qty">
+          <button class="lwc-qty-btn" onclick="lwcQty(${it.id},-1)" aria-label="Decrease quantity">−</button>
+          <span class="lwc-qty-n">${it.qty}</span>
+          <button class="lwc-qty-btn" onclick="lwcQty(${it.id},1)" aria-label="Increase quantity">+</button>
+        </span>
+        <span class="lwc-row-wt"><input type="number" inputmode="decimal" min="0" step="0.1" value="${lwcFromKg(it.kg)}" aria-label="Weight of ${lwcEsc(it.name)}" onchange="lwcEditWt(${it.id},this.value)"></span>
+        <span class="lwc-row-wtu">${u}</span>
+        <span class="lwc-row-line">${lwcFmt(lineKg)} ${u}</span>
+        <button class="lwc-row-del" onclick="lwcRemove(${it.id})" aria-label="Remove ${lwcEsc(it.name)}">×</button>
+      </div>`;
+    }).join('');
+  }
+
+  document.getElementById('lwc-result').innerHTML = `
+    <div class="lwc-scale ${cls}">
+      <div class="lwc-scale-top">
+        <div>
+          <div class="lwc-scale-num">${lwcFmt(totalKg)}<span>${u}</span></div>
+          <div class="lwc-scale-cap">Total packed weight</div>
+        </div>
+        <div class="lwc-scale-badge ${cls}">${badgeIco}<br>${badgeLbl}</div>
+      </div>
+      ${allowHtml}
+      <div class="lwc-bd">${bd}</div>
+    </div>
+    <div class="lwc-items">
+      <div class="lwc-items-hdr">
+        <span>Items in bag · ${count}</span>
+        ${lwcItems.length ? `<button class="lwc-clear" onclick="lwcClearAll()">Clear all</button>` : ''}
+      </div>
+      ${itemsHtml}
+    </div>`;
+}
+
+function lwcEsc(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
 }
 
 /* ══════════════════════════════════════════════════════
