@@ -6940,6 +6940,52 @@ input:checked + .pb-toggle-box::after { transform:translateX(16px);background:#f
 .pb-item-total-row { display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--ink);color:var(--paper);font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;font-weight:600; }
 
 /* ══════════════════════════════════════════════════════
+   RIDE HEIGHT CHECKER CSS
+   ══════════════════════════════════════════════════════ */
+.rh-kid-row { display:flex;align-items:flex-end;gap:10px;margin-bottom:10px; }
+.rh-kid-row .rh-fg { display:flex;flex-direction:column;gap:6px; }
+.rh-kid-row .rh-fg-name { flex:1;min-width:0; }
+.rh-kid-row .rh-fg-h { width:120px;flex-shrink:0; }
+.rh-kid-row label { font-family:var(--sans);font-weight:600;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-2); }
+.rh-kid-row input { background:var(--paper);border:1.5px solid var(--ink);color:var(--ink);font-family:var(--sans);font-size:15px;padding:9px 11px;border-radius:var(--r);outline:none;width:100%; }
+.rh-kid-row input:focus { border-color:var(--accent); }
+.rh-h-wrap { position:relative; }
+.rh-h-wrap .rh-unit-tag { position:absolute;right:10px;top:50%;transform:translateY(-50%);font-family:var(--mono);font-size:12px;color:var(--muted);pointer-events:none; }
+.rh-h-wrap input { padding-right:34px; }
+.rh-del-btn { flex-shrink:0;width:40px;height:40px;border:1.5px solid var(--ink);background:var(--paper-2);border-radius:var(--r);cursor:pointer;font-size:16px;color:var(--ink-2);line-height:1;transition:background .15s; }
+.rh-del-btn:hover { background:#e4c4bd;border-color:var(--accent);color:var(--accent); }
+.rh-add-btn { font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;background:var(--paper);border:1.5px dashed var(--ink);color:var(--ink-2);padding:9px 16px;border-radius:var(--r);cursor:pointer;transition:background .15s; }
+.rh-add-btn:hover { background:var(--paper-2);border-style:solid; }
+
+.rh-results { margin-top:8px; }
+.rh-kid-card { border:1.5px solid var(--ink);border-radius:var(--r);background:var(--paper);margin-bottom:18px;overflow:hidden;animation:pb-in .22s cubic-bezier(.2,.8,.2,1) both; }
+.rh-kid-card-hdr { display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--ink);color:var(--paper);flex-wrap:wrap; }
+.rh-kid-card-hdr .rh-kc-name { font-family:var(--serif);font-weight:600;font-size:21px;letter-spacing:-.01em; }
+.rh-kid-card-hdr .rh-kc-h { font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:#cfc7b8;background:rgba(255,255,255,.1);padding:3px 9px;border-radius:2px; }
+.rh-kid-card-hdr .rh-kc-summary { margin-left:auto;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#cfc7b8; }
+.rh-bucket { padding:12px 16px;border-bottom:1px solid var(--rule); }
+.rh-bucket:last-child { border-bottom:none; }
+.rh-bucket-lbl { font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:600;margin-bottom:9px;display:flex;align-items:center;gap:7px; }
+.rh-bucket-lbl .rh-dot { width:9px;height:9px;border-radius:50%;flex-shrink:0; }
+.rh-bucket-lbl .rh-cnt { color:var(--muted);font-weight:400; }
+.rh-b-ride .rh-dot { background:var(--green); }
+.rh-b-companion .rh-dot { background:var(--blue); }
+.rh-b-short .rh-dot { background:var(--orange); }
+.rh-b-tall .rh-dot { background:var(--muted); }
+.rh-ride { display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px dotted var(--rule);font-size:14px;color:var(--ink-2); }
+.rh-ride:last-child { border-bottom:none; }
+.rh-ride-name { flex:1;min-width:0;line-height:1.35; }
+.rh-ride-meta { display:flex;align-items:center;gap:10px;flex-shrink:0; }
+.rh-ride-req { font-family:var(--mono);font-size:12px;color:var(--muted);white-space:nowrap; }
+.rh-grow { font-family:var(--mono);font-size:11px;font-weight:600;color:var(--orange);white-space:nowrap;background:rgba(230,81,0,.08);padding:2px 7px;border-radius:2px; }
+.rh-bucket-empty { font-style:italic;color:var(--muted);font-size:13px;font-family:var(--serif); }
+.rh-prompt { text-align:center;padding:38px 24px;color:var(--muted);font-family:var(--serif);font-style:italic;font-size:18px;border:1.5px dashed var(--rule);border-radius:var(--r);margin-top:6px; }
+.rh-prompt span { font-size:34px;display:block;margin-bottom:10px;font-style:normal; }
+.rh-legend { display:flex;flex-wrap:wrap;gap:14px;margin:14px 0 4px;font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted); }
+.rh-legend span { display:flex;align-items:center;gap:6px; }
+.rh-legend i { width:9px;height:9px;border-radius:50%;display:inline-block; }
+
+/* ══════════════════════════════════════════════════════
    TRIP JOURNAL CSS
    ══════════════════════════════════════════════════════ */
 .tj-trip-selector {
@@ -8112,16 +8158,55 @@ input:checked + .pb-toggle-box::after { transform:translateX(16px);background:#f
     </div>
   </div>
 </div>
-<div id="view-placeholder-ride-height" class="view">
-  <nav class="tool-topbar">
+<div id="view-ride-height" class="view">
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="window.print()">🖨 Print</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">📏</span>
-    <h2>Ride Height Checker</h2>
-    <p style="margin-bottom:24px">Height requirements across Disney World, Disneyland, Universal FL/CA & more.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-ride-height"></div>
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Offline</div>
+    <h1 class="tool-title">Ride Height Checker</h1>
+    <p class="tool-sub">Enter each child's height, pick a park, and instantly see which rides they can ride, which need a grown-up, and which they're still growing into — across Disney, Universal, SeaWorld &amp; more.</p>
+  </div>
+  <div class="tool-body">
+
+    <!-- STEP 1: UNITS -->
+    <div class="sec-lbl">Measurement Units</div>
+    <div class="chip-grp" id="rh-unit-chips" style="margin-bottom:4px">
+      <span class="chip on" data-v="in" onclick="rhSetUnit('in')">Inches (″)</span>
+      <span class="chip" data-v="cm" onclick="rhSetUnit('cm')">Centimeters (cm)</span>
+    </div>
+
+    <!-- STEP 2: WHO'S RIDING -->
+    <div class="sec-lbl" style="margin-top:24px">Who's Riding?</div>
+    <div id="rh-kid-list"></div>
+    <button class="rh-add-btn" onclick="rhAddKid()">＋ Add another child</button>
+
+    <!-- STEP 3: PARK -->
+    <div class="sec-lbl" style="margin-top:26px">Choose a Park</div>
+    <div class="fg" style="margin-bottom:14px">
+      <label for="rh-park">Park / Resort</label>
+      <select id="rh-park" onchange="rhRender()"></select>
+    </div>
+    <div id="rh-park-info" class="pb-info-card" style="margin-bottom:4px"></div>
+
+    <!-- RESULTS -->
+    <div id="rh-results"></div>
+
+  </div><!-- /tool-body -->
+
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    Measure with shoes on — most parks check height the same way, and a sturdy sole can be the difference between riding and waiting another year. Heights are verified at the ride entrance, so a child near a cutoff may be re-measured. Requirements change as rides open and close; always confirm on the park's official app or website before you travel.
+  </div>
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('park-budget')">🎟 Theme Park Budget</button>
+      <button class="rel-btn" onclick="openTool('park-optimizer')">🗺 Park Day Optimizer</button>
+      <button class="rel-btn" onclick="openTool('park-dining')">🍴 Park Dining Strategy</button>
+      <button class="rel-btn" onclick="openTool('packing')">🧳 Packing List Generator</button>
     </div>
   </div>
 </div>
@@ -9119,7 +9204,7 @@ const TOOLS = [
   {id:'cruise-day',    nm:'Cruise Day Planner',         ico:'📆', ph:'cruise',     on:false,live:true,  ds:'Visual calendar: sea day vs. port day modes.'},
   {id:'park-budget',   nm:'Theme Park Budget',          ico:'🎟', ph:'theme',      on:false,live:true,  ds:'Tickets, food, merch & parking — total cost for any party size.'},
   {id:'park-optimizer',nm:'Park Day Optimizer',         ico:'🗺', ph:'theme',      on:false,live:false, ds:'Rope-drop strategy & Lightning Lane tips for Disney & Universal.'},
-  {id:'ride-height',   nm:'Ride Height Checker',        ico:'📏', ph:'theme',      on:false,live:false, ds:'Height requirements across Disney, Universal & SeaWorld.'},
+  {id:'ride-height',   nm:'Ride Height Checker',        ico:'📏', ph:'theme',      on:false,live:true,  ds:'Height requirements across Disney, Universal, SeaWorld & more. Check who can ride what.'},
   {id:'park-dining',   nm:'Park Dining Strategy',       ico:'🍴', ph:'theme',      on:false,live:false, ds:'ADR windows, value picks & dietary restriction guidance.'},
   {id:'per-diem',      nm:'Per Diem Calculator',        ico:'📋', ph:'business',   on:false,live:false, ds:'US GSA per diem rates by city. International via State Dept.'},
   {id:'expense-report',nm:'Expense Report Builder',     ico:'🧾', ph:'business',   on:false,live:true,  ds:'Log business expenses. Per diem vs. actual. Mileage, billable, receipts. Export CSV.'},
@@ -9781,6 +9866,7 @@ function injectTripCtx(id) {
   if(id==='cruise-day')    cdInit();
   if(id==='trip-journal') tjInit();
   if(id==='park-budget') pbInit();
+  if(id==='ride-height') rhInit();
   if(id==='biz-packing') bpInit();
   if(id==='group-trip') gtInit();
   if(id==='itinerary') ibInit();
@@ -16826,6 +16912,453 @@ function pbCalc() {
   // Force re-animation
   const inner = document.querySelector('.pb-results-inner');
   if(inner){ inner.style.animation='none'; void inner.offsetWidth; inner.style.animation=''; }
+}
+
+/* ════════════════════════════════════════════════════════════
+   RIDE HEIGHT CHECKER  (id: ride-height)
+   Minimum heights in inches, from official park guides.
+   Data current as of May 2026 — always reconfirm before travel.
+   Ride fields: n=name, min=min height to ride (0 = any height),
+   sup=must be accompanied by a supervising companion below this
+   height, max=maximum height limit, note=extra info.
+   ════════════════════════════════════════════════════════════ */
+
+const RH_PARKS = {
+  /* ── Walt Disney World ── */
+  'wdw-magic': { name:'Magic Kingdom', resort:'Walt Disney World', loc:'Orlando, FL', rides:[
+    {n:'TRON Lightcycle / Run', min:48},
+    {n:'Space Mountain', min:44},
+    {n:'Big Thunder Mountain Railroad', min:40},
+    {n:'Tiana\'s Bayou Adventure', min:40},
+    {n:'Seven Dwarfs Mine Train', min:38},
+    {n:'The Barnstormer', min:35},
+    {n:'Tomorrowland Speedway', min:32, note:'Must be 54″ to drive alone'},
+    {n:'Haunted Mansion', min:0},
+    {n:'Pirates of the Caribbean', min:0},
+    {n:'Peter Pan\'s Flight', min:0},
+    {n:'“it\'s a small world”', min:0},
+    {n:'Jungle Cruise', min:0},
+  ]},
+  'wdw-epcot': { name:'EPCOT', resort:'Walt Disney World', loc:'Orlando, FL', rides:[
+    {n:'Guardians of the Galaxy: Cosmic Rewind', min:42},
+    {n:'Test Track', min:40},
+    {n:'Mission: SPACE', min:40, note:'Orange (intense) side requires 44″'},
+    {n:'Soarin\' Around the World', min:40},
+    {n:'Frozen Ever After', min:0},
+    {n:'Remy\'s Ratatouille Adventure', min:0},
+    {n:'Spaceship Earth', min:0},
+    {n:'The Seas with Nemo & Friends', min:0},
+  ]},
+  'wdw-hs': { name:'Disney\'s Hollywood Studios', resort:'Walt Disney World', loc:'Orlando, FL', rides:[
+    {n:'Rock \'n\' Roller Coaster', min:48},
+    {n:'The Twilight Zone Tower of Terror', min:40},
+    {n:'Star Wars: Rise of the Resistance', min:40},
+    {n:'Star Tours – The Adventures Continue', min:40},
+    {n:'Slinky Dog Dash', min:38},
+    {n:'Millennium Falcon: Smugglers Run', min:38},
+    {n:'Alien Swirling Saucers', min:32},
+    {n:'Toy Story Mania!', min:0},
+    {n:'Mickey & Minnie\'s Runaway Railway', min:0},
+  ]},
+  'wdw-ak': { name:'Disney\'s Animal Kingdom', resort:'Walt Disney World', loc:'Orlando, FL', rides:[
+    {n:'Avatar Flight of Passage', min:44},
+    {n:'Expedition Everest', min:44},
+    {n:'DINOSAUR', min:40},
+    {n:'Kali River Rapids', min:38},
+    {n:'Na\'vi River Journey', min:0},
+    {n:'Kilimanjaro Safaris', min:0},
+    {n:'TriceraTop Spin', min:0},
+  ]},
+
+  /* ── Disneyland Resort ── */
+  'dl-disneyland': { name:'Disneyland Park', resort:'Disneyland Resort', loc:'Anaheim, CA', rides:[
+    {n:'Indiana Jones Adventure', min:46},
+    {n:'Matterhorn Bobsleds', min:42},
+    {n:'Space Mountain', min:40},
+    {n:'Big Thunder Mountain Railroad', min:40},
+    {n:'Star Wars: Rise of the Resistance', min:40},
+    {n:'Star Tours – The Adventures Continue', min:40},
+    {n:'Tiana\'s Bayou Adventure', min:40},
+    {n:'Millennium Falcon: Smugglers Run', min:38},
+    {n:'Autopia', min:32, note:'Must be 54″ to drive alone'},
+    {n:'Haunted Mansion', min:0},
+    {n:'Pirates of the Caribbean', min:0},
+    {n:'Finding Nemo Submarine Voyage', min:0},
+  ]},
+  'dl-dca': { name:'Disney California Adventure', resort:'Disneyland Resort', loc:'Anaheim, CA', rides:[
+    {n:'Incredicoaster', min:48},
+    {n:'Goofy\'s Sky School', min:42},
+    {n:'Grizzly River Run', min:42},
+    {n:'Guardians of the Galaxy – Mission: BREAKOUT!', min:40},
+    {n:'Radiator Springs Racers', min:40},
+    {n:'Soarin\' Around the World', min:40},
+    {n:'Toy Story Midway Mania!', min:0},
+    {n:'WEB SLINGERS: A Spider-Man Adventure', min:0},
+    {n:'The Little Mermaid – Ariel\'s Undersea Adventure', min:0},
+  ]},
+
+  /* ── Universal Orlando Resort ── */
+  'uo-usf': { name:'Universal Studios Florida', resort:'Universal Orlando', loc:'Orlando, FL', rides:[
+    {n:'Hollywood Rip Ride Rockit', min:51, max:79},
+    {n:'Revenge of the Mummy', min:48},
+    {n:'MEN IN BLACK Alien Attack', min:42, sup:48},
+    {n:'Harry Potter and the Escape from Gringotts', min:42, sup:48},
+    {n:'TRANSFORMERS: The Ride 3D', min:40, sup:48},
+    {n:'The Simpsons Ride', min:40, sup:48},
+    {n:'Despicable Me Minion Mayhem', min:40, sup:48},
+    {n:'Fast & Furious – Supercharged', min:40, sup:48},
+    {n:'E.T. Adventure', min:34, sup:48},
+  ]},
+  'uo-ioa': { name:'Islands of Adventure', resort:'Universal Orlando', loc:'Orlando, FL', rides:[
+    {n:'The Incredible Hulk Coaster', min:54},
+    {n:'Doctor Doom\'s Fearfall', min:52},
+    {n:'Jurassic World VelociCoaster', min:51},
+    {n:'Hagrid\'s Magical Creatures Motorbike Adventure', min:48},
+    {n:'Harry Potter and the Forbidden Journey', min:48},
+    {n:'Dudley Do-Right\'s Ripsaw Falls', min:44, sup:48},
+    {n:'Jurassic Park River Adventure', min:42, sup:48},
+    {n:'Popeye & Bluto\'s Bilge-Rat Barges', min:42, sup:48},
+    {n:'The Amazing Adventures of Spider-Man', min:40, sup:48},
+    {n:'Flight of the Hippogriff', min:36, sup:48},
+    {n:'Skull Island: Reign of Kong', min:36, sup:48},
+    {n:'Pteranodon Flyers', min:36, max:56, note:'Guests over 56″ must ride with a child 36–56″'},
+  ]},
+  'uo-epic': { name:'Epic Universe ✨', resort:'Universal Orlando', loc:'Orlando, FL', rides:[
+    {n:'Stardust Racers', min:54},
+    {n:'Monsters Unchained: The Frankenstein Experiment', min:48},
+    {n:'Harry Potter and the Battle at the Ministry', min:48},
+    {n:'Hiccup\'s Wing Gliders', min:48},
+    {n:'Dragon Racer\'s Rally', min:48},
+    {n:'The Curse of the Werewolf', min:42, sup:48},
+    {n:'Mario Kart: Bowser\'s Challenge', min:40, sup:48},
+    {n:'Mine-Cart Madness', min:36, sup:48},
+    {n:'Yoshi\'s Adventure', min:34, sup:48},
+    {n:'Constellation Carousel', min:0},
+  ]},
+
+  /* ── Universal Studios Hollywood ── */
+  'ush': { name:'Universal Studios Hollywood', resort:'Universal Studios Hollywood', loc:'Los Angeles, CA', rides:[
+    {n:'Revenge of the Mummy – The Ride', min:48},
+    {n:'Harry Potter and the Forbidden Journey', min:48},
+    {n:'Jurassic World – The Ride', min:42, sup:48},
+    {n:'TRANSFORMERS: The Ride-3D', min:40, sup:48},
+    {n:'Mario Kart: Bowser\'s Challenge', min:40, sup:48},
+    {n:'The Simpsons Ride', min:40, sup:48},
+    {n:'Despicable Me Minion Mayhem', min:40, sup:48},
+    {n:'Flight of the Hippogriff', min:39, sup:48},
+    {n:'The Secret Life of Pets: Off the Leash', min:34, sup:48},
+  ]},
+
+  /* ── SeaWorld ── */
+  'sw-orlando': { name:'SeaWorld Orlando', resort:'SeaWorld', loc:'Orlando, FL', rides:[
+    {n:'Mako', min:54},
+    {n:'Kraken', min:54},
+    {n:'Manta', min:54},
+    {n:'Pipeline: The Surf Coaster', min:54},
+    {n:'Ice Breaker', min:48},
+    {n:'Journey to Atlantis', min:42, sup:48},
+    {n:'Infinity Falls', min:42, sup:48},
+    {n:'Wild Arctic (jet)', min:42, sup:48},
+  ]},
+  'sw-sandiego': { name:'SeaWorld San Diego', resort:'SeaWorld', loc:'San Diego, CA', rides:[
+    {n:'Electric Eel', min:54},
+    {n:'Emperor', min:54},
+    {n:'Manta', min:48},
+    {n:'Journey to Atlantis', min:42, sup:48},
+  ]},
+
+  /* ── Busch Gardens ── */
+  'bg-tampa': { name:'Busch Gardens Tampa', resort:'Busch Gardens', loc:'Tampa, FL', rides:[
+    {n:'SheiKra', min:54},
+    {n:'Montu', min:54},
+    {n:'Kumba', min:54},
+    {n:'Tigris', min:54},
+    {n:'Falcon\'s Fury', min:54},
+    {n:'Iron Gwazi', min:48},
+    {n:'Cheetah Hunt', min:48},
+    {n:'Cobra\'s Curse', min:42, sup:48},
+    {n:'Congo River Rapids', min:42, sup:48},
+  ]},
+
+  /* ── Six Flags ── */
+  'sf-magic': { name:'Six Flags Magic Mountain', resort:'Six Flags', loc:'Valencia, CA', rides:[
+    {n:'Tatsu', min:54},
+    {n:'Batman: The Ride', min:54},
+    {n:'X2', min:48},
+    {n:'Twisted Colossus', min:48},
+    {n:'Goliath', min:48},
+    {n:'Full Throttle', min:48},
+    {n:'Superman: Escape from Krypton', min:48},
+    {n:'West Coast Racers', min:48},
+    {n:'Wonder Woman Flight of Courage', min:48},
+  ]},
+  'sf-great': { name:'Six Flags Great Adventure', resort:'Six Flags', loc:'Jackson, NJ', rides:[
+    {n:'Nitro', min:54},
+    {n:'Batman: The Ride', min:54},
+    {n:'Superman: Ultimate Flight', min:54},
+    {n:'Jersey Devil Coaster', min:54},
+    {n:'Bizarro', min:54},
+    {n:'Green Lantern', min:54},
+    {n:'El Toro', min:48},
+  ]},
+
+  /* ── Knott's Berry Farm ── */
+  'kbf': { name:'Knott\'s Berry Farm', resort:'Knott\'s Berry Farm', loc:'Buena Park, CA', rides:[
+    {n:'Xcelerator: The Ride', min:52},
+    {n:'GhostRider', min:48},
+    {n:'Silver Bullet', min:48},
+    {n:'HangTime', min:48},
+    {n:'Montezooma: The Forbidden Fortress', min:48},
+    {n:'Pony Express', min:48},
+    {n:'Sierra Sidewinder', min:46},
+    {n:'Timber Mountain Log Ride', min:46},
+    {n:'Calico Mine Ride', min:0},
+  ]},
+};
+
+const RH_GROUPS = [
+  {label:'Walt Disney World (Orlando)',  parks:['wdw-magic','wdw-epcot','wdw-hs','wdw-ak']},
+  {label:'Disneyland Resort (Anaheim)',  parks:['dl-disneyland','dl-dca']},
+  {label:'Universal Orlando Resort',     parks:['uo-usf','uo-ioa','uo-epic']},
+  {label:'Universal Studios Hollywood',  parks:['ush']},
+  {label:'SeaWorld',                     parks:['sw-orlando','sw-sandiego']},
+  {label:'Busch Gardens',                parks:['bg-tampa']},
+  {label:'Six Flags',                    parks:['sf-magic','sf-great']},
+  {label:'Knott\'s Berry Farm',          parks:['kbf']},
+];
+
+const RH_UNIT_KEY = 'tt_rh_unit';
+const RH_KIDS_KEY = 'tt_rh_kids';
+
+let rhUnit = 'in';                 // 'in' | 'cm'
+let rhKids = [];                   // [{id, name, h}]  h stored in inches (number) or null
+let rhSelectBuilt = false;
+
+function rhSave() {
+  try {
+    localStorage.setItem(RH_UNIT_KEY, rhUnit);
+    localStorage.setItem(RH_KIDS_KEY, JSON.stringify(rhKids));
+  } catch(_) {}
+}
+
+function rhInit() {
+  // Restore unit preference
+  rhUnit = localStorage.getItem(RH_UNIT_KEY) === 'cm' ? 'cm' : 'in';
+  document.querySelectorAll('#rh-unit-chips .chip').forEach(c =>
+    c.classList.toggle('on', c.dataset.v === rhUnit));
+
+  // Restore saved children
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(RH_KIDS_KEY) || 'null'); } catch(_) {}
+  if (Array.isArray(saved) && saved.length) {
+    rhKids = saved.map(k => ({ id: k.id || ('k' + Math.random().toString(36).slice(2,7)),
+                               name: k.name || '', h: (typeof k.h === 'number') ? k.h : null }));
+  } else {
+    // Seed from active MyTrip party size (assume 2 adults), else a single child row
+    let n = 1;
+    const trip = (typeof getActiveTrip === 'function') ? getActiveTrip() : null;
+    if (trip && trip.travelers) n = Math.max(1, Math.min(6, (parseInt(trip.travelers) || 2) - 2));
+    rhKids = [];
+    for (let i = 0; i < n; i++) rhAddKidObj();
+  }
+
+  // Build the park <select> once
+  if (!rhSelectBuilt) {
+    const sel = document.getElementById('rh-park');
+    sel.innerHTML = RH_GROUPS.map(g =>
+      `<optgroup label="${g.label}">` +
+      g.parks.map(pid => `<option value="${pid}">${RH_PARKS[pid].name}</option>`).join('') +
+      `</optgroup>`).join('');
+    rhSelectBuilt = true;
+  }
+
+  rhRenderKids();
+  rhRender();
+}
+
+function rhAddKidObj() {
+  const n = rhKids.length + 1;
+  rhKids.push({ id: 'k' + Math.random().toString(36).slice(2,7), name: 'Child ' + n, h: null });
+}
+
+function rhAddKid() {
+  rhAddKidObj();
+  rhSave();
+  rhRenderKids();
+  rhRender();
+  // Focus the new child's height field
+  const last = rhKids[rhKids.length - 1];
+  const el = document.getElementById('rh-h-' + last.id);
+  if (el) el.focus();
+}
+
+function rhRemoveKid(id) {
+  rhKids = rhKids.filter(k => k.id !== id);
+  if (!rhKids.length) rhAddKidObj();
+  rhSave();
+  rhRenderKids();
+  rhRender();
+}
+
+// Convert a stored height (inches) to a display value in the current unit
+function rhToDisplay(inches) {
+  if (inches == null) return '';
+  return rhUnit === 'cm' ? Math.round(inches * 2.54) : +(Math.round(inches * 2) / 2);
+}
+// Parse a typed display value (current unit) back to inches
+function rhParse(val) {
+  const v = parseFloat(val);
+  if (isNaN(v) || v <= 0) return null;
+  return rhUnit === 'cm' ? v / 2.54 : v;
+}
+// Format a requirement (stored in inches) for display in the current unit
+function rhFmtReq(inches) {
+  return rhUnit === 'cm' ? Math.round(inches * 2.54) + ' cm' : inches + '″';
+}
+
+function rhRenderKids() {
+  const wrap = document.getElementById('rh-kid-list');
+  const unitLbl = rhUnit === 'cm' ? 'cm' : '″';
+  const step = rhUnit === 'cm' ? '1' : '0.5';
+  wrap.innerHTML = rhKids.map((k, i) => `
+    <div class="rh-kid-row">
+      <div class="rh-fg rh-fg-name">
+        ${i === 0 ? '<label>Name</label>' : ''}
+        <input type="text" value="${rhEsc(k.name)}" maxlength="24" placeholder="Child ${i+1}"
+               oninput="rhKidName('${k.id}', this.value)">
+      </div>
+      <div class="rh-fg rh-fg-h">
+        ${i === 0 ? '<label>Height</label>' : ''}
+        <div class="rh-h-wrap">
+          <input type="number" id="rh-h-${k.id}" min="0" step="${step}" inputmode="decimal"
+                 value="${rhToDisplay(k.h)}" placeholder="—"
+                 oninput="rhKidHeight('${k.id}', this.value)">
+          <span class="rh-unit-tag">${unitLbl}</span>
+        </div>
+      </div>
+      <button class="rh-del-btn" title="Remove" aria-label="Remove child" onclick="rhRemoveKid('${k.id}')">✕</button>
+    </div>`).join('');
+}
+
+function rhKidName(id, val) {
+  const k = rhKids.find(x => x.id === id);
+  if (k) { k.name = val; rhSave(); rhRender(); }
+}
+function rhKidHeight(id, val) {
+  const k = rhKids.find(x => x.id === id);
+  if (k) { k.h = rhParse(val); rhSave(); rhRender(); }
+}
+
+function rhSetUnit(u) {
+  if (u === rhUnit) return;
+  rhUnit = u;
+  document.querySelectorAll('#rh-unit-chips .chip').forEach(c =>
+    c.classList.toggle('on', c.dataset.v === u));
+  rhSave();
+  rhRenderKids();   // re-render inputs with converted values + unit label
+  rhRender();
+}
+
+// Returns 'ride' | 'companion' | 'short' | 'tall'
+function rhStatus(ride, h) {
+  if (ride.max && h > ride.max) return 'tall';
+  if (h < ride.min) return 'short';
+  if (ride.sup && h < ride.sup) return 'companion';
+  return 'ride';
+}
+
+function rhRender() {
+  const pid = document.getElementById('rh-park').value;
+  const park = RH_PARKS[pid];
+  const info = document.getElementById('rh-park-info');
+  const out = document.getElementById('rh-results');
+  if (!park) { out.innerHTML = ''; return; }
+
+  info.innerHTML = `<strong>${park.name}</strong> · ${park.loc} · ${park.rides.length} rides tracked`;
+
+  const named = rhKids.filter(k => k.h != null);
+  if (!named.length) {
+    out.innerHTML = `<div class="rh-prompt"><span>📏</span>Enter at least one child's height above to see which rides at ${rhEsc(park.name)} they can ride.</div>`;
+    return;
+  }
+
+  out.innerHTML = '<div class="rh-results">' + rhLegend() +
+    named.map(k => rhKidCard(k, park)).join('') + '</div>';
+}
+
+function rhLegend() {
+  return `<div class="rh-legend">
+    <span><i style="background:var(--green)"></i> Can ride</span>
+    <span><i style="background:var(--blue)"></i> With a grown-up</span>
+    <span><i style="background:var(--orange)"></i> Not tall enough yet</span>
+  </div>`;
+}
+
+function rhKidCard(kid, park) {
+  const h = kid.h;
+  const buckets = { ride: [], companion: [], short: [], tall: [] };
+  park.rides.forEach(r => buckets[rhStatus(r, h)].push(r));
+
+  const canRideCount = buckets.ride.length + buckets.companion.length;
+  const name = (kid.name || '').trim() || 'This rider';
+
+  let html = `<div class="rh-kid-card">
+    <div class="rh-kid-card-hdr">
+      <span class="rh-kc-name">${rhEsc(name)}</span>
+      <span class="rh-kc-h">${rhFmtReq(rhRoundIn(h))}</span>
+      <span class="rh-kc-summary">Can ride ${canRideCount} of ${park.rides.length}</span>
+    </div>`;
+
+  html += rhBucket('rh-b-ride', '✅ Can Ride', buckets.ride, h, false);
+  html += rhBucket('rh-b-companion', '🧑‍🤝‍🧒 Can Ride With a Grown-Up', buckets.companion, h, false);
+  // Sort "not yet" by closest to qualifying first (most encouraging)
+  buckets.short.sort((a, b) => a.min - b.min);
+  html += rhBucket('rh-b-short', '⏳ Not Tall Enough Yet', buckets.short, h, true);
+  if (buckets.tall.length) html += rhBucket('rh-b-tall', '🚫 Over the Height Limit', buckets.tall, h, false);
+
+  html += '</div>';
+  return html;
+}
+
+function rhBucket(cls, label, rides, h, showGrow) {
+  let inner;
+  if (!rides.length) {
+    inner = '<div class="rh-bucket-empty">None at this park.</div>';
+  } else {
+    inner = rides.map(r => {
+      let meta = '';
+      if (r.sup && h >= r.min && h < r.sup) {
+        meta = `<span class="rh-ride-req">${rhFmtReq(r.min)} · adult req. under ${rhFmtReq(r.sup)}</span>`;
+      } else if (showGrow) {
+        const diff = r.min - h;
+        meta = `<span class="rh-ride-req">${rhFmtReq(r.min)}</span><span class="rh-grow">grow ${rhFmtDiff(diff)}</span>`;
+      } else if (r.min > 0) {
+        meta = `<span class="rh-ride-req">${rhFmtReq(r.min)}${r.max ? '–' + rhFmtReq(r.max) : ''}</span>`;
+      } else {
+        meta = `<span class="rh-ride-req">Any height</span>`;
+      }
+      const note = r.note ? `<br><span style="font-size:12px;color:var(--muted);font-style:italic">${rhEsc(r.note)}</span>` : '';
+      return `<div class="rh-ride"><span class="rh-ride-name">${rhEsc(r.n)}${note}</span><span class="rh-ride-meta">${meta}</span></div>`;
+    }).join('');
+  }
+  return `<div class="rh-bucket ${cls}">
+    <div class="rh-bucket-lbl"><span class="rh-dot"></span>${label} <span class="rh-cnt">· ${rides.length}</span></div>
+    ${inner}
+  </div>`;
+}
+
+// Round inches for display of the rider's own height (keep .5 precision in inches)
+function rhRoundIn(inches) { return +(Math.round(inches * 2) / 2); }
+// Format a positive height difference in the current unit (round up to be safe)
+function rhFmtDiff(diffInches) {
+  if (rhUnit === 'cm') return Math.ceil(diffInches * 2.54) + ' cm';
+  const v = Math.ceil(diffInches * 2) / 2;
+  return v + '″';
+}
+
+function rhEsc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c =>
+    ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
 }
 
 /* ══════════════════════════════════════════════════════
