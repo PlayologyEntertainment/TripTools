@@ -6227,16 +6227,162 @@ body.no-scroll { overflow: hidden; }
   .wx-print-header { display:flex; justify-content:space-between; font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:#666; padding:0 0 12px; border-bottom:1px solid #ccc; margin:16px 24px; }
 }
 </style>
-<div id="view-placeholder-tipping-guide" class="view">
-  <nav class="tool-topbar">
+<style>
+/* ── TIPPING CULTURE GUIDE ── */
+.tg-climate{margin-top:4px;padding:16px 18px;border:1.5px solid var(--ink);border-radius:var(--r);background:var(--paper-2);border-left-width:5px}
+.tg-climate.s-expected{border-left-color:var(--accent)}
+.tg-climate.s-customary{border-left-color:var(--orange)}
+.tg-climate.s-optional{border-left-color:var(--yellow)}
+.tg-climate.s-unusual{border-left-color:var(--muted)}
+.tg-climate-top{display:flex;align-items:center;gap:12px}
+.tg-climate-flag{font-size:34px;line-height:1;flex-shrink:0}
+.tg-climate-meta{flex:1;min-width:0}
+.tg-climate-co{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.tg-climate-hl{font-family:var(--serif);font-size:22px;font-weight:700;letter-spacing:-.02em;line-height:1.1;margin-top:2px}
+.tg-climate-hl.s-expected{color:var(--accent)}
+.tg-climate-hl.s-customary{color:var(--orange)}
+.tg-climate-hl.s-optional{color:#9E7A00}
+.tg-climate-hl.s-unusual{color:var(--muted)}
+.tg-climate-note{font-size:13px;line-height:1.55;color:var(--ink-2);margin-top:12px;border-top:1px solid var(--rule);padding-top:12px}
+.tg-climate-note b{color:var(--ink)}
+
+.tg-section{margin-top:22px}
+.tg-sec-hdr{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.tg-svc-chip{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:2px;background:#FFF6CC;color:#9E7A00;border:1px solid rgba(255,210,63,.4)}
+
+.tg-venues{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+@media(max-width:600px){.tg-venues{grid-template-columns:1fr}}
+.tg-venue{border:1.5px solid var(--rule);border-radius:var(--r);padding:11px 13px;display:flex;align-items:center;gap:11px}
+.tg-venue-ico{font-size:20px;line-height:1;flex-shrink:0;width:24px;text-align:center}
+.tg-venue-body{flex:1;min-width:0}
+.tg-venue-nm{font-weight:600;font-size:14px;line-height:1.2}
+.tg-venue-amt{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:2px}
+.tg-venue-stat{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:4px 8px;border-radius:2px;white-space:nowrap;flex-shrink:0;border:1px solid var(--rule)}
+.tg-venue-stat.s-expected{background:#FFE5DF;color:var(--accent);border-color:rgba(255,77,46,.3)}
+.tg-venue-stat.s-customary{background:#FFE6CC;color:var(--orange);border-color:rgba(230,81,0,.3)}
+.tg-venue-stat.s-optional{background:#FFF6CC;color:#9E7A00;border-color:rgba(255,210,63,.4)}
+.tg-venue-stat.s-unusual{background:var(--paper-2);color:var(--muted);border-color:var(--rule)}
+.tg-venue-stat.s-offensive{background:#F8D7D7;color:#8B0000;border-color:rgba(139,0,0,.3)}
+
+.tg-dd{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:600px){.tg-dd{grid-template-columns:1fr}}
+.tg-dd-col{border:1.5px solid var(--rule);border-radius:var(--r);padding:13px 15px}
+.tg-dd-col.tg-do{border-left:4px solid var(--green)}
+.tg-dd-col.tg-dont{border-left:4px solid var(--accent)}
+.tg-dd-hd{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;font-weight:600}
+.tg-do .tg-dd-hd{color:var(--green)}
+.tg-dont .tg-dd-hd{color:var(--accent)}
+.tg-dd-col ul{margin:0;padding:0;list-style:none}
+.tg-dd-col li{font-size:13px;line-height:1.5;color:var(--ink-2);padding-left:18px;position:relative;margin-bottom:7px}
+.tg-dd-col li:last-child{margin-bottom:0}
+.tg-do li:before{content:'✓';position:absolute;left:0;color:var(--green);font-weight:700}
+.tg-dont li:before{content:'✗';position:absolute;left:0;color:var(--accent);font-weight:700}
+
+.tg-cash{margin-top:22px;padding:13px 16px;border-radius:var(--r);background:var(--paper-2);border-left:3px solid var(--blue);font-size:13px;line-height:1.55;color:var(--ink-2)}
+.tg-cash b{color:var(--ink)}
+.tg-cash .tg-cash-hd{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+
+.tg-phrases{margin-top:14px}
+.tg-phrase{display:flex;align-items:baseline;gap:10px;padding:9px 0;border-bottom:1px solid var(--rule)}
+.tg-phrase:last-child{border-bottom:none}
+.tg-phrase-txt{font-family:var(--serif);font-size:15px;font-weight:600;color:var(--ink);flex-shrink:0}
+.tg-phrase-m{font-size:12px;color:var(--muted);font-style:italic}
+
+.tg-empty{text-align:center;color:var(--muted);font-size:14px;padding:34px 16px;line-height:1.6}
+.tg-empty .tg-empty-ico{font-size:40px;display:block;margin-bottom:10px}
+
+@media print{
+  .tc-country-caret,.tc-drop{display:none!important}
+  .tg-empty{display:none!important}
+}
+</style>
+<div id="view-tipping-guide" class="view">
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="window.print()">🖨 Print</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">🍽</span>
-    <h2>Tipping Culture Guide</h2>
-    <p style="margin-bottom:24px">Country-by-country etiquette: expected / optional / unusual / offensive per venue.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-tipping-guide"></div>
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>Tipping Culture Guide</h1>
+    <p class="tool-sub">Tipping etiquette for 50 of the world's most-visited countries — who to tip, the do's & don'ts, cash-vs-card, and the local phrases that smooth it over.</p>
+  </div>
+
+  <div class="tool-body">
+    <!-- ── COUNTRY PICKER ── -->
+    <div class="fg">
+      <label>Country</label>
+      <div class="tc-country-wrap">
+        <div class="tc-country-input" id="tg-country-disp" onclick="tgOpenPicker()" tabindex="0" role="button" aria-label="Choose country">
+          <span class="tc-country-flag" id="tg-disp-flag">🌐</span>
+          <span class="tc-country-name" id="tg-disp-name">Select a country</span>
+          <span class="tc-country-cur" id="tg-disp-cur"></span>
+          <span class="tc-country-caret">▾</span>
+        </div>
+        <div class="tc-drop" id="tg-country-drop" style="display:none">
+          <div class="tc-drop-search">
+            <input type="search" id="tg-country-search" class="tc-search-input" placeholder="🔍 Search 50 countries…" autocomplete="off" oninput="tgFilterCountries()">
+          </div>
+          <div id="tg-country-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty prompt before a country is chosen -->
+    <div class="tg-empty" id="tg-empty">
+      <span class="tg-empty-ico">🍽</span>
+      Pick a country to see who to tip, how much is customary, and the etiquette that keeps you out of trouble.
+    </div>
+
+    <!-- ── RESULTS ── -->
+    <div id="tg-content" style="display:none">
+      <div class="tg-climate" id="tg-climate">
+        <div class="tg-climate-top">
+          <span class="tg-climate-flag" id="tg-climate-flag">🌐</span>
+          <div class="tg-climate-meta">
+            <div class="tg-climate-co" id="tg-climate-co"></div>
+            <div class="tg-climate-hl" id="tg-climate-hl"></div>
+          </div>
+        </div>
+        <div class="tg-climate-note" id="tg-climate-note"></div>
+      </div>
+
+      <div class="tg-section">
+        <div class="tg-sec-hdr"><span>Tipping by venue</span><span id="tg-svc-chip"></span></div>
+        <div class="tg-venues" id="tg-venues"></div>
+      </div>
+
+      <div class="tg-section">
+        <div class="tg-sec-hdr">Do's &amp; Don'ts</div>
+        <div class="tg-dd">
+          <div class="tg-dd-col tg-do"><div class="tg-dd-hd">Do</div><ul id="tg-do-list"></ul></div>
+          <div class="tg-dd-col tg-dont"><div class="tg-dd-hd">Don't</div><ul id="tg-dont-list"></ul></div>
+        </div>
+      </div>
+
+      <div class="tg-cash">
+        <div class="tg-cash-hd">💴 Cash vs. Card</div>
+        <div id="tg-cash-body"></div>
+      </div>
+
+      <div class="tg-section" id="tg-phrases-sec">
+        <div class="tg-sec-hdr">🗣 Handy Phrases</div>
+        <div class="tg-phrases" id="tg-phrases"></div>
+      </div>
+    </div>
+  </div><!-- /tool-body -->
+
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    When unsure, tip discreetly in local cash and watch what locals do — card tips often never reach the worker, and in places like Japan, South Korea and Singapore, an unexpected tip can cause genuine confusion. Need an exact amount? Use the Tip Calculator.
+  </div>
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('tip-calc')">🤝 Tip Calculator by Country</button>
+      <button class="rel-btn" onclick="openTool('currency')">💱 Currency Converter</button>
+      <button class="rel-btn" onclick="openTool('phrasebook')">💬 Language Phrasebook</button>
+      <button class="rel-btn" onclick="openTool('emergency')">🚨 Emergency Numbers</button>
     </div>
   </div>
 </div>
@@ -9276,7 +9422,7 @@ const TOOLS = [
   {id:'uv-index',      nm:'UV Index & Sun Safety',      ico:'☀️', ph:'destination',on:true, live:false, ds:'Live UV index, SPF recommendations by skin type.'},
   {id:'altitude',      nm:'Altitude Sickness Guide',    ico:'⛰', ph:'destination',on:false,live:false, ds:'Enter elevation → risk level + acclimatization timeline.'},
   {id:'weather',       nm:'Weather Forecast',           ico:'🌦', ph:'destination',on:true, live:true,  ds:'5-day forecast via Open-Meteo. Free, no API key.'},
-  {id:'tipping-guide', nm:'Tipping Culture Guide',      ico:'🍽', ph:'destination',on:false,live:false, ds:'Country-by-country etiquette: expected / optional / offensive per venue.'},
+  {id:'tipping-guide', nm:'Tipping Culture Guide',      ico:'🍽', ph:'destination',on:false,live:true,  ds:'Country-by-country etiquette: expected / optional / offensive per venue.'},
   {id:'driving-rules', nm:'Driving & Road Rules',       ico:'🚦', ph:'destination',on:false,live:false, ds:'Speed limits, BAC limits, toll systems & road sign reference.'},
   {id:'quiet-hours',   nm:'Local Quiet Hours Guide',    ico:'🤫', ph:'destination',on:false,live:false, ds:'Siesta hours, noise ordinances & photography restrictions.'},
   {id:'fuel-cost',     nm:'Fuel Cost Calculator',       ico:'⛽', ph:'road',       on:false,live:true,  ds:'Distance + MPG + fuel price = total cost. Compare two vehicles.'},
@@ -9972,6 +10118,7 @@ function injectTripCtx(id) {
   if(id==='timezone')   tzInit();
   if(id==='meeting-tz') mtpInit();
   if(id==='tip-calc')   tcInit();
+  if(id==='tipping-guide') tgInit();
   if(id==='power-plug') ppInit();
   if(id==='toll-est')   teInit();
   if(id==='road-planner') rpInit();
@@ -22079,6 +22226,382 @@ function tcCopy(){
       btn.textContent = '✓ Copied!';
       setTimeout(()=>{ btn.textContent = orig; }, 1400);
     });
+  }
+}
+
+/* ══════════════════════════════════════════════════════
+   TIPPING CULTURE GUIDE
+   Etiquette reference. Reuses TC_COUNTRIES / TC_VENUES /
+   TC_STATUS from the Tip Calculator as the single source
+   of truth for who/how-much, and layers etiquette on top.
+   ══════════════════════════════════════════════════════ */
+
+/* Per-country etiquette layer, keyed by TC_COUNTRIES code.
+   dos / donts : behavioural guidance. cash : cash-vs-card note.
+   ph : handy phrases [{t:text, m:meaning}]. */
+const TG_ETIQUETTE = {
+  /* === AMERICAS === */
+  US:{dos:[`Tip 15–20% at sit-down restaurants — it's how servers actually earn a living.`,`Leave $1–2 per drink at the bar, or 15–20% of the tab.`,`Tip taxi/rideshare drivers, hairdressers and hotel housekeeping ($2–5/night).`],
+      donts:[`Don't skip the tip because service was merely "okay" — under 15% reads as a complaint.`,`Don't assume a service charge is included; it rarely is, except for large groups.`],
+      cash:`Card tips are universal and reliably reach staff, but cash is always welcome and faster.`,
+      ph:[{t:`Keep the change`,m:`when paying with cash`}]},
+  CA:{dos:[`Tip 15–20% at restaurants, mirroring US norms.`,`Round up or tip 10–15% for taxis and hairdressers.`,`Leave a few dollars for hotel housekeeping.`],
+      donts:[`Don't feel boxed in by the 18/20/25% presets on payment terminals — the low end is fine.`,`Don't forget bars expect ~15% or $1–2 a drink.`],
+      cash:`Card terminals prompt for a tip everywhere; cash is equally welcome.`,
+      ph:[{t:`Keep the change`,m:``}]},
+  MX:{dos:[`Tip 10–15% ("propina") at restaurants.`,`Give housekeeping and porters 20–50 pesos (US$1–2).`,`Tip tour guides and the attendants who bag your groceries.`],
+      donts:[`Don't mistake the "propina sugerida" line for a mandatory charge — it's only a suggestion.`,`Don't tip in worn or torn USD notes; they're often refused.`],
+      cash:`Cash in pesos is king — many places can't add a tip to a card payment.`,
+      ph:[{t:`La propina`,m:`the tip`},{t:`Está bien así`,m:`that's fine / keep the change`}]},
+  BR:{dos:[`Pay the 10% "taxa de serviço" added to restaurant bills — customary even though optional.`,`Tip housekeeping and porters a few reais.`,`Round up taxi fares.`],
+      donts:[`Don't double-tip when the 10% service charge is already on the bill.`,`Don't expect to tip on a card — extras are cash.`],
+      cash:`The service charge goes on the bill; any extra is cash.`,
+      ph:[{t:`Obrigado / Obrigada`,m:`thank you (m / f)`},{t:`Pode ficar com o troco`,m:`keep the change`}]},
+  AR:{dos:[`Leave ~10% at restaurants, in cash on the table.`,`Tip hotel staff 200–500 pesos.`,`USD cash tips are often especially welcome.`],
+      donts:[`Don't confuse the "cubierto" (cover charge) with a tip — they're separate.`,`Don't expect to add a tip on a card; bring cash.`],
+      cash:`Cash only — card systems generally can't process gratuities.`,
+      ph:[{t:`La propina`,m:`the tip`},{t:`Gracias, está bien`,m:`thanks, that's fine`}]},
+  CL:{dos:[`Pay the 10% "propina" — usually suggested on the bill and expected.`,`Round up for taxis and tip hotel staff 1,000–2,000 pesos.`],
+      donts:[`Don't decline the suggested 10% — it's considered rude.`,`Don't tip in coins; small notes are better.`],
+      cash:`The 10% can often go on the card; extra is cash.`,
+      ph:[{t:`La propina`,m:`the tip`},{t:`Gracias`,m:`thank you`}]},
+  PE:{dos:[`Tip ~10% in cash at restaurants if no service charge was added.`,`Tip tour guides generously — many rely on it.`,`Give porters a few soles.`],
+      donts:[`Don't tip taxis — agree the fare before you set off instead.`,`Don't assume service is included; check the bill.`],
+      cash:`Soles in cash; USD welcomed by tourist-facing guides.`,
+      ph:[{t:`La propina`,m:`the tip`},{t:`Gracias`,m:`thank you`}]},
+  CR:{dos:[`Know that 10% service + 13% tax is legally on every restaurant bill.`,`Tip tour guides generously — they often work for tips.`,`Leave US$1–2/night for housekeeping.`],
+      donts:[`Don't double-tip at restaurants — service is already included.`,`Don't worry about tipping taxis; it's optional.`],
+      cash:`US dollars and colones both work; keep small bills for guides.`,
+      ph:[{t:`La propina`,m:`the tip`},{t:`Pura vida`,m:`all good / thanks`}]},
+
+  /* === EUROPE === */
+  GB:{dos:[`Tip 10–12.5% at sit-down restaurants if no service charge is shown.`,`Round up taxi fares.`,`In pubs, offer to "buy one for yourself" instead of tipping.`],
+      donts:[`Don't tip when ordering at the bar — it isn't done.`,`Don't pay a discretionary service charge twice; you can ask to remove it.`],
+      cash:`Card tipping is standard; the service charge sits on the bill.`,
+      ph:[{t:`Keep the change`,m:``},{t:`And one for yourself`,m:`buy the bartender a drink`}]},
+  IE:{dos:[`Tip 10–15% at restaurants if service isn't included.`,`Round up taxi fares.`,`Tip tour guides a few euro.`],
+      donts:[`Don't tip at the pub bar — it's not expected.`,`Don't feel obliged on top of an added service charge.`],
+      cash:`Card tips are fine; cash for pubs and cabs.`,
+      ph:[{t:`Keep the change`,m:``},{t:`Go raibh maith agat`,m:`thank you (Irish)`}]},
+  FR:{dos:[`Know "service compris" — service is included by law in every bill.`,`Round up or leave a euro or two for good café/restaurant service.`,`Tip tour guides and hotel porters €1–2.`],
+      donts:[`Don't add a big percentage tip — it's not expected and looks like you misread the bill.`,`Don't leave a few coins to signal poor service — it reads as an insult.`],
+      cash:`Leave coins on the tray/table; cards rarely allow added tips.`,
+      ph:[{t:`Merci, gardez la monnaie`,m:`thank you, keep the change`},{t:`Service compris`,m:`service included`}]},
+  DE:{dos:[`Round up or add 5–10%, telling the server the total as you pay.`,`Hand the tip over with the payment — don't leave it on the table.`,`Tip taxis and hairdressers ~10%.`],
+      donts:[`Don't leave the tip silently on the table — state the rounded total instead.`,`Don't say "danke" as you hand over money unless you mean "keep the change".`],
+      cash:`Tell the server the total ("Vierzig, bitte"); cash preferred.`,
+      ph:[{t:`Stimmt so`,m:`keep the change`},{t:`Vierzig, bitte`,m:`make it 40 (total incl. tip)`}]},
+  IT:{dos:[`Know the "coperto" cover charge is standard — and is NOT a tip.`,`Round up or leave 5–10% for great table service if no servizio is added.`,`Tip hotel porters €1 per bag.`],
+      donts:[`Don't tip at espresso bars where you stand and pay at the till.`,`Don't add a tip when "servizio incluso" appears on the bill.`],
+      cash:`Leave coins/notes on the table; cards rarely add tips.`,
+      ph:[{t:`Grazie, va bene così`,m:`thanks, that's fine`},{t:`Il coperto`,m:`cover charge (not a tip)`}]},
+  ES:{dos:[`Round up or leave a few coins at bars and casual spots.`,`Leave 5–10% at nicer restaurants for good service.`,`Tip hotel porters €1 per bag.`],
+      donts:[`Don't over-tip — locals tip modestly or not at all.`,`Don't expect to add gratuity on a card.`],
+      cash:`Leave coins on the table; cash is the norm for tips.`,
+      ph:[{t:`Gracias, quédese con el cambio`,m:`thanks, keep the change`}]},
+  PT:{dos:[`Leave 5–10% at restaurants for good service.`,`Know the "couvert" (bread/olives) is not a tip — wave it away if untouched.`,`Round up taxis and tip porters €1.`],
+      donts:[`Don't feel obliged — tipping is welcomed, not expected.`,`Don't assume the couvert charge replaces a tip.`],
+      cash:`Cash on the table; cards seldom allow tips.`,
+      ph:[{t:`Obrigado / Obrigada`,m:`thank you (m / f)`},{t:`Fique com o troco`,m:`keep the change`}]},
+  NL:{dos:[`Round up or add 5–10% at restaurants.`,`Tip taxis ~5–10% by rounding up.`,`A small tip in tourist areas is increasingly common.`],
+      donts:[`Don't over-tip — service is technically included.`,`Don't leave a tip for counter-service coffee.`],
+      cash:`Many card terminals now let you add a tip; cash works too.`,
+      ph:[{t:`Laat maar zitten`,m:`keep the change`},{t:`Dank je wel`,m:`thank you`}]},
+  BE:{dos:[`Know service is included — round up or leave coins for good service.`,`Tip taxis by rounding up.`,`Tip tour guides €5–10.`],
+      donts:[`Don't feel pressured to tip a percentage; it's never expected.`,`Don't tip at counter-service spots.`],
+      cash:`Leave coins on the table; cash is simplest.`,
+      ph:[{t:`Merci / Dank u`,m:`thank you (FR / NL)`}]},
+  GR:{dos:[`Leave 5–10% at tavernas, in cash on the table.`,`Tip even when paying the rest by card — leave the gratuity in coins.`,`Tip hotel housekeeping a euro or two.`],
+      donts:[`Don't expect to add a tip to a card payment.`,`Don't skip rounding up taxis.`],
+      cash:`Cash on the table — cards don't handle tips.`,
+      ph:[{t:`Efharistó`,m:`thank you`},{t:`Krát'a ta résta`,m:`keep the change`}]},
+  CH:{dos:[`Round up or add 5–10% only for excellent service — service is included by law.`,`Tip hotel porters CHF 2–5.`,`Tip tour guides 5–10%.`],
+      donts:[`Don't feel any obligation — wages are high and tips are a true extra.`,`Don't leave a large percentage; it's not the custom.`],
+      cash:`Hand the rounded total to the server; cash preferred.`,
+      ph:[{t:`Stimmt so`,m:`keep the change (German CH)`},{t:`Merci`,m:`thank you (French CH)`}]},
+  AT:{dos:[`Round up by 5–10% and tell the server the total as you pay.`,`Tip taxis ~5–10%.`,`Tip hotel porters €1–2.`],
+      donts:[`Don't leave the tip on the table — state the rounded amount instead.`,`Don't over-tip; modest rounding is the norm.`],
+      cash:`Say the total to the server ("Zwanzig, bitte"); cash.`,
+      ph:[{t:`Passt schon`,m:`keep the change`},{t:`Zwanzig, bitte`,m:`make it 20`}]},
+  SE:{dos:[`Round up or leave 5–10% for good restaurant service.`,`Tip tour guides a little.`,`A small tip via the card terminal prompt is fine.`],
+      donts:[`Don't feel obliged — service is included and locals often skip it.`,`Don't tip at cafés or bars.`],
+      cash:`Sweden is nearly cashless; tip via the card terminal prompt.`,
+      ph:[{t:`Tack`,m:`thank you`}]},
+  NO:{dos:[`Round up or add 5–10% for great service.`,`Tip tour guides modestly.`],
+      donts:[`Don't feel pressured — wages are high and tipping is optional.`,`Don't tip for counter or bar service.`],
+      cash:`Largely cashless — add a tip on the card terminal if offered.`,
+      ph:[{t:`Takk`,m:`thank you`}]},
+  DK:{dos:[`Round up only for outstanding service — service is included by law.`,`Tip tour guides a small amount if you wish.`],
+      donts:[`Don't feel any obligation; tips are genuinely optional.`,`Don't tip at bars or cafés.`],
+      cash:`Mostly cashless; tipping is rare either way.`,
+      ph:[{t:`Tak`,m:`thank you`}]},
+  FI:{dos:[`Round up only for exceptional service.`,`Tip tour guides a few euro if you like.`],
+      donts:[`Don't worry about tipping — it's uncommon and never expected.`,`Don't tip taxis or cafés.`],
+      cash:`Cashless culture; tipping is rare.`,
+      ph:[{t:`Kiitos`,m:`thank you`}]},
+  IS:{dos:[`Relax — tipping isn't part of the culture and service is included.`,`Tip tour guides a small amount; it's welcomed.`],
+      donts:[`Don't feel obliged to tip at restaurants or taxis.`,`Don't tip out of habit; staff earn full wages.`],
+      cash:`Iceland is near-cashless; tips are uncommon.`,
+      ph:[{t:`Takk`,m:`thank you`}]},
+  CZ:{dos:[`Tip ~10% at restaurants by telling the server the rounded total.`,`Tip taxis and tour guides 5–10%.`],
+      donts:[`Don't leave money on the table — hand it over and state the total.`,`Don't over-tip; 10% is plenty.`],
+      cash:`State the total to the server; cash is standard.`,
+      ph:[{t:`To je dobrý`,m:`that's fine / keep the change`},{t:`Děkuji`,m:`thank you`}]},
+  PL:{dos:[`Tip 10–15% at restaurants.`,`Tip taxis and tour guides ~10%.`],
+      donts:[`Don't say "dziękuję" (thank you) as you hand over money — it means "keep the change"!`,`Don't double-tip if a service charge is added.`],
+      cash:`Cash or card; mind the "thank you = keep the change" rule.`,
+      ph:[{t:`Dziękuję`,m:`thank you — but means "keep the change" while paying!`}]},
+  HU:{dos:[`Tip 10–15%, often by stating the total to the server.`,`Check the bill — many Budapest spots add 12–15% service.`,`Tip hotel staff a few hundred forint.`],
+      donts:[`Don't double-tip when service is already added.`,`Don't leave the tip on the table — tell the server.`],
+      cash:`Tell the server the total; cash is common.`,
+      ph:[{t:`Köszönöm`,m:`thank you`}]},
+  HR:{dos:[`Tip 10–15% at tourist-area restaurants.`,`Round up taxis and tip guides.`,`Outside tourist zones, rounding up is enough.`],
+      donts:[`Don't feel obliged in casual local spots — rounding up suffices.`,`Don't assume a tip can go on the card.`],
+      cash:`Cash on the table is safest.`,
+      ph:[{t:`Hvala`,m:`thank you`}]},
+  TR:{dos:[`Tip 10–15% at restaurants.`,`Tip hammam (bath) attendants 10–15%, split among the staff.`,`Tip tour guides generously.`],
+      donts:[`Don't forget small notes for porters, parking and bath attendants.`,`Don't double-tip if service is added.`],
+      cash:`Cash, in small lira notes, for everything.`,
+      ph:[{t:`Teşekkürler`,m:`thank you`},{t:`Üstü kalsın`,m:`keep the change`}]},
+  RU:{dos:[`Tip ~10% at sit-down restaurants.`,`Tip hotel staff 50–100 rubles.`],
+      donts:[`Don't double-tip if a service charge is on the bill.`,`Don't tip app-booked taxis — it's built in.`],
+      cash:`Cash for tips; card tipping is uncommon.`,
+      ph:[{t:`Spasibo`,m:`thank you`}]},
+
+  /* === MIDDLE EAST & AFRICA === */
+  AE:{dos:[`Add 10–15% cash even when a 10% service charge is on the bill — it rarely reaches staff.`,`Tip housekeeping and porters AED 5–10.`,`Tip valets and delivery riders a few dirham.`],
+      donts:[`Don't assume the service charge tips the worker — it usually doesn't.`,`Don't tip with coins; small notes are better.`],
+      cash:`Cash in dirham reaches staff directly; carry small notes.`,
+      ph:[{t:`Shukran`,m:`thank you`}]},
+  SA:{dos:[`Tip 10–15% at expat-staffed restaurants — appreciated though not traditional.`,`Tip porters and hotel staff a few riyals.`],
+      donts:[`Don't expect bar tipping — alcohol service doesn't exist.`,`Don't double-tip when a service charge is added.`],
+      cash:`Cash in riyals for tips.`,
+      ph:[{t:`Shukran`,m:`thank you`}]},
+  IL:{dos:[`Tip 12–15% at restaurants — essentially mandatory and rarely included.`,`Tip in cash so the server keeps the full amount.`,`Tip tour guides 10–15%.`],
+      donts:[`Don't assume a service charge is on the bill; it usually isn't.`,`Don't under-tip at restaurants — staff rely on it.`],
+      cash:`Cash strongly preferred — many places can't add tips to cards.`,
+      ph:[{t:`Toda`,m:`thank you`}]},
+  EG:{dos:[`Embrace "baksheesh" — keep a pocket of small notes for constant small tips.`,`Add 10–15% cash at restaurants; base wages are very low.`,`Tip porters, drivers and washroom/temple attendants a few pounds.`],
+      donts:[`Don't rely on the included service charge reaching staff — it often doesn't.`,`Don't hand out coins; small notes are expected.`],
+      cash:`Cash, in many small notes — baksheesh is constant.`,
+      ph:[{t:`Shukran`,m:`thank you`},{t:`Baksheesh`,m:`tip / small gratuity`}]},
+  MA:{dos:[`Tip 10–15% across the service economy.`,`Keep small dirham notes for porters, parking and hammam staff.`,`Tip tour guides generously.`],
+      donts:[`Don't forget unofficial parking "guardians" expect a few dirham.`,`Don't double-tip when service is added.`],
+      cash:`Cash in small dirham notes everywhere.`,
+      ph:[{t:`Shukran`,m:`thank you`}]},
+  ZA:{dos:[`Tip 10–15% at restaurants and bars — many staff depend on it.`,`Tip petrol attendants and "car guards" R5–10.`,`Tip tour and safari guides generously.`],
+      donts:[`Don't skip the car guard who watched your car.`,`Don't under-tip; the minimum wage is low.`],
+      cash:`Card tips work at restaurants; keep coins for car guards.`,
+      ph:[{t:`Dankie / Thank you`,m:`thanks (Afrikaans / English)`}]},
+  KE:{dos:[`Tip safari guides & trackers US$10–20 per guest per day — the key custom here.`,`Leave ~10% at restaurants if not included.`,`Tip hotel staff 100–200 shillings.`],
+      donts:[`Don't forget to budget separately for safari guide tips.`,`Don't double-tip when service is added.`],
+      cash:`USD cash for guides; shillings for everyday tips.`,
+      ph:[{t:`Asante`,m:`thank you`}]},
+
+  /* === ASIA & PACIFIC === */
+  JP:{dos:[`Let excellent service simply be the standard — no tip needed.`,`For a private guide (a rare exception), present cash in a clean envelope.`],
+      donts:[`Don't leave coins or change on the table — staff may chase you to return it.`,`Don't hand cash directly; it can cause genuine embarrassment.`],
+      cash:`N/A — don't tip. If gifting a guide, use a clean envelope.`,
+      ph:[{t:`Gochisousama deshita`,m:`thank you for the meal`},{t:`Arigatou gozaimasu`,m:`thank you`}]},
+  KR:{dos:[`Skip the tip — outstanding service is simply expected.`,`Know upscale hotels/restaurants add a 10% service charge for you.`],
+      donts:[`Don't leave a tip on the table — it can confuse staff.`,`Don't press cash on a taxi driver.`],
+      cash:`N/A — tipping isn't practiced.`,
+      ph:[{t:`Gamsahamnida`,m:`thank you`}]},
+  CN:{dos:[`Tip tour guides & drivers 10–15% — the main exception.`,`Leave high-end hotel bellhops a small tip if you wish.`],
+      donts:[`Don't tip in restaurants, taxis or local spots — it's not customary.`,`Don't double-tip where a service charge is added.`],
+      cash:`Mostly mobile-pay; tip guides in cash.`,
+      ph:[{t:`Xièxie`,m:`thank you`}]},
+  HK:{dos:[`Know a 10% service charge is usually added at restaurants.`,`Round up or leave small change on top; tip porters HK$10–20.`],
+      donts:[`Don't feel obliged beyond the service charge.`,`Don't tip at fast or counter-service spots.`],
+      cash:`Leave coins; the service charge covers the rest.`,
+      ph:[{t:`M̀h'gōi`,m:`thank you (for service)`}]},
+  TW:{dos:[`Relax — tipping is generally not customary.`,`Tip tour guides ~10% and porters NT$50–100.`],
+      donts:[`Don't tip at restaurants or taxis; it isn't expected.`,`Don't double-tip where a 10% service charge is added.`],
+      cash:`Tipping is rare; cash for guides.`,
+      ph:[{t:`Xièxie`,m:`thank you`}]},
+  TH:{dos:[`Round up or leave small change at restaurants; tip ~10% at nicer ones.`,`Tip massage therapists 50–100 baht.`,`Tip porters & housekeeping 20–50 baht.`],
+      donts:[`Don't double-tip when a 10% service charge is on the bill.`,`Don't leave coins — small notes are more respectful.`],
+      cash:`Cash in small notes; cards rarely add tips.`,
+      ph:[{t:`Khop khun`,m:`thank you`}]},
+  VN:{dos:[`Leave 5–10% at restaurants with no service charge — increasingly expected in tourist areas.`,`Tip housekeeping & porters 20,000–50,000 dong.`,`Tip tour guides and drivers.`],
+      donts:[`Don't feel obliged outside tourist spots — it's not traditional.`,`Don't tip taxis beyond rounding up.`],
+      cash:`Cash in dong (or small USD notes for guides).`,
+      ph:[{t:`Cảm ơn`,m:`thank you`}]},
+  ID:{dos:[`Know restaurants add 5–10% service + tax ("plus-plus").`,`Leave small notes for housekeeping & spa staff.`,`Round up taxis.`],
+      donts:[`Don't double-tip when "++" is on the bill.`,`Don't feel obliged at warungs (local eateries).`],
+      cash:`Cash in rupiah for housekeeping and porters.`,
+      ph:[{t:`Terima kasih`,m:`thank you`}]},
+  MY:{dos:[`Tip porters and tour guides a few ringgit.`,`Round up taxis if you like.`],
+      donts:[`Don't feel obliged at restaurants — the 10% service charge covers it.`,`Don't double-tip where service is added.`],
+      cash:`Cash for porters; restaurants add service automatically.`,
+      ph:[{t:`Terima kasih`,m:`thank you`}]},
+  SG:{dos:[`Know most bills add 10% service + 9% GST ("++") — that's your tip.`,`Tip hotel porters a couple of dollars if you wish.`],
+      donts:[`Don't tip beyond the service charge — the airport even discourages it.`,`Don't tip taxis or hawker stalls.`],
+      cash:`Largely unnecessary; the "++" handles it.`,
+      ph:[{t:`Thank you / Xièxie`,m:`thanks (English widely used)`}]},
+  PH:{dos:[`Add 5–10% on top of the 10% service charge — it doesn't always reach staff.`,`Tip housekeeping 50–100 pesos and porters 20–50.`,`Tip tour guides and drivers.`],
+      donts:[`Don't assume the service charge tips the worker directly.`,`Don't tip in coins; small notes are better.`],
+      cash:`Cash in pesos reaches staff most reliably.`,
+      ph:[{t:`Salamat`,m:`thank you`}]},
+  IN:{dos:[`Tip 5–10% at restaurants if no service charge is added.`,`Keep small ₹10/20/50 notes for porters, drivers and daily helpers.`,`Tip tour guides generously.`],
+      donts:[`Don't pay a service charge twice — it's legally optional and removable on request.`,`Don't tip with coins where small notes are expected.`],
+      cash:`Cash in small rupee notes for everyone.`,
+      ph:[{t:`Dhanyavaad`,m:`thank you`},{t:`Bakshish`,m:`tip`}]},
+  AU:{dos:[`Tip only for great service — staff earn a proper living wage.`,`Round up or leave ~10% at higher-end restaurants.`,`Tip tour guides a few dollars if you wish.`],
+      donts:[`Don't feel obliged — leaving no tip is completely normal.`,`Don't mistake a weekend/holiday surcharge for a tip.`],
+      cash:`Card terminals may prompt; tipping stays optional.`,
+      ph:[{t:`Cheers / Thanks`,m:`thank you`}]},
+  NZ:{dos:[`Tip only for exceptional service — it's genuinely optional.`,`Tip tour guides 5–10% if you'd like.`],
+      donts:[`Don't feel pressured; locals rarely tip.`,`Don't tip at cafés or bars.`],
+      cash:`Optional either way; card or cash both fine.`,
+      ph:[{t:`Cheers / Ngā mihi`,m:`thanks (English / Māori)`}]},
+  FJ:{dos:[`Contribute to the resort "Christmas Fund" box — shared equally among all staff.`,`Tip tour guides a little; round up taxis.`],
+      donts:[`Don't feel obliged to tip individuals — the shared fund is the norm.`,`Don't over-tip; it isn't expected.`],
+      cash:`Drop cash in the staff "Christmas Fund" box.`,
+      ph:[{t:`Vinaka`,m:`thank you`}]},
+};
+
+/* Overall "tipping climate" derived from the venue statuses. */
+const TG_CLIMATE = {
+  expected:  { hl:`Tipping is expected`,  cls:`expected` },
+  customary: { hl:`Tipping is customary`, cls:`customary` },
+  optional:  { hl:`Modest & optional`,    cls:`optional` },
+  unusual:   { hl:`Tipping is unusual`,    cls:`unusual` },
+};
+function tgClimate(co){
+  const score = { expected:4, customary:3, optional:2, unusual:0, offensive:0 };
+  const vals = TC_VENUES.map(v => score[(co.v[v.id]||{}).s] ?? 0);
+  const avg = vals.reduce((a,b)=>a+b,0) / (vals.length||1);
+  if (avg >= 3.3) return TG_CLIMATE.expected;
+  if (avg >= 2.3) return TG_CLIMATE.customary;
+  if (avg >= 1.2) return TG_CLIMATE.optional;
+  return TG_CLIMATE.unusual;
+}
+
+const TG_KEY = 'tt_tipguide_v1';
+let tgState = { countryCode: null };
+
+function tgInit(){
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(TG_KEY) || 'null'); } catch(e){}
+  if (saved && saved.countryCode){
+    tgState.countryCode = saved.countryCode;
+  } else {
+    const trip = getActiveTrip();
+    if (trip && trip.destination){
+      const match = tcGuessCountryFromDest(trip.destination);
+      if (match) tgState.countryCode = match.c;
+    }
+  }
+  tgRenderCountryList('');
+  if (tgState.countryCode && TC_COUNTRIES.some(co => co.c === tgState.countryCode)){
+    tgSelectCountry(tgState.countryCode, false);
+  } else {
+    tgState.countryCode = null;
+    document.getElementById('tg-content').style.display = 'none';
+    document.getElementById('tg-empty').style.display = '';
+  }
+  if (!document._tgClickBound){
+    document.addEventListener('click', tgDocClick);
+    document._tgClickBound = true;
+  }
+}
+
+function tgCountry(){ return TC_COUNTRIES.find(co => co.c === tgState.countryCode); }
+function tgSave(){ try { localStorage.setItem(TG_KEY, JSON.stringify({ countryCode: tgState.countryCode })); } catch(e){} }
+
+/* ── PICKER (mirrors the Tip Calculator picker, shares CSS) ── */
+function tgOpenPicker(){
+  const drop = document.getElementById('tg-country-drop');
+  if (drop.style.display === 'block'){ tgClosePicker(); return; }
+  drop.style.display = 'block';
+  const s = document.getElementById('tg-country-search');
+  s.value = ''; tgRenderCountryList('');
+  setTimeout(()=>s.focus(), 50);
+}
+function tgClosePicker(){ document.getElementById('tg-country-drop').style.display = 'none'; }
+function tgDocClick(e){
+  const wrap = document.getElementById('tg-country-disp');
+  const drop = document.getElementById('tg-country-drop');
+  if (!wrap || !drop || drop.style.display !== 'block') return;
+  if (wrap.contains(e.target) || drop.contains(e.target)) return;
+  tgClosePicker();
+}
+function tgFilterCountries(){ tgRenderCountryList((document.getElementById('tg-country-search').value || '').toLowerCase().trim()); }
+function tgRenderCountryList(q){
+  const list = TC_COUNTRIES.filter(co => !q || co.n.toLowerCase().includes(q) || co.c.toLowerCase().includes(q) || co.cur.toLowerCase().includes(q));
+  const html = list.length
+    ? list.map(co => `<div class="tc-drop-item" onclick="tgSelectCountry('${co.c}')"><span class="tc-drop-flag">${co.f}</span><span class="tc-drop-name">${co.n}</span><span class="tc-drop-cur">${co.cur}</span></div>`).join('')
+    : `<div class="tc-drop-item" style="color:var(--muted);cursor:default">No matches for "${tcEscape(q)}"</div>`;
+  document.getElementById('tg-country-list').innerHTML = html;
+}
+
+function tgSelectCountry(code, save){
+  if (save === undefined) save = true;
+  tgState.countryCode = code;
+  if (save) tgSave();
+  const co = tgCountry();
+  if (!co) return;
+  document.getElementById('tg-disp-flag').textContent = co.f;
+  document.getElementById('tg-disp-name').textContent = co.n;
+  document.getElementById('tg-disp-cur').textContent = co.cur;
+  tgClosePicker();
+  document.getElementById('tg-empty').style.display = 'none';
+  document.getElementById('tg-content').style.display = '';
+  tgRender();
+}
+
+function tgRender(){
+  const co = tgCountry();
+  if (!co) return;
+  const et = TG_ETIQUETTE[co.c] || { dos:[], donts:[], cash:'', ph:[] };
+
+  // Climate headline
+  const clim = tgClimate(co);
+  const climBox = document.getElementById('tg-climate');
+  climBox.className = 'tg-climate s-' + clim.cls;
+  document.getElementById('tg-climate-flag').textContent = co.f;
+  document.getElementById('tg-climate-co').textContent = co.n + ' · ' + co.cur;
+  const hl = document.getElementById('tg-climate-hl');
+  hl.className = 'tg-climate-hl s-' + clim.cls;
+  hl.textContent = clim.hl;
+  document.getElementById('tg-climate-note').innerHTML = co.note;
+
+  // Service-charge chip
+  const chip = document.getElementById('tg-svc-chip');
+  if (co.svc === 'usually') chip.innerHTML = '<span class="tg-svc-chip">⚠ Service usually included</span>';
+  else if (co.svc === 'often') chip.innerHTML = '<span class="tg-svc-chip">⚠ Service sometimes added</span>';
+  else chip.innerHTML = '';
+
+  // Venue grid
+  document.getElementById('tg-venues').innerHTML = TC_VENUES.map(v => {
+    const d = co.v[v.id] || { s:'unusual' };
+    let amt;
+    if (d.s === 'unusual' || d.s === 'offensive') amt = 'Not expected';
+    else if ((d.lo||0) === 0 && (d.hi||0) === 0) amt = 'Optional · round up';
+    else amt = 'Typical ' + tcFormatRange(d, v, co);
+    return `<div class="tg-venue">
+      <span class="tg-venue-ico">${v.ico}</span>
+      <div class="tg-venue-body"><div class="tg-venue-nm">${v.lbl}</div><div class="tg-venue-amt">${amt}</div></div>
+      <span class="tg-venue-stat s-${d.s}">${TC_STATUS[d.s].lbl}</span>
+    </div>`;
+  }).join('');
+
+  // Do's & Don'ts
+  document.getElementById('tg-do-list').innerHTML   = (et.dos||[]).map(x => `<li>${x}</li>`).join('') || '<li>Follow general etiquette below.</li>';
+  document.getElementById('tg-dont-list').innerHTML = (et.donts||[]).map(x => `<li>${x}</li>`).join('') || '<li>—</li>';
+
+  // Cash vs card
+  document.getElementById('tg-cash-body').innerHTML = et.cash || '';
+
+  // Phrases
+  const pSec = document.getElementById('tg-phrases-sec');
+  if (et.ph && et.ph.length){
+    pSec.style.display = '';
+    document.getElementById('tg-phrases').innerHTML = et.ph.map(p =>
+      `<div class="tg-phrase"><span class="tg-phrase-txt">${p.t}</span><span class="tg-phrase-m">${p.m||''}</span></div>`).join('');
+  } else {
+    pSec.style.display = 'none';
   }
 }
 
