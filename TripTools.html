@@ -6701,16 +6701,179 @@ body.no-scroll { overflow: hidden; }
     <span id="fc-print-date"></span>
   </div>
 </div>
-<div id="view-placeholder-rest-stop" class="view">
-  <nav class="tool-topbar">
+<div id="view-rest-stop" class="view">
+  <style>
+  /* ── REST STOP PLANNER ── */
+  #view-rest-stop .rs-section-lbl {
+    font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--muted); margin: 18px 0 8px;
+  }
+  #view-rest-stop .rs-hint {
+    font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--muted);
+  }
+  /* Summary cards */
+  #view-rest-stop .rs-summary {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 22px;
+  }
+  @media(max-width:560px){ #view-rest-stop .rs-summary { grid-template-columns: 1fr 1fr; } }
+  #view-rest-stop .rs-sum-card {
+    background: var(--paper-2); border: 1.5px solid var(--ink); border-radius: var(--r);
+    padding: 12px 10px; text-align: center;
+  }
+  #view-rest-stop .rs-sum-num {
+    font-family: var(--serif); font-weight: 600; font-size: 22px; letter-spacing: -.02em;
+    color: var(--ink); line-height: 1.1; font-variation-settings: "opsz" 72;
+  }
+  #view-rest-stop .rs-sum-lbl {
+    font-family: var(--mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--muted); margin-top: 5px;
+  }
+  /* Timeline */
+  #view-rest-stop .rs-timeline { position: relative; margin: 4px 0 8px; padding-left: 30px; }
+  #view-rest-stop .rs-timeline::before {
+    content: ''; position: absolute; left: 9px; top: 8px; bottom: 8px; width: 2px; background: var(--rule);
+  }
+  #view-rest-stop .rs-node { position: relative; margin-bottom: 16px; }
+  #view-rest-stop .rs-node:last-child { margin-bottom: 0; }
+  #view-rest-stop .rs-dot {
+    position: absolute; left: -30px; top: 2px; width: 20px; height: 20px; border-radius: 50%;
+    background: var(--paper); border: 2px solid var(--ink); display: flex; align-items: center;
+    justify-content: center; font-size: 10px; z-index: 1;
+  }
+  #view-rest-stop .rs-node.rs-endpoint .rs-dot { background: var(--ink); color: var(--paper); }
+  #view-rest-stop .rs-node.rs-overnight .rs-dot { background: var(--blue); border-color: var(--blue); color: #fff; }
+  #view-rest-stop .rs-card {
+    background: var(--paper); border: 1.5px solid var(--ink); border-radius: var(--r); padding: 12px 14px;
+  }
+  #view-rest-stop .rs-node.rs-overnight .rs-card { background: rgba(21,101,192,.06); border-color: var(--blue); }
+  #view-rest-stop .rs-card-top {
+    display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap;
+  }
+  #view-rest-stop .rs-card-title { font-weight: 600; font-size: 15px; color: var(--ink); }
+  #view-rest-stop .rs-card-clock {
+    font-family: var(--mono); font-size: 12px; letter-spacing: .04em; color: var(--accent); font-weight: 600;
+  }
+  #view-rest-stop .rs-card-meta {
+    font-family: var(--mono); font-size: 11px; letter-spacing: .04em; text-transform: uppercase;
+    color: var(--muted); margin-top: 3px;
+  }
+  #view-rest-stop .rs-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 9px; }
+  #view-rest-stop .rs-tag {
+    font-size: 11.5px; background: var(--paper-2); border: 1px solid var(--rule); border-radius: 999px;
+    padding: 3px 9px; color: var(--ink-2); display: inline-flex; align-items: center; gap: 4px;
+  }
+  #view-rest-stop .rs-tag.rs-tag-swap { background: rgba(46,125,50,.1); border-color: rgba(46,125,50,.3); color: var(--green); }
+  /* Travel notes */
+  #view-rest-stop .rs-notes {
+    margin-top: 18px; background: var(--paper-2); border: 1.5px solid var(--ink); border-radius: var(--r);
+    padding: 14px 16px;
+  }
+  #view-rest-stop .rs-notes h4 {
+    margin: 0 0 8px; font-family: var(--mono); font-size: 10px; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--muted); font-weight: 600;
+  }
+  #view-rest-stop .rs-notes ul { margin: 0; padding-left: 18px; }
+  #view-rest-stop .rs-notes li { font-size: 13px; color: var(--ink-2); line-height: 1.5; margin-bottom: 5px; }
+  #view-rest-stop .rs-notes li:last-child { margin-bottom: 0; }
+  #view-rest-stop .rs-empty {
+    text-align: center; color: var(--muted); font-size: 14px; padding: 22px 10px; line-height: 1.5;
+  }
+  #view-rest-stop .rs-results { animation: fc-result-in .22s cubic-bezier(.2,.8,.2,1) both; }
+  /* Print */
+  .rs-print-header { display: none; }
+  @media print {
+    body.rs-printing > .view:not(#view-rest-stop) { display: none !important; }
+    body.rs-printing #view-rest-stop { display: block !important; }
+    #view-rest-stop .tool-bar, #view-rest-stop .site-header, #view-rest-stop .ctx-banner,
+    #view-rest-stop .pro-tip, #view-rest-stop .related, #view-rest-stop .rs-inputs,
+    #view-rest-stop #rs-actions { display: none !important; }
+    #view-rest-stop .rs-print-header {
+      display: flex !important; justify-content: space-between;
+      font-family: var(--mono); font-size: 11px; letter-spacing: .08em;
+      text-transform: uppercase; color: #555;
+      padding-bottom: 10px; border-bottom: 2px solid #000; margin-bottom: 18px;
+    }
+    #view-rest-stop .rs-node { break-inside: avoid; }
+    body { background: #fff !important; background-image: none !important; }
+  }
+  </style>
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="rsPrint()">🖨 Print</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">⏸</span>
-    <h2>Rest Stop Planner</h2>
-    <p style="margin-bottom:24px">Recommended break schedule. Adjusts for kids, pets & elderly travelers.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-rest-stop"></div>
+  <div class="rs-print-header">
+    <strong>TripTools — Rest Stop Planner</strong>
+    <span id="rs-print-date"></span>
+  </div>
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>Rest Stop Planner</h1>
+    <p class="tool-sub">Enter your drive time and who's traveling. Get a recommended break schedule — adjusted for kids, pets, elderly &amp; more — so everyone arrives rested and safe.</p>
+  </div>
+
+  <div class="tool-body">
+    <div class="rs-inputs">
+
+      <!-- ── DRIVE TIME ── -->
+      <div class="rs-section-lbl">Total Drive Time</div>
+      <div class="frow">
+        <div class="fg" style="margin-bottom:0">
+          <label for="rs-hours">Hours</label>
+          <input type="number" id="rs-hours" min="0" max="48" step="1" placeholder="e.g. 6" oninput="rsCalc()">
+        </div>
+        <div class="fg" style="margin-bottom:0">
+          <label for="rs-mins">Minutes</label>
+          <input type="number" id="rs-mins" min="0" max="59" step="5" placeholder="e.g. 30" oninput="rsCalc()">
+        </div>
+      </div>
+
+      <!-- ── DEPARTURE + DRIVERS ── -->
+      <div class="frow" style="margin-top:16px">
+        <div class="fg" style="margin-bottom:0">
+          <label for="rs-depart">Departure Time <span class="rs-hint">(optional)</span></label>
+          <input type="time" id="rs-depart" onchange="rsCalc()">
+        </div>
+        <div class="fg" style="margin-bottom:0">
+          <label for="rs-drivers">Number of Drivers</label>
+          <input type="number" id="rs-drivers" min="1" max="6" step="1" value="1" oninput="rsCalc()">
+        </div>
+      </div>
+
+      <!-- ── TRAVELER TYPES ── -->
+      <div class="rs-section-lbl">Who's Traveling? <span class="rs-hint">(select all that apply)</span></div>
+      <div class="chip-grp" id="rs-factor-chips">
+        <span class="chip" data-v="kids"     onclick="rsTglFactor(this)">🧒 Kids</span>
+        <span class="chip" data-v="pets"     onclick="rsTglFactor(this)">🐾 Pets</span>
+        <span class="chip" data-v="elderly"  onclick="rsTglFactor(this)">🧓 Elderly</span>
+        <span class="chip" data-v="pregnant" onclick="rsTglFactor(this)">🤰 Pregnant</span>
+        <span class="chip" data-v="motion"   onclick="rsTglFactor(this)">🤢 Motion-Sickness</span>
+      </div>
+
+    </div><!-- /rs-inputs -->
+
+    <!-- ── RESULTS ── -->
+    <div id="rs-results" style="display:none;margin-top:24px">
+      <div class="rs-results" id="rs-results-inner"><!-- injected by JS --></div>
+    </div>
+
+    <!-- ── ACTIONS ── -->
+    <div id="rs-actions" style="margin-top:14px;text-align:right">
+      <button class="btn-ghost" onclick="rsReset()">↺ Reset</button>
+    </div>
+
+  </div><!-- /tool-body -->
+
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    Safety experts recommend a 15-minute break at least every two hours of driving — drowsy driving impairs you much like alcohol does. Plan breaks <em>before</em> you feel tired, not after. If you start yawning, drifting between lanes, or can't remember the last few miles, stop now.
+  </div>
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('fuel-cost')">⛽ Fuel Cost Calculator</button>
+      <button class="rel-btn" onclick="openTool('car-kit')">🚨 Car Emergency Kit</button>
+      <button class="rel-btn" onclick="openTool('playlist-time')">🎵 Playlist Timer</button>
     </div>
   </div>
 </div>
@@ -9814,7 +9977,7 @@ const TOOLS = [
   {id:'driving-rules', nm:'Driving & Road Rules',       ico:'🚦', ph:'destination',on:false,live:true,  ds:'Speed limits, BAC limits, toll systems & road sign reference.'},
   {id:'quiet-hours',   nm:'Local Quiet Hours Guide',    ico:'🤫', ph:'destination',on:false,live:false, ds:'Siesta hours, noise ordinances & photography restrictions.'},
   {id:'fuel-cost',     nm:'Fuel Cost Calculator',       ico:'⛽', ph:'road',       on:false,live:true,  ds:'Distance + MPG + fuel price = total cost. Compare two vehicles.'},
-  {id:'rest-stop',     nm:'Rest Stop Planner',          ico:'⏸', ph:'road',       on:false,live:false, ds:'Recommended break schedule. Adjusts for kids, pets & elderly.'},
+  {id:'rest-stop',     nm:'Rest Stop Planner',          ico:'⏸', ph:'road',       on:false,live:true,  ds:'Recommended break schedule. Adjusts for kids, pets & elderly.'},
   {id:'playlist-time', nm:'Road Trip Playlist Timer',   ico:'🎵', ph:'road',       on:false,live:false, ds:'Enter drive hours → how many albums/podcasts to download.'},
   {id:'border-cross',  nm:'Border Crossing Guide',      ico:'🛂', ph:'road',       on:false,live:false, ds:'US/Canada, US/Mexico & major land borders. Documents & wait times.'},
   {id:'car-kit',       nm:'Car Emergency Kit Checklist',ico:'🚨', ph:'road',       on:false,live:true,  ds:'What to carry for road trip safety. Customizable by season & route.'},
@@ -10482,6 +10645,7 @@ function injectTripCtx(id) {
   if(id==='currency') fxInit();
   if(id==='unit-conv') ucInit();
   if(id==='fuel-cost') fcInit();
+  if(id==='rest-stop') rsInit();
   if(id==='flight-est') feInit();
   if(id==='cruise-compare') ccInit();
   if(id==='cruise-grat')   cgInit();
@@ -15611,6 +15775,321 @@ function fcReset() {
     b.classList.toggle('active', b.dataset.fcUnit === 'mpg-us');
   });
   fcApplyUnit();
+}
+
+/* ══════════════════════════════════════════════════════
+   REST STOP PLANNER
+   Offline break-schedule generator. Takes total drive time,
+   optional departure time, driver count and traveler types,
+   then builds a timeline of recommended breaks (stretch,
+   restroom, meal, fuel, pet walk, driver swap) plus overnight
+   stops for long hauls. Break frequency and duration adjust
+   for kids, pets, elderly, pregnant and motion-sickness-prone
+   travelers. Pure heuristic — not a routing or mapping tool.
+   ══════════════════════════════════════════════════════ */
+let rsFactors = [];   // selected subset of RS_FACTORS keys
+
+/* Per-factor tuning: interval = max minutes of driving between
+   breaks, minDur = minimum break length (min), note = guidance. */
+const RS_FACTORS = {
+  kids:     { lbl:'Kids',            ico:'🧒', interval:90,  minDur:20, note:'Kids: pick stops with open space to burn off energy, and keep snacks and water handy.' },
+  pets:     { lbl:'Pets',            ico:'🐾', interval:150, minDur:15, note:'Pets: walk them and offer water at each stop. Never leave a pet in a parked car — interior temperatures climb dangerously fast.' },
+  elderly:  { lbl:'Elderly',         ico:'🧓', interval:105, minDur:15, note:'Elderly travelers: stand and walk at every break to keep blood circulating and ease stiff joints.' },
+  pregnant: { lbl:'Pregnant',        ico:'🤰', interval:90,  minDur:15, note:'Pregnancy: use the restroom and take a short walk often — sitting for long stretches raises the risk of blood clots.' },
+  motion:   { lbl:'Motion-sickness', ico:'🤢', interval:90,  minDur:10, note:'Motion sickness: step outside for fresh air, focus on the horizon, and avoid screens just before resuming.' },
+};
+
+const RS_BASE_INTERVAL = 120;  // minutes of driving between breaks (adults only)
+const RS_BASE_DUR      = 15;   // minutes per break
+const RS_FUEL_INTERVAL = 270;  // suggest a refuel roughly every 4.5h of driving
+const RS_MIN_TAIL      = 25;   // skip a break within this many minutes of arrival
+
+function rsKey(tid){ return 'tt_rest_stop_' + (tid || 'default'); }
+
+function rsInit() {
+  const pd = document.getElementById('rs-print-date');
+  if (pd) pd.textContent = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+
+  const tid = getActiveTripId();
+  let s = null;
+  try { s = JSON.parse(localStorage.getItem(rsKey(tid)) || 'null'); } catch(_) {}
+  if (s) {
+    document.getElementById('rs-hours').value   = s.hours   || '';
+    document.getElementById('rs-mins').value    = s.mins    || '';
+    document.getElementById('rs-depart').value  = s.depart  || '';
+    document.getElementById('rs-drivers').value = s.drivers || 1;
+    rsFactors = Array.isArray(s.factors) ? s.factors : [];
+  } else {
+    rsFactors = [];
+  }
+  document.querySelectorAll('#rs-factor-chips .chip').forEach(c => {
+    c.classList.toggle('on', rsFactors.includes(c.dataset.v));
+  });
+  rsCalc();
+}
+
+function rsSave() {
+  const tid = getActiveTripId();
+  try {
+    localStorage.setItem(rsKey(tid), JSON.stringify({
+      hours:   document.getElementById('rs-hours').value,
+      mins:    document.getElementById('rs-mins').value,
+      depart:  document.getElementById('rs-depart').value,
+      drivers: document.getElementById('rs-drivers').value,
+      factors: rsFactors
+    }));
+  } catch(_) {}
+}
+
+function rsTglFactor(el) {
+  const v = el.dataset.v;
+  el.classList.toggle('on');
+  if (el.classList.contains('on')) {
+    if (!rsFactors.includes(v)) rsFactors.push(v);
+  } else {
+    rsFactors = rsFactors.filter(f => f !== v);
+  }
+  rsCalc();
+}
+
+/* ── formatting helpers ── */
+function rsFmtDur(mins) {
+  mins = Math.round(mins);
+  const h = Math.floor(mins / 60), m = mins % 60;
+  if (h && m) return h + 'h ' + m + 'm';
+  if (h) return h + 'h';
+  return m + 'm';
+}
+function rsFmtClock(totalMin) {
+  let m = ((Math.round(totalMin) % 1440) + 1440) % 1440;
+  const h = Math.floor(m / 60), mm = m % 60;
+  const ampm = h < 12 ? 'AM' : 'PM';
+  let h12 = h % 12; if (h12 === 0) h12 = 12;
+  return h12 + ':' + String(mm).padStart(2,'0') + ' ' + ampm;
+}
+
+/* ── core schedule builder ── */
+function rsBuild(totalDrive, departMin, drivers) {
+  // Effective interval/duration from the most demanding selected factor
+  let interval = RS_BASE_INTERVAL, dur = RS_BASE_DUR;
+  rsFactors.forEach(f => {
+    const meta = RS_FACTORS[f];
+    if (!meta) return;
+    interval = Math.min(interval, meta.interval);
+    dur = Math.max(dur, meta.minDur);
+  });
+
+  // Safe daily driving limit scales modestly with driver count
+  const dailyLimit = drivers >= 3 ? 720 : (drivers === 2 ? 600 : 480);
+  const days = Math.max(1, Math.ceil(totalDrive / dailyLimit));
+  const showClock = (departMin != null && days === 1);
+
+  // Break points at multiples of the interval, skipping any too near the end
+  const breaks = [];
+  for (let t = interval; t < totalDrive - RS_MIN_TAIL; t += interval) breaks.push({ drive: t });
+
+  // Mark the last break before each day boundary as an overnight stop
+  const overnightIdx = new Set();
+  for (let B = dailyLimit; B < totalDrive; B += dailyLimit) {
+    let pick = -1;
+    for (let i = 0; i < breaks.length; i++) { if (breaks[i].drive <= B) pick = i; else break; }
+    if (pick >= 0) overnightIdx.add(pick);
+  }
+
+  let accBreak = 0, lastFuel = 0, lastMeal = 0, driverIdx = 0, dayCounter = 1;
+  const mealWin = {};
+
+  breaks.forEach((b, i) => {
+    b.day = dayCounter;
+    b.clock = showClock ? departMin + b.drive + accBreak : null;
+    b.duration = dur;
+    b.type = 'stretch';
+    b.title = 'Rest & stretch break';
+    b.ico = '🧘';
+    b.tags = [];
+    b.overnight = overnightIdx.has(i);
+
+    if (b.overnight) {
+      b.type = 'overnight';
+      b.ico = '🌙';
+      b.title = 'Overnight stop';
+      b.duration = 0;          // sleep time not counted toward time-on-road
+      lastFuel = b.drive;       // assume topped off before stopping for the night
+      lastMeal = b.drive;
+    } else {
+      // Meal detection: clock windows when known, otherwise a ~5h heuristic
+      let mealName = '';
+      if (showClock) {
+        const tod = ((b.clock % 1440) + 1440) % 1440;
+        if (tod >= 390 && tod <= 570 && !mealWin.b) { mealName = 'Breakfast'; mealWin.b = 1; }
+        else if (tod >= 690 && tod <= 840 && !mealWin.l) { mealName = 'Lunch'; mealWin.l = 1; }
+        else if (tod >= 1050 && tod <= 1230 && !mealWin.d) { mealName = 'Dinner'; mealWin.d = 1; }
+      } else if ((b.drive - lastMeal) >= 300 && (totalDrive - b.drive) > 45) {
+        mealName = 'Meal'; lastMeal = b.drive;
+      }
+      if (mealName) {
+        b.type = 'meal';
+        b.ico = '🍽';
+        b.title = (mealName === 'Meal' ? 'Meal' : mealName) + ' stop';
+        b.duration = Math.max(dur, 40);
+      }
+
+      // Fuel suggestion every ~4.5h of driving
+      if ((b.drive - lastFuel) >= RS_FUEL_INTERVAL) {
+        b.tags.push({ ico:'⛽', text:'Good time to refuel' });
+        lastFuel = b.drive;
+      }
+      // Pet walk reminder
+      if (rsFactors.includes('pets')) b.tags.push({ ico:'🐾', text:'Walk + water pets' });
+      // Driver swap rotation
+      if (drivers >= 2) {
+        driverIdx = (driverIdx + 1) % drivers;
+        b.tags.push({ ico:'🔄', text:'Switch to Driver ' + (driverIdx + 1), swap:true });
+      }
+    }
+
+    accBreak += b.duration;
+    if (b.overnight) dayCounter++;
+  });
+
+  const totalBreak = accBreak;
+  const totalTrip = totalDrive + totalBreak;          // driving + break time (excludes overnight sleep)
+  const arrival = showClock ? departMin + totalTrip : null;
+  const arriveDay = dayCounter;
+
+  return { interval, dur, breaks, days, dailyLimit, totalDrive, totalBreak, totalTrip,
+           arrival, arriveDay, departMin, drivers, showClock };
+}
+
+function rsTagsHtml(tags) {
+  if (!tags || !tags.length) return '';
+  return '<div class="rs-tags">' + tags.map(t =>
+    '<span class="rs-tag' + (t.swap ? ' rs-tag-swap' : '') + '">' + t.ico + ' ' + t.text + '</span>'
+  ).join('') + '</div>';
+}
+
+function rsCalc() {
+  const h = parseInt(document.getElementById('rs-hours').value, 10) || 0;
+  const m = parseInt(document.getElementById('rs-mins').value, 10) || 0;
+  let drivers = parseInt(document.getElementById('rs-drivers').value, 10) || 1;
+  drivers = Math.max(1, Math.min(6, drivers));
+  const departRaw = document.getElementById('rs-depart').value;
+  let departMin = null;
+  if (departRaw && /^\d{1,2}:\d{2}$/.test(departRaw)) {
+    const [hh, mm] = departRaw.split(':').map(Number);
+    if (hh >= 0 && hh < 24 && mm >= 0 && mm < 60) departMin = hh * 60 + mm;
+  }
+  const totalDrive = h * 60 + m;
+
+  rsSave();
+
+  const resEl = document.getElementById('rs-results');
+  const innerEl = document.getElementById('rs-results-inner');
+  if (totalDrive <= 0) { resEl.style.display = 'none'; return; }
+
+  const plan = rsBuild(totalDrive, departMin, drivers);
+  const realBreaks = plan.breaks.filter(b => !b.overnight);
+
+  // re-trigger entry animation
+  innerEl.style.animation = 'none'; innerEl.offsetHeight; innerEl.style.animation = '';
+
+  let html = '';
+
+  // ── Summary cards ──
+  html += '<div class="rs-summary">';
+  html += '<div class="rs-sum-card"><div class="rs-sum-num">' + rsFmtDur(plan.totalDrive) + '</div><div class="rs-sum-lbl">Drive Time</div></div>';
+  html += '<div class="rs-sum-card"><div class="rs-sum-num">' + realBreaks.length + '</div><div class="rs-sum-lbl">' + (realBreaks.length === 1 ? 'Break' : 'Breaks') + '</div></div>';
+  if (plan.showClock) {
+    html += '<div class="rs-sum-card"><div class="rs-sum-num">' + rsFmtClock(plan.arrival) + '</div><div class="rs-sum-lbl">Arrival</div></div>';
+  } else {
+    html += '<div class="rs-sum-card"><div class="rs-sum-num">' + rsFmtDur(plan.totalTrip) + '</div><div class="rs-sum-lbl">Time on Road</div></div>';
+  }
+  html += '<div class="rs-sum-card"><div class="rs-sum-num">' + plan.days + '</div><div class="rs-sum-lbl">' + (plan.days === 1 ? 'Day' : 'Days') + '</div></div>';
+  html += '</div>';
+
+  // ── Timeline ──
+  html += '<div class="rs-timeline">';
+
+  // Departure
+  html += '<div class="rs-node rs-endpoint"><div class="rs-dot">🚗</div><div class="rs-card">' +
+    '<div class="rs-card-top"><span class="rs-card-title">Departure' + (plan.days > 1 ? ' · Day 1' : '') + '</span>' +
+    (plan.showClock ? '<span class="rs-card-clock">' + rsFmtClock(plan.departMin) + '</span>' : '') +
+    '</div><div class="rs-card-meta">Hit the road</div></div></div>';
+
+  if (!realBreaks.length) {
+    html += '<div class="rs-node"><div class="rs-dot">✓</div><div class="rs-card">' +
+      '<div class="rs-empty">Your drive is short enough to do in one go — no scheduled break needed. ' +
+      'Still, pull over and stretch if you start to feel tired or stiff.</div></div></div>';
+  } else {
+    plan.breaks.forEach(b => {
+      const cls = b.overnight ? ' rs-overnight' : (b.type === 'meal' ? ' rs-meal' : '');
+      let meta = 'After ' + rsFmtDur(b.drive) + ' of driving';
+      if (b.overnight) {
+        meta += ' · End of Day ' + b.day + ' — rest up and resume Day ' + (b.day + 1) + ' fresh';
+      } else {
+        meta += ' · ' + b.duration + ' min stop';
+        if (plan.days > 1) meta = 'Day ' + b.day + ' · ' + meta;
+      }
+      html += '<div class="rs-node' + cls + '"><div class="rs-dot">' + b.ico + '</div><div class="rs-card">' +
+        '<div class="rs-card-top"><span class="rs-card-title">' + b.title + '</span>' +
+        (b.clock != null && !b.overnight ? '<span class="rs-card-clock">' + rsFmtClock(b.clock) + '</span>' : '') +
+        '</div><div class="rs-card-meta">' + meta + '</div>' +
+        rsTagsHtml(b.tags) + '</div></div>';
+    });
+  }
+
+  // Arrival
+  html += '<div class="rs-node rs-endpoint"><div class="rs-dot">🏁</div><div class="rs-card">' +
+    '<div class="rs-card-top"><span class="rs-card-title">Arrival' + (plan.days > 1 ? ' · Day ' + plan.arriveDay : '') + '</span>' +
+    (plan.showClock ? '<span class="rs-card-clock">' + rsFmtClock(plan.arrival) + '</span>' : '') +
+    '</div><div class="rs-card-meta">' + rsFmtDur(plan.totalDrive) + ' driving' +
+    (plan.totalBreak > 0 ? ' + ' + rsFmtDur(plan.totalBreak) + ' in breaks' : '') +
+    ' = ' + rsFmtDur(plan.totalTrip) + ' on the road</div></div></div>';
+
+  html += '</div>'; // /timeline
+
+  // ── Travel notes ──
+  const notes = [];
+  notes.push('Plan to break <strong>before</strong> you feel drowsy — roughly every ' + rsFmtDur(plan.interval) + ' of driving.');
+  if (plan.drivers >= 2) {
+    notes.push('Sharing the wheel between ' + plan.drivers + ' drivers — swap at each break so no one drives tired.');
+  } else if (plan.totalDrive >= 480) {
+    notes.push('Driving solo on a long haul: if you can, line up a second driver, or build in an overnight stop rather than pushing through.');
+  }
+  if (plan.days > 1) {
+    notes.push('This trip exceeds a safe single-day driving limit, so it’s split across ' + plan.days + ' days with overnight stops. Book lodging near each overnight marker in advance.');
+  }
+  rsFactors.forEach(f => { if (RS_FACTORS[f]) notes.push(RS_FACTORS[f].note); });
+
+  html += '<div class="rs-notes"><h4>Travel Notes</h4><ul>' +
+    notes.map(n => '<li>' + n + '</li>').join('') + '</ul></div>';
+
+  innerEl.innerHTML = html;
+  resEl.style.display = 'block';
+}
+
+function rsReset() {
+  document.getElementById('rs-hours').value = '';
+  document.getElementById('rs-mins').value = '';
+  document.getElementById('rs-depart').value = '';
+  document.getElementById('rs-drivers').value = 1;
+  rsFactors = [];
+  document.querySelectorAll('#rs-factor-chips .chip').forEach(c => c.classList.remove('on'));
+  document.getElementById('rs-results').style.display = 'none';
+  rsSave();
+}
+
+function rsPrint() {
+  const pd = document.getElementById('rs-print-date');
+  if (pd) pd.textContent = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  document.body.classList.add('rs-printing');
+  const cleanup = () => {
+    document.body.classList.remove('rs-printing');
+    window.removeEventListener('afterprint', cleanup);
+  };
+  window.addEventListener('afterprint', cleanup);
+  setTimeout(() => window.print(), 50);
+  setTimeout(cleanup, 8000);
 }
 
 /* ══════════════════════════════════════════════════════
