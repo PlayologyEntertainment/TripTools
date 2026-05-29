@@ -7344,19 +7344,164 @@ body.no-scroll { overflow: hidden; }
   </div>
 </div>
 
-<div id="view-placeholder-shore-exc" class="view">
-  <nav class="tool-topbar">
+<div id="view-shore-exc" class="view">
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="sePrint()">🖨 Print Port Sheets</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">⚓</span>
-    <h2>Shore Excursion Planner</h2>
-    <p style="margin-bottom:24px">Per-port budget & time planner. Ensures you're back before ship departure.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-shore-exc"></div>
+
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>Shore Excursion Planner</h1>
+    <p class="tool-sub">Plan every port call by the clock and the wallet. Log each excursion with its start and end time, and TripTools flags anything that risks running past all-aboard — because the ship will not wait. Budgets total per port and across your whole sailing, with actual spend pulled from your Daily Expense Tracker.</p>
+  </div>
+
+  <div class="tool-body">
+
+    <!-- SETUP -->
+    <div class="se-setup">
+      <div class="se-setup-hdr"><span class="se-setup-title">§ Cruise Setup</span></div>
+      <div class="se-setup-body">
+        <div class="fg" style="margin:0">
+          <label>Cruise / Ship Name <span class="se-opt">(optional)</span></label>
+          <input type="text" id="se-cruise-name" placeholder="e.g. Western Caribbean on Allure" oninput="seSaveMeta()" autocomplete="off">
+        </div>
+        <div class="fg" style="margin:0">
+          <label>Return Safety Buffer</label>
+          <select id="se-buffer" onchange="seSaveMeta(); seRender();">
+            <option value="30">Warn under 30 min before all-aboard</option>
+            <option value="45">Warn under 45 min before all-aboard</option>
+            <option value="60">Warn under 60 min before all-aboard</option>
+            <option value="90">Warn under 90 min before all-aboard</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUMMARY BAR -->
+    <div class="se-summary-bar" id="se-summary-bar" style="display:none">
+      <div class="se-sum-stat"><span class="se-sum-lbl">⚓ Ports</span><span class="se-sum-val" id="se-sum-ports">—</span></div>
+      <div class="se-sum-stat"><span class="se-sum-lbl">🎟 Excursions</span><span class="se-sum-val" id="se-sum-exc">—</span></div>
+      <div class="se-sum-stat"><span class="se-sum-lbl">Planned Cost</span><span class="se-sum-val" id="se-sum-cost">—</span></div>
+      <div class="se-sum-stat"><span class="se-sum-lbl">Spent (Tracker)</span><span class="se-sum-val" id="se-sum-spent">—</span></div>
+      <div class="se-sum-stat"><span class="se-sum-lbl">⏰ Time Risks</span><span class="se-sum-val" id="se-sum-conflicts">—</span></div>
+    </div>
+
+    <!-- PORTS -->
+    <div id="se-ports"></div>
+
+    <!-- Empty state -->
+    <div class="se-empty" id="se-empty-state">
+      <span>⚓</span>
+      Add your first port of call to start mapping excursions, all-aboard times and budgets.
+    </div>
+
+    <div class="se-add-port-wrap">
+      <button class="btn btn-p" onclick="seAddPort()">+ Add Port of Call</button>
+    </div>
+
+  </div><!-- /tool-body -->
+
+  <!-- PRINT-ONLY PORT SHEETS (built by sePrint) -->
+  <div id="se-print-area" class="se-print-area"></div>
+
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    All-aboard is usually 30–60 minutes before the posted sailing time, and it is the deadline that matters — not the departure itself. Ship-sponsored excursions guarantee the vessel waits if your tour is delayed; independent operators do not, so leave them a wider cushion and let this planner watch the clock for you.
+  </div>
+
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('cruise-day')">📆 Cruise Day Planner</button>
+      <button class="rel-btn" onclick="openTool('expense-track')">📊 Daily Expense Tracker</button>
+      <button class="rel-btn" onclick="openTool('cruise-grat')">🚢 Cruise Gratuity Calculator</button>
+      <button class="rel-btn" onclick="openTool('packing')">📝 Smart Packing List</button>
     </div>
   </div>
 </div>
+<style>
+/* ══ SHORE EXCURSION PLANNER (id: shore-exc) ══════════════ */
+.se-opt { font-weight:400; text-transform:none; letter-spacing:0; color:var(--muted); }
+.se-setup { background:var(--paper-2); border:1.5px solid var(--ink); border-radius:var(--r); padding:16px; margin-bottom:16px; }
+.se-setup-hdr { margin-bottom:12px; }
+.se-setup-title { font-family:var(--mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); }
+.se-setup-body { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+@media(max-width:520px){ .se-setup-body { grid-template-columns:1fr; } }
+
+.se-summary-bar { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; background:var(--ink); border-radius:var(--r); padding:14px 12px; margin-bottom:18px; }
+@media(max-width:680px){ .se-summary-bar { grid-template-columns:repeat(2,1fr); } }
+.se-sum-stat { text-align:center; }
+.se-sum-lbl { display:block; font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--paper-2); opacity:.75; margin-bottom:4px; }
+.se-sum-val { display:block; font-family:var(--serif); font-weight:600; font-size:22px; color:var(--paper); line-height:1; }
+.se-sum-val.bad { color:#ff8a73; }
+.se-sum-val.good { color:#8ce0a0; }
+
+.se-port-card { border:1.5px solid var(--ink); border-radius:var(--r); background:var(--paper); padding:18px; margin-bottom:18px; }
+.se-port-card.has-crit { box-shadow:0 0 0 2px var(--accent) inset; }
+.se-port-hdr { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:14px; }
+.se-port-num { font-family:var(--mono); font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); }
+.se-port-badge { font-family:var(--mono); font-size:10px; letter-spacing:.06em; text-transform:uppercase; padding:3px 8px; border-radius:2px; }
+.se-port-badge.ok   { background:#e8f5e9; color:var(--green); }
+.se-port-badge.warn { background:#FFF3E0; color:#8a4500; }
+.se-port-badge.crit { background:#fdecea; color:var(--accent); }
+.se-port-del { background:none; border:none; color:var(--accent); cursor:pointer; font-family:var(--mono); font-size:11px; letter-spacing:.04em; }
+.se-port-del:hover { text-decoration:underline; }
+.se-port-fields { display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:12px; margin-bottom:6px; }
+@media(max-width:700px){ .se-port-fields { grid-template-columns:1fr 1fr; } }
+.se-port-fields .span2 { grid-column:span 2; }
+@media(max-width:700px){ .se-port-fields .span2 { grid-column:span 2; } }
+
+.se-allaboard-flag { display:flex; align-items:center; gap:8px; background:#FFF3E0; border:1.5px solid var(--orange); border-radius:var(--r); padding:9px 12px; margin:12px 0; font-size:13px; color:#8a4500; }
+
+.se-exc-hdr { font-family:var(--mono); font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:16px 0 10px; }
+.se-exc-list { margin-bottom:8px; }
+.se-exc-item { border:1.5px solid var(--rule); border-radius:var(--r); margin-bottom:8px; background:var(--paper-2); overflow:hidden; }
+.se-exc-item.lv-warn { border-color:var(--orange); }
+.se-exc-item.lv-crit { border-color:var(--accent); }
+.se-exc-row { display:grid; grid-template-columns:auto 2fr 1.1fr 1fr 1fr 1fr auto; gap:8px; align-items:center; padding:10px 12px; }
+@media(max-width:760px){ .se-exc-row { grid-template-columns:auto 1fr 1fr auto; } }
+.se-exc-chk { width:18px; height:18px; accent-color:var(--green); cursor:pointer; }
+.se-exc-name { min-width:0; }
+.se-exc-name.done { text-decoration:line-through; color:var(--muted); }
+.se-exc-prov, .se-exc-time, .se-exc-cost { min-height:38px; }
+@media(max-width:760px){
+  .se-exc-prov { grid-column:span 1; }
+  .se-exc-time, .se-exc-cost { grid-column:span 1; }
+}
+.se-exc-del { background:none; border:none; color:var(--accent); cursor:pointer; font-size:16px; line-height:1; padding:2px 4px; justify-self:end; }
+.se-exc-flags { padding:0 12px 10px; display:flex; flex-direction:column; gap:4px; }
+.se-flag { font-size:12px; display:flex; align-items:flex-start; gap:6px; line-height:1.35; }
+.se-flag.warn { color:#8a4500; }
+.se-flag.crit { color:var(--accent); font-weight:600; }
+.se-exc-empty { font-size:13px; color:var(--muted); font-style:italic; margin-bottom:10px; }
+
+.se-port-foot { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-top:14px; padding-top:14px; border-top:1px solid var(--rule); }
+.se-port-totals { font-size:13px; color:var(--ink-2); }
+.se-port-totals .amt { font-family:var(--serif); font-weight:600; font-size:16px; }
+.se-port-totals .amt.over { color:var(--accent); }
+.se-port-totals .amt.under { color:var(--green); }
+.se-port-totals .sep { color:var(--rule); margin:0 8px; }
+
+.se-add-port-wrap { margin-top:4px; }
+.se-empty { text-align:center; color:var(--muted); padding:48px 20px; border:1.5px dashed var(--rule); border-radius:var(--r); margin-bottom:16px; }
+.se-empty span { display:block; font-size:38px; margin-bottom:10px; }
+
+.se-print-area { display:none; }
+@media print {
+  #view-shore-exc .tool-bar, #view-shore-exc .ctx-banner, #view-shore-exc .se-setup,
+  #view-shore-exc #se-ports, #view-shore-exc .se-empty, #view-shore-exc .se-add-port-wrap,
+  #view-shore-exc .se-summary-bar, #view-shore-exc .pro-tip, #view-shore-exc .related,
+  #view-shore-exc .conn-bdg { display:none !important; }
+  #view-shore-exc .se-print-area { display:block !important; }
+  .se-print-port { break-inside:avoid; border:1px solid #000; border-radius:4px; padding:14px; margin-bottom:14px; }
+  .se-print-port h3 { font-family:var(--serif); margin:0 0 4px; }
+  .se-print-port .meta { font-family:var(--mono); font-size:12px; color:#444; margin-bottom:8px; }
+  .se-print-port ul { margin:6px 0 0 18px; padding:0; }
+  .se-print-port .warn { color:#000; font-weight:700; }
+}
+</style>
 <div id="view-cruise-compare" class="view">
 <style>
 /* ══ CRUISE COMPARE ══════════════════════════════════════════ */
@@ -10168,7 +10313,7 @@ const TOOLS = [
   {id:'border-cross',  nm:'Border Crossing Guide',      ico:'🛂', ph:'road',       on:false,live:false, ds:'US/Canada, US/Mexico & major land borders. Documents & wait times.'},
   {id:'car-kit',       nm:'Car Emergency Kit Checklist',ico:'🚨', ph:'road',       on:false,live:true,  ds:'What to carry for road trip safety. Customizable by season & route.'},
   {id:'toll-est',      nm:'Toll Cost Estimator',        ico:'💲', ph:'road',       on:false,live:true,  ds:'Major US toll roads. Estimated total cost city-to-city.'},
-  {id:'shore-exc',     nm:'Shore Excursion Planner',    ico:'⚓', ph:'cruise',     on:false,live:false, ds:'Per-port budget & time planner. Never miss ship departure.'},
+  {id:'shore-exc',     nm:'Shore Excursion Planner',    ico:'⚓', ph:'cruise',     on:false,live:true,  ds:'Per-port budget & time planner. Never miss ship departure.'},
   {id:'cruise-compare',nm:'Cruise Line Comparison',     ico:'🔍', ph:'cruise',     on:false,live:true,  ds:'Side-by-side of 12 major cruise lines across 10 attributes.'},
   {id:'sea-sick',      nm:'Sea Sickness Guide',         ico:'🌊', ph:'cruise',     on:false,live:false, ds:'Prevention, treatment & best cabin locations for motion sickness.'},
   {id:'cruise-day',    nm:'Cruise Day Planner',         ico:'📆', ph:'cruise',     on:false,live:true,  ds:'Visual calendar: sea day vs. port day modes.'},
@@ -10837,6 +10982,7 @@ function injectTripCtx(id) {
   if(id==='cruise-compare') ccInit();
   if(id==='cruise-grat')   cgInit();
   if(id==='cruise-day')    cdInit();
+  if(id==='shore-exc')     seInit();
   if(id==='trip-journal') tjInit();
   if(id==='park-budget') pbInit();
   if(id==='ride-height') rhInit();
@@ -12208,6 +12354,319 @@ function cdPrint() {
     </div>`;
   });
   document.getElementById('cd-print-area').innerHTML = html;
+  window.print();
+}
+
+/* ══════════════════════════════════════════
+   SHORE EXCURSION PLANNER  (se*)
+   Port-centric companion to the Cruise Day Planner. Each port has an
+   arrival and all-aboard time; each excursion has a start/end time, cost
+   and operator type. Flags excursions that risk missing the ship and
+   totals planned vs. actual spend (via tt_expenses_{tripId}) per port and
+   across the whole sailing.
+   ══════════════════════════════════════════ */
+
+const SE_PROVIDERS = {
+  ship:  { label:'Ship', emoji:'🚢' },
+  indep: { label:'Independent', emoji:'🏝' },
+};
+
+let seData = {
+  cruiseName:'', homeCurrency:'USD', buffer:60,
+  ports:[], // [{id, name, date, arrive, allAboard, excursions:[{id,name,start,end,cost,provider,booked,notes}]}]
+};
+
+function seKey() { return 'tt_shore_' + (getActiveTripId() || 'default'); }
+
+function seLoad() {
+  try { const raw = localStorage.getItem(seKey()); if (raw) seData = JSON.parse(raw); } catch(e) {}
+  if (!Array.isArray(seData.ports)) seData.ports = [];
+  if (!seData.buffer) seData.buffer = 60;
+}
+
+function seSave() {
+  try { localStorage.setItem(seKey(), JSON.stringify(seData)); } catch(e) {}
+}
+
+function seSaveMeta() {
+  seData.cruiseName = document.getElementById('se-cruise-name').value;
+  seData.buffer = parseInt(document.getElementById('se-buffer').value) || 60;
+  seSave();
+}
+
+function seInit() {
+  seLoad();
+
+  // Pre-fill from active MyTrip context where empty
+  const trip = getActiveTrip ? getActiveTrip() : null;
+  const ctx  = document.getElementById('ctx-shore-exc');
+  if (trip) {
+    if (ctx) { ctx.textContent = `✈ Using context from: ${trip.name} — tap to edit ↗`; ctx.classList.add('show'); ctx.onclick = () => showView('mytrip'); }
+    if (!seData.cruiseName && trip.name) seData.cruiseName = trip.name;
+  } else if (ctx) { ctx.classList.remove('show'); }
+  seData.homeCurrency = (typeof cdHomeCurrency === 'function') ? cdHomeCurrency() : (seData.homeCurrency || 'USD');
+
+  document.getElementById('se-cruise-name').value = seData.cruiseName || '';
+  document.getElementById('se-buffer').value = String(seData.buffer || 60);
+  seRender();
+}
+
+/* ── Money & expense helpers (shared with Cruise Day Planner) ── */
+function seHomeCurrency() { return (typeof cdHomeCurrency === 'function') ? cdHomeCurrency() : (seData.homeCurrency || 'USD'); }
+function seMoney(n) { return (typeof cdMoney === 'function') ? cdMoney(n) : ((seHomeCurrency() === 'USD' ? '$' : seHomeCurrency() + ' ') + (n || 0).toFixed(2)); }
+function seSpentByDate() { return (typeof cdSpentByDate === 'function') ? cdSpentByDate() : {}; }
+function seEsc(s) { return (typeof cdEsc === 'function') ? cdEsc(s) : String(s == null ? '' : s); }
+
+/* ── Time helpers ── */
+function seToMin(t) {
+  if (!t || typeof t !== 'string') return null;
+  const m = t.match(/^(\d{1,2}):(\d{2})$/);
+  if (!m) return null;
+  return parseInt(m[1]) * 60 + parseInt(m[2]);
+}
+function seFmtDur(mins) {
+  mins = Math.round(mins);
+  const h = Math.floor(mins / 60), mm = mins % 60;
+  if (h && mm) return `${h}h ${mm}m`;
+  if (h) return `${h}h`;
+  return `${mm}m`;
+}
+function seFmtDate(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr + 'T12:00:00');
+  if (isNaN(d)) return dateStr;
+  return d.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
+}
+
+/* ── Port / excursion mutations ── */
+function sePort(id) { return seData.ports.find(p => p.id === id) || null; }
+function seAddPort() {
+  seData.ports.push({ id:'sport-' + Date.now(), name:'', date:'', arrive:'', allAboard:'', excursions:[] });
+  seSave(); seRender();
+  setTimeout(() => {
+    const cards = document.querySelectorAll('#se-ports .se-port-card');
+    const last = cards[cards.length - 1];
+    if (last) { last.scrollIntoView({ behavior:'smooth', block:'center' }); const inp = last.querySelector('input[type=text]'); if (inp) inp.focus(); }
+  }, 30);
+}
+function seDeletePort(id) {
+  const p = sePort(id);
+  const hasContent = p && (p.name || (p.excursions || []).some(x => x.name));
+  if (hasContent && !confirm('Remove this port and its excursions?')) return;
+  seData.ports = seData.ports.filter(p => p.id !== id);
+  seSave(); seRender();
+}
+function seUpdatePort(id, field, el) {
+  const p = sePort(id); if (!p) return;
+  p[field] = el.value;
+  seSave(); seRender();
+}
+function seAddExc(portId) {
+  const p = sePort(portId); if (!p) return;
+  if (!Array.isArray(p.excursions)) p.excursions = [];
+  p.excursions.push({ id:'sexc-' + Date.now(), name:'', start:'', end:'', cost:'', provider:'ship', booked:false, notes:'' });
+  seSave(); seRender();
+  setTimeout(() => {
+    const card = document.querySelector(`.se-port-card[data-pid="${portId}"]`);
+    const rows = card ? card.querySelectorAll('.se-exc-name') : [];
+    const last = rows[rows.length - 1];
+    if (last) last.focus();
+  }, 30);
+}
+function seUpdateExc(portId, excId, field, el) {
+  const p = sePort(portId); if (!p) return;
+  const x = (p.excursions || []).find(e => e.id === excId); if (!x) return;
+  x[field] = (el.type === 'checkbox') ? el.checked : el.value;
+  seSave(); seRender();
+}
+function seDeleteExc(portId, excId) {
+  const p = sePort(portId); if (!p) return;
+  p.excursions = (p.excursions || []).filter(e => e.id !== excId);
+  seSave(); seRender();
+}
+
+/* ── Per-port analysis (time-safety + budget) ── */
+function sePortAnalysis(p) {
+  const buffer = seData.buffer || 60;
+  const aa = seToMin(p.allAboard);
+  const arr = seToMin(p.arrive);
+  const exc = Array.isArray(p.excursions) ? p.excursions : [];
+  const named = exc.filter(x => (x.name || '').trim() || x.start || x.end || x.cost);
+
+  const rows = exc.map(x => {
+    const start = seToMin(x.start), end = seToMin(x.end);
+    const issues = []; // {level, text}
+    let level = 'ok';
+    const isIndep = x.provider === 'indep';
+
+    if (end != null && start != null && end < start) {
+      level = 'warn';
+      issues.push({ level:'warn', text:'End time is before start time — check the hours.' });
+    }
+    if (aa != null && end != null) {
+      if (end > aa) {
+        level = 'crit';
+        issues.push({ level:'crit', text:`Ends ${seFmtDur(end - aa)} after all-aboard (${p.allAboard}) — you would miss the ship.` });
+      } else {
+        const margin = aa - end;
+        if (margin < buffer) {
+          if (level !== 'crit') level = 'warn';
+          issues.push({ level: isIndep ? 'crit' : 'warn', text: `Only ${seFmtDur(margin)} between the end of this excursion and all-aboard${isIndep ? ' — and the ship will NOT wait for independent tours.' : '.'}` });
+          if (isIndep) level = 'crit';
+        }
+      }
+    }
+    if (arr != null && start != null && start < arr) {
+      if (level === 'ok') level = 'warn';
+      issues.push({ level:'warn', text:`Starts before the ship arrives in port (${p.arrive}).` });
+    }
+    return { exc:x, start, end, level, issues };
+  });
+
+  // Overlap detection among timed, named excursions
+  for (let i = 0; i < rows.length; i++) {
+    for (let j = i + 1; j < rows.length; j++) {
+      const a = rows[i], b = rows[j];
+      if (a.start == null || a.end == null || b.start == null || b.end == null) continue;
+      if (a.start < b.end && b.start < a.end) {
+        [a, b].forEach((r, k) => {
+          const other = k === 0 ? b : a;
+          r.issues.push({ level:'warn', text:`Overlaps in time with “${(other.exc.name || 'another plan').trim() || 'another plan'}”.` });
+          if (r.level === 'ok') r.level = 'warn';
+        });
+      }
+    }
+  }
+
+  const cost = named.reduce((s, x) => s + (parseFloat(x.cost) || 0), 0);
+  const critCount = rows.filter(r => r.level === 'crit').length;
+  const warnCount = rows.filter(r => r.level === 'warn').length;
+  const status = critCount ? 'crit' : (warnCount ? 'warn' : 'ok');
+  return { rows, cost, named, critCount, warnCount, status };
+}
+
+/* ── Render ── */
+function seRender() {
+  const has = seData.ports.length > 0;
+  document.getElementById('se-empty-state').style.display = has ? 'none' : 'block';
+  document.getElementById('se-summary-bar').style.display = has ? 'grid' : 'none';
+
+  const spentMap = seSpentByDate();
+  let totalCost = 0, totalExc = 0, totalCrit = 0;
+  const countedDates = {};
+
+  const portsHtml = seData.ports.map((p, pIdx) => {
+    const a = sePortAnalysis(p);
+    totalCost += a.cost;
+    totalExc += a.named.length;
+    totalCrit += a.critCount;
+
+    const spent = p.date ? (spentMap[p.date] || 0) : 0;
+    if (p.date && !countedDates[p.date]) countedDates[p.date] = spentMap[p.date] || 0;
+
+    const badge = a.named.length
+      ? (a.status === 'crit' ? '<span class="se-port-badge crit">⛔ Conflict</span>'
+        : a.status === 'warn' ? '<span class="se-port-badge warn">⚠ Tight</span>'
+        : '<span class="se-port-badge ok">✓ Clear</span>')
+      : '';
+
+    const aaFlag = (a.named.length && p.allAboard)
+      ? `<div class="se-allaboard-flag">⏰ <span><strong>All aboard ${p.allAboard}</strong> at ${p.name ? seEsc(p.name) : 'this port'} — be back at the gangway early; the ship will not wait.</span></div>`
+      : '';
+
+    const excRows = (p.excursions || []).map(x => {
+      const row = a.rows.find(r => r.exc.id === x.id) || { level:'ok', issues:[] };
+      const lvCls = row.level === 'crit' ? ' lv-crit' : row.level === 'warn' ? ' lv-warn' : '';
+      const provOpts = Object.keys(SE_PROVIDERS).map(k =>
+        `<option value="${k}"${x.provider === k ? ' selected' : ''}>${SE_PROVIDERS[k].emoji} ${SE_PROVIDERS[k].label}</option>`).join('');
+      const flags = row.issues.length
+        ? `<div class="se-exc-flags">${row.issues.map(f => `<div class="se-flag ${f.level}">${f.level === 'crit' ? '⛔' : '⚠️'} <span>${seEsc(f.text)}</span></div>`).join('')}</div>`
+        : '';
+      return `<div class="se-exc-item${lvCls}">
+        <div class="se-exc-row">
+          <input type="checkbox" class="se-exc-chk" ${x.booked ? 'checked' : ''} onchange="seUpdateExc('${p.id}','${x.id}','booked',this)" title="Booked / confirmed">
+          <input type="text" class="se-exc-name${x.booked ? ' done' : ''}" value="${seEsc(x.name || '')}" placeholder="Excursion or plan" autocomplete="off" onchange="seUpdateExc('${p.id}','${x.id}','name',this)">
+          <select class="se-exc-prov" onchange="seUpdateExc('${p.id}','${x.id}','provider',this)" title="Operator">${provOpts}</select>
+          <input type="time" class="se-exc-time" value="${x.start || ''}" title="Start" onchange="seUpdateExc('${p.id}','${x.id}','start',this)">
+          <input type="time" class="se-exc-time" value="${x.end || ''}" title="Back on board / end" onchange="seUpdateExc('${p.id}','${x.id}','end',this)">
+          <input type="number" class="se-exc-cost" value="${x.cost || ''}" placeholder="Cost" min="0" step="any" title="Cost per person or total" onchange="seUpdateExc('${p.id}','${x.id}','cost',this)">
+          <button class="se-exc-del" onclick="seDeleteExc('${p.id}','${x.id}')" title="Remove" aria-label="Remove excursion">✕</button>
+        </div>
+        ${flags}
+      </div>`;
+    }).join('');
+
+    const excBlock = (p.excursions || []).length ? excRows : `<div class="se-exc-empty">No excursions logged for this port yet.</div>`;
+
+    const spendCls = a.cost > 0 ? (spent > a.cost ? 'over' : 'under') : '';
+    const spendNote = a.cost > 0
+      ? (spent > a.cost ? `${seMoney(spent - a.cost)} over plan` : `${seMoney(a.cost - spent)} under plan`)
+      : '';
+    const totalsLine = `Planned <span class="amt">${seMoney(a.cost)}</span><span class="sep">·</span>Spent <span class="amt ${spendCls}">${seMoney(spent)}</span>${spendNote ? `<span class="sep">·</span>${spendNote}` : ''}`;
+
+    return `<div class="se-port-card${a.status === 'crit' ? ' has-crit' : ''}" data-pid="${p.id}">
+      <div class="se-port-hdr">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <span class="se-port-num">Port ${pIdx + 1}${p.date ? ' · ' + seFmtDate(p.date) : ''}</span>
+          ${badge}
+        </div>
+        <button class="se-port-del" onclick="seDeletePort('${p.id}')">✕ Remove</button>
+      </div>
+      <div class="se-port-fields">
+        <div class="fg span2" style="margin:0"><label>Port of Call</label><input type="text" value="${seEsc(p.name || '')}" placeholder="e.g. Cozumel, Mexico" autocomplete="off" onchange="seUpdatePort('${p.id}','name',this)"></div>
+        <div class="fg" style="margin:0"><label>Date <span class="se-opt">(opt.)</span></label><input type="date" value="${p.date || ''}" onchange="seUpdatePort('${p.id}','date',this)"></div>
+        <div class="fg" style="margin:0"><label>Ship Arrives</label><input type="time" value="${p.arrive || ''}" onchange="seUpdatePort('${p.id}','arrive',this)"></div>
+        <div class="fg" style="margin:0"><label>All Aboard</label><input type="time" value="${p.allAboard || ''}" onchange="seUpdatePort('${p.id}','allAboard',this)"></div>
+      </div>
+      ${aaFlag}
+      <div class="se-exc-hdr">Excursions &amp; Plans</div>
+      <div class="se-exc-list">${excBlock}</div>
+      <button class="btn btn-s" onclick="seAddExc('${p.id}')">+ Add excursion</button>
+      <div class="se-port-foot">
+        <div class="se-port-totals">${totalsLine}</div>
+        <button class="btn btn-s" onclick="cdAddExpenseForDate('${p.date}')"${p.date ? '' : ' disabled title="Set a date for this port to log spend"'}>📊 Log spend for this port</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('se-ports').innerHTML = portsHtml;
+
+  const totalSpent = Object.values(countedDates).reduce((s, v) => s + v, 0);
+  document.getElementById('se-sum-ports').textContent = seData.ports.length;
+  document.getElementById('se-sum-exc').textContent = totalExc;
+  document.getElementById('se-sum-cost').textContent = totalCost > 0 ? seMoney(totalCost) : '—';
+  const spentEl = document.getElementById('se-sum-spent');
+  spentEl.textContent = totalSpent > 0 ? seMoney(totalSpent) : seMoney(0);
+  spentEl.className = 'se-sum-val' + (totalCost > 0 ? (totalSpent > totalCost ? ' bad' : '') : '');
+  const confEl = document.getElementById('se-sum-conflicts');
+  confEl.textContent = totalCrit;
+  confEl.className = 'se-sum-val' + (totalCrit > 0 ? ' bad' : (totalExc > 0 ? ' good' : ''));
+}
+
+/* ── Print port sheets ── */
+function sePrint() {
+  if (!seData.ports.length) { window.print(); return; }
+  const spentMap = seSpentByDate();
+  const title = seData.cruiseName || 'Shore Excursion Plan';
+  let html = `<h2 style="font-family:var(--serif);margin:0 0 12px">${seEsc(title)}</h2>`;
+  seData.ports.forEach((p, i) => {
+    const a = sePortAnalysis(p);
+    const times = [];
+    if (p.arrive)    times.push('Arrives ' + p.arrive);
+    if (p.allAboard) times.push('All aboard ' + p.allAboard);
+    const spent = p.date ? (spentMap[p.date] || 0) : 0;
+    html += `<div class="se-print-port">
+      <h3>Port ${i + 1} — ${p.name ? seEsc(p.name) : 'Port of Call'}${p.date ? ' · ' + seFmtDate(p.date) : ''}</h3>
+      <div class="meta">${times.join('  ·  ')}${times.length && a.cost ? '  ·  ' : ''}${a.cost ? 'Planned ' + seMoney(a.cost) : ''}${(times.length || a.cost) && spent ? '  ·  ' : ''}${spent ? 'Spent ' + seMoney(spent) : ''}</div>
+      ${a.named.length ? '<ul>' + a.rows.filter(r => (r.exc.name || '').trim() || r.exc.start || r.exc.end || r.exc.cost).map(r => {
+        const x = r.exc;
+        const t = [x.start, x.end].filter(Boolean).join('–');
+        const warn = r.level === 'crit' ? ' ⛔ RISK: ends after all-aboard' : '';
+        return `<li>${x.booked ? '☑' : '☐'} ${seEsc(x.name || 'Untitled')} (${SE_PROVIDERS[x.provider] ? SE_PROVIDERS[x.provider].label : 'Ship'})${t ? ' — ' + t : ''}${x.cost ? ' — ' + seMoney(parseFloat(x.cost) || 0) : ''}<span class="warn">${warn}</span></li>`;
+      }).join('') + '</ul>' : '<div class="meta">No excursions planned.</div>'}
+    </div>`;
+  });
+  document.getElementById('se-print-area').innerHTML = html;
   window.print();
 }
 
