@@ -2434,16 +2434,137 @@ body.no-scroll { overflow: hidden; }
     </div>
   </div>
 </div>
-<div id="view-placeholder-bucket-list" class="view">
-  <nav class="tool-topbar">
+<div id="view-bucket-list" class="view">
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="window.print()">🖨 Print</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">⭐</span>
-    <h2>Bucket List Builder</h2>
-    <p style="margin-bottom:24px">Create, organize & check off your dream travel destinations. Printable.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-bucket-list"></div>
+  <div class="print-header" id="bl-print-hdr">TripTools · Bucket List &nbsp;·&nbsp; Printed <span id="bl-print-date"></span></div>
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>Bucket List Builder</h1>
+    <p class="tool-sub">Collect every place you dream of going. Add notes and a target year, then check them off as you travel — saved automatically.</p>
+  </div>
+  <div class="tool-body">
+
+    <!-- Add / edit form -->
+    <div class="bl-form" id="bl-form">
+      <div class="bl-form-hdr">
+        <span class="bl-form-title" id="bl-form-title">Add a destination</span>
+        <button class="btn-ghost" id="bl-cancel-btn" onclick="blCancelEdit()" style="display:none">✕ Cancel edit</button>
+      </div>
+      <div class="fg">
+        <label for="bl-dest">Destination</label>
+        <input type="text" id="bl-dest" placeholder="e.g. Kyoto, Japan" maxlength="80" autocomplete="off" onkeydown="if(event.key==='Enter')blSubmit()">
+      </div>
+      <div class="bl-form-grid">
+        <div class="fg">
+          <label for="bl-region">Region</label>
+          <select id="bl-region">
+            <option value="">— Unspecified —</option>
+            <option value="africa">🌍 Africa</option>
+            <option value="asia">🌏 Asia</option>
+            <option value="europe">🏰 Europe</option>
+            <option value="middle-east">🕌 Middle East</option>
+            <option value="n-america">🗽 North America</option>
+            <option value="s-america">🌴 South &amp; Central America</option>
+            <option value="oceania">🏝 Oceania</option>
+            <option value="antarctica">🐧 Antarctica &amp; Polar</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label for="bl-year">Target year <span class="bl-opt">optional</span></label>
+          <input type="number" id="bl-year" placeholder="Someday" min="2026" max="2100" onkeydown="if(event.key==='Enter')blSubmit()">
+        </div>
+      </div>
+      <div class="fg">
+        <label>Priority</label>
+        <div class="chip-grp" id="bl-priority">
+          <span class="chip on" data-v="dream"   onclick="blSetChip(this,'bl-priority')">⭐ Dream</span>
+          <span class="chip"    data-v="high"    onclick="blSetChip(this,'bl-priority')">🔥 High</span>
+          <span class="chip"    data-v="someday" onclick="blSetChip(this,'bl-priority')">🌙 Someday</span>
+        </div>
+      </div>
+      <div class="fg">
+        <label>Trip vibe</label>
+        <div class="chip-grp" id="bl-vibe">
+          <span class="chip on" data-v="any"       onclick="blSetChip(this,'bl-vibe')">✨ Any</span>
+          <span class="chip"    data-v="beach"     onclick="blSetChip(this,'bl-vibe')">🏖 Beach</span>
+          <span class="chip"    data-v="city"      onclick="blSetChip(this,'bl-vibe')">🏙 City</span>
+          <span class="chip"    data-v="adventure" onclick="blSetChip(this,'bl-vibe')">⛰ Adventure</span>
+          <span class="chip"    data-v="nature"    onclick="blSetChip(this,'bl-vibe')">🌲 Nature</span>
+          <span class="chip"    data-v="culture"   onclick="blSetChip(this,'bl-vibe')">🏛 Culture</span>
+          <span class="chip"    data-v="food"      onclick="blSetChip(this,'bl-vibe')">🍜 Food</span>
+          <span class="chip"    data-v="wildlife"  onclick="blSetChip(this,'bl-vibe')">🦁 Wildlife</span>
+          <span class="chip"    data-v="romance"   onclick="blSetChip(this,'bl-vibe')">💕 Romance</span>
+          <span class="chip"    data-v="family"    onclick="blSetChip(this,'bl-vibe')">👨‍👩‍👧 Family</span>
+        </div>
+      </div>
+      <div class="fg" style="margin-bottom:4px">
+        <label for="bl-notes">Notes <span class="bl-opt">optional</span></label>
+        <textarea id="bl-notes" rows="2" maxlength="400" placeholder="Why this place? Things to see, best season, who to go with…"></textarea>
+      </div>
+      <div class="bl-form-actions">
+        <button class="btn btn-p" id="bl-submit-btn" onclick="blSubmit()">+ Add to bucket list</button>
+        <button class="btn btn-s btn-sm" id="bl-quick-btn" onclick="blQuickAddTrip()" style="display:none"></button>
+      </div>
+    </div>
+
+    <!-- Progress -->
+    <div class="prog-wrap" id="bl-prog-wrap" style="display:none">
+      <div class="prog-lbl" id="bl-prog-lbl">0 of 0 visited</div>
+      <div class="prog-bar"><div class="prog-fill" id="bl-prog-fill" style="width:0%"></div></div>
+    </div>
+
+    <!-- Controls -->
+    <div class="bl-controls" id="bl-controls" style="display:none">
+      <div class="bl-filter-chips" id="bl-filter">
+        <span class="chip on" data-v="all"     onclick="blSetFilter(this)">All</span>
+        <span class="chip"    data-v="todo"    onclick="blSetFilter(this)">To Visit</span>
+        <span class="chip"    data-v="visited" onclick="blSetFilter(this)">Visited</span>
+      </div>
+      <div class="bl-sort-wrap">
+        <label for="bl-sort">Sort</label>
+        <select id="bl-sort" onchange="blSetSort(this.value)">
+          <option value="added">Recently added</option>
+          <option value="year">Target year</option>
+          <option value="name">A → Z</option>
+          <option value="priority">Priority</option>
+          <option value="status">Status</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- List -->
+    <div id="bl-list"></div>
+
+    <!-- Empty state -->
+    <div class="bl-empty" id="bl-empty" style="display:none">
+      <span class="em">⭐</span>
+      <h3>Your bucket list is empty</h3>
+      <p>Add your first dream destination above. Big or small, near or far — every great trip starts as a someday.</p>
+    </div>
+
+    <!-- Bulk actions -->
+    <div class="bl-bulk" id="bl-bulk" style="display:none">
+      <button class="btn-ghost" onclick="blClearVisited()">🧹 Clear visited</button>
+      <button class="btn-ghost" onclick="blClearAll()" style="margin-left:auto;color:var(--accent)">↺ Clear all</button>
+    </div>
+
+  </div><!-- /tool-body -->
+
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    Give each dream a target year — even a rough one. Turning "someday" into "2027" is the single biggest predictor of a trip actually happening. Sort by year to see what's coming up next.
+  </div>
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('dest-picker')">🌐 Destination Picker</button>
+      <button class="rel-btn" onclick="openTool('best-time')">📅 Best Time to Visit</button>
+      <button class="rel-btn" onclick="openTool('dest-compare')">⚖️ Destination Comparison</button>
+      <button class="rel-btn" onclick="openTool('itinerary')">📋 Itinerary Builder</button>
     </div>
   </div>
 </div>
@@ -9923,6 +10044,71 @@ input:checked + .pb-toggle-box::after { transform:translateX(16px);background:#f
   </div>
 </div>
 
+<style>
+/* ══════════════════════════════════════════════════════
+   BUCKET LIST BUILDER  (id: bucket-list)
+   ══════════════════════════════════════════════════════ */
+.bl-form { background:var(--paper-2); border:1.5px solid var(--ink); border-radius:var(--r); padding:18px 18px 16px; margin-bottom:22px; }
+.bl-form-hdr { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:14px; }
+.bl-form-title { font-family:var(--mono); font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); }
+.bl-form .fg { margin-bottom:14px; }
+.bl-form-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+@media(max-width:520px){ .bl-form-grid { grid-template-columns:1fr; } }
+.bl-opt { font-family:var(--mono); font-weight:400; text-transform:none; letter-spacing:.04em; color:var(--muted); font-size:10px; }
+.bl-form-actions { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:6px; }
+
+.bl-controls { display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; margin:6px 0 16px; }
+.bl-filter-chips { display:flex; gap:6px; flex-wrap:wrap; }
+.bl-sort-wrap { display:flex; align-items:center; gap:8px; }
+.bl-sort-wrap label { font-family:var(--mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); }
+.bl-sort-wrap select { background:var(--paper-2); border:1.5px solid var(--ink); color:var(--ink); font-family:var(--sans); font-size:13px; padding:7px 10px; border-radius:var(--r); min-height:36px; cursor:pointer; appearance:none; }
+
+#bl-list { display:flex; flex-direction:column; gap:10px; }
+.bl-card { display:flex; gap:12px; align-items:flex-start; background:var(--paper); border:1.5px solid var(--ink); border-radius:var(--r); padding:13px 14px; transition:background .15s; }
+.bl-card.done { background:var(--paper-2); }
+.bl-card.done .bl-dest-name { text-decoration:line-through; opacity:.55; }
+.bl-card.done .bl-notes-txt, .bl-card.done .bl-meta { opacity:.6; }
+.bl-check { cursor:pointer; padding-top:2px; flex-shrink:0; }
+.bl-check .box { width:21px; height:21px; border:1.5px solid var(--ink); border-radius:3px; background:var(--paper); display:flex; align-items:center; justify-content:center; transition:background .12s, border-color .12s; }
+.bl-card.done .bl-check .box { background:var(--green); border-color:var(--green); }
+.bl-card.done .bl-check .box::after { content:'\2713'; color:#fff; font-size:13px; font-weight:700; }
+.bl-card-main { flex:1; min-width:0; }
+.bl-card-top { display:flex; align-items:baseline; gap:9px; flex-wrap:wrap; }
+.bl-dest-name { font-family:var(--serif); font-weight:600; font-size:18px; letter-spacing:-.01em; color:var(--ink); word-break:break-word; }
+.bl-pri { font-family:var(--mono); font-size:9px; letter-spacing:.1em; text-transform:uppercase; padding:2px 7px; border-radius:2px; white-space:nowrap; }
+.bl-pri-dream { background:rgba(255,77,46,.12); color:var(--accent); border:1px solid var(--accent); }
+.bl-pri-high { background:rgba(230,81,0,.1); color:var(--orange); border:1px solid var(--orange); }
+.bl-pri-someday { background:var(--paper-2); color:var(--muted); border:1px solid var(--rule); }
+.bl-meta { display:flex; gap:6px; flex-wrap:wrap; margin-top:7px; }
+.bl-tag { font-family:var(--mono); font-size:10px; letter-spacing:.05em; color:var(--ink-2); background:var(--paper-2); border:1px solid var(--rule); border-radius:2px; padding:3px 7px; }
+.bl-card.done .bl-tag { background:transparent; }
+.bl-notes-txt { font-size:13.5px; line-height:1.5; color:var(--ink-2); margin-top:8px; white-space:pre-wrap; word-break:break-word; }
+.bl-card-actions { display:flex; flex-direction:column; gap:4px; flex-shrink:0; }
+.bl-icon-btn { background:none; border:1px solid var(--rule); border-radius:3px; cursor:pointer; color:var(--muted); font-size:13px; width:30px; height:30px; display:flex; align-items:center; justify-content:center; transition:color .12s, border-color .12s, background .12s; }
+.bl-icon-btn:hover { color:var(--ink); border-color:var(--ink); background:var(--paper-2); }
+
+.bl-empty { text-align:center; padding:34px 20px; }
+.bl-empty .em { font-size:40px; display:block; margin-bottom:10px; }
+.bl-empty h3 { font-family:var(--serif); font-weight:600; font-size:21px; margin:0 0 8px; }
+.bl-empty p { color:var(--muted); margin:0 auto; max-width:430px; font-size:14px; line-height:1.5; }
+.bl-filter-empty { text-align:center; padding:24px; color:var(--muted); font-style:italic; font-family:var(--serif); font-size:14px; }
+.bl-bulk { display:flex; gap:6px; align-items:center; flex-wrap:wrap; margin-top:16px; padding-top:14px; border-top:1px dashed var(--rule); }
+.bl-print-status { display:none; }
+
+@media print {
+  #view-bucket-list .tool-bar, #view-bucket-list .ctx-banner, #view-bucket-list .pro-tip,
+  #view-bucket-list .related, #view-bucket-list .bl-form, #view-bucket-list .bl-controls,
+  #view-bucket-list .bl-bulk, #view-bucket-list .bl-check, #view-bucket-list .bl-card-actions { display:none !important; }
+  #view-bucket-list .print-header { display:block !important; }
+  #view-bucket-list .bl-print-status { display:inline; font-family:var(--mono); font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:#333; border:1px solid #333; border-radius:2px; padding:2px 6px; }
+  body { background:#fff !important; background-image:none !important; }
+  .bl-card { border:1px solid #999 !important; background:#fff !important; page-break-inside:avoid; }
+  .bl-card.done .bl-dest-name { text-decoration:line-through; }
+  .prog-fill { background:#333 !important; }
+  .prog-bar { background:#ddd !important; }
+}
+</style>
+
 <script>
 'use strict';
 
@@ -9932,7 +10118,7 @@ const TOOLS = [
   {id:'dest-compare',  nm:'Destination Comparison',     ico:'⚖️', ph:'discovery', on:false, live:true,  ds:'Side-by-side comparison of 2–3 destinations across 10 dimensions.'},
   {id:'best-time',     nm:'Best Time to Visit',         ico:'📅', ph:'discovery', on:false, live:true,  ds:'Month-by-month weather, crowd & cost heat map for 100+ destinations.'},
   {id:'travel-quiz',   nm:'Travel Style Quiz',          ico:'🧠', ph:'discovery', on:false, live:true,  ds:'10-question quiz to discover your travel personality.'},
-  {id:'bucket-list',   nm:'Bucket List Builder',        ico:'⭐', ph:'discovery', on:false, live:false, ds:'Create, organize & check off dream destinations. Printable.'},
+  {id:'bucket-list',   nm:'Bucket List Builder',        ico:'⭐', ph:'discovery', on:false, live:true,  ds:'Create, organize & check off dream destinations. Printable.'},
   {id:'trip-duration', nm:'Trip Duration Calculator',   ico:'🗓', ph:'discovery', on:false, live:false, ds:'How many days do you really need? Accounts for jet lag & transit.'},
   {id:'budget-plan',   nm:'Travel Budget Planner',      ico:'💰', ph:'discovery', on:false, live:true,  ds:'Full trip budget builder: flights, hotels, food & activities. Pie chart.'},
   {id:'group-trip',    nm:'Group Trip Organizer',       ico:'👥', ph:'discovery', on:false, live:true,  ds:'Headcounts, preferences & destination voting for groups.'},
@@ -10638,6 +10824,7 @@ function injectTripCtx(id) {
     }
   } else if(ctx){ ctx.classList.remove('show'); }
   if(id==='doc-checklist') dcInit();
+  if(id==='bucket-list') blInit();
   if(id==='dest-picker') dpInit();
   if(id==='dest-compare') cmpInit();
   if(id==='best-time')   btInit();
@@ -13333,6 +13520,276 @@ function dcSlug(s) { return s.toLowerCase().replace(/[^a-z0-9]/g, '-'); }
 function dcSetPrintDate() {
   const el = document.getElementById('dc-print-date');
   if (el) el.textContent = new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+}
+
+/* ══════════════════════════════════════════════════════
+   BUCKET LIST BUILDER  (id: bucket-list)
+   ══════════════════════════════════════════════════════ */
+const BL_REGIONS = {
+  'africa':'🌍 Africa', 'asia':'🌏 Asia', 'europe':'🏰 Europe',
+  'middle-east':'🕌 Middle East', 'n-america':'🗽 N. America',
+  's-america':'🌴 S. & C. America', 'oceania':'🏝 Oceania', 'antarctica':'🐧 Polar'
+};
+const BL_VIBES = {
+  'beach':'🏖 Beach', 'city':'🏙 City', 'adventure':'⛰ Adventure', 'nature':'🌲 Nature',
+  'culture':'🏛 Culture', 'food':'🍜 Food', 'wildlife':'🦁 Wildlife', 'romance':'💕 Romance', 'family':'👨‍👩‍👧 Family'
+};
+const BL_PRI = { 'dream':'⭐ Dream', 'high':'🔥 High', 'someday':'🌙 Someday' };
+const BL_PRI_RANK = { 'dream':0, 'high':1, 'someday':2 };
+
+let blState = { items: [], sort: 'added', filter: 'all' };
+let blEditId = null;
+
+function blLoad() {
+  try {
+    const s = JSON.parse(localStorage.getItem('tt_bucket_list'));
+    if (s && Array.isArray(s.items)) {
+      blState.items  = s.items;
+      blState.sort   = s.sort   || 'added';
+      blState.filter = s.filter || 'all';
+    }
+  } catch(e) { blState = { items: [], sort: 'added', filter: 'all' }; }
+}
+function blSave() { localStorage.setItem('tt_bucket_list', JSON.stringify(blState)); }
+
+function blInit() {
+  blLoad();
+  const ss = document.getElementById('bl-sort');
+  if (ss) ss.value = blState.sort;
+  blSyncChip('bl-filter', blState.filter);
+  blResetForm();
+  blSyncQuickBtn();
+  blSetPrintDate();
+  blRender();
+}
+
+function blSyncQuickBtn() {
+  const btn = document.getElementById('bl-quick-btn');
+  if (!btn) return;
+  const trip = getActiveTrip();
+  if (trip && trip.destination && trip.destination.trim()) {
+    btn.style.display = 'inline-flex';
+    btn.textContent = '✈ Add “' + trip.destination.trim() + '”';
+  } else {
+    btn.style.display = 'none';
+  }
+}
+
+/* ── CHIP HELPERS ── */
+function blSetChip(el, grp) {
+  document.querySelectorAll('#' + grp + ' .chip').forEach(c => c.classList.remove('on'));
+  el.classList.add('on');
+}
+function blSyncChip(grp, val) {
+  document.querySelectorAll('#' + grp + ' .chip').forEach(c => c.classList.toggle('on', c.dataset.v === val));
+}
+function blChipVal(grp) {
+  const el = document.querySelector('#' + grp + ' .chip.on');
+  return el ? el.dataset.v : '';
+}
+
+/* ── ADD / EDIT ── */
+function blSubmit() {
+  const destEl = document.getElementById('bl-dest');
+  const dest = destEl.value.trim();
+  if (!dest) { destEl.focus(); return; }
+  const fields = {
+    dest,
+    region:   document.getElementById('bl-region').value,
+    year:     document.getElementById('bl-year').value.trim(),
+    priority: blChipVal('bl-priority') || 'dream',
+    vibe:     blChipVal('bl-vibe') || 'any',
+    notes:    document.getElementById('bl-notes').value.trim()
+  };
+  if (blEditId) {
+    const it = blState.items.find(i => i.id === blEditId);
+    if (it) Object.assign(it, fields);
+  } else {
+    blState.items.unshift(Object.assign({
+      id: 'b' + Date.now() + Math.floor(Math.random() * 1000),
+      done: false,
+      created: Date.now()
+    }, fields));
+  }
+  blSave();
+  blResetForm();
+  blRender();
+}
+
+function blEdit(id) {
+  const it = blState.items.find(i => i.id === id);
+  if (!it) return;
+  blEditId = id;
+  document.getElementById('bl-dest').value   = it.dest || '';
+  document.getElementById('bl-region').value = it.region || '';
+  document.getElementById('bl-year').value   = it.year || '';
+  document.getElementById('bl-notes').value  = it.notes || '';
+  blSyncChip('bl-priority', it.priority || 'dream');
+  blSyncChip('bl-vibe', it.vibe || 'any');
+  document.getElementById('bl-form-title').textContent = 'Edit destination';
+  document.getElementById('bl-submit-btn').textContent = '✓ Save changes';
+  document.getElementById('bl-cancel-btn').style.display = 'inline-flex';
+  document.getElementById('bl-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.getElementById('bl-dest').focus();
+}
+
+function blResetForm() {
+  document.getElementById('bl-dest').value   = '';
+  document.getElementById('bl-region').value = '';
+  document.getElementById('bl-year').value   = '';
+  document.getElementById('bl-notes').value  = '';
+  blSyncChip('bl-priority', 'dream');
+  blSyncChip('bl-vibe', 'any');
+  document.getElementById('bl-form-title').textContent = 'Add a destination';
+  document.getElementById('bl-submit-btn').textContent = '+ Add to bucket list';
+  document.getElementById('bl-cancel-btn').style.display = 'none';
+  blEditId = null;
+}
+function blCancelEdit() { blResetForm(); }
+
+function blDelete(id) {
+  const it = blState.items.find(i => i.id === id);
+  if (!it) return;
+  if (!confirm('Remove “' + it.dest + '” from your bucket list?')) return;
+  blState.items = blState.items.filter(i => i.id !== id);
+  if (blEditId === id) blResetForm();
+  blSave();
+  blRender();
+}
+
+function blToggle(id) {
+  const it = blState.items.find(i => i.id === id);
+  if (!it) return;
+  it.done = !it.done;
+  blSave();
+  blRender();
+}
+
+/* ── QUICK ADD FROM ACTIVE TRIP ── */
+function blQuickAddTrip() {
+  const trip = getActiveTrip();
+  if (!trip || !trip.destination) return;
+  const dest = trip.destination.trim();
+  if (!dest) return;
+  if (blState.items.some(i => i.dest.toLowerCase() === dest.toLowerCase())) {
+    alert('“' + dest + '” is already on your bucket list.');
+    return;
+  }
+  let year = '';
+  if (trip.departDate) {
+    const y = new Date(trip.departDate).getFullYear();
+    if (y && !isNaN(y)) year = String(y);
+  }
+  blState.items.unshift({
+    id: 'b' + Date.now() + Math.floor(Math.random() * 1000),
+    dest, region: '', year, priority: 'dream', vibe: 'any',
+    notes: '', done: false, created: Date.now()
+  });
+  blSave();
+  blRender();
+}
+
+/* ── CONTROLS ── */
+function blSetFilter(el) {
+  document.querySelectorAll('#bl-filter .chip').forEach(c => c.classList.remove('on'));
+  el.classList.add('on');
+  blState.filter = el.dataset.v;
+  blSave();
+  blRender();
+}
+function blSetSort(v) {
+  blState.sort = v;
+  blSave();
+  blRender();
+}
+
+/* ── BULK ── */
+function blClearVisited() {
+  if (!blState.items.some(i => i.done)) return;
+  if (!confirm('Remove all visited destinations from the list?')) return;
+  blState.items = blState.items.filter(i => !i.done);
+  blSave();
+  blRender();
+}
+function blClearAll() {
+  if (!blState.items.length) return;
+  if (!confirm('Clear your entire bucket list? This cannot be undone.')) return;
+  blState.items = [];
+  blResetForm();
+  blSave();
+  blRender();
+}
+
+/* ── SORT / RENDER ── */
+function blSorted(items) {
+  const arr = items.slice();
+  const byName = (a, b) => a.dest.toLowerCase().localeCompare(b.dest.toLowerCase());
+  switch (blState.sort) {
+    case 'name': arr.sort(byName); break;
+    case 'year': arr.sort((a, b) => {
+      const ay = a.year ? +a.year : Infinity, by = b.year ? +b.year : Infinity;
+      return ay - by || byName(a, b);
+    }); break;
+    case 'priority': arr.sort((a, b) =>
+      (BL_PRI_RANK[a.priority] ?? 9) - (BL_PRI_RANK[b.priority] ?? 9) || byName(a, b)); break;
+    case 'status': arr.sort((a, b) =>
+      (a.done ? 1 : 0) - (b.done ? 1 : 0) || (b.created || 0) - (a.created || 0)); break;
+    default: arr.sort((a, b) => (b.created || 0) - (a.created || 0)); // added
+  }
+  return arr;
+}
+
+function blCard(it) {
+  let tags = '';
+  if (it.region && BL_REGIONS[it.region]) tags += `<span class="bl-tag">${BL_REGIONS[it.region]}</span>`;
+  tags += `<span class="bl-tag">🗓 ${it.year ? escapeHtml(it.year) : 'Someday'}</span>`;
+  if (it.vibe && it.vibe !== 'any' && BL_VIBES[it.vibe]) tags += `<span class="bl-tag">${BL_VIBES[it.vibe]}</span>`;
+  const notes = it.notes ? `<div class="bl-notes-txt">${escapeHtml(it.notes)}</div>` : '';
+  const pri = BL_PRI[it.priority] || BL_PRI.dream;
+  const pstatus = it.done ? `<span class="bl-print-status">✓ Visited</span>` : '';
+  return `<div class="bl-card${it.done ? ' done' : ''}" data-id="${it.id}">
+    <div class="bl-check" onclick="blToggle('${it.id}')" role="checkbox" aria-checked="${it.done}" tabindex="0" onkeydown="if(event.key===' '||event.key==='Enter'){event.preventDefault();blToggle('${it.id}')}"><span class="box"></span></div>
+    <div class="bl-card-main">
+      <div class="bl-card-top"><span class="bl-dest-name">${escapeHtml(it.dest)}</span><span class="bl-pri bl-pri-${it.priority}">${pri}</span>${pstatus}</div>
+      <div class="bl-meta">${tags}</div>
+      ${notes}
+    </div>
+    <div class="bl-card-actions">
+      <button class="bl-icon-btn" onclick="blEdit('${it.id}')" title="Edit">✎</button>
+      <button class="bl-icon-btn" onclick="openTool('itinerary')" title="Plan this trip">🧭</button>
+      <button class="bl-icon-btn" onclick="blDelete('${it.id}')" title="Remove">✕</button>
+    </div>
+  </div>`;
+}
+
+function blRender() {
+  const total = blState.items.length;
+  const visited = blState.items.filter(i => i.done).length;
+  document.getElementById('bl-prog-wrap').style.display = total ? 'block' : 'none';
+  document.getElementById('bl-controls').style.display  = total ? 'flex'  : 'none';
+  document.getElementById('bl-bulk').style.display      = total ? 'flex'  : 'none';
+  document.getElementById('bl-empty').style.display     = total ? 'none'  : 'block';
+  if (total) {
+    const pct = Math.round(visited / total * 100);
+    document.getElementById('bl-prog-lbl').textContent =
+      `${visited} of ${total} visited · ${total - visited} to go`;
+    document.getElementById('bl-prog-fill').style.width = pct + '%';
+  }
+  let shown = blState.items;
+  if (blState.filter === 'todo') shown = shown.filter(i => !i.done);
+  else if (blState.filter === 'visited') shown = shown.filter(i => i.done);
+  shown = blSorted(shown);
+  const list = document.getElementById('bl-list');
+  if (total && !shown.length) {
+    list.innerHTML = `<div class="bl-filter-empty">No destinations in this view.</div>`;
+  } else {
+    list.innerHTML = shown.map(blCard).join('');
+  }
+}
+
+function blSetPrintDate() {
+  const el = document.getElementById('bl-print-date');
+  if (el) el.textContent = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 }
 
 /* ══════════════════════════════════════════════════════
