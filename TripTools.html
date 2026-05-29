@@ -7714,19 +7714,175 @@ input:checked + .pb-toggle-box::after { transform:translateX(16px);background:#f
     </div>
   </div>
 </div>
-<div id="view-placeholder-cruise-day" class="view">
-  <nav class="tool-topbar">
+<div id="view-cruise-day" class="view">
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="cdPrint()">🖨 Print Day Sheets</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">📆</span>
-    <h2>Cruise Day Planner</h2>
-    <p style="margin-bottom:24px">Visual calendar for cruise itinerary. Sea day vs. port day modes.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-cruise-day"></div>
+
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>Cruise Day Planner</h1>
+    <p class="tool-sub">Map your sailing day by day. Flag each day as embarkation, a day at sea, a port call, or disembarkation — then track shore excursions, all-aboard times, budgets, and actual spending pulled from your Expense Tracker.</p>
+  </div>
+
+  <div class="tool-body">
+
+    <!-- CRUISE SETUP -->
+    <div class="cd-setup">
+      <div class="cd-setup-hdr"><span class="cd-setup-title">§ Cruise Setup</span></div>
+      <div class="cd-setup-body">
+        <div class="fg" style="margin:0">
+          <label>Cruise / Ship Name</label>
+          <input type="text" id="cd-cruise-name" placeholder="e.g. Caribbean on Symphony" oninput="cdSaveMeta()" autocomplete="off">
+        </div>
+        <div class="fg" style="margin:0">
+          <label>Cruise Line <span class="cd-opt">(optional)</span></label>
+          <input type="text" id="cd-cruise-line" placeholder="e.g. Royal Caribbean" oninput="cdSaveMeta()" autocomplete="off">
+        </div>
+        <div class="fg" style="margin:0">
+          <label>Embarkation Date</label>
+          <input type="date" id="cd-start-date" onchange="cdOnDateChange()">
+        </div>
+        <div class="fg" style="margin:0">
+          <label>Disembarkation Date</label>
+          <input type="date" id="cd-end-date" onchange="cdOnDateChange()">
+        </div>
+      </div>
+    </div>
+
+    <!-- SUMMARY BAR -->
+    <div class="cd-summary-bar" id="cd-summary-bar" style="display:none">
+      <div class="cd-sum-stat"><span class="cd-sum-lbl">Nights</span><span class="cd-sum-val" id="cd-sum-nights">—</span></div>
+      <div class="cd-sum-stat"><span class="cd-sum-lbl">🌊 Sea Days</span><span class="cd-sum-val" id="cd-sum-sea">—</span></div>
+      <div class="cd-sum-stat"><span class="cd-sum-lbl">⚓ Port Days</span><span class="cd-sum-val" id="cd-sum-port">—</span></div>
+      <div class="cd-sum-stat"><span class="cd-sum-lbl">Planned Budget</span><span class="cd-sum-val" id="cd-sum-budget">—</span></div>
+      <div class="cd-sum-stat"><span class="cd-sum-lbl">Spent (Tracker)</span><span class="cd-sum-val" id="cd-sum-spent">—</span></div>
+    </div>
+
+    <!-- VISUAL CALENDAR STRIP -->
+    <div class="cd-cal-label" id="cd-cal-label" style="display:none">§ Itinerary — tap a day to edit</div>
+    <div class="cd-cal-strip" id="cd-cal-strip"></div>
+
+    <!-- DAY DETAIL EDITOR -->
+    <div id="cd-detail"></div>
+
+    <!-- Empty state -->
+    <div class="cd-empty" id="cd-empty-state">
+      <span>🚢</span>
+      Set your embarkation &amp; disembarkation dates above to generate your sailing calendar.
+    </div>
+
+  </div><!-- /tool-body -->
+
+  <!-- PRINT-ONLY DAY SHEETS (built by cdPrint) -->
+  <div id="cd-print-area" class="cd-print-area"></div>
+
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    Always note the <em>all-aboard</em> time for every port — it's typically 30–60 minutes before the ship's posted departure, and the ship will not wait. If you book an independent (non-ship) excursion, leave a generous buffer; only ship-sponsored tours guarantee the vessel waits for you.
+  </div>
+
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('expense-track')">📊 Daily Expense Tracker</button>
+      <button class="rel-btn" onclick="openTool('cruise-grat')">🚢 Cruise Gratuity Calculator</button>
+      <button class="rel-btn" onclick="openTool('cruise-compare')">🔍 Cruise Line Comparison</button>
+      <button class="rel-btn" onclick="openTool('itinerary')">📋 Itinerary Builder</button>
     </div>
   </div>
 </div>
+<style>
+/* ══ CRUISE DAY PLANNER (id: cruise-day) ══════════════════ */
+.cd-opt { font-weight:400; text-transform:none; letter-spacing:0; color:var(--muted); }
+.cd-setup { background:var(--paper-2); border:1.5px solid var(--ink); border-radius:var(--r); padding:16px; margin-bottom:16px; }
+.cd-setup-hdr { margin-bottom:12px; }
+.cd-setup-title { font-family:var(--mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); }
+.cd-setup-body { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+@media(max-width:520px){ .cd-setup-body { grid-template-columns:1fr; } }
+
+.cd-summary-bar { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; background:var(--ink); border-radius:var(--r); padding:14px 12px; margin-bottom:18px; }
+@media(max-width:680px){ .cd-summary-bar { grid-template-columns:repeat(2,1fr); } }
+.cd-sum-stat { text-align:center; }
+.cd-sum-lbl { display:block; font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--paper-2); opacity:.75; margin-bottom:4px; }
+.cd-sum-val { display:block; font-family:var(--serif); font-weight:600; font-size:22px; color:var(--paper); line-height:1; }
+
+.cd-cal-label { font-family:var(--mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-bottom:10px; }
+.cd-cal-strip { display:flex; gap:10px; overflow-x:auto; padding-bottom:10px; margin-bottom:8px; }
+.cd-cal-card {
+  flex:0 0 auto; width:118px; border:2px solid var(--ink); border-radius:var(--r); background:var(--paper);
+  cursor:pointer; overflow:hidden; transition:transform .08s ease; text-align:left; padding:0;
+}
+.cd-cal-card:hover { transform:translateY(-2px); }
+.cd-cal-card.active { box-shadow:0 0 0 3px var(--ink); }
+.cd-cal-top { padding:6px 9px; color:#fff; }
+.cd-cal-dayno { font-family:var(--mono); font-size:10px; letter-spacing:.08em; text-transform:uppercase; opacity:.9; }
+.cd-cal-date { font-family:var(--serif); font-weight:600; font-size:15px; line-height:1.1; }
+.cd-cal-body { padding:7px 9px 9px; }
+.cd-cal-type { font-size:11px; font-weight:600; display:flex; align-items:center; gap:4px; }
+.cd-cal-port { font-size:12px; color:var(--ink-2); margin-top:3px; min-height:15px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.cd-cal-spend { font-family:var(--mono); font-size:10px; color:var(--muted); margin-top:5px; }
+
+.cd-detail-card { border:1.5px solid var(--ink); border-radius:var(--r); background:var(--paper); padding:18px; margin-bottom:24px; }
+.cd-detail-hdr { display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin-bottom:14px; flex-wrap:wrap; }
+.cd-detail-title { font-family:var(--serif); font-weight:600; font-size:22px; }
+.cd-detail-sub { font-family:var(--mono); font-size:11px; color:var(--muted); letter-spacing:.04em; }
+.cd-type-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px; }
+.cd-type-btn { font-family:var(--mono); font-size:12px; letter-spacing:.04em; padding:8px 12px; border:1.5px solid var(--ink); border-radius:2px; background:var(--paper); color:var(--ink-2); cursor:pointer; }
+.cd-type-btn:hover { background:var(--paper-2); }
+.cd-type-btn.on { color:#fff; border-color:transparent; }
+.cd-type-btn.on.t-embark { background:var(--green); }
+.cd-type-btn.on.t-sea    { background:var(--blue); }
+.cd-type-btn.on.t-port   { background:var(--orange); }
+.cd-type-btn.on.t-debark { background:var(--purple); }
+
+.cd-times-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+@media(max-width:520px){ .cd-times-grid { grid-template-columns:1fr; } }
+.cd-allaboard-flag { display:flex; align-items:center; gap:8px; background:#FFF3E0; border:1.5px solid var(--orange); border-radius:var(--r); padding:9px 12px; margin:14px 0; font-size:13px; color:#8a4500; }
+
+.cd-budget-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; align-items:end; margin-top:4px; }
+@media(max-width:520px){ .cd-budget-row { grid-template-columns:1fr; } }
+.cd-spend-box { background:var(--paper-2); border:1.5px solid var(--rule); border-radius:var(--r); padding:11px 13px; }
+.cd-spend-box .lbl { font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); display:block; margin-bottom:4px; }
+.cd-spend-box .val { font-family:var(--serif); font-weight:600; font-size:20px; line-height:1; }
+.cd-spend-box .val.over { color:var(--accent); }
+.cd-spend-box .val.under { color:var(--green); }
+
+.cd-exc-wrap { margin-top:18px; }
+.cd-exc-hdr { font-family:var(--mono); font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-bottom:10px; }
+.cd-exc-item { display:flex; align-items:flex-start; gap:10px; border:1.5px solid var(--rule); border-radius:var(--r); padding:10px 12px; margin-bottom:8px; background:var(--paper-2); }
+.cd-exc-check { margin-top:3px; flex:0 0 auto; width:18px; height:18px; accent-color:var(--green); cursor:pointer; }
+.cd-exc-main { flex:1; min-width:0; }
+.cd-exc-name { font-weight:600; font-size:14px; }
+.cd-exc-name.done { text-decoration:line-through; color:var(--muted); }
+.cd-exc-meta { font-family:var(--mono); font-size:11px; color:var(--muted); margin-top:2px; }
+.cd-exc-notes { font-size:12px; color:var(--ink-2); margin-top:4px; white-space:pre-wrap; }
+.cd-exc-del { flex:0 0 auto; background:none; border:none; color:var(--accent); cursor:pointer; font-size:15px; line-height:1; padding:2px 4px; }
+.cd-exc-add { display:grid; grid-template-columns:2fr 1fr 1fr auto; gap:8px; margin-top:6px; }
+@media(max-width:600px){ .cd-exc-add { grid-template-columns:1fr 1fr; } }
+.cd-exc-add input { min-height:38px; }
+.cd-exc-add-btn { white-space:nowrap; }
+.cd-exc-empty { font-size:13px; color:var(--muted); font-style:italic; margin-bottom:10px; }
+
+.cd-day-actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:18px; padding-top:14px; border-top:1px solid var(--rule); }
+.cd-empty { text-align:center; color:var(--muted); padding:48px 20px; border:1.5px dashed var(--rule); border-radius:var(--r); }
+.cd-empty span { display:block; font-size:38px; margin-bottom:10px; }
+
+.cd-print-area { display:none; }
+@media print {
+  #view-cruise-day .tool-bar, #view-cruise-day .ctx-banner, #view-cruise-day .cd-setup,
+  #view-cruise-day .cd-cal-strip, #view-cruise-day .cd-cal-label, #view-cruise-day #cd-detail,
+  #view-cruise-day .cd-empty, #view-cruise-day .pro-tip, #view-cruise-day .related,
+  #view-cruise-day .conn-bdg { display:none !important; }
+  #view-cruise-day .cd-print-area { display:block !important; }
+  .cd-print-day { break-inside:avoid; border:1px solid #000; border-radius:4px; padding:14px; margin-bottom:14px; }
+  .cd-print-day h3 { font-family:var(--serif); margin:0 0 4px; }
+  .cd-print-day .meta { font-family:var(--mono); font-size:12px; color:#444; margin-bottom:8px; }
+  .cd-print-day ul { margin:6px 0 0 18px; padding:0; }
+}
+</style>
 <div id="view-park-budget" class="view">
   <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
@@ -8960,7 +9116,7 @@ const TOOLS = [
   {id:'shore-exc',     nm:'Shore Excursion Planner',    ico:'⚓', ph:'cruise',     on:false,live:false, ds:'Per-port budget & time planner. Never miss ship departure.'},
   {id:'cruise-compare',nm:'Cruise Line Comparison',     ico:'🔍', ph:'cruise',     on:false,live:true,  ds:'Side-by-side of 12 major cruise lines across 10 attributes.'},
   {id:'sea-sick',      nm:'Sea Sickness Guide',         ico:'🌊', ph:'cruise',     on:false,live:false, ds:'Prevention, treatment & best cabin locations for motion sickness.'},
-  {id:'cruise-day',    nm:'Cruise Day Planner',         ico:'📆', ph:'cruise',     on:false,live:false, ds:'Visual calendar: sea day vs. port day modes.'},
+  {id:'cruise-day',    nm:'Cruise Day Planner',         ico:'📆', ph:'cruise',     on:false,live:true,  ds:'Visual calendar: sea day vs. port day modes.'},
   {id:'park-budget',   nm:'Theme Park Budget',          ico:'🎟', ph:'theme',      on:false,live:true,  ds:'Tickets, food, merch & parking — total cost for any party size.'},
   {id:'park-optimizer',nm:'Park Day Optimizer',         ico:'🗺', ph:'theme',      on:false,live:false, ds:'Rope-drop strategy & Lightning Lane tips for Disney & Universal.'},
   {id:'ride-height',   nm:'Ride Height Checker',        ico:'📏', ph:'theme',      on:false,live:false, ds:'Height requirements across Disney, Universal & SeaWorld.'},
@@ -9622,6 +9778,7 @@ function injectTripCtx(id) {
   if(id==='flight-est') feInit();
   if(id==='cruise-compare') ccInit();
   if(id==='cruise-grat')   cgInit();
+  if(id==='cruise-day')    cdInit();
   if(id==='trip-journal') tjInit();
   if(id==='park-budget') pbInit();
   if(id==='biz-packing') bpInit();
@@ -10606,6 +10763,390 @@ function etExportCSV() {
   const safe = (etData.tripName || 'trip').replace(/[^a-z0-9]+/gi,'-').toLowerCase();
   a.href = url; a.download = `expenses-${safe}-${etTodayISO()}.csv`; a.click();
   URL.revokeObjectURL(url);
+}
+
+/* ══════════════════════════════════════════
+   CRUISE DAY PLANNER  (cd*)
+   Visual calendar with Sea / Port / Embark / Debark day modes.
+   Storage key: tt_cruise_{tripId|default}
+   Integrates with Daily Expense Tracker (tt_expenses_{tripId})
+   to show actual spend per day and quick-add expenses.
+   ══════════════════════════════════════════ */
+
+const CD_TYPES = {
+  embark: { label:'Embark',   emoji:'🛳', color:'var(--green)'  },
+  sea:    { label:'Sea Day',  emoji:'🌊', color:'var(--blue)'   },
+  port:   { label:'Port Day', emoji:'⚓', color:'var(--orange)' },
+  debark: { label:'Debark',   emoji:'🏁', color:'var(--purple)' },
+};
+
+let cdData = {
+  cruiseName:'', cruiseLine:'', startDate:'', endDate:'', homeCurrency:'USD',
+  days:[], // [{id, date, type, port, arrive, allAboard, depart, budget, notes, excursions:[]}]
+};
+let cdActiveIdx = 0;
+
+function cdKey() { return 'tt_cruise_' + (getActiveTripId() || 'default'); }
+
+function cdLoad() {
+  try { const raw = localStorage.getItem(cdKey()); if (raw) cdData = JSON.parse(raw); } catch(e) {}
+  if (!Array.isArray(cdData.days)) cdData.days = [];
+}
+
+function cdSave() {
+  try { localStorage.setItem(cdKey(), JSON.stringify(cdData)); } catch(e) {}
+}
+
+function cdSaveMeta() {
+  cdData.cruiseName = document.getElementById('cd-cruise-name').value;
+  cdData.cruiseLine = document.getElementById('cd-cruise-line').value;
+  cdSave();
+}
+
+function cdInit() {
+  cdLoad();
+
+  // Pre-fill from active MyTrip context where our fields are empty
+  const trip = getActiveTrip ? getActiveTrip() : null;
+  const ctx  = document.getElementById('ctx-cruise-day');
+  if (trip) {
+    if (ctx) { ctx.textContent = `✈ Using context from: ${trip.name} — tap to edit ↗`; ctx.classList.add('show'); ctx.onclick = () => showView('mytrip'); }
+    if (!cdData.cruiseName && trip.name)        cdData.cruiseName = trip.name;
+    if (!cdData.startDate  && trip.departDate)  cdData.startDate  = trip.departDate;
+    if (!cdData.endDate    && trip.returnDate)  cdData.endDate    = trip.returnDate;
+    if (trip.homeCurrency)                      cdData.homeCurrency = trip.homeCurrency;
+  } else if (ctx) { ctx.classList.remove('show'); }
+  cdData.homeCurrency = cdHomeCurrency();
+
+  document.getElementById('cd-cruise-name').value = cdData.cruiseName || '';
+  document.getElementById('cd-cruise-line').value = cdData.cruiseLine || '';
+  document.getElementById('cd-start-date').value  = cdData.startDate || '';
+  document.getElementById('cd-end-date').value    = cdData.endDate || '';
+
+  if (cdData.startDate && cdData.endDate && cdData.days.length === 0) {
+    cdData.days = cdBuildDayList(cdData.startDate, cdData.endDate);
+    cdSave();
+  }
+  cdActiveIdx = Math.min(cdActiveIdx, Math.max(0, cdData.days.length - 1));
+  cdRender();
+}
+
+function cdFmtDate(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr + 'T12:00:00');
+  if (isNaN(d)) return dateStr;
+  return d.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
+}
+
+function cdBuildDayList(startStr, endStr) {
+  const days = [];
+  let cur = new Date(startStr + 'T12:00:00');
+  const end = new Date(endStr + 'T12:00:00');
+  if (isNaN(cur) || isNaN(end) || end < cur) return days;
+  const dates = [];
+  while (cur <= end) { dates.push(cur.toISOString().slice(0,10)); cur.setDate(cur.getDate()+1); }
+  dates.forEach((dateStr, i) => {
+    let type = 'sea';
+    if (i === 0) type = 'embark';
+    else if (i === dates.length - 1) type = 'debark';
+    days.push({ id:'cday-'+dateStr, date:dateStr, type, port:'', arrive:'', allAboard:'', depart:'', budget:'', notes:'', excursions:[] });
+  });
+  return days;
+}
+
+function cdOnDateChange() {
+  const s = document.getElementById('cd-start-date').value;
+  const e = document.getElementById('cd-end-date').value;
+  if (e && s && new Date(e) < new Date(s)) {
+    document.getElementById('cd-end-date').value = s;
+  }
+  cdData.startDate = document.getElementById('cd-start-date').value;
+  cdData.endDate   = document.getElementById('cd-end-date').value;
+
+  if (cdData.startDate && cdData.endDate) {
+    // Rebuild date range but preserve any day the user already customized
+    const fresh = cdBuildDayList(cdData.startDate, cdData.endDate);
+    cdData.days = fresh.map(nd => {
+      const old = cdData.days.find(d => d.date === nd.date);
+      return old ? old : nd;
+    });
+    cdActiveIdx = 0;
+  }
+  cdSave();
+  cdRender();
+}
+
+/* ── Expense Tracker integration ───────────── */
+function cdExpenseStore() {
+  const id = getActiveTripId() || 'default';
+  try { const r = localStorage.getItem('tt_expenses_' + id); if (r) return JSON.parse(r); } catch(_) {}
+  return null;
+}
+function cdHomeCurrency() {
+  const st = cdExpenseStore();
+  if (st && st.homeCurrency) return st.homeCurrency;
+  const trip = getActiveTrip ? getActiveTrip() : null;
+  if (trip && trip.homeCurrency) return trip.homeCurrency;
+  return (cdData && cdData.homeCurrency) || 'USD';
+}
+function cdSpentByDate() {
+  const st = cdExpenseStore();
+  const home = cdHomeCurrency();
+  const map = {};
+  if (st && Array.isArray(st.expenses)) {
+    st.expenses.forEach(e => {
+      let amt;
+      if (e.curr === home) amt = +e.amt;
+      else if (e.homeAmt != null && !isNaN(e.homeAmt)) amt = +e.homeAmt;
+      else { const c = (typeof etConvert === 'function') ? etConvert(+e.amt, e.curr, home) : null; amt = (c != null) ? c : +e.amt; }
+      map[e.date] = (map[e.date] || 0) + (amt || 0);
+    });
+  }
+  return map;
+}
+function cdMoney(n) {
+  const home = cdHomeCurrency();
+  if (typeof etFmt === 'function') return etFmt(n, home);
+  return (home === 'USD' ? '$' : home + ' ') + (n || 0).toFixed(2);
+}
+function cdAddExpenseForDate(date) {
+  openTool('expense-track');
+  setTimeout(() => {
+    const di = document.getElementById('et-in-date'); if (di) di.value = date;
+    const card = document.querySelector('#view-expense-track .et-add-card');
+    if (card) card.scrollIntoView({ behavior:'smooth', block:'center' });
+    const amt = document.getElementById('et-in-amt'); if (amt) amt.focus();
+  }, 40);
+}
+
+/* ── Day mutations ─────────────────────────── */
+function cdActiveDay() { return cdData.days[cdActiveIdx] || null; }
+function cdSelectDay(idx) { cdActiveIdx = idx; cdRender(); }
+function cdSetType(type) {
+  const d = cdActiveDay(); if (!d) return;
+  d.type = type;
+  if (type === 'sea') { d.port = ''; d.arrive = ''; d.allAboard = ''; d.depart = ''; }
+  cdSave(); cdRender();
+}
+function cdUpdateField(field, el) {
+  const d = cdActiveDay(); if (!d) return;
+  d[field] = el.value;
+  cdSave();
+  // Light refresh only — don't re-render the detail editor or the focused input loses focus
+  cdRenderCalendar();
+  cdUpdateSummary();
+  if (field === 'allAboard' || field === 'depart' || field === 'arrive') cdRefreshAllAboardFlag();
+  if (field === 'budget') cdRefreshSpendBox();
+}
+function cdRefreshAllAboardFlag() {
+  const d = cdActiveDay(); const flag = document.getElementById('cd-allaboard-flag');
+  if (!d || !flag) return;
+  if (d.type === 'port' && d.allAboard) {
+    flag.style.display = 'flex';
+    flag.innerHTML = `⏰ <span><strong>All aboard ${d.allAboard}</strong>${d.depart ? ` · ship departs ${d.depart}` : ''} — be back at the gangway early; the ship will not wait.</span>`;
+  } else { flag.style.display = 'none'; }
+}
+function cdRefreshSpendBox() {
+  const d = cdActiveDay(); const box = document.getElementById('cd-spend-val');
+  if (!d || !box) return;
+  const spent = cdSpentByDate()[d.date] || 0;
+  const budget = parseFloat(d.budget) || 0;
+  box.textContent = cdMoney(spent);
+  box.className = 'val' + (budget > 0 ? (spent > budget ? ' over' : ' under') : '');
+  const sub = document.getElementById('cd-spend-sub');
+  if (sub) sub.textContent = budget > 0 ? (spent > budget ? `${cdMoney(spent - budget)} over budget` : `${cdMoney(budget - spent)} left of budget`) : 'No daily budget set';
+}
+
+/* ── Excursions ────────────────────────────── */
+function cdAddExcursion() {
+  const d = cdActiveDay(); if (!d) return;
+  const nameEl = document.getElementById('cd-exc-name');
+  const name = (nameEl.value || '').trim();
+  if (!name) { nameEl.focus(); return; }
+  const time = document.getElementById('cd-exc-time').value;
+  const cost = document.getElementById('cd-exc-cost').value;
+  if (!Array.isArray(d.excursions)) d.excursions = [];
+  d.excursions.push({ id:'exc-'+Date.now(), name, time, cost, booked:false, notes:'' });
+  cdSave(); cdRender();
+  setTimeout(() => { const n = document.getElementById('cd-exc-name'); if (n) n.focus(); }, 0);
+}
+function cdToggleExc(id) {
+  const d = cdActiveDay(); if (!d) return;
+  const x = (d.excursions || []).find(e => e.id === id); if (!x) return;
+  x.booked = !x.booked; cdSave(); cdRender();
+}
+function cdDeleteExc(id) {
+  const d = cdActiveDay(); if (!d) return;
+  d.excursions = (d.excursions || []).filter(e => e.id !== id);
+  cdSave(); cdRender();
+}
+
+/* ── Render ────────────────────────────────── */
+function cdRender() {
+  const has = cdData.days.length > 0;
+  document.getElementById('cd-empty-state').style.display = has ? 'none' : 'block';
+  document.getElementById('cd-summary-bar').style.display = has ? 'grid' : 'none';
+  document.getElementById('cd-cal-label').style.display = has ? 'block' : 'none';
+  if (!has) { document.getElementById('cd-cal-strip').innerHTML = ''; document.getElementById('cd-detail').innerHTML = ''; return; }
+  cdActiveIdx = Math.min(cdActiveIdx, cdData.days.length - 1);
+  cdRenderCalendar();
+  cdRenderDetail();
+  cdUpdateSummary();
+}
+
+function cdRenderCalendar() {
+  const spent = cdSpentByDate();
+  const html = cdData.days.map((d, i) => {
+    const t = CD_TYPES[d.type] || CD_TYPES.sea;
+    const sp = spent[d.date];
+    return `<button class="cd-cal-card${i === cdActiveIdx ? ' active' : ''}" onclick="cdSelectDay(${i})">
+      <div class="cd-cal-top" style="background:${t.color}">
+        <div class="cd-cal-dayno">Day ${i + 1}</div>
+        <div class="cd-cal-date">${cdFmtDate(d.date)}</div>
+      </div>
+      <div class="cd-cal-body">
+        <div class="cd-cal-type" style="color:${t.color}">${t.emoji} ${t.label}</div>
+        <div class="cd-cal-port">${d.port ? cdEsc(d.port) : (d.type === 'sea' ? 'At sea' : '—')}</div>
+        ${sp != null ? `<div class="cd-cal-spend">${cdMoney(sp)} spent</div>` : ''}
+      </div>
+    </button>`;
+  }).join('');
+  document.getElementById('cd-cal-strip').innerHTML = html;
+}
+
+function cdRenderDetail() {
+  const d = cdActiveDay(); if (!d) { document.getElementById('cd-detail').innerHTML = ''; return; }
+  const spent = cdSpentByDate()[d.date] || 0;
+  const budget = parseFloat(d.budget) || 0;
+  const isSea = d.type === 'sea';
+
+  // Contextual time fields per day type
+  let timeFields = '';
+  if (!isSea) {
+    const f = [];
+    if (d.type === 'embark')      { f.push(['arrive','Boarding From']); f.push(['depart','Ship Departs']); }
+    else if (d.type === 'debark') { f.push(['arrive','Ship Arrives']); }
+    else                          { f.push(['arrive','Arrives']); f.push(['allAboard','All Aboard']); f.push(['depart','Ship Departs']); }
+    timeFields = `<div class="cd-times-grid">${f.map(([k,lbl]) =>
+      `<div class="fg" style="margin:0"><label>${lbl}</label><input type="time" value="${d[k] || ''}" oninput="cdUpdateField('${k}', this)"></div>`
+    ).join('')}</div>`;
+  }
+
+  const portLabel = d.type === 'embark' ? 'Embarkation Port' : d.type === 'debark' ? 'Disembarkation Port' : 'Port of Call';
+  const portBlock = isSea ? '' : `
+    <div class="fg" style="margin:0 0 14px">
+      <label>${portLabel}</label>
+      <input type="text" value="${cdEsc(d.port || '')}" placeholder="e.g. Cozumel, Mexico" oninput="cdUpdateField('port', this)" autocomplete="off">
+    </div>${timeFields}
+    <div class="cd-allaboard-flag" id="cd-allaboard-flag" style="display:none"></div>`;
+
+  const exc = Array.isArray(d.excursions) ? d.excursions : [];
+  const excItems = exc.length ? exc.map(x => `
+    <div class="cd-exc-item">
+      <input type="checkbox" class="cd-exc-check" ${x.booked ? 'checked' : ''} onchange="cdToggleExc('${x.id}')" title="Mark booked">
+      <div class="cd-exc-main">
+        <div class="cd-exc-name${x.booked ? ' done' : ''}">${cdEsc(x.name)}</div>
+        <div class="cd-exc-meta">${x.time ? '🕒 ' + x.time : ''}${x.time && x.cost ? '  ·  ' : ''}${x.cost ? '💲 ' + cdMoney(parseFloat(x.cost) || 0) : ''}${x.booked ? '  ·  ✅ Booked' : ''}</div>
+        ${x.notes ? `<div class="cd-exc-notes">${cdEsc(x.notes)}</div>` : ''}
+      </div>
+      <button class="cd-exc-del" onclick="cdDeleteExc('${x.id}')" title="Remove" aria-label="Remove excursion">✕</button>
+    </div>`).join('') : `<div class="cd-exc-empty">No excursions or plans logged for this day yet.</div>`;
+
+  const t = CD_TYPES[d.type] || CD_TYPES.sea;
+  const spendCls = budget > 0 ? (spent > budget ? 'over' : 'under') : '';
+  const spendSub = budget > 0 ? (spent > budget ? `${cdMoney(spent - budget)} over budget` : `${cdMoney(budget - spent)} left of budget`) : 'No daily budget set';
+
+  document.getElementById('cd-detail').innerHTML = `
+  <div class="cd-detail-card">
+    <div class="cd-detail-hdr">
+      <div class="cd-detail-title">Day ${cdActiveIdx + 1} · ${cdFmtDate(d.date)}</div>
+      <div class="cd-detail-sub">${t.emoji} ${t.label}</div>
+    </div>
+
+    <div class="cd-type-row">
+      ${Object.keys(CD_TYPES).map(k => `<button class="cd-type-btn t-${k}${d.type === k ? ' on' : ''}" onclick="cdSetType('${k}')">${CD_TYPES[k].emoji} ${CD_TYPES[k].label}</button>`).join('')}
+    </div>
+
+    ${portBlock}
+
+    <div class="cd-budget-row">
+      <div class="fg" style="margin:0">
+        <label>Planned Budget for the Day (${cdHomeCurrency()})</label>
+        <input type="number" min="0" step="any" value="${d.budget || ''}" placeholder="e.g. 150" oninput="cdUpdateField('budget', this)">
+      </div>
+      <div class="cd-spend-box">
+        <span class="lbl">Logged in Expense Tracker</span>
+        <span class="val ${spendCls}" id="cd-spend-val">${cdMoney(spent)}</span>
+        <div class="cd-cal-spend" id="cd-spend-sub" style="margin-top:5px">${spendSub}</div>
+      </div>
+    </div>
+
+    <div class="cd-exc-wrap">
+      <div class="cd-exc-hdr">${isSea ? 'Onboard Plans &amp; Activities' : 'Shore Excursions &amp; Plans'}</div>
+      ${excItems}
+      <div class="cd-exc-add">
+        <input type="text" id="cd-exc-name" placeholder="${isSea ? 'e.g. Spa morning' : 'e.g. Mayan ruins tour'}" autocomplete="off" onkeydown="if(event.key==='Enter')cdAddExcursion()">
+        <input type="time" id="cd-exc-time" title="Time">
+        <input type="number" id="cd-exc-cost" placeholder="Cost" min="0" step="any">
+        <button class="btn btn-p cd-exc-add-btn" onclick="cdAddExcursion()">+ Add</button>
+      </div>
+    </div>
+
+    <div class="fg" style="margin:18px 0 0">
+      <label>Day Notes</label>
+      <textarea rows="2" placeholder="Reservations, reminders, formal night, tender info…" style="resize:vertical" oninput="cdUpdateField('notes', this)">${cdEsc(d.notes || '')}</textarea>
+    </div>
+
+    <div class="cd-day-actions">
+      ${!isSea ? `<button class="btn btn-s" onclick="cdAddExpenseForDate('${d.date}')">📊 Log an expense for this day</button>` : `<button class="btn btn-s" onclick="cdAddExpenseForDate('${d.date}')">📊 Log onboard spend</button>`}
+    </div>
+  </div>`;
+
+  cdRefreshAllAboardFlag();
+}
+
+function cdUpdateSummary() {
+  const days = cdData.days;
+  const nights = Math.max(0, days.length - 1);
+  const sea = days.filter(d => d.type === 'sea').length;
+  const port = days.filter(d => d.type === 'port').length;
+  const budget = days.reduce((s, d) => s + (parseFloat(d.budget) || 0), 0);
+  const spentMap = cdSpentByDate();
+  const spent = days.reduce((s, d) => s + (spentMap[d.date] || 0), 0);
+  document.getElementById('cd-sum-nights').textContent = nights;
+  document.getElementById('cd-sum-sea').textContent = sea;
+  document.getElementById('cd-sum-port').textContent = port;
+  document.getElementById('cd-sum-budget').textContent = budget > 0 ? cdMoney(budget) : '—';
+  document.getElementById('cd-sum-spent').textContent = spent > 0 ? cdMoney(spent) : cdMoney(0);
+}
+
+function cdEsc(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+/* ── Print day sheets ──────────────────────── */
+function cdPrint() {
+  if (!cdData.days.length) { window.print(); return; }
+  const spentMap = cdSpentByDate();
+  const title = cdData.cruiseName || 'Cruise Itinerary';
+  let html = `<h2 style="font-family:var(--serif);margin:0 0 4px">${cdEsc(title)}</h2>`;
+  if (cdData.cruiseLine) html += `<div class="meta" style="margin-bottom:12px">${cdEsc(cdData.cruiseLine)}</div>`;
+  cdData.days.forEach((d, i) => {
+    const t = CD_TYPES[d.type] || CD_TYPES.sea;
+    const times = [];
+    if (d.arrive)    times.push('Arrive ' + d.arrive);
+    if (d.allAboard) times.push('All aboard ' + d.allAboard);
+    if (d.depart)    times.push('Depart ' + d.depart);
+    const exc = Array.isArray(d.excursions) ? d.excursions : [];
+    const budget = parseFloat(d.budget) || 0;
+    const spent = spentMap[d.date] || 0;
+    html += `<div class="cd-print-day">
+      <h3>Day ${i + 1} — ${cdFmtDate(d.date)} · ${t.emoji} ${t.label}${d.port ? ' · ' + cdEsc(d.port) : ''}</h3>
+      <div class="meta">${times.join('  ·  ')}${times.length && (budget || spent) ? '  ·  ' : ''}${budget ? 'Budget ' + cdMoney(budget) : ''}${budget && spent ? '  ·  ' : ''}${spent ? 'Spent ' + cdMoney(spent) : ''}</div>
+      ${exc.length ? '<ul>' + exc.map(x => `<li>${x.booked ? '☑' : '☐'} ${cdEsc(x.name)}${x.time ? ' (' + x.time + ')' : ''}${x.cost ? ' — ' + cdMoney(parseFloat(x.cost) || 0) : ''}</li>`).join('') + '</ul>' : ''}
+      ${d.notes ? `<div style="margin-top:6px;font-style:italic">${cdEsc(d.notes)}</div>` : ''}
+    </div>`;
+  });
+  document.getElementById('cd-print-area').innerHTML = html;
+  window.print();
 }
 
 /* ══════════════════════════════════════════
