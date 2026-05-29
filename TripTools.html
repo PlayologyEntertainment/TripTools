@@ -9189,19 +9189,235 @@ input:checked + .pb-toggle-box::after { transform:translateX(16px);background:#f
     </div>
   </div>
 </div>
-<div id="view-placeholder-customs-duty" class="view">
-  <nav class="tool-topbar">
+<div id="view-customs-duty" class="view">
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="window.print()">🖨 Print</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">🛃</span>
-    <h2>Customs Duty Calculator</h2>
-    <p style="margin-bottom:24px">Estimate US customs duties on goods purchased abroad. $800 duty-free exemption.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-customs-duty"></div>
+
+  <!-- Print-only header -->
+  <div class="cdc-print-hdr">
+    <strong>TripTools — Customs Duty Calculator</strong>
+    <span id="cdc-print-date"></span>
+  </div>
+
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>Customs Duty Calculator</h1>
+    <p class="tool-sub">Estimate what you might owe U.S. Customs on goods bought abroad. Applies your duty-free exemption, the CBP flat-rate band, and typical duty rates by category.</p>
+  </div>
+
+  <div class="tool-body">
+
+    <!-- Disclaimer -->
+    <div class="cdc-warn">
+      <strong>Estimate only —</strong> A CBP officer makes the final determination at the border. Duty rates come from the U.S. Harmonized Tariff Schedule (HTSUS) and vary by exact product and country of origin; the rates below are typical averages. Enter values in <b>U.S. dollars</b>. Always declare everything truthfully on your CBP Form 6059B.
+    </div>
+
+    <!-- STEP 1 — TRIP BACK -->
+    <div class="sec-lbl">Step 1 — Your Return Trip</div>
+    <div class="fg">
+      <label for="cdc-region">Returning to the U.S. from</label>
+      <select id="cdc-region" onchange="cdcCalc()">
+        <option value="general">Most countries (Europe, Asia, Mexico, Canada…) — $800 exemption</option>
+        <option value="insular">U.S. insular possessions (USVI, Guam, American Samoa) — $1,600 exemption</option>
+      </select>
+    </div>
+    <div class="frow">
+      <div class="fg">
+        <label for="cdc-travelers">Travelers in your household</label>
+        <input type="number" id="cdc-travelers" min="1" max="20" value="1" oninput="cdcCalc()">
+      </div>
+      <div class="fg">
+        <label>Exemption handling</label>
+        <div class="chip-grp" id="cdc-pool-grp">
+          <span class="chip on" data-v="1" onclick="cdcSetPool(this,1)">👨‍👩‍👧 Pool family exemptions</span>
+          <span class="chip" data-v="0" onclick="cdcSetPool(this,0)">🧍 Just me</span>
+        </div>
+      </div>
+    </div>
+    <label class="cdc-check">
+      <input type="checkbox" id="cdc-reduced" onchange="cdcCalc()">
+      <span>Trip was under 48 hours, or I used my exemption in the last 30 days <span class="cdc-hint">(reduces exemption to $200 per person)</span></span>
+    </label>
+
+    <!-- STEP 2 — GOODS -->
+    <div class="sec-lbl" style="margin-top:26px">Step 2 — Declare Your Goods</div>
+
+    <div class="cdc-import" id="cdc-import"></div>
+
+    <div class="cdc-add">
+      <div class="fg">
+        <label for="cdc-desc">Item</label>
+        <input type="text" id="cdc-desc" placeholder="e.g. Leather handbag" onkeydown="if(event.key==='Enter')cdcAddItem()">
+      </div>
+      <div class="fg">
+        <label for="cdc-cat">Category</label>
+        <select id="cdc-cat"></select>
+      </div>
+      <div class="fg">
+        <label for="cdc-val">Value (USD)</label>
+        <input type="number" id="cdc-val" min="0" step="any" placeholder="0.00" onkeydown="if(event.key==='Enter')cdcAddItem()">
+      </div>
+      <button class="btn btn-p cdc-add-btn" onclick="cdcAddItem()">+ Add</button>
+    </div>
+
+    <div id="cdc-list"></div>
+
+    <!-- STEP 3 — ALCOHOL & TOBACCO -->
+    <div class="sec-lbl" style="margin-top:26px">Step 3 — Alcohol &amp; Tobacco <span style="font-family:var(--sans);font-weight:400;letter-spacing:0;text-transform:none;color:var(--muted);font-size:12px">(allowance check — optional)</span></div>
+    <p class="cdc-note">These have quantity limits separate from the dollar exemption. Enter the <b>value</b> of any alcohol or tobacco above as goods too — this section just flags quantity allowances.</p>
+    <div class="frow">
+      <div class="fg">
+        <label for="cdc-alc-l">Alcohol — total liters</label>
+        <input type="number" id="cdc-alc-l" min="0" step="any" value="0" oninput="cdcCalc()">
+      </div>
+      <div class="fg">
+        <label for="cdc-alc-a">Travelers aged 21+</label>
+        <input type="number" id="cdc-alc-a" min="0" max="20" value="0" oninput="cdcCalc()">
+      </div>
+    </div>
+    <div class="frow">
+      <div class="fg">
+        <label for="cdc-cigs">Cigarettes (count)</label>
+        <input type="number" id="cdc-cigs" min="0" step="1" value="0" oninput="cdcCalc()">
+      </div>
+      <div class="fg">
+        <label for="cdc-cigars">Cigars (count)</label>
+        <input type="number" id="cdc-cigars" min="0" step="1" value="0" oninput="cdcCalc()">
+      </div>
+    </div>
+
+    <!-- RESULTS -->
+    <div class="cdc-results" id="cdc-results">
+      <div class="cdc-results-inner">
+        <div class="cdc-result-hdr">
+          <div class="cdc-result-label">ESTIMATED DUTY OWED</div>
+          <div class="cdc-big-num" id="cdc-total">$0.00</div>
+          <div class="cdc-big-sub" id="cdc-total-sub"></div>
+        </div>
+
+        <div class="cdc-bars" id="cdc-bars"></div>
+
+        <table class="cdc-breakdown">
+          <tbody>
+            <tr><td>Total declared value</td><td class="amt" id="cdc-r-value">$0.00</td></tr>
+            <tr><td>Duty-free exemption <span class="cdc-tier" id="cdc-r-exempt-tier"></span></td><td class="amt" id="cdc-r-exempt">−$0.00</td></tr>
+            <tr class="cdc-sep"><td>Dutiable amount</td><td class="amt" id="cdc-r-dutiable">$0.00</td></tr>
+            <tr><td>Flat-rate band <span class="cdc-tier" id="cdc-r-flat-tier"></span></td><td class="amt" id="cdc-r-flat">$0.00</td></tr>
+            <tr><td>Duty above flat-rate band <span class="cdc-tier" id="cdc-r-above-tier"></span></td><td class="amt" id="cdc-r-above">$0.00</td></tr>
+          </tbody>
+        </table>
+
+        <div class="cdc-flags" id="cdc-flags"></div>
+      </div>
+    </div>
+
+    <div class="cdc-actions">
+      <button class="btn btn-s" onclick="cdcCopySummary()" style="font-size:13px;padding:10px 18px">📋 Copy Summary</button>
+      <button class="btn-ghost" onclick="cdcClear()" style="font-size:13px">🗑 Clear All</button>
+      <span class="cdc-copy-ok" id="cdc-copy-ok">✓ Copied</span>
+    </div>
+
+  </div><!-- /tool-body -->
+
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    Most consumer electronics, original art, antiques over 100 years old, books and many handcrafts are duty-free — they still count toward your $800 exemption, but add little or no duty. The flat 3% rate on the first $1,000 above your exemption is almost always cheaper than the regular tariff, so it usually pays to declare honestly rather than risk seizure and penalties.
+  </div>
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('customs-decl')">📦 Customs Declaration Helper</button>
+      <button class="rel-btn" onclick="openTool('vat-refund')">🧾 VAT &amp; Tax Refund Guide</button>
+      <button class="rel-btn" onclick="openTool('souvenir')">🎁 Souvenir &amp; Gift Tracker</button>
+      <button class="rel-btn" onclick="openTool('expense-track')">📊 Daily Expense Tracker</button>
     </div>
   </div>
 </div>
+
+<style>
+/* ══════════════════════════════════════════════════════
+   CUSTOMS DUTY CALCULATOR CSS
+   ══════════════════════════════════════════════════════ */
+.cdc-warn { background:rgba(255,77,46,.08); border-left:3px solid var(--accent); border-radius:0 var(--r) var(--r) 0; padding:11px 15px; font-size:13px; color:var(--ink-2); margin-bottom:22px; line-height:1.55; }
+.cdc-warn strong { color:var(--accent); }
+.cdc-note { font-size:13px; color:var(--muted); line-height:1.5; margin:-4px 0 12px; }
+
+.cdc-check { display:flex; gap:9px; align-items:flex-start; font-size:14px; color:var(--ink-2); cursor:pointer; line-height:1.45; padding:4px 0; }
+.cdc-check input { width:18px; height:18px; margin-top:1px; accent-color:var(--accent); flex-shrink:0; cursor:pointer; }
+.cdc-hint { color:var(--muted); font-size:12px; }
+
+/* Import strip */
+.cdc-import { margin-bottom:14px; }
+.cdc-import-card { display:flex; gap:10px; align-items:center; flex-wrap:wrap; padding:11px 14px; background:var(--paper-2); border:1.5px dashed var(--ink); border-radius:var(--r); font-size:13px; color:var(--ink-2); }
+.cdc-import-card .ic { font-size:18px; }
+.cdc-import-card .btn { margin-left:auto; }
+
+/* Add row */
+.cdc-add { display:grid; grid-template-columns:1fr 1fr 130px auto; gap:12px; align-items:end; margin-bottom:14px; }
+.cdc-add .fg { margin-bottom:0; }
+.cdc-add-btn { white-space:nowrap; padding:11px 18px; }
+@media(max-width:620px){ .cdc-add{ grid-template-columns:1fr 1fr; } .cdc-add .cdc-add-btn{ grid-column:1/-1; } }
+
+/* Item list */
+.cdc-item { display:grid; grid-template-columns:auto 1fr auto auto; gap:12px; align-items:center; padding:11px 14px; background:var(--paper); border:1px solid var(--rule); border-radius:var(--r); margin-bottom:8px; }
+.cdc-item .ico { font-size:20px; }
+.cdc-item .meta { min-width:0; }
+.cdc-item .nm { font-weight:600; font-size:14px; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.cdc-item .cat { font-size:11px; font-family:var(--mono); letter-spacing:.04em; color:var(--muted); text-transform:uppercase; }
+.cdc-item .val { font-family:var(--serif); font-weight:600; font-size:16px; white-space:nowrap; }
+.cdc-item .rate { font-size:11px; color:var(--muted); display:block; text-align:right; }
+.cdc-item .del { border:none; background:none; color:var(--muted); cursor:pointer; font-size:17px; padding:2px 4px; line-height:1; transition:color .12s; }
+.cdc-item .del:hover { color:var(--accent); }
+.cdc-empty { text-align:center; color:var(--muted); font-style:italic; padding:18px; border:1px dashed var(--rule); border-radius:var(--r); font-size:14px; }
+
+/* Results */
+.cdc-results { margin-top:26px; border:1.5px solid var(--ink); border-radius:var(--r); overflow:hidden; }
+.cdc-results-inner { padding:22px 22px 8px; background:var(--paper-2); }
+.cdc-result-hdr { text-align:center; padding-bottom:16px; border-bottom:1px solid var(--rule); margin-bottom:16px; }
+.cdc-result-label { font-family:var(--mono); font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); }
+.cdc-big-num { font-family:var(--serif); font-weight:600; font-size:44px; line-height:1.1; color:var(--ink); margin:4px 0; }
+.cdc-big-num.zero { color:var(--green); }
+.cdc-big-sub { font-size:13px; color:var(--ink-2); }
+
+.cdc-bars { margin-bottom:16px; }
+.cdc-bar-row { margin-bottom:9px; }
+.cdc-bar-row .bl { display:flex; justify-content:space-between; font-size:12px; color:var(--ink-2); margin-bottom:3px; }
+.cdc-bar-track { height:9px; background:var(--paper); border:1px solid var(--rule); border-radius:6px; overflow:hidden; }
+.cdc-bar-fill { height:100%; border-radius:6px; }
+
+.cdc-breakdown { width:100%; border-collapse:collapse; font-size:14px; }
+.cdc-breakdown td { padding:7px 0; color:var(--ink-2); border-bottom:1px solid var(--rule); }
+.cdc-breakdown td.amt { text-align:right; font-family:var(--mono); color:var(--ink); white-space:nowrap; }
+.cdc-breakdown tr.cdc-sep td { font-weight:600; color:var(--ink); border-top:1.5px solid var(--ink); border-bottom:1px solid var(--rule); }
+.cdc-breakdown tr:last-child td { border-bottom:none; }
+.cdc-tier { font-family:var(--mono); font-size:10px; color:var(--muted); letter-spacing:.04em; }
+
+.cdc-flags { margin-top:4px; }
+.cdc-flag { display:flex; gap:9px; align-items:flex-start; padding:10px 13px; border-radius:var(--r); font-size:13px; line-height:1.45; margin-top:10px; }
+.cdc-flag.ok   { background:rgba(46,125,50,.08);  border-left:3px solid var(--green); color:var(--ink-2); }
+.cdc-flag.warn { background:rgba(255,77,46,.08);  border-left:3px solid var(--accent); color:var(--ink-2); }
+.cdc-flag b { color:var(--ink); }
+
+.cdc-actions { display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-top:18px; }
+.cdc-copy-ok { color:var(--green); font-size:13px; font-weight:600; opacity:0; transition:opacity .2s; }
+.cdc-copy-ok.show { opacity:1; }
+
+/* Print header (hidden on screen) */
+.cdc-print-hdr { display:none; }
+@media print {
+  #view-customs-duty .tool-bar, #view-customs-duty .ctx-banner, #view-customs-duty .pro-tip,
+  #view-customs-duty .related, #view-customs-duty .cdc-add, #view-customs-duty .cdc-import,
+  #view-customs-duty .cdc-actions, #view-customs-duty .btn-ghost { display:none !important; }
+  #view-customs-duty .cdc-print-hdr { display:flex; justify-content:space-between; align-items:baseline;
+    border-bottom:2px solid #000; padding-bottom:8px; margin-bottom:16px; font-family:var(--serif); }
+  #view-customs-duty .cdc-results { border-color:#000; }
+  #view-customs-duty .cdc-results-inner { background:#fff !important; }
+  #view-customs-duty .cdc-item .del { display:none !important; }
+}
+</style>
 <style>
 /* ══════════════════════════════════════════════════════
    TRIP COST RECAP CSS
@@ -9616,7 +9832,7 @@ const TOOLS = [
   {id:'meeting-tz',    nm:'Meeting Time Zone Planner',  ico:'🗓', ph:'business',   on:false,live:true,  ds:'Participants + cities + work hours → color-coded overlap grid and copy-paste invite text.'},
   {id:'lounge-guide',  nm:'Airport Lounge Guide',       ico:'🛋', ph:'business',   on:false,live:false, ds:'Lounge access by credit card, status or paid entry at 50+ airports.'},
   {id:'biz-packing',   nm:'Business Trip Packing',      ico:'👔', ph:'business',   on:false,live:true,  ds:'Professional carry-on-only checklist. Tech, attire, docs & wrinkle tips.'},
-  {id:'customs-duty',  nm:'Customs Duty Calculator',    ico:'🛃', ph:'home',       on:false,live:false, ds:'Estimate US customs duties on goods purchased abroad.'},
+  {id:'customs-duty',  nm:'Customs Duty Calculator',    ico:'🛃', ph:'home',       on:false,live:true,  ds:'Estimate US customs duties on goods purchased abroad.'},
   {id:'trip-recap',    nm:'Trip Cost Recap',            ico:'📊', ph:'home',       on:false,live:true,  ds:'Actual vs. budgeted expenses. Visual summary by category.'},
   {id:'souvenir',      nm:'Souvenir & Gift Tracker',    ico:'🎁', ph:'home',       on:false,live:false, ds:'Gift list with person, idea, cost & purchased checkbox.'},
   {id:'health-check',  nm:'Post-Trip Health Checklist', ico:'🏥', ph:'home',       on:false,live:false, ds:'Symptom awareness for common post-travel illnesses.'},
@@ -10299,6 +10515,7 @@ function injectTripCtx(id) {
   if(id==='vaccination') vacInit();
   if(id==='weather')    wxInit();
   if(id==='trip-recap') tcrInit();
+  if(id==='customs-duty') cdcInit();
 }
 
 /* ── HUB RENDER ── */
@@ -12098,6 +12315,359 @@ function tcrCopyFallback(text) {
   try { document.execCommand('copy'); } catch(_) {}
   document.body.removeChild(ta);
 }
+
+/* ══════════════════════════════════════════════════════
+   CUSTOMS DUTY CALCULATOR
+   US CBP exemption + flat-rate band + estimated HTSUS duty.
+   Storage key: tt_customs_{tripId|default}
+   ══════════════════════════════════════════════════════ */
+const CDC_CATS = [
+  { id:'general',     name:'General merchandise / souvenirs',    rate:0.030, emoji:'🛍' },
+  { id:'apparel',     name:'Clothing & apparel',                 rate:0.120, emoji:'👕' },
+  { id:'footwear',    name:'Footwear & shoes',                   rate:0.100, emoji:'👟' },
+  { id:'leather',     name:'Leather goods & handbags',           rate:0.080, emoji:'👜' },
+  { id:'jewelry',     name:'Jewelry (precious metal)',           rate:0.055, emoji:'💍' },
+  { id:'watches',     name:'Watches',                            rate:0.050, emoji:'⌚' },
+  { id:'electronics', name:'Electronics & cameras',              rate:0.000, emoji:'📱' },
+  { id:'cosmetics',   name:'Cosmetics & perfume',                rate:0.000, emoji:'💄' },
+  { id:'ceramics',    name:'Pottery, glass & ceramics',          rate:0.060, emoji:'🏺' },
+  { id:'textiles',    name:'Linens, rugs & textiles',            rate:0.080, emoji:'🧶' },
+  { id:'wood',        name:'Wood, furniture & carvings',         rate:0.000, emoji:'🪵' },
+  { id:'art',         name:'Original art & antiques (100+ yrs)', rate:0.000, emoji:'🖼' },
+  { id:'food',        name:'Food, candy & coffee',               rate:0.020, emoji:'🍫' },
+  { id:'toys',        name:'Toys, games & books',                rate:0.000, emoji:'🧸' },
+  { id:'alcohol',     name:'Wine, beer & spirits',               rate:0.030, emoji:'🍷' },
+  { id:'tobacco',     name:'Tobacco & cigars',                   rate:0.040, emoji:'🚬' },
+];
+let cdcData = null;       // { region, travelers, pool, reduced, alcL, alc21, cigs, cigars, items:[] }
+let cdcSnapshot = null;
+
+function cdcKey() { const id = getActiveTripId() || 'default'; return 'tt_customs_' + id; }
+
+function cdcInit() {
+  // Trip context banner
+  const trip = getActiveTrip();
+  const ctx  = document.getElementById('ctx-customs-duty');
+  if (trip && ctx) {
+    ctx.textContent = `✈ Using context from: ${trip.name} — tap to edit ↗`;
+    ctx.classList.add('show');
+    ctx.onclick = () => showView('mytrip');
+  } else if (ctx) {
+    ctx.classList.remove('show');
+  }
+  document.getElementById('cdc-print-date').textContent =
+    'Printed ' + new Date().toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+
+  // Populate the category dropdown once
+  const catSel = document.getElementById('cdc-cat');
+  if (catSel && !catSel.options.length) {
+    catSel.innerHTML = CDC_CATS.map(c =>
+      `<option value="${c.id}">${c.emoji} ${c.name} — ${(c.rate*100).toFixed(c.rate*100 % 1 ? 1 : 0)}%${c.rate===0?' (duty-free)':''}</option>`
+    ).join('');
+  }
+
+  cdcLoad();
+  // Default traveler count + 21+ from trip party size if unset
+  if (cdcData.travelers == null) {
+    const pax = trip && trip.travelers ? parseInt(trip.travelers) : (trip && trip.pax ? parseInt(trip.pax) : 1);
+    cdcData.travelers = Math.max(1, pax || 1);
+  }
+  cdcSyncInputs();
+  cdcRenderImport();
+  cdcRenderList();
+  cdcCalc();
+}
+
+function cdcLoad() {
+  cdcData = null;
+  try { const raw = localStorage.getItem(cdcKey()); if (raw) cdcData = JSON.parse(raw); } catch(_) {}
+  if (!cdcData) cdcData = { region:'general', travelers:null, pool:1, reduced:false, alcL:0, alc21:0, cigs:0, cigars:0, items:[] };
+  if (!Array.isArray(cdcData.items)) cdcData.items = [];
+}
+function cdcSave() { try { localStorage.setItem(cdcKey(), JSON.stringify(cdcData)); } catch(_) {} }
+
+function cdcSyncInputs() {
+  document.getElementById('cdc-region').value     = cdcData.region || 'general';
+  document.getElementById('cdc-travelers').value  = cdcData.travelers || 1;
+  document.getElementById('cdc-reduced').checked  = !!cdcData.reduced;
+  document.getElementById('cdc-alc-l').value      = cdcData.alcL || 0;
+  document.getElementById('cdc-alc-a').value      = cdcData.alc21 || 0;
+  document.getElementById('cdc-cigs').value       = cdcData.cigs || 0;
+  document.getElementById('cdc-cigars').value     = cdcData.cigars || 0;
+  document.querySelectorAll('#cdc-pool-grp .chip').forEach(c =>
+    c.classList.toggle('on', String(c.dataset.v) === String(cdcData.pool ? 1 : 0)));
+}
+
+function cdcSetPool(el, v) {
+  document.querySelectorAll('#cdc-pool-grp .chip').forEach(c => c.classList.remove('on'));
+  el.classList.add('on');
+  cdcData.pool = v ? 1 : 0;
+  cdcCalc();
+}
+
+function cdcAddItem() {
+  const desc = document.getElementById('cdc-desc').value.trim();
+  const cat  = document.getElementById('cdc-cat').value || 'general';
+  const val  = parseFloat(document.getElementById('cdc-val').value);
+  if (!val || val <= 0) { document.getElementById('cdc-val').focus(); return; }
+  cdcData.items.push({
+    id: 'g_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
+    desc: desc || (CDC_CATS.find(c => c.id === cat) || {}).name || 'Item',
+    cat, val,
+  });
+  document.getElementById('cdc-desc').value = '';
+  document.getElementById('cdc-val').value  = '';
+  cdcSave(); cdcRenderList(); cdcCalc();
+  document.getElementById('cdc-desc').focus();
+}
+
+function cdcDelItem(id) {
+  cdcData.items = cdcData.items.filter(i => i.id !== id);
+  cdcSave(); cdcRenderList(); cdcCalc();
+}
+
+function cdcClear() {
+  if (cdcData.items.length && !confirm('Remove all declared goods?')) return;
+  cdcData.items = [];
+  cdcData.alcL = 0; cdcData.alc21 = 0; cdcData.cigs = 0; cdcData.cigars = 0;
+  cdcSave(); cdcSyncInputs(); cdcRenderList(); cdcRenderImport(); cdcCalc();
+}
+
+/* Pull "Shopping" purchases from the Daily Expense Tracker (and a future
+   Souvenir Tracker if present) so users don't re-type what they logged. */
+function cdcImportSources() {
+  const id = getActiveTripId() || 'default';
+  const out = [];
+  // Daily Expense Tracker — shopping-category entries
+  try {
+    const raw = localStorage.getItem('tt_expenses_' + id);
+    if (raw) {
+      const et = JSON.parse(raw);
+      (et.expenses || []).filter(e => e.cat === 'shopping').forEach(e => {
+        const v = (e.homeAmt != null ? e.homeAmt : e.amt) || 0;
+        if (v > 0) out.push({ src:'et_' + e.id, desc:e.desc || 'Shopping', val:Math.round(v*100)/100 });
+      });
+    }
+  } catch(_) {}
+  // Souvenir & Gift Tracker — forward compatible (tt_souvenir_{id})
+  try {
+    const raw = localStorage.getItem('tt_souvenir_' + id);
+    if (raw) {
+      const sv = JSON.parse(raw);
+      (sv.items || sv.gifts || []).forEach(g => {
+        const v = parseFloat(g.cost != null ? g.cost : g.amt) || 0;
+        if (v > 0) out.push({ src:'sv_' + (g.id || g.desc), desc:g.idea || g.desc || g.item || 'Souvenir', val:Math.round(v*100)/100 });
+      });
+    }
+  } catch(_) {}
+  return out;
+}
+
+function cdcRenderImport() {
+  const wrap = document.getElementById('cdc-import');
+  const avail = cdcImportSources();
+  const have = new Set(cdcData.items.map(i => i.src).filter(Boolean));
+  const pending = avail.filter(s => !have.has(s.src));
+  if (!avail.length) { wrap.innerHTML = ''; return; }
+  if (!pending.length) {
+    wrap.innerHTML = `<div class="cdc-import-card"><span class="ic">✓</span><span>All ${avail.length} shopping purchase${avail.length===1?'':'s'} from your trip are already in the list.</span></div>`;
+    return;
+  }
+  const sum = pending.reduce((s,p) => s + p.val, 0);
+  wrap.innerHTML = `<div class="cdc-import-card"><span class="ic">📥</span><span>Found <b>${pending.length}</b> shopping purchase${pending.length===1?'':'s'} (${cdcFmt(sum)}) logged for this trip.</span><button class="btn btn-s btn-sm" onclick="cdcImport()">Import as goods</button></div>`;
+}
+
+function cdcImport() {
+  const avail = cdcImportSources();
+  const have = new Set(cdcData.items.map(i => i.src).filter(Boolean));
+  let n = 0;
+  avail.filter(s => !have.has(s.src)).forEach(s => {
+    cdcData.items.push({
+      id: 'g_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
+      desc: s.desc, cat: cdcGuessCat(s.desc), val: s.val, src: s.src,
+    });
+    n++;
+  });
+  if (n) { cdcSave(); cdcRenderList(); cdcRenderImport(); cdcCalc(); }
+}
+
+function cdcGuessCat(desc) {
+  const n = (desc || '').toLowerCase();
+  if (/wine|beer|spirit|whisk|vodka|gin|rum|liquor|tequila|champagne/.test(n)) return 'alcohol';
+  if (/cigar|tobacco|cigarette/.test(n)) return 'tobacco';
+  if (/watch/.test(n)) return 'watches';
+  if (/ring|necklace|earring|bracelet|jewel|gold|silver|diamond/.test(n)) return 'jewelry';
+  if (/bag|purse|handbag|wallet|belt|leather/.test(n)) return 'leather';
+  if (/shoe|boot|sneaker|sandal|footwear/.test(n)) return 'footwear';
+  if (/shirt|dress|jacket|coat|pant|jean|sweater|scarf|cloth|apparel|hat/.test(n)) return 'apparel';
+  if (/phone|laptop|camera|headphone|tablet|electronic|console|drone/.test(n)) return 'electronics';
+  if (/perfume|cosmetic|makeup|lipstick|skincare|cologne/.test(n)) return 'cosmetics';
+  if (/pottery|ceramic|glass|vase|porcelain/.test(n)) return 'ceramics';
+  if (/rug|linen|towel|blanket|textile|fabric|carpet/.test(n)) return 'textiles';
+  if (/art|painting|antique|sculpture/.test(n)) return 'art';
+  if (/wood|carving|furniture/.test(n)) return 'wood';
+  if (/choc|candy|coffee|tea|snack|food|spice|sauce/.test(n)) return 'food';
+  if (/toy|game|book|puzzle/.test(n)) return 'toys';
+  return 'general';
+}
+
+function cdcRenderList() {
+  const wrap = document.getElementById('cdc-list');
+  if (!cdcData.items.length) {
+    wrap.innerHTML = `<div class="cdc-empty">No goods added yet — add what you bought above, or import from your expense log.</div>`;
+    return;
+  }
+  wrap.innerHTML = cdcData.items.map(it => {
+    const c = CDC_CATS.find(x => x.id === it.cat) || CDC_CATS[0];
+    return `<div class="cdc-item">
+      <span class="ico">${c.emoji}</span>
+      <div class="meta"><div class="nm">${cdcEsc(it.desc)}</div><div class="cat">${c.name}${it.src?' · imported':''}</div></div>
+      <div><div class="val">${cdcFmt(it.val)}</div><span class="rate">${c.rate===0?'duty-free':'~'+(c.rate*100).toFixed(c.rate*100%1?1:0)+'% duty'}</span></div>
+      <button class="del" title="Remove" onclick="cdcDelItem('${it.id}')">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function cdcCalc() {
+  // Read live inputs into state
+  cdcData.region    = document.getElementById('cdc-region').value;
+  cdcData.travelers = Math.max(1, Math.min(parseInt(document.getElementById('cdc-travelers').value) || 1, 20));
+  cdcData.reduced   = document.getElementById('cdc-reduced').checked;
+  cdcData.alcL      = Math.max(0, parseFloat(document.getElementById('cdc-alc-l').value) || 0);
+  cdcData.alc21     = Math.max(0, parseInt(document.getElementById('cdc-alc-a').value) || 0);
+  cdcData.cigs      = Math.max(0, parseInt(document.getElementById('cdc-cigs').value) || 0);
+  cdcData.cigars    = Math.max(0, parseInt(document.getElementById('cdc-cigars').value) || 0);
+  cdcSave();
+
+  const d = cdcCompute();
+  cdcSnapshot = d;
+
+  // Headline
+  const big = document.getElementById('cdc-total');
+  big.textContent = cdcFmt(d.totalDuty);
+  big.classList.toggle('zero', d.totalDuty < 0.005);
+  document.getElementById('cdc-total-sub').textContent = d.totalValue <= 0
+    ? 'Add the goods you bought to see an estimate'
+    : (d.totalDuty < 0.005
+        ? 'Within your duty-free exemption — likely nothing to pay'
+        : `Effective rate ${(d.effRate*100).toFixed(1)}% on ${cdcFmt(d.totalValue)} of goods`);
+
+  // Breakdown
+  document.getElementById('cdc-r-value').textContent    = cdcFmt(d.totalValue);
+  document.getElementById('cdc-r-exempt').textContent   = '−' + cdcFmt(d.exemption);
+  document.getElementById('cdc-r-exempt-tier').textContent = `(${d.perPerson===200?'$200':'$'+d.perPerson} × ${d.pool ? d.travelers + (d.travelers===1?' traveler':' travelers') : '1 traveler'})`;
+  document.getElementById('cdc-r-dutiable').textContent = cdcFmt(d.dutiable);
+  document.getElementById('cdc-r-flat').textContent     = cdcFmt(d.flatDuty);
+  document.getElementById('cdc-r-flat-tier').textContent = `(${cdcFmt(d.flatBand)} @ ${(d.flatRate*100).toFixed(d.flatRate*100%1?1:0)}%)`;
+  document.getElementById('cdc-r-above').textContent    = cdcFmt(d.aboveDuty);
+  document.getElementById('cdc-r-above-tier').textContent = d.aboveBand > 0 ? `(${cdcFmt(d.aboveBand)} @ ~${(d.wRate*100).toFixed(1)}% avg)` : '';
+
+  // Bars (value composition)
+  const bars = document.getElementById('cdc-bars');
+  if (d.totalValue > 0) {
+    const exShown = Math.min(d.exemption, d.totalValue);
+    const seg = [
+      { lbl:'Exemption (duty-free)', val:exShown,    color:'var(--green)' },
+      { lbl:'Flat-rate band',        val:d.flatBand,  color:'var(--blue)' },
+      { lbl:'Regular duty',          val:d.aboveBand, color:'var(--accent)' },
+    ];
+    bars.innerHTML = seg.filter(s => s.val > 0).map(s =>
+      `<div class="cdc-bar-row"><div class="bl"><span>${s.lbl}</span><span>${cdcFmt(s.val)}</span></div><div class="cdc-bar-track"><div class="cdc-bar-fill" style="width:${Math.max(2,(s.val/d.totalValue)*100).toFixed(1)}%;background:${s.color}"></div></div></div>`
+    ).join('');
+  } else { bars.innerHTML = ''; }
+
+  // Allowance flags
+  const flags = [];
+  if (cdcData.reduced) {
+    flags.push({ t:'warn', h:`<b>Reduced $200 exemption applied.</b> This exemption is per person and generally cannot be pooled across family members — your actual exemption may be lower.` });
+  }
+  if (cdcData.alcL > 0) {
+    const allow = cdcData.alc21 * 1;
+    if (cdcData.alc21 === 0) flags.push({ t:'warn', h:`<b>Alcohol:</b> you entered ${cdcNum(cdcData.alcL)} L but 0 travelers aged 21+. Only travelers 21+ may bring alcohol; expect duty plus federal excise tax.` });
+    else if (cdcData.alcL > allow) flags.push({ t:'warn', h:`<b>Alcohol over allowance:</b> ${cdcNum(cdcData.alcL)} L vs. ${allow} L duty-free (1 L per adult). The extra ${cdcNum(cdcData.alcL - allow)} L is subject to duty + IRS excise tax, and state limits may apply.` });
+    else flags.push({ t:'ok', h:`<b>Alcohol within allowance:</b> ${cdcNum(cdcData.alcL)} L vs. ${allow} L duty-free (1 L per adult 21+).` });
+  }
+  if (cdcData.cigs > 0) {
+    const allow = cdcData.travelers * 200;
+    if (cdcData.cigs > allow) flags.push({ t:'warn', h:`<b>Cigarettes over allowance:</b> ${cdcData.cigs} vs. ${allow} duty-free (200 per traveler). Excess is dutiable and may be subject to excise tax.` });
+    else flags.push({ t:'ok', h:`<b>Cigarettes within allowance:</b> ${cdcData.cigs} vs. ${allow} duty-free (200 per traveler).` });
+  }
+  if (cdcData.cigars > 0) {
+    const allow = cdcData.travelers * 100;
+    if (cdcData.cigars > allow) flags.push({ t:'warn', h:`<b>Cigars over allowance:</b> ${cdcData.cigars} vs. ${allow} duty-free (100 per traveler). Cuban-origin cigars are prohibited.` });
+    else flags.push({ t:'ok', h:`<b>Cigars within allowance:</b> ${cdcData.cigars} vs. ${allow} duty-free (100 per traveler).` });
+  }
+  document.getElementById('cdc-flags').innerHTML = flags.map(f =>
+    `<div class="cdc-flag ${f.t}"><span>${f.t==='ok'?'✓':'⚠'}</span><span>${f.h}</span></div>`).join('');
+}
+
+function cdcCompute() {
+  const items = cdcData.items;
+  const totalValue = items.reduce((s,i) => s + (i.val || 0), 0);
+  const travelers  = cdcData.travelers || 1;
+  const pool       = !!cdcData.pool;
+  const perPerson  = cdcData.reduced ? 200 : (cdcData.region === 'insular' ? 1600 : 800);
+  const exemption  = perPerson * (pool ? travelers : 1);
+
+  const dutiable   = Math.max(0, totalValue - exemption);
+  const flatRate   = cdcData.region === 'insular' ? 0.015 : 0.03;
+  const flatBand   = Math.min(dutiable, 1000);
+  const flatDuty   = flatBand * flatRate;
+  const aboveBand  = Math.max(0, dutiable - 1000);
+
+  // Value-weighted average HTSUS rate across all declared goods
+  let wRate = 0;
+  if (totalValue > 0) {
+    const weighted = items.reduce((s,i) => {
+      const c = CDC_CATS.find(x => x.id === i.cat) || CDC_CATS[0];
+      return s + (i.val || 0) * c.rate;
+    }, 0);
+    wRate = weighted / totalValue;
+  }
+  const aboveDuty = aboveBand * wRate;
+  const totalDuty = flatDuty + aboveDuty;
+  const effRate   = totalValue > 0 ? totalDuty / totalValue : 0;
+
+  return { totalValue, travelers, pool, perPerson, exemption, dutiable,
+           flatRate, flatBand, flatDuty, aboveBand, wRate, aboveDuty, totalDuty, effRate };
+}
+
+function cdcCopySummary() {
+  const d = cdcSnapshot || cdcCompute();
+  const L = [];
+  L.push('TripTools — Customs Duty Estimate');
+  L.push('(Estimate only — CBP makes the final determination)');
+  L.push('');
+  L.push('Returning from: ' + (cdcData.region === 'insular' ? 'U.S. insular possession' : 'most countries'));
+  L.push(`Travelers: ${d.travelers}${d.pool ? ' (exemptions pooled)' : ' (single declarant)'}`);
+  L.push('');
+  cdcData.items.forEach(it => {
+    const c = CDC_CATS.find(x => x.id === it.cat) || CDC_CATS[0];
+    L.push(`  ${it.desc} — ${cdcFmt(it.val)} (${c.name})`);
+  });
+  L.push('');
+  L.push(`Total declared value:  ${cdcFmt(d.totalValue)}`);
+  L.push(`Duty-free exemption:  -${cdcFmt(d.exemption)}`);
+  L.push(`Dutiable amount:       ${cdcFmt(d.dutiable)}`);
+  L.push(`Flat-rate band duty:   ${cdcFmt(d.flatDuty)}  (${cdcFmt(d.flatBand)} @ ${(d.flatRate*100).toFixed(d.flatRate*100%1?1:0)}%)`);
+  L.push(`Duty above band:       ${cdcFmt(d.aboveDuty)}`);
+  L.push(`ESTIMATED DUTY OWED:   ${cdcFmt(d.totalDuty)}`);
+  const text = L.join('\n');
+  const showOk = () => {
+    const ok = document.getElementById('cdc-copy-ok');
+    ok.classList.add('show'); setTimeout(() => ok.classList.remove('show'), 1600);
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(showOk).catch(() => { tcrCopyFallback(text); showOk(); });
+  } else { tcrCopyFallback(text); showOk(); }
+}
+
+function cdcFmt(n) {
+  const v = Math.round((n || 0) * 100) / 100;
+  return '$' + v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+function cdcNum(n) { return (Math.round((n || 0) * 100) / 100).toLocaleString('en-US'); }
+function cdcEsc(s) { return String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c])); }
 
 /* ── MYTRIP ── */
 function getTrips()        { return JSON.parse(localStorage.getItem('tt_trips')||'[]'); }
