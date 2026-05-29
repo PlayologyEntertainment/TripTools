@@ -3671,16 +3671,165 @@ body.no-scroll { overflow: hidden; }
     </div>
   </div>
 </div>
-<div id="view-placeholder-customs-decl" class="view">
-  <nav class="tool-topbar">
+<style>
+/* ── CUSTOMS DECLARATION HELPER ── */
+.cdh-print-hdr{display:none}
+.cdh-result{margin-top:20px}
+.cdh-empty{padding:22px 18px;border:1.5px dashed var(--ink);border-radius:var(--r);color:var(--muted);text-align:center;font-size:14px;background:var(--paper-2)}
+.cdh-empty strong{display:block;font-family:var(--serif);font-size:17px;color:var(--ink);margin-bottom:4px;font-weight:600}
+.cdh-card{border:2px solid var(--ink);border-radius:var(--r);overflow:hidden;background:var(--paper);break-inside:avoid}
+.cdh-card-top{padding:16px 18px;display:flex;align-items:center;gap:14px;background:var(--paper-2);border-bottom:1.5px solid var(--ink)}
+.cdh-card-flag{font-size:38px;line-height:1;flex-shrink:0}
+.cdh-card-main{flex:1;min-width:0}
+.cdh-card-name{font-family:var(--serif);font-size:22px;font-weight:700;letter-spacing:-.02em;color:var(--ink);line-height:1.1}
+.cdh-card-auth{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+.cdh-allow-grid{display:grid;grid-template-columns:1fr 1fr;border-bottom:1.5px solid var(--ink)}
+.cdh-allow-cell{padding:13px 16px;border-right:1.5px solid var(--ink);border-bottom:1.5px solid var(--ink)}
+.cdh-allow-cell:nth-child(2n){border-right:none}
+.cdh-allow-cell:nth-last-child(-n+2){border-bottom:none}
+.cdh-allow-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:6px}
+.cdh-allow-val{font-size:13.5px;color:var(--ink);margin-top:5px;line-height:1.45;font-weight:500}
+@media(max-width:520px){
+  .cdh-allow-grid{grid-template-columns:1fr}
+  .cdh-allow-cell{border-right:none}
+}
+.cdh-list-block{padding:14px 18px;border-bottom:1.5px solid var(--rule)}
+.cdh-list-block:last-child{border-bottom:none}
+.cdh-list-hdr{font-family:var(--serif);font-size:15px;font-weight:600;color:var(--ink);display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.cdh-list{list-style:none;margin:0;padding:0;font-size:13px;color:var(--ink-2);line-height:1.5}
+.cdh-list li{padding:4px 0 4px 20px;position:relative}
+.cdh-list.prohibited li::before{content:"✕";position:absolute;left:0;color:var(--accent);font-weight:700}
+.cdh-list.restricted li::before{content:"!";position:absolute;left:2px;color:#B8860B;font-weight:700}
+.cdh-note{padding:13px 18px;background:var(--paper-2);font-size:13px;color:var(--ink-2);line-height:1.55}
+.cdh-note strong{color:var(--ink);font-weight:600}
+.cdh-sec{margin-top:30px}
+.cdh-sec-hdr{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid var(--ink)}
+.cdh-sec-num{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.cdh-sec-hdr h3{font-family:var(--serif);font-size:20px;font-weight:600;letter-spacing:-.01em;color:var(--ink);margin:0}
+.cdh-check-list{display:flex;flex-direction:column;gap:8px}
+.cdh-check-item{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border:1.5px solid var(--ink);border-radius:var(--r);background:var(--paper);cursor:pointer;min-height:44px}
+.cdh-check-item:hover{background:var(--paper-2)}
+.cdh-check-item input{appearance:none;-webkit-appearance:none;width:22px;height:22px;border:1.5px solid var(--ink);border-radius:3px;background:var(--paper);flex-shrink:0;cursor:pointer;position:relative;margin:0}
+.cdh-check-item input:checked{background:var(--accent);border-color:var(--accent)}
+.cdh-check-item input:checked::after{content:"✓";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:700}
+.cdh-check-item input:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.cdh-check-ico{font-size:20px;line-height:1.2;flex-shrink:0}
+.cdh-check-body{flex:1;font-size:14px;color:var(--ink);line-height:1.4}
+.cdh-check-body small{display:block;color:var(--muted);font-size:12px;margin-top:2px;line-height:1.4}
+.cdh-check-item.checked{border-color:var(--accent);background:rgba(255,77,46,.06)}
+.cdh-verdict{margin-top:16px;border:2px solid var(--ink);border-radius:var(--r);overflow:hidden}
+.cdh-verdict-top{padding:16px 18px;display:flex;align-items:center;gap:14px}
+.cdh-verdict-ico{font-size:32px;line-height:1;flex-shrink:0}
+.cdh-verdict-title{font-family:var(--serif);font-size:20px;font-weight:700;letter-spacing:-.02em;line-height:1.15}
+.cdh-verdict-sub{font-size:13px;margin-top:3px;line-height:1.45}
+.cdh-verdict.red .cdh-verdict-top{background:var(--accent);color:#fff}
+.cdh-verdict.red .cdh-verdict-sub{color:rgba(255,255,255,.9)}
+.cdh-verdict.green .cdh-verdict-top{background:var(--green);color:#fff}
+.cdh-verdict.green .cdh-verdict-sub{color:rgba(255,255,255,.9)}
+.cdh-verdict-body{padding:14px 18px;background:var(--paper);font-size:13.5px;color:var(--ink-2);line-height:1.55}
+.cdh-verdict-body ul{margin:8px 0 0;padding-left:20px}
+.cdh-verdict-body li{margin-bottom:4px}
+.cdh-verdict-body strong{color:var(--ink)}
+.cdh-reset{margin-top:10px;background:none;border:1.5px solid var(--ink);border-radius:var(--r);padding:9px 16px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);cursor:pointer;min-height:40px}
+.cdh-reset:hover{background:var(--paper-2)}
+.cdh-channel-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:560px){.cdh-channel-grid{grid-template-columns:1fr}}
+.cdh-channel{border:1.5px solid var(--ink);border-radius:var(--r);overflow:hidden;background:var(--paper)}
+.cdh-channel-hd{padding:12px 16px;color:#fff;display:flex;align-items:center;gap:10px;font-family:var(--serif);font-weight:700;font-size:17px;letter-spacing:-.01em}
+.cdh-channel.green .cdh-channel-hd{background:var(--green)}
+.cdh-channel.red .cdh-channel-hd{background:var(--accent)}
+.cdh-channel-bd{padding:13px 16px;font-size:13px;color:var(--ink-2);line-height:1.5}
+.cdh-channel-bd strong{color:var(--ink);font-weight:600}
+@media print{
+  .cdh-print-hdr{display:flex !important;justify-content:space-between;align-items:baseline;border-bottom:2px solid #000;padding-bottom:8px;margin-bottom:16px;font-family:var(--serif)}
+  .cdh-search-wrap,.cdh-reset,.tool-bar{display:none !important}
+  .cdh-card,.cdh-channel,.cdh-verdict,.cdh-check-item{break-inside:avoid;border:1.5px solid #000 !important}
+  .cdh-card-top,.cdh-verdict.red .cdh-verdict-top,.cdh-verdict.green .cdh-verdict-top,.cdh-channel-hd{background:#000 !important;color:#fff !important}
+}
+</style>
+<div id="view-customs-decl" class="view">
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="window.print()">🖨 Print</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">📦</span>
-    <h2>Customs Declaration Helper</h2>
-    <p style="margin-bottom:24px">What you can & can't bring in. Duty-free limits & prohibited items by country.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-customs-decl"></div>
+
+  <!-- Print-only header -->
+  <div class="cdh-print-hdr">
+    <strong>TripTools — Customs Declaration Helper</strong>
+    <span id="cdh-print-date"></span>
+  </div>
+
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>Customs Declaration Helper</h1>
+    <p class="tool-sub">What you can &amp; can't bring into your destination — duty-free allowances for alcohol, tobacco, goods &amp; cash, plus prohibited and must-declare items. Then run the self-check to see if you should walk the red or green channel.</p>
+  </div>
+
+  <div class="tool-body">
+
+    <!-- ── DESTINATION LOOKUP ── -->
+    <div class="fg">
+      <label>Destination Country</label>
+      <div class="vg-search-wrap cdh-search-wrap">
+        <input type="search" id="cdh-dest-search" class="vg-search-input" placeholder="🔍 Search destination…" autocomplete="off">
+        <div id="cdh-dest-drop" class="vg-drop" style="display:none"></div>
+        <input type="hidden" id="cdh-dest-val">
+      </div>
+    </div>
+
+    <div id="cdh-result" class="cdh-result"></div>
+
+    <div style="margin-top:16px;padding:12px 16px;background:var(--paper-2);border-left:3px solid var(--yellow);border-radius:var(--r);font-size:13px;color:var(--muted);line-height:1.55">
+      ⚠️ <strong>Verify with official sources before travel.</strong> Customs allowances and prohibited-item lists change frequently and vary by your age, residency, length of stay, and mode of arrival. Confirm with the destination's official customs authority before you pack. When in doubt — <strong>declare it.</strong>
+    </div>
+
+    <!-- ── SELF-CHECK ── -->
+    <div class="cdh-sec">
+      <div class="cdh-sec-hdr">
+        <span class="cdh-sec-num">§ 01</span>
+        <h3>📋 Do I Need to Declare?</h3>
+      </div>
+      <p style="margin:0 0 12px 0;font-size:13px;color:var(--ink-2);line-height:1.55">Tick anything you're carrying. This is a personal self-check — your answers stay in this browser and are never sent anywhere.</p>
+      <div class="cdh-check-list" id="cdh-check-list"></div>
+      <div id="cdh-verdict-wrap"></div>
+      <button class="cdh-reset" onclick="cdhResetCheck()">↺ Reset self-check</button>
+    </div>
+
+    <!-- ── RED vs GREEN CHANNEL ── -->
+    <div class="cdh-sec">
+      <div class="cdh-sec-hdr">
+        <span class="cdh-sec-num">§ 02</span>
+        <h3>🚦 Red Channel vs. Green Channel</h3>
+      </div>
+      <p style="margin:0 0 12px 0;font-size:13px;color:var(--ink-2);line-height:1.55">Most international airports split arriving travelers into two channels. Picking the wrong one isn't a shortcut — walking through green with something to declare is a customs offence almost everywhere.</p>
+      <div class="cdh-channel-grid">
+        <div class="cdh-channel green">
+          <div class="cdh-channel-hd">🟢 Green / "Nothing to Declare"</div>
+          <div class="cdh-channel-bd">Use only if everything you carry is <strong>within the duty-free allowances</strong> and you have <strong>no prohibited or restricted items</strong>. Officers can still stop and search you at random.</div>
+        </div>
+        <div class="cdh-channel red">
+          <div class="cdh-channel-hd">🔴 Red / "Goods to Declare"</div>
+          <div class="cdh-channel-bd">Use if you're <strong>over any allowance</strong>, carrying <strong>restricted goods</strong> (food, plants, animal products, large cash sums, medicines, commercial items), or you're simply <strong>unsure</strong>. Declaring voluntarily means duty at worst — failing to declare risks seizure and fines.</div>
+        </div>
+      </div>
+      <p style="margin:12px 0 0 0;font-size:12px;color:var(--muted);line-height:1.5;font-style:italic">Some countries (e.g. the United States) have no physical channels — instead you complete a written or digital declaration form for every traveler or family. The principle is the same: declare everything truthfully.</p>
+    </div>
+
+  </div>
+
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    Keep receipts for big-ticket purchases in your carry-on. If an officer questions the value of a watch, camera, or jewellery, a receipt settles it instantly — and proves which items you already owned before the trip, so you aren't charged duty on your own belongings.
+  </div>
+
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('customs-duty')">🛃 Customs Duty Calculator</button>
+      <button class="rel-btn" onclick="openTool('tsa-guide')">🔒 TSA &amp; Security Guide</button>
+      <button class="rel-btn" onclick="openTool('visa-guide')">🌍 Visa Requirement Guide</button>
+      <button class="rel-btn" onclick="openTool('doc-checklist')">✅ Document Checklist</button>
     </div>
   </div>
 </div>
@@ -10277,7 +10426,7 @@ const TOOLS = [
   {id:'doc-checklist', nm:'Travel Document Checklist',  ico:'✅', ph:'docs',      on:false, live:true,  ds:'Customizable pre-trip checklist adapting to trip type.'},
   {id:'intl-driving',  nm:'International Driving Guide',ico:'🚗', ph:'docs',      on:false, live:false, ds:'IDP requirements, driving side & speed limits for 80+ countries.'},
   {id:'flight-delay',  nm:'Flight Delay Compensation',  ico:'⚖️', ph:'docs',      on:false, live:false, ds:'Your rights by region — EU261, US DOT, UK, Canada.'},
-  {id:'customs-decl',  nm:'Customs Declaration Helper', ico:'📦', ph:'docs',      on:false, live:false, ds:"What you can & can't bring in. Duty-free limits by country."},
+  {id:'customs-decl',  nm:'Customs Declaration Helper', ico:'📦', ph:'docs',      on:false, live:true,  ds:"What you can & can't bring in. Duty-free allowances, prohibited items & a declare-or-not self-check."},
   {id:'ff-tracker',    nm:'Frequent Flyer Tracker',     ico:'🏆', ph:'docs',      on:false, live:false, ds:'Log miles/points across programs. Track expiry & redemption value.'},
   {id:'vaccination',   nm:'Vaccination Requirements',   ico:'💉', ph:'docs',      on:false, live:true,  ds:'Required & recommended vaccines for 120+ destinations. Malaria risk zones, Yellow Fever certificate guide & personal record.'},
   {id:'tsa-guide',     nm:'TSA & Security Guide',       ico:'🔒', ph:'docs',      on:false, live:true,  ds:'Search any item for carry-on / checked / prohibited status.'},
@@ -11013,6 +11162,7 @@ function injectTripCtx(id) {
   if(id==='weather')    wxInit();
   if(id==='trip-recap') tcrInit();
   if(id==='customs-duty') cdcInit();
+  if(id==='customs-decl') cdhInit();
 }
 
 /* ── HUB RENDER ── */
@@ -29873,6 +30023,453 @@ function tqRetake() {
   try { localStorage.removeItem(TQ_KEY); } catch(_) {}
   document.getElementById('tq-result-wrap').innerHTML = '';
   tqRenderQuestion();
+}
+
+/* ════════════════════════════════════════════════════════════
+   CUSTOMS DECLARATION HELPER
+   Bundled, offline reference of duty-free allowances + prohibited
+   / restricted items for ~40 top destinations, plus a personal
+   "do I need to declare?" self-check. All allowances are per adult
+   traveler and approximate — see in-tool disclaimer.
+   ════════════════════════════════════════════════════════════ */
+
+/* Shared EU template (duty-free for travelers ARRIVING from outside the EU) */
+const CDH_EU_ALC  = '1 L spirits (>22% ABV) OR 2 L fortified/sparkling wine — PLUS 4 L still wine AND 16 L beer';
+const CDH_EU_TOB  = '200 cigarettes OR 100 cigarillos OR 50 cigars OR 250 g tobacco';
+const CDH_EU_GOODS= 'Other goods up to €430 (air/sea) or €300 (land); €150 limit for under-15s';
+const CDH_EU_CASH = '€10,000 or more (or equivalent) must be declared when entering or leaving the EU';
+const CDH_EU_PROH = ['Counterfeit & pirated goods','Meat, milk &amp; dairy products from outside the EU','Endangered species & CITES products (ivory, certain corals, skins, shells)','Illegal drugs & narcotics','Offensive weapons, flick knives & disguised weapons','Indecent or obscene material'];
+const CDH_EU_REST = ['Cash €10,000+ — declare','Plants, seeds, bulbs &amp; some fruit/vegetables (phytosanitary certificate)','Pets — microchip, rabies vaccination &amp; EU pet/health certificate','Medicines containing controlled substances — carry your prescription','Firearms & ammunition — permit required','Protected-species souvenirs — CITES permit'];
+function cdhEU(c,n,f,extra){
+  return {c,n,f,region:'EU',auth:'EU harmonised customs rules',
+    alc:CDH_EU_ALC, tob:CDH_EU_TOB, goods:CDH_EU_GOODS, cash:CDH_EU_CASH,
+    proh:CDH_EU_PROH, rest:CDH_EU_REST,
+    note:'Allowances apply to travelers <strong>arriving from outside the EU</strong> and to adults (17+ for alcohol &amp; tobacco). Travel within the EU is unrestricted for personal-use quantities.' + (extra?(' '+extra):'')};
+}
+
+const CDH_COUNTRIES = [
+  // ── European Union ──
+  cdhEU('FR','France','🇫🇷','For overseas territories (French Guiana, Réunion…) different rules apply.'),
+  cdhEU('DE','Germany','🇩🇪'),
+  cdhEU('IT','Italy','🇮🇹'),
+  cdhEU('ES','Spain','🇪🇸','The Canary Islands have lower allowances — they are outside the EU customs/VAT territory.'),
+  cdhEU('NL','Netherlands','🇳🇱'),
+  cdhEU('GR','Greece','🇬🇷'),
+  cdhEU('PT','Portugal','🇵🇹'),
+  cdhEU('IE','Ireland','🇮🇪'),
+  cdhEU('AT','Austria','🇦🇹'),
+  cdhEU('BE','Belgium','🇧🇪'),
+  cdhEU('SE','Sweden','🇸🇪'),
+  cdhEU('DK','Denmark','🇩🇰'),
+  cdhEU('PL','Poland','🇵🇱'),
+  cdhEU('CZ','Czechia','🇨🇿'),
+  cdhEU('HR','Croatia','🇭🇷'),
+
+  // ── Non-EU Europe ──
+  {c:'GB',n:'United Kingdom',f:'🇬🇧',region:'Europe',auth:'HM Revenue & Customs (HMRC) / Border Force',
+    alc:'4 L spirits OR 9 L sparkling/fortified wine — PLUS 18 L still wine AND 42 L beer',
+    tob:'200 cigarettes OR 100 cigarillos OR 50 cigars OR 250 g tobacco OR 200 sticks of heated tobacco',
+    goods:'Other goods up to £390 (£270 if arriving by private plane/boat)',
+    cash:'£10,000 or more in cash must be declared when entering or leaving Great Britain',
+    proh:['Illegal drugs','Offensive weapons, flick & gravity knives, self-defence sprays','Endangered species & products (CITES)','Rough diamonds','Indecent & obscene material','Most meat & dairy from non-EU countries'],
+    rest:['Cash £10,000+ — declare','Food, plants &amp; seeds (restrictions apply)','Firearms, ammunition & explosives — licence','Medicines containing controlled drugs — carry prescription/letter','Live animals & pets — pet travel scheme'],
+    note:'Allowances are per adult (17+) arriving from <strong>outside the UK</strong>. You can split the alcohol allowance (e.g. 2 L spirits + 4.5 L sparkling wine).'},
+  {c:'CH',n:'Switzerland',f:'🇨🇭',region:'Europe',auth:'Federal Office for Customs & Border Security (FOCBS)',
+    alc:'5 L of alcohol up to 18% ABV — PLUS 1 L above 18% ABV (17+)',
+    tob:'250 cigarettes/cigars OR 250 g tobacco',
+    goods:'Goods up to CHF 300 total value are VAT-free; above that VAT is due',
+    cash:'CHF 10,000 or more (or equivalent) must be declared on request',
+    proh:['Counterfeit & pirated goods','Protected species & CITES products','Illegal drugs','Certain weapons (e.g. butterfly knives, brass knuckles)'],
+    rest:['Meat & meat products — max 1 kg per person','Cash CHF 10,000+ — declare on request','Firearms — permit','Medicines — personal quantities only'],
+    note:'Switzerland is outside the EU. The CHF 300 value limit and 1 kg meat limit are the most commonly exceeded — declare anything above them via the QuickZoll app or red channel.'},
+  {c:'NO',n:'Norway',f:'🇳🇴',region:'Europe',auth:'Norwegian Customs (Tolletaten)',
+    alc:'1 L spirits + 1.5 L wine + 2 L beer (quotas can be swapped; 18+ for wine/beer, 20+ for spirits)',
+    tob:'200 cigarettes + 200 sheets of cigarette paper, OR 250 g tobacco (18+)',
+    goods:'Goods up to NOK 6,000 (stay over 24 h) or NOK 3,000 (under 24 h)',
+    cash:'NOK 25,000 or more (or equivalent) must be declared',
+    proh:['Illegal drugs','Certain weapons & knives','Counterfeit goods','Potatoes; certain plants & seeds'],
+    rest:['Meat, dairy & products — up to 10 kg from EEA','Cash NOK 25,000+ — declare','Medicines — personal supply with documentation','Firearms — permit'],
+    note:'Norway is outside the EU. You must declare via the red channel / Norwegian Customs app if you exceed the quotas — this is one of the strictest alcohol-duty regimes in Europe.'},
+  {c:'IS',n:'Iceland',f:'🇮🇸',region:'Europe',auth:'Iceland Revenue & Customs (Skatturinn)',
+    alc:'1 L spirits + 0.75 L wine + 3 L beer (combinations allowed; 20+)',
+    tob:'200 cigarettes OR 250 g tobacco (18+)',
+    goods:'Goods up to ISK 88,000 (max ISK 56,000 for any single item)',
+    cash:'€10,000 or more (or equivalent) must be declared',
+    proh:['Raw eggs & uncooked meat','Illegal drugs','Certain weapons','Snus/chewing tobacco above personal limits'],
+    rest:['Food — up to 10 kg (no raw meat/eggs)','Fishing & riding gear — must be disinfected/certified','Cash €10,000+ — declare','Medicines — personal supply with prescription'],
+    note:'Iceland has strict biosecurity. Used riding clothing and fishing tackle must be disinfected or accompanied by a vet/disinfection certificate.'},
+  {c:'TR',n:'Turkey',f:'🇹🇷',region:'Europe',auth:'Turkish Ministry of Trade — Customs',
+    alc:'1 L spirits (>22%) + 1 L wine/other (≤22%) — total alcohol up to 1 L + 1 L (18+)',
+    tob:'600 cigarettes + 100 cigarillos + 50 cigars + 250 g tobacco (combined limits, 18+)',
+    goods:'Gifts/goods up to €430 (€150 for under-15s)',
+    cash:'US$10,000 or more in foreign currency must be declared; max ₺5,000 in Turkish lira',
+    proh:['Illegal drugs','Counterfeit goods','Antiquities & antiques without certificate (illegal to export)'],
+    rest:['Cash US$10,000+ — declare','Antiquities — export strictly controlled, keep purchase certificates','Medicines — personal supply with prescription','Firearms — permit'],
+    note:'Exporting antiquities or genuine antiques from Turkey is a serious offence. Keep certificates of authenticity and purchase receipts for carpets, art and historic-looking items.'},
+
+  // ── North America ──
+  {c:'US',n:'United States',f:'🇺🇸',region:'North America',auth:'U.S. Customs & Border Protection (CBP)',
+    alc:'1 L of alcohol duty-free for personal use (21+); more is allowed but dutiable',
+    tob:'200 cigarettes + 100 cigars (non-Cuban) duty-free (21+)',
+    goods:'US$800 personal exemption (gifts/personal goods) for returning residents & most visitors',
+    cash:'US$10,000 or more in cash/instruments must be reported (FinCEN Form 105)',
+    proh:['Cuban-origin cigars & products (most cases)','Absinthe with thujone & some spirits','Many fruits, vegetables, plants & soil','Most fresh meat & poultry products','Counterfeit goods; certain wildlife & ivory'],
+    rest:['ALL food, plants & animal products — must be declared on CBP Form 6059B','Cash US$10,000+ — report','Prescription medicines — original packaging + script','Firearms & ammunition — strict permits'],
+    note:'There are no red/green channels — <strong>every traveler/family completes a declaration</strong> (paper or at a kiosk). Declare all agricultural items even if allowed; failing to do so risks fines even when the item itself was admissible.'},
+  {c:'CA',n:'Canada',f:'🇨🇦',region:'North America',auth:'Canada Border Services Agency (CBSA)',
+    alc:'1.5 L wine OR 1.14 L spirits OR 8.5 L beer (must meet the legal drinking age of the province)',
+    tob:'200 cigarettes + 50 cigars + 200 g tobacco + 200 tobacco sticks (a special-duty stamp may apply)',
+    goods:'CAN$0 (under 24 h) · CAN$200 (24 h+) · CAN$800 (48 h+) personal exemption',
+    cash:'CAD$10,000 or more (or equivalent) must be declared',
+    proh:['Prohibited firearms & weapons','Certain food, plants & animal products','Obscene material & hate propaganda','Endangered species & products (CITES)'],
+    rest:['Food, plants, animals & wood products — declare all','Cash CAD$10,000+ — declare','Firearms — declare in writing','Cannabis — illegal to take across the border in either direction'],
+    note:'Even though cannabis is legal within Canada, carrying it across the international border (in or out) is a serious criminal offence. Duty-free alcohol/tobacco require the 48-hour stay.'},
+  {c:'MX',n:'Mexico',f:'🇲🇽',region:'North America',auth:'Mexican Customs (Aduanas / SAT)',
+    alc:'3 L of spirits/liquor + 6 L of wine (adults 18+)',
+    tob:'10 packs of cigarettes (200) OR 25 cigars OR 200 g tobacco (18+)',
+    goods:'US$500 by air/sea · US$300 by land (per person)',
+    cash:'US$10,000 or more (or equivalent) must be declared',
+    proh:['Illegal drugs','Firearms & ammunition (very strict — even one round can mean prison)','Endangered species & products'],
+    rest:['Cash US$10,000+ — declare','Firearms & ammunition — special permit, otherwise prohibited','Certain foods, plants & medicines'],
+    note:'Bringing in ANY firearm or ammunition without a hard-to-obtain permit is a serious crime in Mexico — check every bag. Customs uses a random "red light / green light" button at many crossings.'},
+
+  // ── Asia ──
+  {c:'JP',n:'Japan',f:'🇯🇵',region:'Asia',auth:'Japan Customs',
+    alc:'3 bottles of alcoholic beverages (about 760 ml each), 20+',
+    tob:'200 cigarettes OR 50 cigars OR 250 g tobacco; heated tobacco ~10 packs (20+)',
+    goods:'Goods with a total overseas value up to ¥200,000',
+    cash:'¥1,000,000 or more (or equivalent) must be declared',
+    proh:['Narcotics & stimulants — incl. some OTC meds (Adderall, certain pseudoephedrine cold medicines)','Firearms, swords & parts','Counterfeit goods','Most fresh meat, fruit & plants','Obscene material'],
+    rest:['Meat & plant products — quarantine inspection required','Prescription medicines over 1 month / injectables — "Yakkan Shoumei" import certificate','Cash ¥1,000,000+ — declare'],
+    note:'Japan bans some medicines that are legal elsewhere (e.g. Adderall, and cold/allergy meds containing pseudoephedrine). Check before you fly. All arrivals submit a declaration (paper or Visit Japan Web QR).'},
+  {c:'CN',n:'China',f:'🇨🇳',region:'Asia',auth:'General Administration of Customs (GACC)',
+    alc:'1.5 L of alcohol (>12% ABV) for personal use',
+    tob:'400 cigarettes OR 100 cigars OR 500 g tobacco (for non-residents)',
+    goods:'Personal goods up to RMB 5,000 in value',
+    cash:'US$5,000 (foreign) or RMB 20,000 must be declared',
+    proh:['Printed/digital material harmful to politics, economy or culture','Illegal drugs','Fresh fruit, vegetables & many animal products','Counterfeit currency'],
+    rest:['Cash over US$5,000 / RMB 20,000 — declare','Publications, films & media — may be inspected','Certain electronics & transmitters'],
+    note:'Customs may inspect books, films and devices for politically sensitive content. Mainland China rules differ from Hong Kong &amp; Macau, which are separate customs territories.'},
+  {c:'HK',n:'Hong Kong',f:'🇭🇰',region:'Asia',auth:'Hong Kong Customs & Excise',
+    alc:'1 L of liquor with >30% ABV (18+); lower-strength alcohol is duty-free',
+    tob:'19 cigarettes OR 1 cigar (≤25 g) OR 25 g tobacco — among the lowest limits in the world (18+)',
+    goods:'Hong Kong is a free port — no general customs duty on most goods',
+    cash:'HK$120,000 or more (or equivalent) must be declared',
+    proh:['Illegal drugs','Weapons, including certain knives & laser pointers','Counterfeit goods','Endangered species & products (CITES — strict on ivory)'],
+    rest:['Cash HK$120,000+ — declare','Powdered infant formula — max 1.8 kg (two cans) leaving HK','Pharmaceuticals — personal quantities'],
+    note:'The tobacco allowance is tiny — effectively a single cigar or under a pack of cigarettes. Bringing in more without declaring is a common, costly mistake.'},
+  {c:'KR',n:'South Korea',f:'🇰🇷',region:'Asia',auth:'Korea Customs Service',
+    alc:'2 bottles of alcohol, total ≤ 2 L and ≤ US$400 in value (19+)',
+    tob:'200 cigarettes OR 50 cigars OR 250 g tobacco (19+)',
+    goods:'Duty-free allowance of US$800 total (plus 60 ml perfume)',
+    cash:'US$10,000 or more (or equivalent) must be declared',
+    proh:['Illegal drugs','Counterfeit goods','Firearms, knives & weapons','Items infringing IP rights'],
+    rest:['Cash US$10,000+ — declare','Meat & plant products — quarantine','Health/medicine products over personal limits','Endangered species — CITES'],
+    note:'The US$800 duty-free allowance covers all purchased goods combined. Arrivals can use a paper card or the mobile customs declaration.'},
+  {c:'TH',n:'Thailand',f:'🇹🇭',region:'Asia',auth:'Thai Customs Department',
+    alc:'1 L of alcoholic beverages (20+)',
+    tob:'200 cigarettes OR 250 g of cigars/tobacco — exceeding this brings very heavy fines (20+)',
+    goods:'Personal goods up to ฿20,000 in value',
+    cash:'US$20,000 or more (or equivalent) must be declared; taking out ฿50,000+ in Thai baht needs permission',
+    proh:['E-cigarettes, vapes & refills — illegal to import or possess','Illegal drugs (severe penalties incl. death)','Pornography','Counterfeit goods','Fake/IP-infringing items'],
+    rest:['Buddha images & antiques — export permit from the Fine Arts Dept','Cash US$20,000+ — declare','Some plants & food — phytosanitary rules'],
+    note:'<strong>Vapes and e-cigarettes are banned in Thailand</strong> — bringing them in can mean confiscation, large fines or jail. Exporting Buddha images/antiques requires a permit.'},
+  {c:'SG',n:'Singapore',f:'🇸🇬',region:'Asia',auth:'Singapore Customs',
+    alc:'Up to 1 L spirits + 1 L wine + 1 L beer (combinations) — only if 18+ , 48 h+ away & NOT arriving from Malaysia',
+    tob:'No duty-free tobacco — every cigarette is dutiable and must be declared',
+    goods:'GST relief on goods up to S$500 (over 48 h away) or S$100 (under 48 h)',
+    cash:'S$20,000 or more (or equivalent) must be declared',
+    proh:['Chewing gum (import for sale banned)','E-cigarettes, vapes & shisha — banned','Illegal drugs — death penalty for trafficking','Firecrackers; controlled/obscene publications','Endangered species & products'],
+    rest:['ALL tobacco — declare & pay duty (no allowance)','Cash S$20,000+ — declare','Medicines — some need prior approval (e.g. codeine, sleeping pills)'],
+    note:'Singapore has <strong>zero</strong> duty-free tobacco allowance and bans vapes and chewing-gum imports. Penalties for drugs are among the harshest in the world. Use the red channel for any tobacco.'},
+  {c:'IN',n:'India',f:'🇮🇳',region:'Asia',auth:'Central Board of Indirect Taxes & Customs (CBIC)',
+    alc:'2 L of alcoholic liquor or wine',
+    tob:'100 cigarettes OR 25 cigars OR 125 g tobacco',
+    goods:'Duty-free allowance ₹50,000 for travelers (lower for short stays / certain origins)',
+    cash:'US$5,000 in notes / US$10,000 total instruments must be declared; ₹25,000 limit for Indian currency',
+    proh:['Narcotics','Counterfeit goods & currency','Certain wildlife products & ivory','Satellite phones (require licence)'],
+    rest:['Gold & jewellery above free limits — declare & pay duty','Cash over limits — declare','Drones & satellite phones — permits','Wildlife/antiques — restricted export'],
+    note:'Gold is tightly controlled and dutiable above small personal limits. Many travelers are stopped over undeclared gold and electronics — use the red channel if unsure.'},
+  {c:'AE',n:'United Arab Emirates',f:'🇦🇪',region:'Asia',auth:'UAE Federal Customs / Dubai Customs',
+    alc:'4 L of alcohol OR 2 cartons (24 cans) of beer — non-Muslim adults 18+',
+    tob:'400 cigarettes + 50 cigars + 500 g tobacco',
+    goods:'Gifts up to AED 3,000 in value',
+    cash:'AED 60,000 or more (or equivalent) must be declared',
+    proh:['Narcotics — zero tolerance (incl. poppy seeds, some CBD/THC products)','Pork products (restricted)','Pornography & material offensive to Islam','Gambling tools; counterfeit goods','Israeli-origin goods historically restricted'],
+    rest:['Medicines with controlled substances (codeine, tramadol, some ADHD/sleep meds) — prior approval + prescription','Cash AED 60,000+ — declare','Certain books/media — may be inspected'],
+    note:'The UAE has <strong>zero tolerance for drugs</strong> — trace amounts, poppy seeds, and some legal-elsewhere medicines (e.g. codeine, CBD) can lead to arrest. Get prior approval for controlled medicines.'},
+  {c:'VN',n:'Vietnam',f:'🇻🇳',region:'Asia',auth:'General Department of Vietnam Customs',
+    alc:'1.5 L spirits (>22%) OR 2 L (<22%) — PLUS 3 L beer (18+)',
+    tob:'200 cigarettes OR 100 cigars OR 500 g tobacco (18+)',
+    goods:'Goods up to VND 10,000,000 in value',
+    cash:'US$5,000 (or equivalent) or VND 15,000,000 must be declared',
+    proh:['Illegal drugs','Weapons & explosives; firecrackers','"Reactionary" or culturally inappropriate material','Counterfeit goods'],
+    rest:['Cash US$5,000+ / VND 15,000,000+ — declare','Publications & media — may be inspected','Antiques — export restricted'],
+    note:'Printed material, films and media deemed politically or culturally sensitive can be confiscated. Declare cash above the threshold to avoid seizure on exit.'},
+  {c:'ID',n:'Indonesia',f:'🇮🇩',region:'Asia',auth:'Indonesian Customs (Bea Cukai)',
+    alc:'1 L of alcoholic beverages (18+)',
+    tob:'200 cigarettes OR 25 cigars OR 100 g tobacco (18+)',
+    goods:'Personal goods up to US$500 per person',
+    cash:'IDR 100,000,000 or more (or equivalent) must be declared',
+    proh:['Illegal drugs — death penalty for trafficking','Pornography','Counterfeit goods','Certain media & publications'],
+    rest:['Cash IDR 100,000,000+ — declare','Plants, animals & food — quarantine','Medicines — personal quantities with prescription'],
+    note:'Indonesia (including Bali) imposes the death penalty for drug trafficking. All arrivals file an electronic customs declaration (e-CD QR code) before landing.'},
+  {c:'PH',n:'Philippines',f:'🇵🇭',region:'Asia',auth:'Bureau of Customs',
+    alc:'2 bottles of wine/spirits, up to 1 L each (18+)',
+    tob:'2 cartons of cigarettes (400) OR 50 cigars OR 250 g tobacco (18+)',
+    goods:'Personal goods up to PHP 10,000 in value',
+    cash:'US$10,000 (foreign) must be declared; PHP 50,000 limit for Philippine pesos',
+    proh:['Illegal drugs','Firearms & ammunition without permit','Pornography','Counterfeit goods'],
+    rest:['Cash US$10,000+ / PHP 50,000+ — declare','Plants, seeds & animals — quarantine','Firearms — permit'],
+    note:'Carry receipts for new gadgets/gifts; goods above PHP 10,000 are dutiable. Declare currency above the thresholds in both directions.'},
+  {c:'MY',n:'Malaysia',f:'🇲🇾',region:'Asia',auth:'Royal Malaysian Customs Department',
+    alc:'1 L of alcoholic beverages',
+    tob:'Duty-free tobacco has been abolished — all cigarettes/tobacco must be declared & duty paid',
+    goods:'Goods up to RM 500 (RM 1,000 if arriving from Langkawi/Labuan after 72 h)',
+    cash:'US$10,000 or more (or equivalent) must be declared',
+    proh:['Illegal drugs — mandatory death penalty for trafficking','Pornography','Counterfeit goods & currency','Certain publications & religious material','Daggers & flick knives'],
+    rest:['ALL tobacco — declare & pay duty','Cash US$10,000+ — declare','Medicines — personal quantities with prescription'],
+    note:'Malaysia imposes the <strong>mandatory death penalty</strong> for drug trafficking. As of recent rules there is no duty-free cigarette allowance — declare any tobacco.'},
+
+  // ── Oceania ──
+  {c:'AU',n:'Australia',f:'🇦🇺',region:'Oceania',auth:'Australian Border Force / Dept of Agriculture (biosecurity)',
+    alc:'2.25 L of alcoholic beverages (18+)',
+    tob:'25 cigarettes OR 25 g of tobacco, plus one open packet (18+)',
+    goods:'General goods up to A$900 (A$450 for under-18s); families can pool',
+    cash:'A$10,000 or more (or equivalent) must be declared',
+    proh:['Illegal drugs','Many foods, fresh produce, seeds & plant material','Weapons & certain knives','Protected wildlife & products (CITES)'],
+    rest:['ALL food, plant, wood & animal products — MUST be declared (heavy on-the-spot fines)','Cash A$10,000+ — declare','Medicines — declare, carry prescription','Firearms — permit'],
+    note:'Australia has <strong>extremely strict biosecurity</strong>. Declare every food item, wooden souvenir, seed and animal product — even if it turns out to be allowed. Undeclared items risk instant fines or visa cancellation.'},
+  {c:'NZ',n:'New Zealand',f:'🇳🇿',region:'Oceania',auth:'NZ Customs Service / Ministry for Primary Industries',
+    alc:'3 bottles of wine/beer (≤4.5 L total) + 3 L of spirits/liqueurs (17+)',
+    tob:'50 cigarettes OR 50 g of tobacco/cigars (17+)',
+    goods:'Goods up to NZ$700 in value',
+    cash:'NZ$10,000 or more (or equivalent) must be declared',
+    proh:['Illegal drugs','Most fresh food, fruit, honey & plant material','Weapons & objectionable material','Endangered species & products'],
+    rest:['ALL food, plants, animal products & outdoor/used gear — MUST be declared','Cash NZ$10,000+ — declare','Medicines — declare, carry prescription','Used hiking/camping/sports gear — must be clean'],
+    note:'Failing to declare a single piece of fruit can mean an instant <strong>NZ$400 fine</strong>. Clean all hiking boots and outdoor gear before arrival — biosecurity officers check for soil and seeds.'},
+
+  // ── South America ──
+  {c:'BR',n:'Brazil',f:'🇧🇷',region:'South America',auth:'Receita Federal (Brazilian Customs)',
+    alc:'12 L of alcoholic beverages',
+    tob:'10 packs of cigarettes (200) + 25 cigars + 250 g tobacco',
+    goods:'Goods up to US$1,000 by air/sea (US$500 by land/river)',
+    cash:'R$10,000 (or equivalent) must be declared',
+    proh:['Illegal drugs','Counterfeit goods','Certain food, plant & animal products','Endangered species & products'],
+    rest:['Cash R$10,000+ — declare','Electronics & goods over US$1,000 — declare & pay 50% duty on excess','Plants/animals — quarantine'],
+    note:'Goods above the US$1,000 air allowance are taxed at a flat 50%. Keep receipts and use the e-DBV electronic declaration for valuables and excess goods.'},
+  {c:'AR',n:'Argentina',f:'🇦🇷',region:'South America',auth:'Dirección General de Aduanas (AFIP)',
+    alc:'2 L of alcoholic beverages (18+)',
+    tob:'400 cigarettes + 50 cigars (18+)',
+    goods:'Goods up to US$500 by air/sea (plus US$500 in the arrival duty-free shop)',
+    cash:'US$10,000 or more (or equivalent) must be declared',
+    proh:['Illegal drugs','Fresh food of animal/plant origin','Counterfeit goods','Endangered species & products'],
+    rest:['Cash US$10,000+ — declare','Food, plants & animal products — quarantine (SENASA)','Goods over US$500 — declare & pay duty'],
+    note:'A separate US$500 allowance applies to purchases in the airport arrival duty-free shop, on top of the US$500 general goods allowance.'},
+
+  // ── Africa / Middle East ──
+  {c:'ZA',n:'South Africa',f:'🇿🇦',region:'Africa',auth:'South African Revenue Service (SARS) Customs',
+    alc:'2 L of wine + 1 L of other alcoholic beverages (spirits/beer) — 18+',
+    tob:'200 cigarettes + 20 cigars + 250 g tobacco (18+)',
+    goods:'New/used goods up to R5,000 (a flat 20% rate applies on the next R20,000)',
+    cash:'R25,000 / US$10,000 (or equivalent) must be declared',
+    proh:['Illegal drugs','Counterfeit goods','Certain food & agricultural products','Endangered species & products (CITES — strict on rhino/ivory)'],
+    rest:['Cash over limits — declare','Goods over R5,000 — declare, flat 20% on next R20,000','Firearms — temporary import permit','Medicines — personal supply with prescription'],
+    note:'A simple flat-rate option (20%) applies to goods between R5,000 and R25,000, so you can clear extra purchases without itemised duty. Declare firearms in advance.'},
+  {c:'EG',n:'Egypt',f:'🇪🇬',region:'Africa',auth:'Egyptian Customs Authority',
+    alc:'1 L on arrival + up to 3 L within 24–48 h from a duty-free shop (21+)',
+    tob:'200 cigarettes OR 25 cigars OR 200 g tobacco',
+    goods:'Personal goods up to a limited value (about EGP 1,000–10,000 depending on item)',
+    cash:'US$10,000 or more (or equivalent) must be declared; EGP 5,000 limit for Egyptian pounds',
+    proh:['Illegal drugs','Drones (require prior permit)','Pornography','Counterfeit goods','Certain political/religious material'],
+    rest:['Cash US$10,000+ — declare','Drones — prior permit required','Antiquities — export strictly prohibited','Medicines — personal supply with prescription'],
+    note:'Drones are effectively banned without a hard-to-get permit and are often confiscated on arrival. Exporting genuine antiquities is illegal.'},
+  {c:'MA',n:'Morocco',f:'🇲🇦',region:'Africa',auth:'Administration des Douanes (ADII)',
+    alc:'1 L of spirits + 1 L of wine',
+    tob:'200 cigarettes OR 50 cigars OR 250 g tobacco',
+    goods:'Personal goods up to MAD 2,000 in value',
+    cash:'Foreign currency over MAD 100,000 equivalent must be declared; dirhams cannot be exported',
+    proh:['Illegal drugs','Pornography','Counterfeit goods','Items offensive to Islam'],
+    rest:['Cash over MAD 100,000 equivalent — declare','Drones — often restricted/confiscated','Dirhams — cannot be taken out of the country'],
+    note:'The Moroccan dirham is a closed currency — convert any leftover dirhams before you leave, as you cannot legally export them. Drones are frequently confiscated at the airport.'},
+];
+
+let cdhCheckState = {};
+const CDH_CHECK_KEY = 'tt_cdh_check';
+const CDH_CHECK_ITEMS = [
+  {id:'cash',  ico:'💵', t:'Cash or monetary instruments over the declaration threshold', d:'Usually around US$10,000 / €10,000 equivalent — combined across your party.'},
+  {id:'alc',   ico:'🥃', t:'Alcohol over the duty-free allowance', d:'Extra bottles bought as gifts count too.'},
+  {id:'tob',   ico:'🚬', t:'Tobacco / cigarettes over the allowance', d:'Some countries (Singapore, Malaysia) have no allowance at all.'},
+  {id:'goods', ico:'🛍️', t:'Purchases or gifts over the value limit', d:'Include duty-free shopping and items bought for other people.'},
+  {id:'food',  ico:'🍎', t:'Food, plants, seeds or fresh produce', d:'Fruit, snacks, spices, seeds, cut flowers — strict in AU/NZ/US.'},
+  {id:'meat',  ico:'🥩', t:'Meat, dairy or other animal products', d:'Cured meats, cheese, jerky, eggs, honey.'},
+  {id:'med',   ico:'💊', t:'Prescription or controlled medicines', d:'Some everyday meds are restricted (Japan, UAE, Singapore).'},
+  {id:'commercial', ico:'📦', t:'Commercial goods, samples or items for resale', d:'Anything beyond personal/gift use is dutiable.'},
+  {id:'animal', ico:'🐾', t:'Live animals or pets', d:'Need microchip, vaccination &amp; health certificates.'},
+  {id:'weapon', ico:'🔫', t:'Weapons, firearms, ammunition or replicas', d:'Includes some knives, sprays and self-defence items.'},
+  {id:'other', ico:'🎁', t:"Items someone else asked you to carry", d:'You are legally responsible for everything in your bags.'},
+];
+
+function cdhInit(){
+  const trip = getActiveTrip();
+  const ctx  = document.getElementById('ctx-customs-decl');
+  if (trip && ctx) {
+    ctx.textContent = `✈ Using context from: ${trip.name} — tap to edit ↗`;
+    ctx.classList.add('show');
+    ctx.onclick = () => showView('mytrip');
+  } else if (ctx) { ctx.classList.remove('show'); }
+
+  const pd = document.getElementById('cdh-print-date');
+  if (pd) pd.textContent = new Date().toLocaleDateString();
+
+  // Load self-check state
+  try { cdhCheckState = JSON.parse(localStorage.getItem(CDH_CHECK_KEY) || '{}') || {}; }
+  catch(_) { cdhCheckState = {}; }
+  cdhRenderCheck();
+
+  // Destination search
+  const search = document.getElementById('cdh-dest-search');
+  const drop   = document.getElementById('cdh-dest-drop');
+  const hidden = document.getElementById('cdh-dest-val');
+  const result = document.getElementById('cdh-result');
+  if (result) result.innerHTML = '';
+  search.value = '';
+  hidden.value = '';
+
+  search.oninput = () => { hidden.value=''; cdhRenderDrop(drop, search.value); drop.style.display='block'; };
+  search.onfocus = () => { cdhRenderDrop(drop, search.value); drop.style.display='block'; };
+  search.onblur  = () => setTimeout(() => { drop.style.display='none'; }, 160);
+
+  // Autofill from active trip destination (fuzzy match)
+  const tripDest = trip && trip.destination ? trip.destination.toLowerCase() : '';
+  if (tripDest) {
+    const tokens = tripDest.split(/[,\s]+/).filter(s => s.length > 2);
+    const match = CDH_COUNTRIES.find(d =>
+      tripDest.includes(d.n.toLowerCase()) ||
+      tokens.some(tk => d.n.toLowerCase().includes(tk))
+    );
+    if (match) {
+      search.value = match.f + ' ' + match.n;
+      hidden.value = match.c;
+      cdhShow(match.c);
+    }
+  }
+}
+
+function cdhRenderDrop(drop, q){
+  const query = (q || '').toLowerCase().trim();
+  const list = query
+    ? CDH_COUNTRIES.filter(x => x.n.toLowerCase().includes(query) || x.c.toLowerCase().includes(query))
+    : CDH_COUNTRIES.slice().sort((a,b)=>a.n.localeCompare(b.n));
+  if (!list.length){
+    drop.innerHTML = '<div class="vg-drop-item" style="color:var(--muted);cursor:default">No data for that destination yet — verify with its official customs authority.</div>';
+    return;
+  }
+  drop.innerHTML = list.slice(0,80).map(x => {
+    const safe = (x.f + ' ' + x.n).replace(/'/g,'&#39;');
+    return `<div class="vg-drop-item" onmousedown="cdhSelect(event,'${x.c}','${safe}')">${x.f} ${x.n}</div>`;
+  }).join('');
+}
+
+function cdhSelect(e, code, label){
+  e.preventDefault();
+  document.getElementById('cdh-dest-search').value = label;
+  document.getElementById('cdh-dest-val').value = code;
+  document.getElementById('cdh-dest-drop').style.display = 'none';
+  cdhShow(code);
+}
+
+function cdhShow(code){
+  const res = document.getElementById('cdh-result');
+  if (!code){ res.innerHTML=''; return; }
+  const d = CDH_COUNTRIES.find(x => x.c === code);
+  if (!d){
+    res.innerHTML = '<div class="cdh-empty"><strong>No data for this destination</strong>Check directly with the destination country\'s official customs authority before you travel.</div>';
+    return;
+  }
+  const prohList = d.proh.map(p => `<li>${p}</li>`).join('');
+  const restList = d.rest.map(r => `<li>${r}</li>`).join('');
+  res.innerHTML = `
+    <div class="cdh-card">
+      <div class="cdh-card-top">
+        <span class="cdh-card-flag">${d.f}</span>
+        <div class="cdh-card-main">
+          <div class="cdh-card-name">${d.n}</div>
+          <div class="cdh-card-auth">${d.auth} · ${d.region}</div>
+        </div>
+      </div>
+      <div class="cdh-allow-grid">
+        <div class="cdh-allow-cell"><div class="cdh-allow-lbl">🥃 Alcohol</div><div class="cdh-allow-val">${d.alc}</div></div>
+        <div class="cdh-allow-cell"><div class="cdh-allow-lbl">🚬 Tobacco</div><div class="cdh-allow-val">${d.tob}</div></div>
+        <div class="cdh-allow-cell"><div class="cdh-allow-lbl">🛍️ Goods / Gifts</div><div class="cdh-allow-val">${d.goods}</div></div>
+        <div class="cdh-allow-cell"><div class="cdh-allow-lbl">💵 Cash to Declare</div><div class="cdh-allow-val">${d.cash}</div></div>
+      </div>
+      <div class="cdh-list-block">
+        <div class="cdh-list-hdr">🚫 Prohibited — do not bring</div>
+        <ul class="cdh-list prohibited">${prohList}</ul>
+      </div>
+      <div class="cdh-list-block">
+        <div class="cdh-list-hdr">⚠️ Restricted — declare or get a permit</div>
+        <ul class="cdh-list restricted">${restList}</ul>
+      </div>
+      <div class="cdh-note">📝 ${d.note}</div>
+    </div>`;
+}
+
+function cdhRenderCheck(){
+  const wrap = document.getElementById('cdh-check-list');
+  if (!wrap) return;
+  wrap.innerHTML = CDH_CHECK_ITEMS.map(it => {
+    const on = !!cdhCheckState[it.id];
+    return `<label class="cdh-check-item${on?' checked':''}">
+      <input type="checkbox" ${on?'checked':''} onchange="cdhToggle('${it.id}',this.checked)">
+      <span class="cdh-check-ico">${it.ico}</span>
+      <span class="cdh-check-body">${it.t}<small>${it.d}</small></span>
+    </label>`;
+  }).join('');
+  cdhRenderVerdict();
+}
+
+function cdhToggle(id, on){
+  cdhCheckState[id] = on;
+  try { localStorage.setItem(CDH_CHECK_KEY, JSON.stringify(cdhCheckState)); } catch(_){}
+  cdhRenderCheck();
+}
+
+function cdhResetCheck(){
+  cdhCheckState = {};
+  try { localStorage.removeItem(CDH_CHECK_KEY); } catch(_){}
+  cdhRenderCheck();
+}
+
+function cdhRenderVerdict(){
+  const wrap = document.getElementById('cdh-verdict-wrap');
+  if (!wrap) return;
+  const flagged = CDH_CHECK_ITEMS.filter(it => cdhCheckState[it.id]);
+  if (!flagged.length){
+    wrap.innerHTML = `
+      <div class="cdh-verdict green">
+        <div class="cdh-verdict-top">
+          <span class="cdh-verdict-ico">🟢</span>
+          <div><div class="cdh-verdict-title">Likely nothing to declare</div>
+          <div class="cdh-verdict-sub">Based on your answers, the green channel is probably fine.</div></div>
+        </div>
+        <div class="cdh-verdict-body">You haven't flagged anything above. As long as you're genuinely within every duty-free allowance for your destination and carrying no restricted items, you can use the green / "nothing to declare" channel. Officers may still search you at random — <strong>when in doubt, declare it.</strong></div>
+      </div>`;
+    return;
+  }
+  const items = flagged.map(it => `<li>${it.ico} ${it.t}</li>`).join('');
+  wrap.innerHTML = `
+    <div class="cdh-verdict red">
+      <div class="cdh-verdict-top">
+        <span class="cdh-verdict-ico">🔴</span>
+        <div><div class="cdh-verdict-title">You should declare — use the red channel</div>
+        <div class="cdh-verdict-sub">${flagged.length} item${flagged.length>1?'s':''} flagged that customs needs to know about.</div></div>
+      </div>
+      <div class="cdh-verdict-body">Based on your answers, declare the following on arrival (red channel, or your written/digital declaration form):
+        <ul>${items}</ul>
+        Declaring voluntarily means duty or inspection at worst. Failing to declare risks seizure, fines, and — for drugs, weapons or large undeclared cash — criminal charges.</div>
+    </div>`;
 }
 
 </script>
