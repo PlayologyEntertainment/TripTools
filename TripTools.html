@@ -2334,16 +2334,103 @@ body.no-scroll { overflow: hidden; }
     </div>
   </div>
 </div>
-<div id="view-placeholder-travel-quiz" class="view">
-  <nav class="tool-topbar">
+<style>
+/* ════════ TRAVEL STYLE QUIZ CSS (id: travel-quiz) ════════ */
+.tq-progress { margin-bottom:20px; }
+.tq-progress-top { display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted); }
+.tq-progress-top b { color:var(--ink); }
+.tq-bar { height:8px;background:var(--paper-2);border:1.5px solid var(--ink);border-radius:99px;overflow:hidden; }
+.tq-bar-fill { height:100%;background:var(--accent);width:0;transition:width .35s cubic-bezier(.2,.8,.2,1); }
+
+.tq-q { animation:pb-in .25s cubic-bezier(.2,.8,.2,1) both; }
+.tq-q-num { font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:8px; }
+.tq-q-text { font-family:var(--serif);font-weight:600;font-size:clamp(22px,4vw,30px);line-height:1.18;letter-spacing:-.02em;color:var(--ink);margin-bottom:22px; }
+.tq-opts { display:flex;flex-direction:column;gap:11px; }
+.tq-opt { display:flex;align-items:center;gap:13px;text-align:left;width:100%;background:var(--paper);border:1.5px solid var(--ink);border-radius:var(--r);padding:15px 16px;cursor:pointer;font-family:var(--sans);font-size:16px;line-height:1.35;color:var(--ink);transition:background .15s,border-color .15s,transform .12s; }
+.tq-opt:hover { background:var(--paper-2);border-color:var(--accent); }
+.tq-opt:active { transform:scale(.99); }
+.tq-opt.sel { background:var(--ink);color:var(--paper);border-color:var(--ink); }
+.tq-opt-key { flex-shrink:0;width:28px;height:28px;display:grid;place-items:center;border:1.5px solid currentColor;border-radius:50%;font-family:var(--mono);font-size:13px;font-weight:600;opacity:.7; }
+.tq-opt.sel .tq-opt-key { opacity:1;background:var(--accent);border-color:var(--accent);color:var(--ink); }
+.tq-nav { display:flex;justify-content:space-between;align-items:center;margin-top:24px;gap:12px; }
+.tq-back-q { font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;background:none;border:none;color:var(--muted);cursor:pointer;padding:8px 4px; }
+.tq-back-q:hover { color:var(--ink); }
+.tq-back-q:disabled { opacity:.3;cursor:default; }
+.tq-dots { display:flex;gap:6px;flex-wrap:wrap;justify-content:center; }
+.tq-dot { width:9px;height:9px;border-radius:50%;background:var(--paper-2);border:1.5px solid var(--ink); }
+.tq-dot.done { background:var(--accent);border-color:var(--accent); }
+.tq-dot.cur { background:var(--ink);border-color:var(--ink); }
+
+/* RESULTS */
+.tq-result { animation:pb-in .3s cubic-bezier(.2,.8,.2,1) both; }
+.tq-hero { border:1.5px solid var(--ink);border-radius:var(--r);overflow:hidden;margin-bottom:20px; }
+.tq-hero-top { background:var(--ink);color:var(--paper);padding:26px 22px;text-align:center; }
+.tq-hero-emoji { font-size:54px;line-height:1;display:block;margin-bottom:10px; }
+.tq-hero-kicker { font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--yellow);margin-bottom:8px; }
+.tq-hero-name { font-family:var(--serif);font-weight:600;font-size:clamp(28px,6vw,40px);line-height:1.05;letter-spacing:-.02em;color:var(--paper); }
+.tq-hero-name em { font-style:italic;color:var(--accent);font-variation-settings:"opsz" 120,"SOFT" 100,"WONK" 1; }
+.tq-hero-tag { font-family:var(--serif);font-style:italic;font-size:16px;color:#cfc7b8;margin-top:8px; }
+.tq-hero-body { padding:20px 22px;font-size:16px;line-height:1.6;color:var(--ink-2);background:var(--paper); }
+
+.tq-sec-lbl { font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:24px 0 12px;display:flex;align-items:center;gap:8px; }
+.tq-sec-lbl::after { content:"";flex:1;height:1px;background:var(--rule); }
+
+.tq-tags { display:flex;flex-wrap:wrap;gap:9px; }
+.tq-tag { font-family:var(--sans);font-weight:600;font-size:14px;background:var(--paper-2);border:1.5px solid var(--ink);border-radius:99px;padding:7px 15px;color:var(--ink); }
+
+.tq-dests { display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px; }
+.tq-dest { border:1.5px solid var(--ink);border-radius:var(--r);background:var(--paper);padding:12px 14px; }
+.tq-dest .tq-dest-name { font-family:var(--serif);font-weight:600;font-size:17px;letter-spacing:-.01em;color:var(--ink);margin-bottom:2px; }
+.tq-dest .tq-dest-why { font-family:var(--sans);font-size:12.5px;color:var(--muted);line-height:1.4; }
+
+.tq-match { display:flex;flex-direction:column;gap:12px; }
+.tq-match-row { display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:center; }
+.tq-match-name { font-family:var(--sans);font-weight:600;font-size:14px;color:var(--ink);display:flex;align-items:center;gap:8px; }
+.tq-match-pct { font-family:var(--mono);font-size:12px;color:var(--muted); }
+.tq-match-track { grid-column:1 / -1;height:10px;background:var(--paper-2);border:1.5px solid var(--ink);border-radius:99px;overflow:hidden; }
+.tq-match-bar { height:100%;border-radius:99px;background:var(--muted);transition:width .5s cubic-bezier(.2,.8,.2,1); }
+.tq-match-row.top .tq-match-bar { background:var(--accent); }
+.tq-match-row.top .tq-match-name { color:var(--accent); }
+
+.tq-tips { list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px; }
+.tq-tips li { position:relative;padding-left:26px;font-size:15px;line-height:1.5;color:var(--ink-2); }
+.tq-tips li::before { content:"→";position:absolute;left:0;top:0;color:var(--accent);font-weight:700; }
+
+.tq-actions { display:flex;flex-wrap:wrap;gap:11px;margin-top:26px; }
+.tq-btn { font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;border:1.5px solid var(--ink);border-radius:var(--r);padding:12px 18px;cursor:pointer;transition:background .15s,color .15s; }
+.tq-btn-primary { background:var(--ink);color:var(--paper); }
+.tq-btn-primary:hover { background:var(--accent);border-color:var(--accent);color:var(--ink); }
+.tq-btn-ghost { background:var(--paper);color:var(--ink); }
+.tq-btn-ghost:hover { background:var(--paper-2);border-color:var(--accent); }
+@media print { .tq-actions, .tq-nav { display:none !important; } }
+</style>
+<div id="view-travel-quiz" class="view">
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="window.print()">🖨 Print</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">🧠</span>
-    <h2>Travel Style Quiz</h2>
-    <p style="margin-bottom:24px">10-question quiz to discover your travel personality and recommended destinations.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-travel-quiz"></div>
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Offline</div>
+    <h1 class="tool-title">Travel Style Quiz</h1>
+    <p class="tool-sub">Ten quick questions reveal your travel personality — the kind of trips, places, and pace that fit you best. No right answers, just your style. Your result is saved on this device.</p>
+  </div>
+  <div class="tool-body">
+    <div id="tq-quiz"></div>
+    <div id="tq-result-wrap"></div>
+  </div><!-- /tool-body -->
+
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    Most travelers are a blend of two styles, not one. Check your match breakdown — your runner-up type is a great way to mix things up on a longer trip or compromise when you're traveling with someone whose style differs from yours.
+  </div>
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('dest-picker')">🌐 Destination Picker</button>
+      <button class="rel-btn" onclick="openTool('best-time')">📅 Best Time to Visit</button>
+      <button class="rel-btn" onclick="openTool('bucket-list')">⭐ Bucket List Builder</button>
+      <button class="rel-btn" onclick="openTool('budget-plan')">💰 Budget Planner</button>
     </div>
   </div>
 </div>
@@ -9147,7 +9234,7 @@ const TOOLS = [
   {id:'dest-picker',   nm:'Destination Picker',         ico:'🌐', ph:'discovery', on:false, live:true,  ds:'Spin-the-globe randomizer filtered by continent, budget & vibe.'},
   {id:'dest-compare',  nm:'Destination Comparison',     ico:'⚖️', ph:'discovery', on:false, live:true,  ds:'Side-by-side comparison of 2–3 destinations across 10 dimensions.'},
   {id:'best-time',     nm:'Best Time to Visit',         ico:'📅', ph:'discovery', on:false, live:true,  ds:'Month-by-month weather, crowd & cost heat map for 100+ destinations.'},
-  {id:'travel-quiz',   nm:'Travel Style Quiz',          ico:'🧠', ph:'discovery', on:false, live:false, ds:'10-question quiz to discover your travel personality.'},
+  {id:'travel-quiz',   nm:'Travel Style Quiz',          ico:'🧠', ph:'discovery', on:false, live:true,  ds:'10-question quiz to discover your travel personality.'},
   {id:'bucket-list',   nm:'Bucket List Builder',        ico:'⭐', ph:'discovery', on:false, live:false, ds:'Create, organize & check off dream destinations. Printable.'},
   {id:'trip-duration', nm:'Trip Duration Calculator',   ico:'🗓', ph:'discovery', on:false, live:false, ds:'How many days do you really need? Accounts for jet lag & transit.'},
   {id:'budget-plan',   nm:'Travel Budget Planner',      ico:'💰', ph:'discovery', on:false, live:true,  ds:'Full trip budget builder: flights, hotels, food & activities. Pie chart.'},
@@ -9857,6 +9944,7 @@ function injectTripCtx(id) {
   if(id==='dest-picker') dpInit();
   if(id==='dest-compare') cmpInit();
   if(id==='best-time')   btInit();
+  if(id==='travel-quiz') tqInit();
   if(id==='currency') fxInit();
   if(id==='unit-conv') ucInit();
   if(id==='fuel-cost') fcInit();
@@ -25891,6 +25979,337 @@ function wxReadCache() {
     if (!raw) return null;
     return JSON.parse(raw); // returned even if expired so we can offer offline fallback
   } catch(_) { return null; }
+}
+
+/* ════════════════════════════════════════════════════════════
+   TRAVEL STYLE QUIZ  (id: travel-quiz)
+   Single-archetype model: each answer scores toward six travel
+   personalities. Highest total wins; runner-ups shown as a match
+   breakdown. Offline; last result persisted to localStorage.
+   ════════════════════════════════════════════════════════════ */
+
+const TQ_ARCH = {
+  adventurer: {
+    emoji:'🧗', name:'The Adventurer', tag:'Thrills over thread counts.',
+    blurb:"You travel to feel alive. The best souvenirs are sore legs and a story no one will believe. You'd rather sleep in a tent under the stars than a suite, and a packed itinerary is wasted time you could've spent outdoors.",
+    types:['National parks','Mountain ranges','Surf & dive coasts','Jungle & trek routes'],
+    dests:[
+      {n:'New Zealand', why:'Bungee, glaciers & endless trails'},
+      {n:'Costa Rica', why:'Volcanoes, rainforest & ziplines'},
+      {n:'Nepal', why:'Himalayan treks for every level'},
+      {n:'Patagonia, Chile', why:'Raw, wild end-of-the-world hiking'},
+      {n:'Iceland', why:'Glaciers, lava fields & ice caves'},
+    ],
+    tips:[
+      'Build in a recovery day after big efforts — adventure burnout is real.',
+      'Travel insurance with adventure-sports coverage is worth every cent.',
+      'Shoulder season means emptier trails and lower guide prices.',
+    ],
+  },
+  culture: {
+    emoji:'🏛', name:'The Culture Seeker', tag:'History in every cobblestone.',
+    blurb:"For you, a destination is a story to read in person. You'll happily spend a whole day in a museum, learn a few phrases before you land, and seek out the neighborhood where real life happens — not the souvenir strip.",
+    types:['Historic capitals','Ancient sites & ruins','Museum cities','Heritage old towns'],
+    dests:[
+      {n:'Rome, Italy', why:'2,000 years layered on every street'},
+      {n:'Kyoto, Japan', why:'Temples, gardens & living tradition'},
+      {n:'Istanbul, Türkiye', why:'Where two continents collide'},
+      {n:'Cusco, Peru', why:'Gateway to the Inca world'},
+      {n:'Cairo, Egypt', why:'Pyramids and millennia of antiquity'},
+    ],
+    tips:[
+      'Pre-book timed entry for major museums and sites to skip the queues.',
+      'A local guide for the first day pays off for the rest of the trip.',
+      'Visit headline sights at opening or late afternoon to dodge crowds.',
+    ],
+  },
+  relaxer: {
+    emoji:'🌴', name:'The Relaxer', tag:"The itinerary is: nothing.",
+    blurb:"You go away to actually get away. Success is a clear head, a good book, and nowhere to be. You'll trade a checklist of sights for a hammock and a view any day — the trip is the rest, not the running around.",
+    types:['Beach resorts','Island escapes','Wellness & spa retreats','Quiet lakeside towns'],
+    dests:[
+      {n:'Maldives', why:'Overwater calm and warm water'},
+      {n:'Bali, Indonesia', why:'Wellness, beaches & slow mornings'},
+      {n:'Santorini, Greece', why:'Sunsets, caldera views & ease'},
+      {n:'Phuket, Thailand', why:'Beaches, massages & gentle pace'},
+      {n:'Maui, Hawaii', why:'Laid-back shores and warm air'},
+    ],
+    tips:[
+      'Pick one base and stay put — constant moving defeats the purpose.',
+      'Book a room with a view or balcony; you\'ll spend real time in it.',
+      'Resist over-planning. One loose plan a day is plenty.',
+    ],
+  },
+  luxury: {
+    emoji:'💎', name:'The Luxury Traveler', tag:'Worth doing is worth doing well.',
+    blurb:"You'd rather take one beautifully done trip than three rough ones. Comfort, service, and a great room aren't extras — they're the point. You happily pay for the experience that makes a place unforgettable.",
+    types:['Five-star cities','Design & boutique hotels','Private guided tours','Glamorous coastlines'],
+    dests:[
+      {n:'Dubai, UAE', why:'Iconic stays and high-end everything'},
+      {n:'Paris, France', why:'Grand hotels, dining & design'},
+      {n:'Maldives', why:'Private villas and butler service'},
+      {n:'Amalfi Coast, Italy', why:'Cliffside glamour by the sea'},
+      {n:'Singapore', why:'Polished, seamless, world-class'},
+    ],
+    tips:[
+      'Booking direct often unlocks room upgrades and perks loyalty sites miss.',
+      'Shoulder season buys you five-star rooms at far gentler rates.',
+      'A great concierge is your best tool — ask before you arrive.',
+    ],
+  },
+  budget: {
+    emoji:'🎒', name:'The Budget Explorer', tag:'Maximum memories, minimum spend.',
+    blurb:"You measure a trip in experiences per dollar, and you're winning. Hostels, street food, and slow overland travel aren't sacrifices — they're how you stay on the road longer and meet the people who make a place real.",
+    types:['Backpacker hubs','Affordable capitals','Street-food cities','Overland routes'],
+    dests:[
+      {n:'Vietnam', why:'Incredible food, tiny prices'},
+      {n:'Lisbon, Portugal', why:'Europe\'s best value capital'},
+      {n:'Mexico City, Mexico', why:'Huge culture, small budget'},
+      {n:'Bangkok, Thailand', why:'Backpacker classic for a reason'},
+      {n:'Prague, Czechia', why:'Old-world beauty, low cost'},
+    ],
+    tips:[
+      'Travel slow — fewer transit legs is the single biggest money saver.',
+      'Eat where the line is local; it\'s cheaper and usually better.',
+      'Mid-week, off-season flights are where the real savings hide.',
+    ],
+  },
+  foodie: {
+    emoji:'🍷', name:'The Foodie', tag:'I travel on my stomach.',
+    blurb:"You plan trips around tables. A market crawl, a cooking class, the restaurant you booked months ago — that's your sightseeing. You believe you understand a culture best through what, and how, it eats.",
+    types:['Culinary capitals','Wine & spirits regions','Market cities','Coastal seafood towns'],
+    dests:[
+      {n:'Tokyo, Japan', why:'More acclaimed kitchens than anywhere'},
+      {n:'Lyon, France', why:'The gastronomic heart of France'},
+      {n:'San Sebastián, Spain', why:'Pintxos bars and Michelin stars'},
+      {n:'Bologna, Italy', why:'Italy\'s richest food region'},
+      {n:'Oaxaca, Mexico', why:'Moles, mezcal & market feasts'},
+    ],
+    tips:[
+      'Book standout restaurants the day reservations open — they vanish fast.',
+      'Take a market tour early in the trip; it maps out the rest.',
+      'Eat your big meal at lunch — set menus are cheaper than dinner.',
+    ],
+  },
+};
+
+const TQ_Q = [
+  { q:"It's your first morning in a new place. You…", opts:[
+    { t:"Hit the trail or the water before breakfast — daylight's burning.", s:{adventurer:2} },
+    { t:"Join a walking tour of the old town.", s:{culture:2} },
+    { t:"Sleep in, then drift to the pool with a book.", s:{relaxer:2} },
+    { t:"Track down the breakfast spot the locals swear by.", s:{foodie:2,budget:1} },
+  ]},
+  { q:"Pick the photo you'd hang on your wall:", opts:[
+    { t:"A misty mountain summit at sunrise.", s:{adventurer:2} },
+    { t:"A centuries-old temple courtyard.", s:{culture:2} },
+    { t:"An empty stretch of white-sand beach.", s:{relaxer:2} },
+    { t:"A candlelit rooftop dinner over the skyline.", s:{luxury:2,foodie:1} },
+  ]},
+  { q:"Your ideal place to sleep on the road:", opts:[
+    { t:"A tent or a mountain hut.", s:{adventurer:2,budget:1} },
+    { t:"A lively hostel full of fellow travelers.", s:{budget:2} },
+    { t:"A boutique hotel with real character.", s:{culture:1,luxury:1} },
+    { t:"A five-star suite with a view.", s:{luxury:2} },
+  ]},
+  { q:"How do you plan a trip?", opts:[
+    { t:"I don't — half the fun is winging it.", s:{adventurer:1,budget:1} },
+    { t:"Spreadsheets, opening hours and a sights list.", s:{culture:2} },
+    { t:"Book the flights, figure out the rest there.", s:{relaxer:1,budget:1} },
+    { t:"A concierge or travel designer handles the details.", s:{luxury:2} },
+  ]},
+  { q:"The souvenir you actually bring home:", opts:[
+    { t:"Mud on my boots and a great story.", s:{adventurer:2} },
+    { t:"Museum stubs and a local craft.", s:{culture:2} },
+    { t:"A deep tan and a clear head.", s:{relaxer:2} },
+    { t:"A bottle from the vineyard I visited.", s:{foodie:2} },
+  ]},
+  { q:"Dinner abroad usually means…", opts:[
+    { t:"Whatever's cooking at the trailhead or campfire.", s:{adventurer:1,budget:1} },
+    { t:"Street stalls and night markets.", s:{budget:2,foodie:1} },
+    { t:"A long, multi-course meal I booked weeks ago.", s:{foodie:2,luxury:1} },
+    { t:"Room service after a spa day.", s:{relaxer:2,luxury:1} },
+  ]},
+  { q:"Your travel-budget philosophy:", opts:[
+    { t:"Stretch every dollar so the trip lasts longer.", s:{budget:2} },
+    { t:"Spend on experiences, save on the rest.", s:{adventurer:1,foodie:1} },
+    { t:"Comfort is worth paying for.", s:{luxury:2,relaxer:1} },
+    { t:"I'll splurge on one unforgettable meal or stay.", s:{foodie:1,luxury:1} },
+  ]},
+  { q:"Pick a perfect day:", opts:[
+    { t:"Kayaking a coastline, then cliff-jumping.", s:{adventurer:2} },
+    { t:"Three museums and a historic walking route.", s:{culture:2} },
+    { t:"Hammock, waves, repeat.", s:{relaxer:2} },
+    { t:"A cooking class, then a market crawl.", s:{foodie:2} },
+  ]},
+  { q:"Who's usually on your trips?", opts:[
+    { t:"Just me and a backpack.", s:{budget:2} },
+    { t:"A small crew chasing the next adventure.", s:{adventurer:2} },
+    { t:"My partner, somewhere romantic and quiet.", s:{relaxer:1,luxury:1} },
+    { t:"Friends who love to eat their way through a city.", s:{foodie:2} },
+  ]},
+  { q:"The trip you'd brag about:", opts:[
+    { t:"Summiting something or crossing a wild border.", s:{adventurer:2} },
+    { t:"Walking through living history.", s:{culture:2} },
+    { t:"Doing absolutely nothing, beautifully.", s:{relaxer:2} },
+    { t:"An impossibly long, delicious table.", s:{foodie:2} },
+  ]},
+];
+
+const TQ_KEY = 'tt_travel_quiz_v1';
+let tqAnswers = [];   // index per question, or null
+let tqCurrent = 0;    // current question index
+let tqResult = null;  // winning archetype id once computed
+
+function tqInit() {
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(TQ_KEY) || 'null'); } catch(_) {}
+  if (saved && saved.result && TQ_ARCH[saved.result] && Array.isArray(saved.answers)) {
+    tqAnswers = saved.answers.slice(0, TQ_Q.length);
+    tqResult = saved.result;
+    tqShowResult();
+  } else {
+    tqAnswers = new Array(TQ_Q.length).fill(null);
+    tqCurrent = 0;
+    tqResult = null;
+    tqRenderQuestion();
+  }
+}
+
+function tqSave() {
+  try { localStorage.setItem(TQ_KEY, JSON.stringify({ answers: tqAnswers, result: tqResult })); } catch(_) {}
+}
+
+function tqRenderQuestion() {
+  document.getElementById('tq-result-wrap').innerHTML = '';
+  const wrap = document.getElementById('tq-quiz');
+  const i = tqCurrent;
+  const Q = TQ_Q[i];
+  const answered = tqAnswers.filter(a => a !== null).length;
+  const pct = Math.round((answered / TQ_Q.length) * 100);
+  const keys = ['A','B','C','D','E'];
+  const dots = TQ_Q.map((_, qi) =>
+    `<span class="tq-dot ${qi === i ? 'cur' : (tqAnswers[qi] !== null ? 'done' : '')}"></span>`).join('');
+  const opts = Q.opts.map((o, oi) =>
+    `<button type="button" class="tq-opt ${tqAnswers[i] === oi ? 'sel' : ''}" onclick="tqPick(${oi})">
+       <span class="tq-opt-key">${keys[oi]}</span><span>${o.t}</span>
+     </button>`).join('');
+  wrap.innerHTML = `
+    <div class="tq-progress">
+      <div class="tq-progress-top"><span>Question <b>${i+1}</b> of ${TQ_Q.length}</span><span>${pct}% complete</span></div>
+      <div class="tq-bar"><div class="tq-bar-fill" style="width:${pct}%"></div></div>
+    </div>
+    <div class="tq-q">
+      <div class="tq-q-num">Travel Style Quiz</div>
+      <div class="tq-q-text">${Q.q}</div>
+      <div class="tq-opts">${opts}</div>
+      <div class="tq-nav">
+        <button class="tq-back-q" onclick="tqBack()" ${i === 0 ? 'disabled' : ''}>← Back</button>
+        <div class="tq-dots">${dots}</div>
+        <span style="width:48px"></span>
+      </div>
+    </div>`;
+}
+
+function tqPick(oi) {
+  tqAnswers[tqCurrent] = oi;
+  tqSave();
+  // brief highlight before advancing
+  const wrap = document.getElementById('tq-quiz');
+  const btns = wrap.querySelectorAll('.tq-opt');
+  btns.forEach((b, idx) => b.classList.toggle('sel', idx === oi));
+  setTimeout(() => {
+    if (tqCurrent < TQ_Q.length - 1) {
+      tqCurrent++;
+      tqRenderQuestion();
+    } else {
+      tqResult = tqCompute().ranked[0].id;
+      tqSave();
+      tqShowResult();
+    }
+  }, 230);
+}
+
+function tqBack() {
+  if (tqCurrent > 0) { tqCurrent--; tqRenderQuestion(); }
+}
+
+function tqCompute() {
+  const scores = {};
+  Object.keys(TQ_ARCH).forEach(id => scores[id] = 0);
+  tqAnswers.forEach((oi, qi) => {
+    if (oi === null) return;
+    const s = TQ_Q[qi].opts[oi].s;
+    for (const id in s) scores[id] = (scores[id] || 0) + s[id];
+  });
+  const ranked = Object.keys(scores)
+    .map(id => ({ id, score: scores[id] }))
+    .sort((a, b) => b.score - a.score || TQ_ARCH_ORDER.indexOf(a.id) - TQ_ARCH_ORDER.indexOf(b.id));
+  return { scores, ranked };
+}
+const TQ_ARCH_ORDER = Object.keys(TQ_ARCH);
+
+function tqShowResult() {
+  document.getElementById('tq-quiz').innerHTML = '';
+  const { ranked } = tqCompute();
+  const winId = (tqResult && TQ_ARCH[tqResult]) ? tqResult : ranked[0].id;
+  const A = TQ_ARCH[winId];
+  const max = Math.max(1, ranked[0].score);
+  // emphasize the chosen winner in the breakdown even if tied
+  const top3 = ranked.slice(0, 3);
+  const matchRows = top3.map(r => {
+    const a = TQ_ARCH[r.id];
+    const w = Math.round((r.score / max) * 100);
+    return `<div class="tq-match-row ${r.id === winId ? 'top' : ''}">
+      <span class="tq-match-name">${a.emoji} ${a.name}</span>
+      <span class="tq-match-pct">${w}% match</span>
+      <span class="tq-match-track"><span class="tq-match-bar" style="width:${w}%"></span></span>
+    </div>`;
+  }).join('');
+  const tags = A.types.map(t => `<span class="tq-tag">${t}</span>`).join('');
+  const dests = A.dests.map(d =>
+    `<div class="tq-dest"><div class="tq-dest-name">${d.n}</div><div class="tq-dest-why">${d.why}</div></div>`).join('');
+  const tips = A.tips.map(t => `<li>${t}</li>`).join('');
+
+  document.getElementById('tq-result-wrap').innerHTML = `
+    <div class="tq-result">
+      <div class="tq-hero">
+        <div class="tq-hero-top">
+          <span class="tq-hero-emoji">${A.emoji}</span>
+          <div class="tq-hero-kicker">Your travel style is</div>
+          <div class="tq-hero-name">${A.name.replace('The ', 'The <em>') + '</em>'}</div>
+          <div class="tq-hero-tag">${A.tag}</div>
+        </div>
+        <div class="tq-hero-body">${A.blurb}</div>
+      </div>
+
+      <div class="tq-sec-lbl">Destination types for you</div>
+      <div class="tq-tags">${tags}</div>
+
+      <div class="tq-sec-lbl">Places worth a look</div>
+      <div class="tq-dests">${dests}</div>
+
+      <div class="tq-sec-lbl">Your match breakdown</div>
+      <div class="tq-match">${matchRows}</div>
+
+      <div class="tq-sec-lbl">Travel tips for your style</div>
+      <ul class="tq-tips">${tips}</ul>
+
+      <div class="tq-actions">
+        <button class="tq-btn tq-btn-primary" onclick="openTool('dest-picker')">🌐 Find destinations →</button>
+        <button class="tq-btn tq-btn-ghost" onclick="tqRetake()">↻ Retake quiz</button>
+        <button class="tq-btn tq-btn-ghost" onclick="window.print()">🖨 Print result</button>
+      </div>
+    </div>`;
+}
+
+function tqRetake() {
+  tqAnswers = new Array(TQ_Q.length).fill(null);
+  tqCurrent = 0;
+  tqResult = null;
+  try { localStorage.removeItem(TQ_KEY); } catch(_) {}
+  document.getElementById('tq-result-wrap').innerHTML = '';
+  tqRenderQuestion();
 }
 
 </script>
