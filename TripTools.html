@@ -2569,6 +2569,10 @@ body.no-scroll { overflow: hidden; }
   <style>
   /* ── FLIGHT COST ESTIMATOR ── */
   #view-flight-est .fe-section-lbl { font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 16px 0 8px; }
+  #view-flight-est .fe-freshness { display: flex; align-items: center; gap: 9px; font-family: var(--mono); font-size: 11px; letter-spacing: .04em; color: var(--ink-2); background: var(--paper-2); border: 1px solid var(--rule); border-radius: var(--r); padding: 9px 13px; margin: 4px 0 4px; line-height: 1.4; }
+  #view-flight-est .fe-freshness .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+  #view-flight-est .fe-freshness b { font-family: var(--sans); font-weight: 600; letter-spacing: 0; color: var(--ink); }
+  #view-flight-est .fe-freshness .muted { color: var(--muted); }
   #view-flight-est .fe-swap { background: var(--paper-2); border: 1.5px dashed var(--ink); color: var(--ink); border-radius: var(--r); cursor: pointer; font-family: var(--sans); font-size: 12px; font-weight: 600; padding: 7px 14px; margin: 2px 0 6px; }
   #view-flight-est .fe-swap:hover { background: var(--ink); color: var(--paper); }
   #view-flight-est .fe-results { border-top: 2px solid var(--ink); margin-top: 24px; padding-top: 24px; }
@@ -2625,6 +2629,9 @@ body.no-scroll { overflow: hidden; }
   </div>
 
   <div class="tool-body">
+
+    <!-- ── DATA FRESHNESS ── -->
+    <div class="fe-freshness" id="fe-freshness"></div>
 
     <!-- ── ROUTE ── -->
     <div class="fe-section-lbl">Route</div>
@@ -14010,7 +14017,8 @@ function fcReset() {
    Not a live fare search.
    ══════════════════════════════════════════════════════ */
 
-const FE_DATA_VERSION = 'Fare model v1.0 — reviewed May 2026';
+const FE_FARE_DATE = 'May 2026';   // date the bundled fare data was last pulled / calibrated
+const FE_DATA_VERSION = 'Fare model v1.0 — reviewed ' + FE_FARE_DATE;
 
 /* Bundled airport reference: code, city, country, region, lat, lon */
 const FE_AIRPORTS = [
@@ -14132,6 +14140,9 @@ let feBuilt = false;
 function feInit() {
   const pd = document.getElementById('fe-print-date');
   if(pd) pd.textContent = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+
+  const fr = document.getElementById('fe-freshness');
+  if(fr) fr.innerHTML = `<span class="dot"></span><span>Fare data current as of <b>${FE_FARE_DATE}</b> <span class="muted">· bundled offline · refreshed with each app release</span></span>`;
 
   if(!feBuilt) {
     feBuildOptions();
