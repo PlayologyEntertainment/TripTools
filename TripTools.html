@@ -3658,16 +3658,162 @@ body.no-scroll { overflow: hidden; }
     </div>
   </div>
 </div>
-<div id="view-placeholder-flight-delay" class="view">
-  <nav class="tool-topbar">
+<style>
+/* ── FLIGHT DELAY COMPENSATION ── */
+.fdc-print-hdr{display:none}
+.fdc-pills{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 4px}
+.fdc-pill{padding:9px 14px;border:1.5px solid var(--ink);border-radius:var(--r);background:var(--paper);font-family:var(--sans);font-size:13.5px;font-weight:500;color:var(--ink-2);cursor:pointer;transition:background .12s,color .12s;min-height:44px;display:inline-flex;align-items:center;gap:7px}
+.fdc-pill:hover:not(.on){background:var(--paper-2)}
+.fdc-pill.on{background:var(--ink);color:var(--paper)}
+.fdc-helper{margin:6px 0 0;font-size:12.5px;color:var(--muted);line-height:1.5}
+.fdc-helper details{margin-top:4px}
+.fdc-helper summary{cursor:pointer;color:var(--blue);font-weight:500}
+.fdc-helper details[open] summary{margin-bottom:6px}
+.fdc-fields{margin-top:6px}
+.fdc-result{margin-top:22px}
+.fdc-empty{padding:20px 18px;border:1.5px dashed var(--ink);border-radius:var(--r);color:var(--muted);text-align:center;font-size:14px;background:var(--paper-2)}
+.fdc-card{border:2px solid var(--ink);border-radius:var(--r);overflow:hidden;background:var(--paper);break-inside:avoid}
+.fdc-verdict-top{padding:18px;display:flex;align-items:center;gap:16px}
+.fdc-verdict-ico{font-size:34px;line-height:1;flex-shrink:0}
+.fdc-verdict-amt{font-family:var(--serif);font-size:38px;font-weight:700;letter-spacing:-.03em;line-height:1}
+.fdc-verdict-ttl{font-family:var(--serif);font-size:21px;font-weight:700;letter-spacing:-.02em;line-height:1.1}
+.fdc-verdict-sub{font-size:13px;margin-top:4px;line-height:1.45}
+.fdc-card.elig .fdc-verdict-top{background:var(--green);color:#fff}
+.fdc-card.elig .fdc-verdict-sub{color:rgba(255,255,255,.9)}
+.fdc-card.partial .fdc-verdict-top{background:var(--yellow);color:var(--ink)}
+.fdc-card.partial .fdc-verdict-sub{color:var(--ink-2)}
+.fdc-card.none .fdc-verdict-top{background:var(--paper-2);color:var(--ink);border-bottom:1.5px solid var(--ink)}
+.fdc-card.none .fdc-verdict-sub{color:var(--muted)}
+.fdc-rights{padding:4px 0}
+.fdc-right{padding:13px 18px;border-top:1.5px solid var(--rule);display:flex;gap:12px;align-items:flex-start}
+.fdc-right:first-child{border-top:none}
+.fdc-right-ico{font-size:20px;line-height:1.2;flex-shrink:0;width:24px;text-align:center}
+.fdc-right-body{flex:1;font-size:13.5px;color:var(--ink-2);line-height:1.5}
+.fdc-right-body strong{color:var(--ink);font-weight:600;display:block;margin-bottom:2px;font-family:var(--serif);font-size:14.5px}
+.fdc-cite{padding:12px 18px;background:var(--ink);color:var(--paper);font-family:var(--mono);font-size:11px;letter-spacing:.04em;line-height:1.5}
+.fdc-cite b{color:var(--yellow);font-weight:500}
+.fdc-sec{margin-top:30px}
+.fdc-sec-hdr{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid var(--ink)}
+.fdc-sec-num{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.fdc-sec-hdr h3{font-family:var(--serif);font-size:20px;font-weight:600;letter-spacing:-.01em;color:var(--ink);margin:0}
+.fdc-letter-wrap{margin-top:14px}
+.fdc-letter{width:100%;min-height:300px;box-sizing:border-box;border:1.5px solid var(--ink);border-radius:var(--r);background:var(--paper);color:var(--ink);font-family:var(--mono);font-size:12.5px;line-height:1.6;padding:14px;resize:vertical;white-space:pre-wrap}
+.fdc-letter:focus{border-color:var(--accent);outline:none}
+.fdc-copy-row{display:flex;align-items:center;gap:12px;margin-top:10px;flex-wrap:wrap}
+.fdc-copy-ok{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--green);opacity:0;transition:opacity .2s}
+.fdc-copy-ok.show{opacity:1}
+.fdc-locked{padding:18px;border:1.5px dashed var(--ink);border-radius:var(--r);background:var(--paper-2);color:var(--muted);font-size:13.5px;text-align:center;line-height:1.5}
+@media print{
+  .fdc-print-hdr{display:flex !important;justify-content:space-between;align-items:baseline;border-bottom:2px solid #000;padding-bottom:8px;margin-bottom:16px;font-family:var(--serif)}
+  .fdc-pills,.fdc-helper,.tool-bar,.fdc-copy-row,.fdc-fields,.btn{display:none !important}
+  .fdc-card,.fdc-letter{break-inside:avoid;border:1.5px solid #000 !important}
+  .fdc-card.elig .fdc-verdict-top,.fdc-cite{background:#000 !important;color:#fff !important}
+  .fdc-letter{min-height:0;color:#000;font-size:11px}
+}
+</style>
+<div id="view-flight-delay" class="view">
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="window.print()">🖨 Print</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">⚖️</span>
-    <h2>Flight Delay Compensation</h2>
-    <p style="margin-bottom:24px">Your rights by region — EU261, US DOT, UK, Canada. With template complaint letters.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-flight-delay"></div>
+
+  <div class="fdc-print-hdr">
+    <strong>TripTools — Flight Delay Compensation</strong>
+    <span id="fdc-print-date"></span>
+  </div>
+
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>Flight Delay Compensation</h1>
+    <p class="tool-sub">Know your rights when a flight is delayed, cancelled or overbooked. Check what you're owed under EU261, UK261, US DOT or Canada's APPR — then generate a ready-to-send complaint letter citing the exact rule and amount.</p>
+  </div>
+
+  <div class="tool-body">
+
+    <!-- Which rules apply -->
+    <div class="sec-lbl">Step 1 — Which rules apply?</div>
+    <div class="fdc-pills" id="fdc-region-pills">
+      <span class="fdc-pill on" data-v="eu"  onclick="fdcSetRegion('eu',this)">🇪🇺 EU261</span>
+      <span class="fdc-pill"    data-v="uk"  onclick="fdcSetRegion('uk',this)">🇬🇧 UK261</span>
+      <span class="fdc-pill"    data-v="us"  onclick="fdcSetRegion('us',this)">🇺🇸 US DOT</span>
+      <span class="fdc-pill"    data-v="ca"  onclick="fdcSetRegion('ca',this)">🇨🇦 Canada APPR</span>
+    </div>
+    <div class="fdc-helper">
+      <details>
+        <summary>Not sure which applies to your flight?</summary>
+        <strong>EU261</strong> — any flight <em>departing</em> an EU/EEA airport, or <em>arriving</em> in the EU/EEA on an EU/EEA airline (incl. Iceland, Norway, Switzerland).<br>
+        <strong>UK261</strong> — any flight departing a UK airport, or arriving in the UK on a UK/EU airline.<br>
+        <strong>US DOT</strong> — flights to, from or within the United States.<br>
+        <strong>Canada APPR</strong> — flights to, from or within Canada.<br>
+        If more than one could apply, the one that pays more usually governs — check both.
+      </details>
+    </div>
+
+    <!-- What happened -->
+    <div class="sec-lbl">Step 2 — What happened?</div>
+    <div class="fdc-pills" id="fdc-type-pills">
+      <span class="fdc-pill on" data-v="delay"  onclick="fdcSetType('delay',this)">🕐 Delayed</span>
+      <span class="fdc-pill"    data-v="cancel" onclick="fdcSetType('cancel',this)">❌ Cancelled</span>
+      <span class="fdc-pill"    data-v="denied" onclick="fdcSetType('denied',this)">🚫 Denied boarding</span>
+    </div>
+
+    <!-- Dynamic fields -->
+    <div class="sec-lbl">Step 3 — Your flight details</div>
+    <div class="fdc-fields" id="fdc-fields"></div>
+
+    <button class="btn btn-p" style="width:100%;margin-top:16px" onclick="fdcCheck()">⚖️ Check My Rights</button>
+
+    <div id="fdc-result" class="fdc-result"></div>
+
+    <div style="margin-top:16px;padding:12px 16px;background:var(--paper-2);border-left:3px solid var(--yellow);border-radius:var(--r);font-size:13px;color:var(--muted);line-height:1.55">
+      ⚠️ <strong>Guidance only — not legal advice.</strong> Eligibility depends on the exact circumstances, and airlines often dispute claims. Amounts and rules change; verify with the relevant regulator (EU/national enforcement body, UK CAA, US DOT, or the Canadian Transportation Agency) before acting. "Extraordinary" / out-of-control causes (most weather, ATC, strikes, security, safety issues) remove cash compensation but not your care and refund rights.
+    </div>
+
+    <!-- Complaint letter -->
+    <div class="fdc-sec">
+      <div class="fdc-sec-hdr">
+        <span class="fdc-sec-num">§ 02</span>
+        <h3>✍️ Generate Your Complaint Letter</h3>
+      </div>
+      <p style="margin:0 0 12px 0;font-size:13px;color:var(--ink-2);line-height:1.55">Fill in your flight details and we'll draft a formal claim letter citing the correct regulation and the amount from your result above. Everything stays in this browser.</p>
+      <div class="frow">
+        <div class="fg"><label for="fdc-l-name">Your full name</label><input type="text" id="fdc-l-name" placeholder="Jane Traveler" oninput="fdcBuildLetter()"></div>
+        <div class="fg"><label for="fdc-l-airline">Airline</label><input type="text" id="fdc-l-airline" placeholder="e.g. Lufthansa" oninput="fdcBuildLetter()"></div>
+      </div>
+      <div class="frow">
+        <div class="fg"><label for="fdc-l-flight">Flight number</label><input type="text" id="fdc-l-flight" placeholder="e.g. LH401" oninput="fdcBuildLetter()"></div>
+        <div class="fg"><label for="fdc-l-date">Flight date</label><input type="date" id="fdc-l-date" oninput="fdcBuildLetter()"></div>
+      </div>
+      <div class="frow">
+        <div class="fg"><label for="fdc-l-from">From (city / airport)</label><input type="text" id="fdc-l-from" placeholder="e.g. Frankfurt (FRA)" oninput="fdcBuildLetter()"></div>
+        <div class="fg"><label for="fdc-l-to">To (city / airport)</label><input type="text" id="fdc-l-to" placeholder="e.g. New York (JFK)" oninput="fdcBuildLetter()"></div>
+      </div>
+      <div class="fg"><label for="fdc-l-ref">Booking reference (optional)</label><input type="text" id="fdc-l-ref" placeholder="e.g. ABC123" oninput="fdcBuildLetter()"></div>
+      <div class="fdc-letter-wrap" id="fdc-letter-wrap">
+        <div class="fdc-locked" id="fdc-letter-locked">Run <strong>Check My Rights</strong> above first — the letter will cite the matching regulation and amount.</div>
+        <textarea class="fdc-letter" id="fdc-letter" style="display:none" spellcheck="false" aria-label="Generated complaint letter"></textarea>
+        <div class="fdc-copy-row" id="fdc-copy-row" style="display:none">
+          <button class="btn" onclick="fdcCopyLetter()">📋 Copy letter</button>
+          <span class="fdc-copy-ok" id="fdc-copy-ok">✓ Copied to clipboard</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    Claim directly with the airline first and give them a deadline (e.g. 14 days). Keep every boarding pass, booking email and a photo of the airport departure board showing the delay. If the airline refuses or ignores you, escalate free of charge to the national enforcement body — you rarely need a paid claims agency that takes a cut.
+  </div>
+
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('doc-checklist')">✅ Document Checklist</button>
+      <button class="rel-btn" onclick="openTool('travel-ins')">🛡 Travel Insurance Worksheet</button>
+      <button class="rel-btn" onclick="openTool('customs-decl')">📦 Customs Declaration Helper</button>
+      <button class="rel-btn" onclick="openTool('expense-track')">📊 Daily Expense Tracker</button>
     </div>
   </div>
 </div>
@@ -10425,7 +10571,7 @@ const TOOLS = [
   {id:'visa-guide',    nm:'Visa Requirement Guide',     ico:'🌍', ph:'docs',      on:false, live:true,  ds:'Nationality + destination = visa type, cost & processing time.'},
   {id:'doc-checklist', nm:'Travel Document Checklist',  ico:'✅', ph:'docs',      on:false, live:true,  ds:'Customizable pre-trip checklist adapting to trip type.'},
   {id:'intl-driving',  nm:'International Driving Guide',ico:'🚗', ph:'docs',      on:false, live:false, ds:'IDP requirements, driving side & speed limits for 80+ countries.'},
-  {id:'flight-delay',  nm:'Flight Delay Compensation',  ico:'⚖️', ph:'docs',      on:false, live:false, ds:'Your rights by region — EU261, US DOT, UK, Canada.'},
+  {id:'flight-delay',  nm:'Flight Delay Compensation',  ico:'⚖️', ph:'docs',      on:false, live:true,  ds:'Your rights for delays, cancellations & bumping — EU261, UK261, US DOT, Canada APPR. With complaint-letter generator.'},
   {id:'customs-decl',  nm:'Customs Declaration Helper', ico:'📦', ph:'docs',      on:false, live:true,  ds:"What you can & can't bring in. Duty-free allowances, prohibited items & a declare-or-not self-check."},
   {id:'ff-tracker',    nm:'Frequent Flyer Tracker',     ico:'🏆', ph:'docs',      on:false, live:false, ds:'Log miles/points across programs. Track expiry & redemption value.'},
   {id:'vaccination',   nm:'Vaccination Requirements',   ico:'💉', ph:'docs',      on:false, live:true,  ds:'Required & recommended vaccines for 120+ destinations. Malaria risk zones, Yellow Fever certificate guide & personal record.'},
@@ -11163,6 +11309,7 @@ function injectTripCtx(id) {
   if(id==='trip-recap') tcrInit();
   if(id==='customs-duty') cdcInit();
   if(id==='customs-decl') cdhInit();
+  if(id==='flight-delay') fdcInit();
 }
 
 /* ── HUB RENDER ── */
@@ -30470,6 +30617,344 @@ function cdhRenderVerdict(){
         <ul>${items}</ul>
         Declaring voluntarily means duty or inspection at worst. Failing to declare risks seizure, fines, and — for drugs, weapons or large undeclared cash — criminal charges.</div>
     </div>`;
+}
+
+/* ════════════════════════════════════════════════════════════
+   FLIGHT DELAY COMPENSATION
+   Offline eligibility engine for EU261 / UK261 / US DOT / Canada
+   APPR covering delays, cancellations & denied boarding, plus a
+   region-specific complaint-letter generator. Guidance only.
+   ════════════════════════════════════════════════════════════ */
+const fdcState = { region:'eu', type:'delay' };
+let fdcResult = null;
+
+const FDC_REG = {
+  eu: { cur:'€', label:'Regulation (EC) No 261/2004', body:'the national enforcement body of the relevant EU/EEA country',
+        amt:{short:250, med:400, long:600} },
+  uk: { cur:'£', label:'UK Regulation (EC) No 261/2004 (as retained in UK law)', body:'the UK Civil Aviation Authority (CAA)',
+        amt:{short:220, med:350, long:520} },
+  us: { cur:'$', label:'US DOT rules (14 CFR Parts 250 & 259)', body:'the US Department of Transportation (DOT)' },
+  ca: { cur:'CA$', label:"Canada's Air Passenger Protection Regulations (APPR)", body:'the Canadian Transportation Agency (CTA)' }
+};
+const FDC_DIST_TXT = { short:'1,500 km or less', med:'between 1,500 and 3,500 km', long:'over 3,500 km' };
+const FDC_TYPE_TXT = { delay:'delay', cancel:'cancellation', denied:'denied boarding' };
+
+function fdcSel(id, label, opts){
+  return `<div class="fg"><label for="${id}">${label}</label><select id="${id}">` +
+    opts.map(o=>`<option value="${o[0]}">${o[1]}</option>`).join('') + `</select></div>`;
+}
+
+function fdcInit(){
+  const trip = getActiveTrip();
+  const ctx  = document.getElementById('ctx-flight-delay');
+  if (trip && ctx) {
+    ctx.textContent = `✈ Using context from: ${trip.name} — tap to edit ↗`;
+    ctx.classList.add('show');
+    ctx.onclick = () => showView('mytrip');
+  } else if (ctx) { ctx.classList.remove('show'); }
+
+  const pd = document.getElementById('fdc-print-date');
+  if (pd) pd.textContent = new Date().toLocaleDateString();
+
+  fdcState.region = 'eu';
+  fdcState.type   = 'delay';
+  document.querySelectorAll('#fdc-region-pills .fdc-pill').forEach(p=>p.classList.toggle('on', p.dataset.v==='eu'));
+  document.querySelectorAll('#fdc-type-pills .fdc-pill').forEach(p=>p.classList.toggle('on', p.dataset.v==='delay'));
+
+  fdcRenderFields();
+  document.getElementById('fdc-result').innerHTML = '';
+  fdcLockLetter();
+}
+
+function fdcSetRegion(r, el){
+  fdcState.region = r;
+  document.querySelectorAll('#fdc-region-pills .fdc-pill').forEach(p=>p.classList.remove('on'));
+  el.classList.add('on');
+  fdcRenderFields();
+  document.getElementById('fdc-result').innerHTML = '';
+  fdcLockLetter();
+}
+function fdcSetType(t, el){
+  fdcState.type = t;
+  document.querySelectorAll('#fdc-type-pills .fdc-pill').forEach(p=>p.classList.remove('on'));
+  el.classList.add('on');
+  fdcRenderFields();
+  document.getElementById('fdc-result').innerHTML = '';
+  fdcLockLetter();
+}
+
+function fdcRenderFields(){
+  const r = fdcState.region, t = fdcState.type;
+  const causeEU = ['airline',"Airline's fault — technical fault, crew, IT, operational, overbooking"];
+  const extraEU = ['extra','Outside the airline’s control — bad weather, air-traffic control, third-party strike, security, medical'];
+  let h = '';
+
+  if (r==='eu' || r==='uk'){
+    if (t!=='denied') h += fdcSel('fdc-dist','Flight distance', [['short','1,500 km or less (short-haul)'],['med','1,500 – 3,500 km (medium-haul)'],['long','Over 3,500 km (long-haul)']]);
+    if (t==='delay'){
+      h += fdcSel('fdc-delay','How late did you reach your final destination?', [['lt3','Less than 3 hours'],['3to4','3 to 4 hours'],['ge4','4 hours or more (or never arrived)']]);
+      h += fdcSel('fdc-cause','Reason for the disruption', [causeEU, extraEU]);
+    } else if (t==='cancel'){
+      h += fdcSel('fdc-notice','How much notice were you given?', [['ge14','14 days or more before departure'],['7to14','7 to 13 days before'],['lt7','Less than 7 days / on the day']]);
+      h += fdcSel('fdc-cause','Reason for the cancellation', [causeEU, extraEU]);
+    } else { // denied
+      h += fdcSel('fdc-dist','Flight distance', [['short','1,500 km or less (short-haul)'],['med','1,500 – 3,500 km (medium-haul)'],['long','Over 3,500 km (long-haul)']]);
+      h += fdcSel('fdc-vol','Were you bumped against your will?', [['invol','Yes — denied boarding involuntarily (e.g. overbooking)'],['vol','No — I volunteered to give up my seat']]);
+    }
+  }
+  else if (r==='us'){
+    if (t==='denied'){
+      h += fdcSel('fdc-route','Flight type', [['dom','Domestic US flight'],['intl','International flight']]);
+      h += fdcSel('fdc-dbdelay','How late will the airline get you to your destination?', [['lt1','Under 1 hour'],['1to2','1 to 2 hours'],['2to4','2 to 4 hours'],['gt4','More than 4 hours']]);
+      h += `<div class="fg"><label for="fdc-us-fare">Your one-way fare for this flight (USD, optional)</label><input type="number" id="fdc-us-fare" min="0" step="1" placeholder="e.g. 320"></div>`;
+    } else {
+      h += fdcSel('fdc-control','Was the cause within the airline’s control?', [['ctrl','Within the airline’s control — maintenance, crew, IT, operational'],['unctrl','Outside its control — weather, air-traffic control, security']]);
+      h += fdcSel('fdc-refund','Did you decide NOT to travel because the flight was cancelled or significantly changed?', [['yes','Yes — flight cancelled, or I rejected a major schedule change and didn’t fly'],['no','No — I still flew, just late']]);
+      if (t==='delay') h += fdcSel('fdc-usdelay','Length of the delay at departure/arrival', [['lt3','Under 3 hours'],['ge3','3 hours or more']]);
+    }
+  }
+  else if (r==='ca'){
+    h += fdcSel('fdc-size','Airline size', [['large','Large carrier (e.g. Air Canada, WestJet, 2M+ passengers/yr)'],['small','Small carrier']]);
+    const caCause = fdcSel('fdc-cacause','Reason for the disruption', [['ctrl','Within the carrier’s control (not safety-related)'],['safety','Within control but required for safety'],['outside','Outside the carrier’s control — weather, ATC, security']]);
+    if (t==='denied'){
+      h += fdcSel('fdc-cacause','Reason you were bumped', [['ctrl','Within the carrier’s control (e.g. overbooking)'],['safety','Required for safety (e.g. weight/aircraft swap)'],['outside','Outside the carrier’s control']]);
+      h += fdcSel('fdc-cadbdelay','How late will you arrive at your destination?', [['0to6','Up to 6 hours'],['6to9','6 to 9 hours'],['ge9','9 hours or more']]);
+    } else {
+      h += caCause;
+      h += fdcSel('fdc-cadelay','How late did you reach your final destination?', [['lt3','Less than 3 hours'],['3to6','3 to 6 hours'],['6to9','6 to 9 hours'],['ge9','9 hours or more']]);
+    }
+  }
+  document.getElementById('fdc-fields').innerHTML = h;
+}
+
+function fdcVal(id){ const el = document.getElementById(id); return el ? el.value : ''; }
+
+function fdcCheck(){
+  const r = fdcState.region, t = fdcState.type;
+  let res;
+  if (r==='eu' || r==='uk') res = fdcCalcEU(r, t);
+  else if (r==='us')        res = fdcCalcUS(t);
+  else                      res = fdcCalcCA(t);
+
+  fdcResult = res;
+  fdcRenderResult(res);
+  fdcBuildLetter();
+}
+
+/* ── EU261 / UK261 ── */
+function fdcCalcEU(r, t){
+  const cfg = FDC_REG[r], cur = cfg.cur;
+  const careRight = { ico:'🍽️', title:'Care & assistance', body:'Free meals and refreshments in proportion to the wait, two phone calls/emails, plus hotel accommodation and transfers if you are delayed overnight — regardless of the cause.' };
+  const refundRight = { ico:'💶', title:'Refund or re-routing', body:'You may choose re-routing to your destination, or a full refund (with a flight back to your origin if you’ve already part-travelled). For long delays of 5+ hours you can abandon the trip and claim a full refund.' };
+  const dl = { ico:'📅', title:'Time limit to claim', body: r==='uk' ? 'Usually up to 6 years (England, Wales & NI; 5 in Scotland) from the flight date.' : 'Varies by country — typically 2 to 6 years from the flight date.' };
+  const cite = `<b>${cfg.label}</b> · Articles 5–7. Distance is measured to your final destination (great-circle).`;
+
+  if (t==='delay'){
+    const dist = fdcVal('fdc-dist'), delay = fdcVal('fdc-delay'), cause = fdcVal('fdc-cause');
+    if (delay==='lt3')
+      return fdcNone('No cash compensation', 'A delay under 3 hours at your final destination doesn’t trigger compensation. You’re still owed care if you were kept waiting.', [careRight], cite, {region:r,type:t,cur});
+    if (cause==='extra')
+      return fdcPartial('No cash — extraordinary circumstances', 'Because the cause was outside the airline’s control, no fixed compensation is due. But the airline must still look after you.', [careRight, refundRight, dl], cite, {region:r,type:t,cur});
+    let amt = cfg.amt[dist];
+    if (dist==='long' && delay==='3to4') amt = amt/2;
+    const half = (dist==='long' && delay==='3to4');
+    return fdcElig(amt, cur, `${cur}${amt} compensation likely due`,
+      `For a ${FDC_DIST_TXT[dist]} flight delayed ${delay==='3to4'?'3–4':'4+'} hours.` + (half?' Halved because long-haul arrivals 3–4 hours late qualify for 50%.':''),
+      [ {ico:'⚖️', title:`Compensation: ${cur}${amt}`, body:`Fixed sum under Article 7, independent of your ticket price. Payable in cash/bank transfer — you can refuse vouchers.`}, careRight, refundRight, dl ], cite, {region:r,type:t,cur});
+  }
+
+  if (t==='cancel'){
+    const dist = fdcVal('fdc-dist'), notice = fdcVal('fdc-notice'), cause = fdcVal('fdc-cause');
+    if (notice==='ge14')
+      return fdcNone('No cash compensation', 'With 14+ days’ notice the airline isn’t required to pay compensation, but you’re owed a refund or re-routing.', [refundRight], cite, {region:r,type:t,cur});
+    if (cause==='extra')
+      return fdcPartial('No cash — extraordinary circumstances', 'Cancellation caused by events outside the airline’s control. No fixed compensation, but refund/re-routing and care still apply.', [refundRight, careRight, dl], cite, {region:r,type:t,cur});
+    const amt = cfg.amt[dist];
+    return fdcElig(amt, cur, `${cur}${amt} compensation likely due`,
+      `Cancellation with ${notice==='lt7'?'less than 7 days':'7–13 days'}’ notice on a ${FDC_DIST_TXT[dist]} flight.`,
+      [ {ico:'⚖️', title:`Compensation: ${cur}${amt}`, body:'Compensation can be reduced by 50% if you were re-routed close to your original schedule (within 1–2h depending on notice).'}, refundRight, careRight, dl ], cite, {region:r,type:t,cur});
+  }
+
+  // denied boarding
+  const dist = fdcVal('fdc-dist'), vol = fdcVal('fdc-vol');
+  if (vol==='vol')
+    return fdcPartial('Negotiated benefits — no fixed sum', 'If you volunteered to give up your seat, you get whatever benefits you agreed with the airline (vouchers, cash, rebooking) — there’s no statutory amount.', [refundRight, careRight], cite, {region:r,type:t,cur});
+  const amt = cfg.amt[dist];
+  return fdcElig(amt, cur, `${cur}${amt} compensation due`,
+    `Involuntary denied boarding on a ${FDC_DIST_TXT[dist]} flight. Overbooking is never an "extraordinary circumstance", so compensation is owed in full.`,
+    [ {ico:'⚖️', title:`Compensation: ${cur}${amt}`, body:'Paid immediately on top of your right to a refund or re-routing.'}, refundRight, careRight, dl ], cite, {region:r,type:t,cur});
+}
+
+/* ── US DOT ── */
+function fdcCalcUS(t){
+  const cur = '$';
+  const cite = `<b>US DOT</b> — 14 CFR Part 250 (oversales / denied boarding) and the DOT refund rule. The US has <b>no</b> mandated cash payout for delays or cancellations themselves.`;
+  if (t==='denied'){
+    const route = fdcVal('fdc-route'), band = fdcVal('fdc-dbdelay');
+    const fareRaw = parseFloat(fdcVal('fdc-us-fare'));
+    let pct = 0;
+    if (band==='lt1') pct = 0;
+    else if (route==='dom') pct = (band==='1to2') ? 200 : 400;
+    else pct = (band==='gt4') ? 400 : 200; // intl: 1–4h = 200%, >4h = 400%
+    if (pct===0)
+      return fdcNone('No compensation', 'If the airline gets you to your destination within 1 hour of your original arrival, no denied-boarding compensation is due.', [], cite, {region:'us',type:t,cur});
+    const cap = pct===400 ? 2150 : 1075;
+    let amtNum=null, amtText;
+    if (!isNaN(fareRaw) && fareRaw>0){ amtNum = Math.min(Math.round(fareRaw*pct/100), cap); amtText = `${cur}${amtNum}`; }
+    else { amtText = `${pct}% of your one-way fare (max ${cur}${cap})`; }
+    return fdcElig(amtNum, cur, amtNum!=null ? `${cur}${amtNum} due` : `${pct}% of fare`,
+      `Involuntary bumping with a ${band==='gt4'?'4+':band==='2to4'?'2–4':'1–2'} hour arrival delay → ${pct}% of your one-way fare, capped at ${cur}${cap}.`,
+      [ {ico:'⚖️', title:`Denied boarding pay: ${amtText}`, body:'Must be offered as cash or cheque on the day — you can decline travel vouchers. This is on top of getting you to your destination.'},
+        {ico:'🎟️', title:'Keep your seat value', body:'You also keep your original ticket or get re-routed at no extra cost.'} ], cite, {region:'us',type:t,cur,amtText});
+  }
+  // delay or cancel
+  const ctrl = fdcVal('fdc-control'), refund = fdcVal('fdc-refund');
+  const rights = [];
+  if (refund==='yes') rights.push({ ico:'💵', title:'Full automatic refund', body:'When a flight is cancelled or significantly changed and you choose not to travel, US DOT rules require a prompt full refund to your original payment method — even on non-refundable fares. You don’t have to accept a voucher.' });
+  if (ctrl==='ctrl') rights.push({ ico:'🛏️', title:'Care for controllable disruptions', body:'For delays/cancellations within the airline’s control, major US airlines now commit to free rebooking, meal vouchers for 3+ hour waits, and overnight hotel + transport. Coverage is set by each airline’s DOT customer-service commitments.' });
+  else rights.push({ ico:'🔁', title:'Rebooking', body:'You’ll be rebooked on the airline’s next available flight at no charge. For causes outside the airline’s control (weather, ATC), meals and hotels are usually not provided.' });
+  rights.push({ ico:'📅', title:'How to claim', body:'There’s no deadline to file a DOT complaint. Cash refunds are due within 7 business days (credit card) or 20 days (other); request in writing if not automatic.' });
+  return fdcPartial('No statutory cash — but you have refund & care rights', 'US law doesn’t set a fixed delay/cancellation payout. Your protections are refunds and the airline’s own service commitments.', rights, cite, {region:'us',type:t,cur});
+}
+
+/* ── Canada APPR ── */
+function fdcCalcCA(t){
+  const cur = 'CA$';
+  const size = fdcVal('fdc-size');
+  const cite = `<b>Air Passenger Protection Regulations (APPR)</b> under the Canada Transportation Act. Compensation applies only to disruptions <b>within the carrier’s control and not required for safety</b>.`;
+  const refundRight = { ico:'💵', title:'Refund or rebooking', body:'For a delay of 3+ hours you can choose rebooking or a full refund if the trip no longer serves its purpose. Refunds go to your original payment method.' };
+  const careRight = { ico:'🍽️', title:'Care (controllable delays)', body:'For delays within the carrier’s control: food and drink, and overnight hotel + transport, while you wait.' };
+  const dl = { ico:'📅', title:'Time limit to claim', body:'You have up to 1 year from the disruption to file. The airline must acknowledge and respond within 30 days.' };
+
+  if (t==='denied'){
+    const cause = fdcVal('fdc-cacause'), band = fdcVal('fdc-cadbdelay');
+    if (cause!=='ctrl')
+      return fdcPartial('No cash — not within carrier control', 'Denied-boarding compensation under APPR applies only when the bumping is within the carrier’s control and not for safety. You keep your refund/rebooking and care rights.', [refundRight, careRight, dl], cite, {region:'ca',type:t,cur});
+    const tbl = { '0to6':900, '6to9':1800, 'ge9':2400 };
+    const amt = tbl[band];
+    return fdcElig(amt, cur, `${cur}${amt} due`,
+      `Involuntary denied boarding within the carrier’s control, arriving ${band==='ge9'?'9+':band==='6to9'?'6–9':'up to 6'} hours late.`,
+      [ {ico:'⚖️', title:`Denied boarding pay: ${cur}${amt}`, body:'Must be paid within 48 hours, in addition to refund or rebooking.'}, refundRight, careRight, dl ], cite, {region:'ca',type:t,cur});
+  }
+  // delay / cancel
+  const cause = fdcVal('fdc-cacause'), band = fdcVal('fdc-cadelay');
+  if (cause==='outside')
+    return fdcNone('No compensation — outside carrier control', 'Disruptions outside the carrier’s control (weather, ATC, security) carry no compensation or care obligations, but you keep your rebooking/refund right.', [refundRight], cite, {region:'ca',type:t,cur});
+  if (cause==='safety')
+    return fdcPartial('No cash — required for safety', 'When a delay within the carrier’s control is required for safety, no compensation is due, but the airline must still provide care and rebooking/refund.', [careRight, refundRight, dl], cite, {region:'ca',type:t,cur});
+  if (band==='lt3')
+    return fdcNone('No cash compensation', 'Compensation needs an arrival delay of 3 hours or more. You’re still owed care while you wait.', [careRight], cite, {region:'ca',type:t,cur});
+  const tbl = size==='large' ? { '3to6':400,'6to9':700,'ge9':1000 } : { '3to6':125,'6to9':250,'ge9':500 };
+  const amt = tbl[band];
+  return fdcElig(amt, cur, `${cur}${amt} compensation due`,
+    `${size==='large'?'Large':'Small'} carrier, controllable delay of ${band==='ge9'?'9+':band==='6to9'?'6–9':'3–6'} hours at your destination.`,
+    [ {ico:'⚖️', title:`Compensation: ${cur}${amt}`, body:`Based on the arrival delay and carrier size. ${size==='large'?'Large':'Small'}-carrier rate applies. Must be paid within 30 days of your claim.`}, careRight, refundRight, dl ], cite, {region:'ca',type:t,cur});
+}
+
+/* ── Result object builders ── */
+function fdcElig(amount, cur, ttl, sub, rights, cite, meta){
+  return Object.assign({ cls:'elig', ico:'✅', eligible:true, amount, amountText: meta.amtText || (amount!=null?cur+amount:null), ttlBig:(amount!=null?cur+amount:null), ttl, sub, rights, cite }, meta);
+}
+function fdcPartial(ttl, sub, rights, cite, meta){
+  return Object.assign({ cls:'partial', ico:'⚠️', eligible:false, amount:null, amountText:null, ttlBig:null, ttl, sub, rights, cite }, meta);
+}
+function fdcNone(ttl, sub, rights, cite, meta){
+  return Object.assign({ cls:'none', ico:'ℹ️', eligible:false, amount:null, amountText:null, ttlBig:null, ttl, sub, rights, cite }, meta);
+}
+
+function fdcRenderResult(res){
+  const wrap = document.getElementById('fdc-result');
+  const big = res.ttlBig ? `<div class="fdc-verdict-amt">${res.ttlBig}</div><div class="fdc-verdict-sub">${res.sub}</div>` :
+    `<div class="fdc-verdict-ttl">${res.ttl}</div><div class="fdc-verdict-sub">${res.sub}</div>`;
+  const rights = res.rights.map(r=>`<div class="fdc-right"><span class="fdc-right-ico">${r.ico}</span><span class="fdc-right-body"><strong>${r.title}</strong>${r.body}</span></div>`).join('');
+  wrap.innerHTML = `
+    <div class="fdc-card ${res.cls}">
+      <div class="fdc-verdict-top">
+        <span class="fdc-verdict-ico">${res.ico}</span>
+        <div>${big}</div>
+      </div>
+      <div class="fdc-rights">${rights}</div>
+      <div class="fdc-cite">${res.cite}</div>
+    </div>`;
+}
+
+/* ── Complaint letter ── */
+function fdcLockLetter(){
+  const lock = document.getElementById('fdc-letter-locked');
+  const ta   = document.getElementById('fdc-letter');
+  const row  = document.getElementById('fdc-copy-row');
+  if (lock) lock.style.display = 'block';
+  if (ta){ ta.style.display = 'none'; ta.value=''; }
+  if (row) row.style.display = 'none';
+}
+
+function fdcBuildLetter(){
+  if (!fdcResult) return;
+  const lock = document.getElementById('fdc-letter-locked');
+  const ta   = document.getElementById('fdc-letter');
+  const row  = document.getElementById('fdc-copy-row');
+  lock.style.display = 'none';
+  ta.style.display = 'block';
+  row.style.display = 'flex';
+
+  const ph = (id, fallback) => { const v = (fdcVal(id)||'').trim(); return v || fallback; };
+  const name    = ph('fdc-l-name','[Your full name]');
+  const airline = ph('fdc-l-airline','[Airline]');
+  const flight  = ph('fdc-l-flight','[flight number]');
+  const dateRaw = fdcVal('fdc-l-date');
+  const fdate   = dateRaw ? new Date(dateRaw+'T00:00').toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}) : '[flight date]';
+  const from    = ph('fdc-l-from','[departure airport]');
+  const to      = ph('fdc-l-to','[arrival airport]');
+  const ref     = (fdcVal('fdc-l-ref')||'').trim();
+  const today   = new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'});
+  const cfg     = FDC_REG[fdcResult.region];
+  const typeTxt = FDC_TYPE_TXT[fdcResult.type];
+
+  let ask;
+  if (fdcResult.eligible && fdcResult.amountText){
+    ask = `Under ${cfg.label}, I am entitled to compensation of ${fdcResult.amountText} for this ${typeTxt}. I request that you pay this amount in full, by bank transfer or cheque (not vouchers), within 14 days of this letter.`;
+  } else if (fdcResult.region==='us' && fdcResult.type!=='denied'){
+    ask = `Under ${cfg.label}, I request a full refund of the affected portion of my ticket to my original form of payment, together with reimbursement of the out-of-pocket expenses (meals, accommodation and transport) I incurred as a result of this ${typeTxt}. Receipts are attached.`;
+  } else {
+    ask = `While I understand a fixed compensation payment may not apply in this case, under ${cfg.label} I am entitled to assistance and a refund or re-routing. I request reimbursement of the expenses I incurred (meals, accommodation, transport) and confirmation of how my fare was refunded or my journey re-routed. Receipts are attached.`;
+  }
+
+  const refLine = ref ? `Booking reference: ${ref}\n` : '';
+  const letter =
+`${name}
+${today}
+
+To: ${airline} — Customer Relations
+
+Re: Claim under ${cfg.label}
+Flight ${flight}, ${from} to ${to}, on ${fdate}
+${refLine}
+Dear ${airline},
+
+I am writing regarding the ${typeTxt} of the above flight, on which I was a confirmed passenger.
+
+${ask}
+
+${ask.startsWith('Under '+cfg.label+', I am entitled to compensation') ? 'This is a statutory entitlement and is separate from any refund, re-routing or expenses I am also owed. ' : ''}Please treat this as a formal claim. I have retained my boarding pass, booking confirmation and evidence of the disruption, which I can provide on request.
+
+If I do not receive a satisfactory response within 14 days, I will refer my complaint to ${cfg.body} and pursue the matter further.
+
+I look forward to your prompt reply.
+
+Yours faithfully,
+${name}`;
+
+  ta.value = letter;
+}
+
+function fdcCopyLetter(){
+  const ta = document.getElementById('fdc-letter');
+  const ok = document.getElementById('fdc-copy-ok');
+  const text = ta.value;
+  const showOk = () => { ok.classList.add('show'); setTimeout(()=>ok.classList.remove('show'), 1800); };
+  if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(showOk).catch(()=>{ tcrCopyFallback(text); showOk(); });
+  } else { tcrCopyFallback(text); showOk(); }
 }
 
 </script>
