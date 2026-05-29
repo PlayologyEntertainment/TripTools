@@ -6386,16 +6386,188 @@ body.no-scroll { overflow: hidden; }
     </div>
   </div>
 </div>
-<div id="view-placeholder-driving-rules" class="view">
-  <nav class="tool-topbar">
+<style>
+/* ── DRIVING & ROAD RULES ── */
+.dr-hero{margin-top:4px;display:flex;align-items:center;gap:14px;padding:16px 18px;border:1.5px solid var(--ink);border-radius:var(--r);background:var(--paper-2);border-left-width:5px}
+.dr-hero.side-left{border-left-color:var(--blue)}
+.dr-hero.side-right{border-left-color:var(--accent)}
+.dr-hero-flag{font-size:34px;line-height:1;flex-shrink:0}
+.dr-hero-meta{flex:1;min-width:0}
+.dr-hero-co{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.dr-hero-side{font-family:var(--serif);font-size:22px;font-weight:700;letter-spacing:-.02em;line-height:1.15;margin-top:2px}
+.dr-hero.side-left .dr-hero-side{color:var(--blue)}
+.dr-hero.side-right .dr-hero-side{color:var(--accent)}
+.dr-hero-sub{font-size:12px;color:var(--muted);line-height:1.45;margin-top:4px}
+.dr-hero-ico{font-size:30px;flex-shrink:0;opacity:.85}
+
+.dr-glance{margin-top:14px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media(max-width:600px){.dr-glance{grid-template-columns:1fr}}
+.dr-glance-card{border:1.5px solid var(--rule);border-radius:var(--r);padding:11px 13px;display:flex;flex-direction:column;gap:4px}
+.dr-glance-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:6px}
+.dr-glance-val{font-weight:600;font-size:15px;line-height:1.3;color:var(--ink)}
+.dr-glance-val b{color:var(--ink)}
+.dr-glance-sub{font-size:11.5px;color:var(--muted);line-height:1.4}
+.dr-glance-card.dr-idp-req{border-left:4px solid var(--accent)}
+.dr-glance-card.dr-idp-rec{border-left:4px solid var(--orange)}
+.dr-glance-card.dr-idp-no{border-left:4px solid var(--green)}
+.dr-pill{font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:2px;align-self:flex-start}
+.dr-pill.req{background:#FFE5DF;color:var(--accent);border:1px solid rgba(255,77,46,.3)}
+.dr-pill.rec{background:#FFE6CC;color:var(--orange);border:1px solid rgba(230,81,0,.3)}
+.dr-pill.no{background:#E3F4E4;color:var(--green);border:1px solid rgba(46,125,50,.3)}
+
+.dr-section{margin-top:22px}
+.dr-sec-hdr{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+
+.dr-speeds{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media(max-width:600px){.dr-speeds{grid-template-columns:1fr}}
+.dr-speed{border:1.5px solid var(--rule);border-radius:var(--r);padding:13px;text-align:center}
+.dr-speed-ico{font-size:20px;line-height:1}
+.dr-speed-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:6px}
+.dr-speed-val{font-family:var(--serif);font-size:23px;font-weight:700;letter-spacing:-.02em;color:var(--ink);margin-top:3px;line-height:1.1}
+.dr-speed-conv{font-family:var(--mono);font-size:10px;letter-spacing:.04em;color:var(--muted);margin-top:4px}
+.dr-conv{font-family:var(--sans);font-size:12px;font-weight:500;color:var(--muted)}
+.dr-note{font-size:12.5px;color:var(--muted);line-height:1.5;margin-top:10px}
+
+.dr-rows{display:flex;flex-direction:column;border:1.5px solid var(--rule);border-radius:var(--r);overflow:hidden}
+.dr-row{display:flex;gap:12px;padding:11px 14px;border-bottom:1px solid var(--rule);align-items:flex-start}
+.dr-row:last-child{border-bottom:none}
+.dr-row-ico{font-size:18px;line-height:1.3;flex-shrink:0;width:22px;text-align:center}
+.dr-row-body{flex:1;min-width:0}
+.dr-row-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.dr-row-val{font-size:13.5px;line-height:1.5;color:var(--ink-2);margin-top:2px}
+.dr-row-val b{color:var(--ink)}
+
+.dr-knownote{margin-top:22px;padding:13px 16px;border-radius:var(--r);background:var(--paper-2);border-left:3px solid var(--blue);font-size:13px;line-height:1.55;color:var(--ink-2)}
+.dr-knownote b{color:var(--ink)}
+.dr-knownote-hd{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+
+.dr-signs-sec{border-top:1.5px solid var(--rule);padding-top:18px;margin-top:26px}
+.dr-signs-hdr{cursor:pointer;justify-content:space-between;user-select:none}
+.dr-signs-caret{transition:transform .2s}
+.dr-signs-sec.open .dr-signs-caret{transform:rotate(180deg)}
+.dr-sign-intro{font-size:12.5px;color:var(--ink-2);line-height:1.55;margin-bottom:14px}
+.dr-sign-legend{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px}
+@media(max-width:600px){.dr-sign-legend{grid-template-columns:1fr}}
+.dr-leg{border:1.5px solid var(--rule);border-radius:var(--r);padding:9px 11px;font-size:12px;line-height:1.45;color:var(--ink-2)}
+.dr-leg b{display:block;color:var(--ink);font-size:12.5px;margin-bottom:2px}
+.dr-sign-grp{margin-bottom:16px}
+.dr-sign-grp-hd{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.dr-signs{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+@media(max-width:600px){.dr-signs{grid-template-columns:1fr}}
+.dr-sign{display:flex;align-items:center;gap:11px;border:1.5px solid var(--rule);border-radius:var(--r);padding:9px 12px}
+.dr-sign-ico{font-size:22px;line-height:1;flex-shrink:0;width:26px;text-align:center}
+.dr-sign-nm{font-weight:600;font-size:13px;line-height:1.25}
+.dr-sign-ds{font-size:11.5px;color:var(--muted);line-height:1.35;margin-top:1px}
+
+@media print{
+  #view-driving-rules .tc-country-caret,#view-driving-rules .tc-drop{display:none!important}
+  #view-driving-rules #dr-empty{display:none!important}
+  #view-driving-rules #dr-signs-body{display:block!important}
+}
+</style>
+<div id="view-driving-rules" class="view">
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="window.print()">🖨 Print</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">🚦</span>
-    <h2>Driving & Road Rules</h2>
-    <p style="margin-bottom:24px">Speed limits, BAC limits, toll systems, parking norms & visual road sign reference.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-driving-rules"></div>
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>Driving &amp; Road Rules</h1>
+    <p class="tool-sub">Which side they drive on, speed limits, the drink-drive limit, tolls, parking and the safety laws that catch tourists out — for 53 of the world's most-visited countries. Plus a universal road-sign reference.</p>
+  </div>
+
+  <div class="tool-body">
+    <!-- ── COUNTRY PICKER ── -->
+    <div class="fg">
+      <label>Country</label>
+      <div class="tc-country-wrap">
+        <div class="tc-country-input" id="dr-country-disp" onclick="drOpenPicker()" tabindex="0" role="button" aria-label="Choose country">
+          <span class="tc-country-flag" id="dr-disp-flag">🌐</span>
+          <span class="tc-country-name" id="dr-disp-name">Select a country</span>
+          <span class="tc-country-cur" id="dr-disp-side"></span>
+          <span class="tc-country-caret">▾</span>
+        </div>
+        <div class="tc-drop" id="dr-country-drop" style="display:none">
+          <div class="tc-drop-search">
+            <input type="search" id="dr-country-search" class="tc-search-input" placeholder="🔍 Search 53 countries…" autocomplete="off" oninput="drFilterCountries()">
+          </div>
+          <div id="dr-country-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty prompt before a country is chosen -->
+    <div class="tg-empty" id="dr-empty">
+      <span class="tg-empty-ico">🚦</span>
+      Pick a country to see which side they drive on, the speed limits, the drink-drive limit, toll &amp; parking norms, and the safety laws that catch visitors out.
+    </div>
+
+    <!-- ── RESULTS ── -->
+    <div id="dr-content" style="display:none">
+      <div class="dr-hero" id="dr-hero">
+        <div class="dr-hero-flag" id="dr-hero-flag">🌐</div>
+        <div class="dr-hero-meta">
+          <div class="dr-hero-co" id="dr-hero-co"></div>
+          <div class="dr-hero-side" id="dr-hero-side"></div>
+          <div class="dr-hero-sub" id="dr-hero-sub"></div>
+        </div>
+        <div class="dr-hero-ico" id="dr-hero-ico">🚗</div>
+      </div>
+
+      <div class="dr-glance" id="dr-glance"></div>
+
+      <div class="dr-section">
+        <div class="dr-sec-hdr">Speed limits</div>
+        <div class="dr-speeds" id="dr-speeds"></div>
+        <div class="dr-note" id="dr-speed-note"></div>
+      </div>
+
+      <div class="dr-section">
+        <div class="dr-sec-hdr">Tolls &amp; parking</div>
+        <div class="dr-rows" id="dr-tollpark"></div>
+      </div>
+
+      <div class="dr-section">
+        <div class="dr-sec-hdr">Safety law essentials</div>
+        <div class="dr-rows" id="dr-safety"></div>
+      </div>
+
+      <div class="dr-knownote" id="dr-knownote-wrap">
+        <div class="dr-knownote-hd">ⓘ Good to know</div>
+        <div id="dr-knownote"></div>
+      </div>
+    </div>
+
+    <!-- ── UNIVERSAL ROAD-SIGN REFERENCE (always available) ── -->
+    <div class="dr-section dr-signs-sec" id="dr-signs-sec">
+      <div class="dr-sec-hdr dr-signs-hdr" onclick="drToggleSigns()" id="dr-signs-toggle" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();drToggleSigns();}">
+        <span>🪧 Universal road-sign reference</span>
+        <span class="dr-signs-caret" id="dr-signs-caret">▾</span>
+      </div>
+      <div id="dr-signs-body" style="display:none">
+        <div class="dr-sign-intro">Most countries follow the <b>Vienna Convention on Road Signs</b>, so the <b>shape and colour</b> tell you what a sign does even when the words are foreign. Use these cues:</div>
+        <div class="dr-sign-legend" id="dr-sign-legend"></div>
+        <div id="dr-sign-groups"></div>
+      </div>
+    </div>
+
+    <div style="margin-top:16px;padding:12px 16px;background:var(--paper-2);border-left:3px solid var(--yellow);border-radius:var(--r);font-size:13px;color:var(--muted);line-height:1.55">
+      ⚠️ <strong>Verify with official sources before travel.</strong> Driving laws, speed limits and drink-drive limits change frequently and can vary by state, province or region. Confirm with the official transport authority or your car-rental provider before you drive.
+    </div>
+  </div><!-- /tool-body -->
+
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    If you're driving on the opposite side from home, the danger moments are junctions, roundabouts and the first turn after a stop — say "stay on the [left/right]" out loud each time until it's automatic. Many fatal tourist crashes happen pulling out of a car park or fuel station. A stick-on arrow on the dashboard helps.
+  </div>
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('intl-driving')">🚗 International Driving Guide</button>
+      <button class="rel-btn" onclick="openTool('emergency')">🚨 Emergency Numbers</button>
+      <button class="rel-btn" onclick="openTool('fuel-cost')">⛽ Fuel Cost Calculator</button>
+      <button class="rel-btn" onclick="openTool('toll-est')">💲 Toll Cost Estimator</button>
     </div>
   </div>
 </div>
@@ -9423,7 +9595,7 @@ const TOOLS = [
   {id:'altitude',      nm:'Altitude Sickness Guide',    ico:'⛰', ph:'destination',on:false,live:false, ds:'Enter elevation → risk level + acclimatization timeline.'},
   {id:'weather',       nm:'Weather Forecast',           ico:'🌦', ph:'destination',on:true, live:true,  ds:'5-day forecast via Open-Meteo. Free, no API key.'},
   {id:'tipping-guide', nm:'Tipping Culture Guide',      ico:'🍽', ph:'destination',on:false,live:true,  ds:'Country-by-country etiquette: expected / optional / offensive per venue.'},
-  {id:'driving-rules', nm:'Driving & Road Rules',       ico:'🚦', ph:'destination',on:false,live:false, ds:'Speed limits, BAC limits, toll systems & road sign reference.'},
+  {id:'driving-rules', nm:'Driving & Road Rules',       ico:'🚦', ph:'destination',on:false,live:true,  ds:'Speed limits, BAC limits, toll systems & road sign reference.'},
   {id:'quiet-hours',   nm:'Local Quiet Hours Guide',    ico:'🤫', ph:'destination',on:false,live:false, ds:'Siesta hours, noise ordinances & photography restrictions.'},
   {id:'fuel-cost',     nm:'Fuel Cost Calculator',       ico:'⛽', ph:'road',       on:false,live:true,  ds:'Distance + MPG + fuel price = total cost. Compare two vehicles.'},
   {id:'rest-stop',     nm:'Rest Stop Planner',          ico:'⏸', ph:'road',       on:false,live:false, ds:'Recommended break schedule. Adjusts for kids, pets & elderly.'},
@@ -10119,6 +10291,7 @@ function injectTripCtx(id) {
   if(id==='meeting-tz') mtpInit();
   if(id==='tip-calc')   tcInit();
   if(id==='tipping-guide') tgInit();
+  if(id==='driving-rules') drInit();
   if(id==='power-plug') ppInit();
   if(id==='toll-est')   teInit();
   if(id==='road-planner') rpInit();
@@ -22603,6 +22776,908 @@ function tgRender(){
   } else {
     pSec.style.display = 'none';
   }
+}
+
+/* ══════════════════════════════════════════════════════
+   DRIVING & ROAD RULES GUIDE
+   Offline reference for 53 countries (shares TC_COUNTRIES picker).
+   Per-country fields:
+     side   : 'left' | 'right'      — which side of the road
+     idp    : 'no' | 'rec' | 'req'  — Int'l Driving Permit need for tourists
+     idpNote: optional override text for the IDP card
+     unit   : 'km/h' | 'mph'        — native speed unit
+     urban / rural / motor          — default limits in native unit
+                                      (motor: 0 = no general limit; null = no motorways)
+     speedNote                      — caveats on limits
+     bac    : number (% BAC, g/100mL); 0 = zero tolerance
+     bacNote
+     toll / park                    — toll-system & parking guidance
+     seatbelt / phone / child / lights / winter — safety-law essentials
+     emerg  : primary emergency number
+     note   : general "good to know"
+   ══════════════════════════════════════════════════════ */
+const DR_DATA = {
+  /* ===== AMERICAS ===== */
+  US:{side:'right',idp:'rec',unit:'mph',urban:30,rural:55,motor:70,
+    speedNote:`Limits are set by each state — rural interstates run 65–80 mph (up to 85 in parts of Texas). Right turn on red is allowed after a full stop unless a sign forbids it.`,
+    bac:0.08,bacNote:`0.08% nationwide; commercial drivers and under-21s far lower (often zero).`,
+    toll:`Mostly electronic — tags like E-ZPass, SunPass and FasTrak, or cashless "bill-by-plate". Rental firms add daily toll-pass fees.`,
+    park:`Read curb colours and signs carefully: hydrants, street-cleaning days and permit zones are ticketed hard. Meters and apps (ParkMobile) downtown.`,
+    seatbelt:`Compulsory in front; most states require all seats.`,
+    phone:`Handheld use banned in most states — hands-free only; texting banned almost everywhere.`,
+    child:`Child seat/booster required, typically to age 8 or a height/weight limit (varies by state).`,
+    lights:`Headlights in poor visibility; many states require lights whenever wipers are on.`,
+    winter:`Snow tyres or chains may be mandatory on mountain passes (esp. California, Colorado) in winter.`,
+    emerg:'911',
+    note:`Rules, speed enforcement and phone laws vary a lot state to state. Move-over laws require you to slow/change lanes for stopped emergency vehicles.`},
+  CA:{side:'right',idp:'rec',unit:'km/h',urban:50,rural:80,motor:100,
+    speedNote:`Highways are usually 100–110 km/h. Right turn on red is allowed after stopping (except on Montréal Island and where signed).`,
+    bac:0.08,bacNote:`0.08% is the criminal limit; many provinces issue licence suspensions from 0.05%. Zero for new/young drivers.`,
+    toll:`Very few toll roads. Ontario's 407 ETR is camera-billed by plate; some bridges charge electronically.`,
+    park:`Watch winter overnight/snow-route bans and permit zones. Apps and meters in cities.`,
+    seatbelt:`Compulsory, all seats.`,
+    phone:`Handheld phones banned nationwide — hands-free only.`,
+    child:`Child seat/booster required to ~9 kg–18 kg stages or 145 cm (varies by province).`,
+    lights:`Daytime running lights standard; headlights required in poor visibility.`,
+    winter:`Winter tyres mandatory in Québec (Dec 1–Mar 15) and parts of BC; strongly advised elsewhere.`,
+    emerg:'911',
+    note:`Distances and limits are metric. Watch for moose/deer on rural roads at dawn and dusk.`},
+  MX:{side:'right',idp:'rec',unit:'km/h',urban:40,rural:80,motor:110,
+    speedNote:`"Cuotas" (toll highways) are well-maintained; free "libre" roads are slower with topes (speed bumps) through towns.`,
+    bac:0.08,bacNote:`0.08% nationally, but several states (incl. Mexico City) enforce lower limits and run breathalyser checkpoints ("alcoholímetro").`,
+    toll:`Cash/card at toll booths on "cuota" highways — keep pesos handy; tolls can be significant on long routes.`,
+    park:`Use guarded lots ("estacionamiento") in cities. Avoid leaving valuables visible.`,
+    seatbelt:`Compulsory in front; rear belts required in most states.`,
+    phone:`Handheld use banned — hands-free only.`,
+    child:`Child seats required for young children (enforcement varies).`,
+    lights:`Headlights in tunnels and poor visibility.`,
+    winter:`Not generally required.`,
+    emerg:'911',
+    note:`Avoid driving at night on rural roads. Topes (speed bumps) are often unmarked — slow through every town.`},
+  BR:{side:'right',idp:'req',unit:'km/h',urban:60,rural:80,motor:110,
+    speedNote:`Heavily camera-enforced ("radar"). Limits drop sharply and often near cameras — watch the signs.`,
+    bac:0,bacNote:`Zero tolerance ("Lei Seca") — any measurable alcohol means heavy fines and possible arrest.`,
+    toll:`Cash/card booths and "Sem Parar" electronic tags on major highways, especially in São Paulo state.`,
+    park:`Use paid "Zona Azul" zones and guarded lots; informal "flanelinhas" may expect a small fee.`,
+    seatbelt:`Compulsory, all seats.`,
+    phone:`Handheld use banned — hands-free only.`,
+    child:`Child seat/booster required to age 10 / 1.45 m.`,
+    lights:`Daytime headlights required on highways.`,
+    winter:`Not required.`,
+    emerg:'190',
+    note:`An IDP plus your home licence is required. At night some cities permit treating red lights as stop-then-go for safety — check local rules.`},
+  AR:{side:'right',idp:'rec',unit:'km/h',urban:40,rural:110,motor:130,
+    speedNote:`Urban avenues 60 km/h; residential streets 40. Highways up to 130.`,
+    bac:0.05,bacNote:`0.05% general; zero for motorcyclists, and some provinces (e.g. Córdoba) enforce zero tolerance.`,
+    toll:`Cash/card booths and electronic "TelePASE" tags around Buenos Aires.`,
+    park:`Watch yellow-line no-parking and tow zones in Buenos Aires; use guarded lots.`,
+    seatbelt:`Compulsory, all seats.`,
+    phone:`Handheld use banned.`,
+    child:`Under-10s must ride in the rear with a suitable restraint.`,
+    lights:`Daytime headlights required on highways/routes.`,
+    winter:`Snow chains may be needed in Andean/Patagonian passes.`,
+    emerg:'911',
+    note:`Carry the original licence, ID and car papers — police checks are common.`},
+  CL:{side:'right',idp:'rec',unit:'km/h',urban:50,rural:100,motor:120,
+    speedNote:`Camera and average-speed enforcement on highways.`,
+    bac:0.03,bacNote:`0.03% = infraction; from 0.08% counts as "manejo en estado de ebriedad" with severe penalties.`,
+    toll:`Electronic free-flow ("TAG") on Santiago urban motorways — rentals must have a working transponder; cash booths on interurban routes.`,
+    park:`Metered/attendant parking in cities; obey loading-zone restrictions.`,
+    seatbelt:`Compulsory, all seats.`,
+    phone:`Handheld use banned.`,
+    child:`Under-12s / under 1.35 m must use a rear child restraint.`,
+    lights:`Daytime headlights required on rural roads.`,
+    winter:`Chains required on signposted Andean routes in winter.`,
+    emerg:'133',
+    note:`The Santiago TAG system bills automatically — confirm your rental is enrolled to avoid fines.`},
+  PE:{side:'right',idp:'rec',unit:'km/h',urban:60,rural:80,motor:100,
+    speedNote:`School/hospital zones 30 km/h. Mountain roads are slow and winding.`,
+    bac:0.05,bacNote:`0.05% limit, strictly enforced with checkpoints.`,
+    toll:`Cash/card booths ("peaje") on the Pan-American and major highways.`,
+    park:`Use guarded lots ("playa de estacionamiento") in Lima; informal attendants common.`,
+    seatbelt:`Compulsory, all seats.`,
+    phone:`Handheld use banned.`,
+    child:`Under-12s ride in the rear with a restraint.`,
+    lights:`Headlights in tunnels and poor visibility.`,
+    winter:`Not generally required; altitude affects engine/driver — acclimatise.`,
+    emerg:'105',
+    note:`Lima traffic is chaotic and assertive. Avoid driving on mountain roads after dark.`},
+  CR:{side:'right',idp:'rec',unit:'km/h',urban:40,rural:80,motor:100,
+    speedNote:`Speeding over 120 km/h is a criminal-level offence with huge fines.`,
+    bac:0.05,bacNote:`0.05% limit; from 0.075% is a serious offence.`,
+    toll:`Small cash tolls ("peaje") on a few routes near San José; carry colones.`,
+    park:`Use guarded lots; "boleta" parking meters in central San José.`,
+    seatbelt:`Compulsory, all seats.`,
+    phone:`Handheld use banned.`,
+    child:`Child seat/booster required to age 12 / 1.45 m.`,
+    lights:`Headlights in poor visibility.`,
+    winter:`Not applicable; 4x4 useful in the rainy season for rural/gravel roads.`,
+    emerg:'911',
+    note:`Roads can be potholed and poorly lit; rivers/fords in remote areas need a 4x4. Avoid night driving rurally.`},
+
+  /* ===== EUROPE ===== */
+  GB:{side:'left',idp:'rec',unit:'mph',urban:30,rural:60,motor:70,
+    speedNote:`Built-up areas 30 mph (often 20 in cities); single carriageways 60; dual carriageways & motorways 70.`,
+    bac:0.08,bacNote:`0.08% in England, Wales & NI; Scotland is lower at 0.05%.`,
+    toll:`Most motorways are free. Exceptions: the M6 Toll, the Dartford Crossing (pay online by midnight next day) and city schemes — London's Congestion Charge & ULEZ apply to rentals too.`,
+    park:`Single yellow line = restrictions apply (check signs); double yellow = no waiting any time. Pay by app/meter; clamping/towing in cities.`,
+    seatbelt:`Compulsory, all seats.`,
+    phone:`Touching a handheld phone while driving is illegal — hands-free only.`,
+    child:`Child seat required until 12 years or 135 cm.`,
+    lights:`Headlights at night and in poor visibility.`,
+    winter:`No legal requirement; carry care on rare snow/ice.`,
+    emerg:'999',
+    note:`Drive on the LEFT. Roundabouts are everywhere — give way to traffic coming from your right.`},
+  IE:{side:'left',idp:'rec',unit:'km/h',urban:50,rural:80,motor:120,
+    speedNote:`Ireland is metric (km/h) — unlike neighbouring UK. National roads 100; motorways 120.`,
+    bac:0.05,bacNote:`0.05% general; 0.02% for novice and professional drivers.`,
+    toll:`Booths on most motorways; the M50 around Dublin is barrier-free "eFlow" — pay online by 8pm next day (rentals are billed).`,
+    park:`Pay-and-display and apps in towns; obey clearway and double-yellow rules.`,
+    seatbelt:`Compulsory, all seats.`,
+    phone:`Handheld use banned — hands-free only.`,
+    child:`Child seat required until 150 cm or 36 kg.`,
+    lights:`Headlights at night and in poor visibility.`,
+    winter:`No requirement; rural roads are narrow — take care.`,
+    emerg:'112',
+    note:`Drive on the LEFT. Rural lanes can be single-track with blind bends.`},
+  FR:{side:'right',idp:'rec',unit:'km/h',urban:50,rural:80,motor:130,
+    speedNote:`Motorways 130 (110 in rain); many secondary roads dropped to 80. Average-speed cameras are common.`,
+    bac:0.05,bacNote:`0.05% general; 0.02% for drivers in their first 3 years.`,
+    toll:`Extensive toll ("péage") motorways — take a ticket, pay by card/cash on exit, or use a "Télépéage" tag. Costs add up on long trips.`,
+    park:`Paid "horodateur" zones in towns; "Crit'Air" emissions sticker required to drive in many city low-emission zones, including Paris.`,
+    seatbelt:`Compulsory, all seats.`,
+    phone:`Handheld use banned — hands-free only.`,
+    child:`Child seat/booster required until 10 years.`,
+    lights:`Headlights in poor visibility; recommended day and night.`,
+    winter:`Winter tyres or chains compulsory Nov 1–Mar 31 in many mountain ("Loi Montagne") areas.`,
+    emerg:'112',
+    note:`You must carry a reflective vest and warning triangle. A Crit'Air sticker is needed for city low-emission zones.`},
+  DE:{side:'right',idp:'rec',unit:'km/h',urban:50,rural:100,motor:0,
+    speedNote:`Autobahn has no general limit on many stretches (130 km/h advisory) — but limits apply often, and they're enforced. Towns 50; rural 100.`,
+    bac:0.05,bacNote:`0.05% general; zero for novice drivers and under-21s.`,
+    toll:`Free for cars (toll applies only to trucks). Neighbouring Austria/Switzerland need vignettes.`,
+    park:`Blue-zone parking discs in some towns; "Umweltzone" low-emission zones require a green "Umweltplakette" sticker in many cities.`,
+    seatbelt:`Compulsory, all seats.`,
+    phone:`Handheld use banned — hands-free only.`,
+    child:`Child seat required until 12 years or 150 cm.`,
+    lights:`Headlights in poor visibility (DRL standard).`,
+    winter:`Winter ("M+S"/3PMSF) tyres compulsory in wintry conditions — not by date but by weather.`,
+    emerg:'112',
+    note:`On the Autobahn, keep right except to overtake, and check mirrors carefully — closing speeds can be huge. Carry a warning triangle, vest and first-aid kit.`},
+  IT:{side:'right',idp:'rec',unit:'km/h',urban:50,rural:90,motor:130,
+    speedNote:`Motorways ("autostrada") 130; secondary roads 90. Average-speed "Tutor" cameras are widespread.`,
+    bac:0.05,bacNote:`0.05% general; zero for drivers with under 3 years' experience and under-21s.`,
+    toll:`Take a ticket entering the autostrada, pay by card/cash or "Telepass" on exit. Don't use blue Telepass-only lanes without a tag.`,
+    park:`Blue lines = paid, white = free, yellow = reserved. "ZTL" limited-traffic zones in historic centres are camera-fined — rentals get the ticket.`,
+    seatbelt:`Compulsory, all seats.`,
+    phone:`Handheld use banned — hands-free only.`,
+    child:`Child seat required until 12 years or 150 cm.`,
+    lights:`Dipped headlights compulsory on all out-of-town roads, day and night.`,
+    winter:`Winter tyres or chains on board required on many routes Nov 15–Apr 15.`,
+    emerg:'112',
+    note:`Beware ZTL zones in cities like Florence, Rome and Milan — entering without a permit means automatic fines. Carry a vest and triangle.`},
+  ES:{side:'right',idp:'rec',unit:'km/h',urban:50,rural:90,motor:120,
+    speedNote:`Towns 50 (often 30 on single-lane city streets); conventional roads 90; motorways 120.`,
+    bac:0.05,bacNote:`0.05% general; 0.03% for drivers with under 2 years' experience.`,
+    toll:`Mix of free "autovía" and tolled "autopista (AP)" — booths take card/cash; "Via-T" tags speed things up. Many former toll roads are now free.`,
+    park:`Blue lines = paid, green = resident priority. Major cities (Madrid, Barcelona) have low-emission zones requiring registration.`,
+    seatbelt:`Compulsory, all seats.`,
+    phone:`Handheld use banned — hands-free only.`,
+    child:`Child seat required under 135 cm; under-135 cm ride in the rear.`,
+    lights:`Headlights in tunnels and poor visibility.`,
+    winter:`Winter tyres/chains needed on signed mountain routes in winter.`,
+    emerg:'112',
+    note:`Carry two warning triangles and a reflective vest (kept inside the cabin). Check city low-emission-zone rules before driving in.`},
+  PT:{side:'right',idp:'rec',unit:'km/h',urban:50,rural:90,motor:120,
+    speedNote:`Motorways 120; main roads 90; towns 50. Visiting drivers face on-the-spot fines.`,
+    bac:0.05,bacNote:`0.05% general; 0.02% for drivers in their first 3 years.`,
+    toll:`Some motorways are electronic-only ("Via Verde"/electronic tolls) with no booths — arrange a toll device with your rental or you'll be fined.`,
+    park:`Paid zones in cities; use guarded lots in Lisbon/Porto.`,
+    seatbelt:`Compulsory, all seats.`,
+    phone:`Handheld use banned — hands-free only.`,
+    child:`Child seat required under 135 cm; under-3s need a rear-facing seat.`,
+    lights:`Headlights in tunnels and poor visibility.`,
+    winter:`Rarely needed.`,
+    emerg:'112',
+    note:`Electronic-only toll roads catch many tourists — confirm how your rental handles tolls before setting off. Carry a vest and triangle.`},
+  NL:{side:'right',idp:'rec',unit:'km/h',urban:50,rural:80,motor:100,
+    speedNote:`Motorways: 100 km/h daytime (6am–7pm), up to 130 where signed at night. Heavily camera-enforced.`,
+    bac:0.05,bacNote:`0.05% general; 0.02% for drivers with under 5 years' experience.`,
+    toll:`Free motorways; only a couple of tunnels (Westerschelde, Kil) charge.`,
+    park:`Expensive paid parking in cities — pay by app/meter; "milieuzone" low-emission zones in some cities. Watch out for cyclists everywhere.`,
+    seatbelt:`Compulsory, all seats.`,
+    phone:`Handheld use banned — hands-free only.`,
+    child:`Child seat required under 135 cm.`,
+    lights:`Headlights in poor visibility.`,
+    winter:`Not required.`,
+    emerg:'112',
+    note:`Cyclists have priority and dedicated lanes/traffic lights — always check for bikes before turning or opening doors.`},
+  BE:{side:'right',idp:'rec',unit:'km/h',urban:50,rural:90,motor:120,
+    speedNote:`Motorways 120; rural 70–90 (Flanders default 70); towns 50, 30 in Brussels.`,
+    bac:0.05,bacNote:`0.05% general, strictly enforced.`,
+    toll:`Free for cars (truck toll only); the Liefkenshoek Tunnel near Antwerp charges.`,
+    park:`Paid blue-zone discs; Brussels, Antwerp and Ghent have low-emission zones requiring registration for foreign plates.`,
+    seatbelt:`Compulsory, all seats.`,
+    phone:`Handheld use banned — hands-free only.`,
+    child:`Child seat required under 135 cm.`,
+    lights:`Headlights in poor visibility.`,
+    winter:`Not required.`,
+    emerg:'112',
+    note:`"Priority from the right" is taken seriously — at unmarked junctions, traffic from your right has right of way. Carry a vest and triangle.`},
+  GR:{side:'right',idp:'rec',unit:'km/h',urban:50,rural:90,motor:130,
+    speedNote:`Motorways up to 130; rural roads 90. Surfaces vary off the main routes.`,
+    bac:0.05,bacNote:`0.05% general; 0.02% for novice and professional drivers.`,
+    toll:`Cash/card booths on motorways (Attiki Odos, the A roads) — keep euros handy.`,
+    park:`Paid/controlled zones in central Athens; double-parking is rife but risky.`,
+    seatbelt:`Compulsory, all seats.`,
+    phone:`Handheld use banned — hands-free only.`,
+    child:`Child seat required under 135 cm.`,
+    lights:`Headlights in poor visibility.`,
+    winter:`Chains may be needed in northern/mountain areas in winter.`,
+    emerg:'112',
+    note:`Carry a vest, triangle and first-aid kit. Island and mountain roads can be narrow with steep drops.`},
+  CH:{side:'right',idp:'rec',unit:'km/h',urban:50,rural:80,motor:120,
+    speedNote:`Motorways 120; main roads 80; towns 50, often 30 residential. Enforcement is strict with very high fines.`,
+    bac:0.05,bacNote:`0.05% general; 0.01% (effectively zero) for novice and professional drivers.`,
+    toll:`A motorway "vignette" sticker is mandatory to use any motorway — buy it (annual) at the border or online; driving without one is fined.`,
+    park:`White zones often need a parking disc; blue zone = disc with time limit; check signs carefully.`,
+    seatbelt:`Compulsory, all seats.`,
+    phone:`Handheld use banned — hands-free only.`,
+    child:`Child seat required until 12 years or 150 cm.`,
+    lights:`Daytime running lights compulsory at all times.`,
+    winter:`No date rule, but you're liable if you obstruct traffic without proper winter tyres.`,
+    emerg:'112',
+    note:`Buy the motorway vignette before you drive. Headlights must be on day and night. Alpine passes may close in winter.`},
+  AT:{side:'right',idp:'rec',unit:'km/h',urban:50,rural:100,motor:130,
+    speedNote:`Motorways 130; rural 100; towns 50. Some night-time motorway limits near cities.`,
+    bac:0.05,bacNote:`0.05% general; 0.01% for novice drivers (first probationary period).`,
+    toll:`A motorway "Vignette" (digital or sticker) is mandatory; additional tolls apply on certain alpine tunnels/passes (Brenner, Tauern).`,
+    park:`"Kurzparkzone" short-stay zones need a paper/SMS ticket; check the blue street markings.`,
+    seatbelt:`Compulsory, all seats.`,
+    phone:`Handheld use banned — hands-free only.`,
+    child:`Child seat required under 14 years or 135 cm.`,
+    lights:`Headlights in poor visibility.`,
+    winter:`Winter tyres compulsory Nov 1–Apr 15 in wintry conditions (snow chains on board for mountain routes).`,
+    emerg:'112',
+    note:`Buy the Vignette before joining a motorway. Carry a vest, triangle and first-aid kit.`},
+  SE:{side:'right',idp:'rec',unit:'km/h',urban:50,rural:70,motor:110,
+    speedNote:`Limits in 10 km/h steps; motorways 110–120, rural typically 70–100.`,
+    bac:0.02,bacNote:`0.02% — among the strictest in the world; random breath tests are common.`,
+    toll:`Camera-based congestion tolls in Stockholm and Gothenburg (billed by plate); a few bridges charge.`,
+    park:`Paid zones and apps; obey cleaning-day ("servicedag") signs or be towed.`,
+    seatbelt:`Compulsory, all seats.`,
+    phone:`Hands-free only.`,
+    child:`Children under 135 cm should use a child restraint; rear-facing recommended to ~4 years.`,
+    lights:`Dipped headlights compulsory day and night, year-round.`,
+    winter:`Winter tyres mandatory Dec 1–Mar 31 in wintry conditions.`,
+    emerg:'112',
+    note:`Headlights on at all times. Watch for moose/reindeer, especially at dawn and dusk in the north.`},
+  NO:{side:'right',idp:'rec',unit:'km/h',urban:50,rural:80,motor:110,
+    speedNote:`Most roads 80; motorways up to 110. Fines are extremely high and income-related.`,
+    bac:0.02,bacNote:`0.02% — effectively zero; heavily enforced.`,
+    toll:`Extensive automatic toll rings ("AutoPASS") billed by plate — register your rental/foreign plate or arrange via the rental firm.`,
+    park:`Paid zones and apps; many EV charging/parking rules in cities.`,
+    seatbelt:`Compulsory, all seats.`,
+    phone:`Hands-free only.`,
+    child:`Children under 135 cm must use a child restraint.`,
+    lights:`Dipped headlights compulsory day and night, year-round.`,
+    winter:`Winter tyres/studs required in winter conditions; carry chains for mountain roads.`,
+    emerg:'112',
+    note:`Headlights on always. Tolls are automatic and unavoidable — sort out billing before you drive. Mountain passes close in winter.`},
+  DK:{side:'right',idp:'rec',unit:'km/h',urban:50,rural:80,motor:130,
+    speedNote:`Motorways 110–130; rural 80; towns 50.`,
+    bac:0.05,bacNote:`0.05% limit, strictly enforced.`,
+    toll:`Free motorways; the Storebælt and Øresund bridges charge (card/cash/electronic).`,
+    park:`Paid zones and parking-disc areas; use the disc in the windscreen where required.`,
+    seatbelt:`Compulsory, all seats.`,
+    phone:`Hands-free only.`,
+    child:`Children under 135 cm must use a child restraint.`,
+    lights:`Dipped headlights compulsory day and night.`,
+    winter:`Not legally mandated but widely used; advisable in snow.`,
+    emerg:'112',
+    note:`Headlights on always. Cyclists are everywhere with priority lanes — check before turning. Carry a warning triangle.`},
+  FI:{side:'right',idp:'rec',unit:'km/h',urban:50,rural:80,motor:120,
+    speedNote:`Motorways 120 (often 100 in winter); rural 80–100. Fines are income-related and can be huge.`,
+    bac:0.05,bacNote:`0.05% limit, strictly enforced.`,
+    toll:`No road tolls.`,
+    park:`Paid zones and discs; obey winter snow-clearing signs.`,
+    seatbelt:`Compulsory, all seats.`,
+    phone:`Hands-free only.`,
+    child:`Children under 135 cm must use a suitable restraint.`,
+    lights:`Dipped headlights compulsory day and night, year-round.`,
+    winter:`Winter (often studded) tyres mandatory Dec 1–Feb (extended in practice Nov–Mar).`,
+    emerg:'112',
+    note:`Headlights on always. Reindeer and elk are a serious hazard, especially in Lapland — report any collision.`},
+  IS:{side:'right',idp:'rec',unit:'km/h',urban:50,rural:80,motor:null,
+    speedNote:`Built-up 50; gravel roads 80; paved rural roads 90. There are no motorways.`,
+    bac:0.05,bacNote:`0.05% limit, strictly enforced.`,
+    toll:`Only the Vaðlaheiði tunnel (near Akureyri) charges — pay online.`,
+    park:`Paid zones in central Reykjavík; off-road driving is illegal and heavily fined.`,
+    seatbelt:`Compulsory, all seats.`,
+    phone:`Hands-free only.`,
+    child:`Children under 135 cm must use a child restraint.`,
+    lights:`Headlights compulsory day and night, year-round.`,
+    winter:`Studded tyres allowed ~Nov 1–Apr 14; a 4x4 is wise off the Ring Road.`,
+    emerg:'112',
+    note:`NEVER drive off marked roads/tracks — it's illegal and damages fragile nature. F-roads (highlands) need a 4x4 and are closed in winter. Watch for sudden weather and single-lane bridges.`},
+  CZ:{side:'right',idp:'rec',unit:'km/h',urban:50,rural:90,motor:130,
+    speedNote:`Motorways 130; rural 90; towns 50.`,
+    bac:0,bacNote:`Zero tolerance — absolutely no alcohol permitted.`,
+    toll:`A digital motorway "dálniční známka" (e-vignette) is required — buy online before using motorways.`,
+    park:`Coloured-zone parking in Prague (orange/blue) — blue is residents-only; use marked visitor zones.`,
+    seatbelt:`Compulsory, all seats.`,
+    phone:`Handheld use banned — hands-free only.`,
+    child:`Child seat required under 150 cm / 36 kg.`,
+    lights:`Dipped headlights compulsory day and night, year-round.`,
+    winter:`Winter tyres compulsory Nov 1–Mar 31 when snow/ice present or signed.`,
+    emerg:'112',
+    note:`Buy the e-vignette before joining a motorway. Headlights on always. Zero alcohol means zero.`},
+  PL:{side:'right',idp:'rec',unit:'km/h',urban:50,rural:90,motor:140,
+    speedNote:`Motorways up to 140 (Europe's highest); expressways 120; rural 90; towns 50 (60 at night in some places).`,
+    bac:0.02,bacNote:`0.02% limit — effectively near-zero, strictly enforced.`,
+    toll:`State motorways use the free-flow "e-TOLL" app/device; some private concession sections (A1/A2/A4) take cash/card at booths.`,
+    park:`Paid zones in city centres; use apps/meters.`,
+    seatbelt:`Compulsory, all seats.`,
+    phone:`Handheld use banned — hands-free only.`,
+    child:`Child seat required under 150 cm.`,
+    lights:`Dipped headlights compulsory day and night, year-round.`,
+    winter:`Not mandated by law but strongly advised in winter.`,
+    emerg:'112',
+    note:`Headlights on always. Enforcement and fines have risen sharply — stick to limits.`},
+  HU:{side:'right',idp:'rec',unit:'km/h',urban:50,rural:90,motor:130,
+    speedNote:`Motorways 130; rural 90; towns 50.`,
+    bac:0,bacNote:`Zero tolerance — no alcohol permitted at all.`,
+    toll:`An electronic "e-matrica" (e-vignette) is mandatory for motorways — buy online/at petrol stations before driving; it's linked to your plate.`,
+    park:`Paid zones in Budapest by district; pay by app/meter.`,
+    seatbelt:`Compulsory, all seats.`,
+    phone:`Handheld use banned — hands-free only.`,
+    child:`Child seat required under 150 cm.`,
+    lights:`Dipped headlights compulsory day and night outside built-up areas.`,
+    winter:`Not mandated but advisable in snow.`,
+    emerg:'112',
+    note:`Buy the e-vignette before joining a motorway (no booths to catch you — cameras will). Zero alcohol tolerance.`},
+  HR:{side:'right',idp:'rec',unit:'km/h',urban:50,rural:90,motor:130,
+    speedNote:`Motorways 130; rural 90; towns 50. Reduced limits for drivers under 24.`,
+    bac:0.05,bacNote:`0.05% general; zero for drivers under 24, professionals and novices.`,
+    toll:`Cash/card booths on motorways — take a ticket, pay on exit; "ENC" electronic tags speed it up.`,
+    park:`Zoned paid parking in coastal towns/Dubrovnik (very limited in old towns) — use garages.`,
+    seatbelt:`Compulsory, all seats.`,
+    phone:`Handheld use banned — hands-free only.`,
+    child:`Child seat required for under-5s; under-12s ride in the rear.`,
+    lights:`Daytime headlights compulsory in winter (late Oct–late Mar) and in poor visibility.`,
+    winter:`Winter equipment compulsory Nov 15–Apr 15 (tyres/chains) where signed.`,
+    emerg:'112',
+    note:`Carry a vest, triangle and spare bulbs. Coastal roads are scenic but winding — allow extra time.`},
+
+  /* ===== EUROPE / EURASIA & MIDDLE EAST ===== */
+  TR:{side:'right',idp:'req',unit:'km/h',urban:50,rural:90,motor:120,
+    speedNote:`Motorways ("otoyol") 120; divided roads 110; rural 90; towns 50.`,
+    bac:0.05,bacNote:`0.05% if no passengers; zero tolerance when carrying passengers or for commercial drivers.`,
+    toll:`All-electronic "HGS" tags — there are no cash booths. Rentals must have a working HGS; otherwise you're fined.`,
+    park:`Use "İSPARK"/guarded lots in Istanbul; street parking is scarce and chaotic.`,
+    seatbelt:`Compulsory, all seats.`,
+    phone:`Handheld use banned.`,
+    child:`Under-3s in a child seat; under-12s ride in the rear.`,
+    lights:`Headlights in poor visibility.`,
+    winter:`Winter tyres compulsory in many provinces (typically Dec 1–Apr 1).`,
+    emerg:'112',
+    note:`Carry an IDP. Toll roads are tag-only (HGS) — confirm your rental is set up or you'll get penalty notices.`},
+  RU:{side:'right',idp:'req',unit:'km/h',urban:60,rural:90,motor:110,
+    speedNote:`Towns 60; rural 90; motorways 110–130. A small enforcement tolerance, but cameras are everywhere.`,
+    bac:0.03,bacNote:`0.035% (0.16 mg/L breath) — effectively near-zero; penalties are severe.`,
+    toll:`A few tolled motorways (e.g. M11, M4) with electronic "T-pass"/booths.`,
+    park:`Paid zones in Moscow/St Petersburg via app; tow-aways are common.`,
+    seatbelt:`Compulsory, all seats.`,
+    phone:`Handheld use banned.`,
+    child:`Child restraint required for under-7s; older children need a booster/belt adjuster.`,
+    lights:`Daytime running lights compulsory at all times.`,
+    winter:`Winter tyres compulsory Dec–Feb (in practice Nov–Mar).`,
+    emerg:'112',
+    note:`Carry an IDP (with Russian translation), plus passport and car papers. Headlights on always. A dashcam is near-universal for insurance/disputes.`},
+  AE:{side:'right',idp:'req',unit:'km/h',urban:60,rural:100,motor:120,
+    speedNote:`Motorways 120–140; many limits have a small buffer before cameras trigger, but fines are heavy. Tailgating and lane discipline are enforced.`,
+    bac:0,bacNote:`Zero tolerance — any alcohol can mean arrest and jail.`,
+    toll:`Dubai's "Salik" and Abu Dhabi's "Darb" are automatic camera tolls billed to the vehicle — rentals pass the charges on.`,
+    park:`Paid zones via app/meter ("Mawaqif" in Abu Dhabi, RTA in Dubai); fines are steep.`,
+    seatbelt:`Compulsory, all seats.`,
+    phone:`Handheld use banned — heavily fined.`,
+    child:`Child seat required for under-4s; under-10s must ride in the rear.`,
+    lights:`Headlights in poor visibility; no "flashing" to intimidate.`,
+    winter:`Not applicable; beware sandstorms reducing visibility.`,
+    emerg:'999',
+    note:`Zero alcohol tolerance is absolute. Road-rage gestures and aggressive driving are offences. Carry an IDP with your home licence.`},
+  SA:{side:'right',idp:'req',unit:'km/h',urban:60,rural:90,motor:120,
+    speedNote:`Motorways 120–140; camera-enforced ("Saher" system). Towns 60.`,
+    bac:0,bacNote:`Zero tolerance — alcohol is illegal in the country.`,
+    toll:`Largely toll-free roads.`,
+    park:`Paid zones in major cities; use marked areas.`,
+    seatbelt:`Compulsory, all seats.`,
+    phone:`Handheld use banned — Saher cameras catch it.`,
+    child:`Child restraints required for young children.`,
+    lights:`Headlights in poor visibility/sandstorms.`,
+    winter:`Not applicable; sandstorms can cut visibility suddenly.`,
+    emerg:'999',
+    note:`Carry an IDP and passport copy. The Saher network of cameras enforces speeding, phone use and red lights automatically.`},
+  IL:{side:'right',idp:'req',unit:'km/h',urban:50,rural:80,motor:110,
+    speedNote:`Urban 50; intercity 80–90; motorways up to 110–120. Camera-enforced.`,
+    bac:0.05,bacNote:`0.05% general; 0.024% (near-zero) for new and young drivers and professionals.`,
+    toll:`Highway 6 (Kvish 6) is camera-tolled by plate; the Carmel and a few tunnels charge — rentals are billed.`,
+    park:`Blue-and-white curb = paid (app/meter); red-and-white = no parking; red-and-yellow = buses only.`,
+    seatbelt:`Compulsory, all seats.`,
+    phone:`Handheld use banned — hands-free only.`,
+    child:`Child seat required for under-8s.`,
+    lights:`Daytime headlights compulsory on intercity roads Nov 1–Mar 31.`,
+    winter:`Not applicable in most areas.`,
+    emerg:'112',
+    note:`Carry an IDP. Curb-colour codes tell you the parking rules — learn the blue/white vs red/white meaning.`},
+  EG:{side:'right',idp:'req',unit:'km/h',urban:60,rural:90,motor:100,
+    speedNote:`Limits are widely ignored locally but enforced on tourists; desert highways have checkpoints.`,
+    bac:0,bacNote:`Effectively zero tolerance — driving with alcohol brings severe penalties.`,
+    toll:`Some cash toll gates on desert highways.`,
+    park:`Chaotic; use guarded lots and tip the attendant ("monadi").`,
+    seatbelt:`Compulsory in front.`,
+    phone:`Handheld use banned (loosely enforced).`,
+    child:`Restraints rarely enforced but strongly advised.`,
+    lights:`Many drive at night with lights off — keep yours on; flash to signal.`,
+    winter:`Not applicable; sandstorms reduce visibility.`,
+    emerg:'122',
+    note:`Driving is assertive and lane markings are advisory. Avoid night driving and remote desert roads; checkpoints require passport and IDP. A local driver is often the safer choice.`},
+  MA:{side:'right',idp:'req',unit:'km/h',urban:60,rural:100,motor:120,
+    speedNote:`Motorways ("autoroute") 120; rural 100; towns 60, with frequent radar checks just below town limits.`,
+    bac:0,bacNote:`Zero tolerance.`,
+    toll:`Cash/card booths on the autoroute network — keep dirhams handy.`,
+    park:`"Gardien" attendants watch street parking for a small tip; use them in cities.`,
+    seatbelt:`Compulsory, all seats.`,
+    phone:`Handheld use banned.`,
+    child:`Restraints advised for young children.`,
+    lights:`Headlights in poor visibility.`,
+    winter:`Snow/chains possible in the Atlas mountains in winter.`,
+    emerg:'19',
+    note:`Carry an IDP, passport and car papers — police checkpoints are frequent and often issue on-the-spot fines for minor speeding.`},
+
+  /* ===== AFRICA ===== */
+  ZA:{side:'left',idp:'rec',unit:'km/h',urban:60,rural:100,motor:120,
+    speedNote:`Towns 60; rural 100; freeways 120. Camera and average-speed enforcement.`,
+    bac:0.05,bacNote:`0.05% (0.24 mg/L breath); strictly enforced with roadblocks.`,
+    toll:`Cash/card toll plazas on major routes plus Gauteng's "e-toll" gantries (largely scrapped) — rentals usually handle tolls.`,
+    park:`Use guarded lots; "car guards" watch street parking for a tip. Don't leave valuables visible.`,
+    seatbelt:`Compulsory, all seats.`,
+    phone:`Handheld use banned.`,
+    child:`Child seat required for under-3s.`,
+    lights:`Headlights in poor visibility.`,
+    winter:`Not generally required.`,
+    emerg:'112',
+    note:`Drive on the LEFT. At a 4-way stop, first to arrive goes first. Minibus taxis stop abruptly. Keep doors locked; avoid driving after dark in unfamiliar areas.`},
+  KE:{side:'left',idp:'req',unit:'km/h',urban:50,rural:100,motor:110,
+    speedNote:`Towns 50; highways 100; the Nairobi Expressway up to 80–100. "Bumps" through villages are frequent.`,
+    bac:0.08,bacNote:`0.08% limit; "Alcoblow" roadside checks operate, especially at night.`,
+    toll:`The Nairobi Expressway is electronic/cash-tolled; otherwise few tolls.`,
+    park:`County parking fees via app/attendant in Nairobi; use guarded lots.`,
+    seatbelt:`Compulsory, all seats.`,
+    phone:`Handheld use banned.`,
+    child:`Restraints advised; enforcement limited.`,
+    lights:`Headlights in poor visibility.`,
+    winter:`Not applicable; rainy-season roads can flood/wash out.`,
+    emerg:'999',
+    note:`Drive on the LEFT. Carry an IDP. "Matatus" (minibuses) and boda-boda motorbikes are unpredictable. Avoid night driving outside cities.`},
+
+  /* ===== ASIA ===== */
+  JP:{side:'left',idp:'req',unit:'km/h',urban:40,rural:60,motor:100,
+    idpNote:`A 1949 Geneva-Convention IDP is required (some nationalities need an official Japanese translation instead).`,
+    speedNote:`City roads 40; ordinary roads 50–60; expressways 80–120. Limits are modest and enforced.`,
+    bac:0.03,bacNote:`0.03% — and passengers who let a drunk person drive can also be charged. Effectively, don't drink at all.`,
+    toll:`Expressways are expensive cash/card tolls or "ETC" card — many rentals include an ETC card; keep the entry ticket if paying cash.`,
+    park:`Street parking is largely banned — use coin/"times" car parks; proof-of-parking rules apply to residents.`,
+    seatbelt:`Compulsory, all seats.`,
+    phone:`Handheld use banned — hands-free only.`,
+    child:`Child seat required for under-6s.`,
+    lights:`Headlights at night and in tunnels.`,
+    winter:`Winter/studless tyres or chains essential in snow regions (Hokkaido, Japan Alps, Tohoku).`,
+    emerg:'110',
+    note:`Drive on the LEFT. Carry the correct IDP (Geneva 1949) — Swiss/German/French/etc. nationals need an official translation instead. Drink-driving penalties are extreme.`},
+  KR:{side:'right',idp:'req',unit:'km/h',urban:50,rural:80,motor:100,
+    speedNote:`Cities 50 (often 30 on side streets); highways 100–110. Extensive speed and section cameras.`,
+    bac:0.03,bacNote:`0.03% — lowered in 2019; licence revoked from 0.08%. Strict checkpoints.`,
+    toll:`Expressway tolls via "Hi-pass" tag or cash/card booths — many rentals have Hi-pass.`,
+    park:`Paid lots and metered zones; street parking limited in Seoul.`,
+    seatbelt:`Compulsory, all seats (nationwide since 2018).`,
+    phone:`Handheld use banned.`,
+    child:`Child seat required for under-6s.`,
+    lights:`Headlights at night/tunnels.`,
+    winter:`Snow tyres/chains advised in winter, especially inland/mountain roads.`,
+    emerg:'112',
+    note:`Carry an IDP. Bus-only lanes (blue lines) on highways and in Seoul are camera-enforced — don't stray into them.`},
+  CN:{side:'right',idp:'req',unit:'km/h',urban:50,rural:70,motor:120,
+    idpNote:`The IDP is NOT recognised — you must obtain a temporary Chinese driving permit to drive legally.`,
+    speedNote:`City roads 50–60; rural 70–80; expressways 100–120. Dense camera enforcement and points system.`,
+    bac:0.02,bacNote:`0.02% is the limit; 0.08%+ is the crime of "drunk driving" with detention.`,
+    toll:`Expressways are tolled — "ETC" tag or cash/card at booths.`,
+    park:`Paid lots/apps in cities; street parking scarce and tightly controlled.`,
+    seatbelt:`Compulsory in front; rear belts increasingly required.`,
+    phone:`Handheld use banned.`,
+    child:`Child-seat rules vary by city (e.g. Shanghai requires them).`,
+    lights:`Headlights at night/poor visibility; avoid full beam in cities.`,
+    winter:`Winter tyres/chains needed in the north in winter.`,
+    emerg:'110',
+    note:`Foreign and international permits aren't valid — you need a temporary Chinese licence (arranged on arrival, e.g. at major airports). Most visitors hire a car with a driver instead.`},
+  HK:{side:'left',idp:'rec',unit:'km/h',urban:50,rural:70,motor:110,
+    speedNote:`Default 50 in urban areas unless signed; expressways up to 110. Lots of cameras.`,
+    bac:0.05,bacNote:`0.05% (50 mg) limit, strictly enforced.`,
+    toll:`Cross-harbour tunnels and several roads are tolled — now largely the cashless "HKeToll" by plate; rentals are billed.`,
+    park:`Very limited and pricey — use multi-storey car parks; illegal parking is towed fast.`,
+    seatbelt:`Compulsory, all seats.`,
+    phone:`Handheld use banned — hands-free only.`,
+    child:`Child restraint required for young children.`,
+    lights:`Headlights at night/in tunnels.`,
+    winter:`Not applicable.`,
+    emerg:'999',
+    note:`Drive on the LEFT. Roads are dense and parking is scarce/expensive — public transport is usually easier than driving.`},
+  TW:{side:'right',idp:'req',unit:'km/h',urban:50,rural:70,motor:110,
+    speedNote:`City 50; highways up to 110. Average-speed cameras on freeways.`,
+    bac:0.03,bacNote:`0.03% (0.15 mg/L breath) limit; heavy penalties and possible jail above it.`,
+    toll:`Freeways use the all-electronic "eTag"/"ETC" billed by distance — no booths; rentals are enrolled.`,
+    park:`Paid lots and metered scooter/car bays; attendants issue tickets on the street.`,
+    seatbelt:`Compulsory, all seats.`,
+    phone:`Handheld use banned.`,
+    child:`Child seat required for under-4s; under-12s ride in the rear.`,
+    lights:`Headlights at night/tunnels.`,
+    winter:`Not applicable; mountain roads can be foggy.`,
+    emerg:'110',
+    note:`Carry an IDP. Scooters are everywhere and filter aggressively — check mirrors and blind spots constantly.`},
+  TH:{side:'left',idp:'req',unit:'km/h',urban:60,rural:90,motor:120,
+    speedNote:`Towns ~60; rural 90; some motorways/expressways now 120. Enforcement is patchy but rising.`,
+    bac:0.05,bacNote:`0.05% general; 0.02% for drivers under 20 or with a probationary licence.`,
+    toll:`Bangkok expressways and a few motorways charge cash or the "M-Flow"/"Easy Pass" electronic system.`,
+    park:`Use mall/hotel car parks in Bangkok; street parking is restricted and erratic.`,
+    seatbelt:`Compulsory in front (and rear by law since 2022).`,
+    phone:`Handheld use banned.`,
+    child:`Child-restraint law exists; enforcement is limited.`,
+    lights:`Headlights at night.`,
+    winter:`Not applicable; heavy rain in the wet season.`,
+    emerg:'191',
+    note:`Drive on the LEFT. Carry an IDP. Motorbikes weave constantly and road-accident rates are high — drive defensively and avoid renting a scooter without proper cover/helmet.`},
+  VN:{side:'right',idp:'req',unit:'km/h',urban:60,rural:80,motor:120,
+    idpNote:`Vietnam recognises 1968-Convention IDPs; many tourists' permits aren't valid, so confirm before driving.`,
+    speedNote:`Urban 50–60; rural 70–90; expressways up to 120. Traffic is dense and assertive.`,
+    bac:0,bacNote:`Zero tolerance (since 2020) — any alcohol means large fines and bike/vehicle impound.`,
+    toll:`Expressways and some national roads have cash/electronic ("ETC") toll booths.`,
+    park:`Use guarded lots; pavement motorbike parking has attendants.`,
+    seatbelt:`Compulsory in front.`,
+    phone:`Handheld use banned.`,
+    child:`Restraints rarely used; advised for children.`,
+    lights:`Headlights at night (avoid full beam in cities).`,
+    winter:`Not applicable.`,
+    emerg:'113',
+    note:`Zero alcohol tolerance. Traffic is overwhelmingly motorbikes that flow like water — many visitors hire a car with a driver rather than drive themselves.`},
+  ID:{side:'left',idp:'req',unit:'km/h',urban:50,rural:80,motor:100,
+    speedNote:`Urban 50; rural 80; toll expressways up to 100. Congestion is heavy in Jakarta/Bali.`,
+    bac:0,bacNote:`Effectively zero tolerance — alcohol and driving are not mixed.`,
+    toll:`Toll roads require an electronic "e-Toll"/"e-money" tap card — there are no cash lanes on tolls.`,
+    park:`Attendants ("juru parkir") manage street/lot parking for a small fee.`,
+    seatbelt:`Compulsory in front.`,
+    phone:`Handheld use banned.`,
+    child:`Restraints advised; enforcement limited.`,
+    lights:`Motorcycles must run headlights day and night; cars at night.`,
+    winter:`Not applicable; wet-season flooding.`,
+    emerg:'112',
+    note:`Drive on the LEFT. Carry an IDP. Toll roads need a prepaid e-money card. Scooters dominate — in Bali especially, drive cautiously and wear a helmet.`},
+  MY:{side:'left',idp:'rec',unit:'km/h',urban:60,rural:90,motor:110,
+    speedNote:`Towns 60; rural 90; expressways 110. Camera and average-speed (AES) enforcement.`,
+    bac:0.05,bacNote:`0.05% limit (lowered); heavy penalties above it.`,
+    toll:`Expressways use the "Touch 'n Go"/RFID cashless system — rentals carry a card/tag; keep it topped up.`,
+    park:`Paid coupons/apps and attended lots in cities.`,
+    seatbelt:`Compulsory, all seats.`,
+    phone:`Handheld use banned.`,
+    child:`Child seat required (law since 2020) for young children.`,
+    lights:`Headlights at night/in rain.`,
+    winter:`Not applicable; heavy monsoon rain.`,
+    emerg:'999',
+    note:`Drive on the LEFT. Expressway tolls need a Touch 'n Go card — make sure your rental's is topped up. Watch for motorbikes filtering on the left.`},
+  SG:{side:'left',idp:'rec',unit:'km/h',urban:50,rural:70,motor:90,
+    speedNote:`Urban 50; expressways 80–90. One of the most disciplined, camera-covered systems anywhere.`,
+    bac:0.08,bacNote:`0.08% (35 µg breath) limit; severe penalties including jail for repeat offences.`,
+    toll:`"ERP" electronic road-pricing gantries charge by time/zone via an in-car unit — rentals are fitted; the COE/road system makes driving costly.`,
+    park:`Paid lots and "EPS"/app parking; illegal parking is fined fast.`,
+    seatbelt:`Compulsory, all seats.`,
+    phone:`Handheld use banned — hands-free only.`,
+    child:`Child seat/booster required under 1.35 m.`,
+    lights:`Headlights at night/in rain.`,
+    winter:`Not applicable.`,
+    emerg:'999',
+    note:`Drive on the LEFT. Rules are strictly enforced and fines are high. The MRT/bus network is excellent — many visitors skip driving entirely.`},
+  PH:{side:'right',idp:'req',unit:'km/h',urban:60,rural:80,motor:100,
+    speedNote:`City roads ~30–60; highways up to 100. Manila traffic is severe; "number coding" schemes ban certain plates on set days.`,
+    bac:0.05,bacNote:`0.05% limit; field sobriety + breath tests apply.`,
+    toll:`Expressways (NLEX/SLEX) are cashless RFID ("Autosweep"/"Easytrip") — rentals carry a sticker; keep it loaded.`,
+    park:`Mall and pay lots; street parking is informal with attendants.`,
+    seatbelt:`Compulsory, all seats.`,
+    phone:`Handheld use banned ("Anti-Distracted Driving Act").`,
+    child:`Child seat required for young children (law since 2021).`,
+    lights:`Headlights at night.`,
+    winter:`Not applicable; typhoon-season flooding.`,
+    emerg:'911',
+    note:`Carry an IDP (valid up to 90 days). Check Metro Manila "number coding" days for your plate. Expressways are RFID-only — top up before you travel.`},
+  IN:{side:'left',idp:'req',unit:'km/h',urban:50,rural:80,motor:100,
+    speedNote:`City 50; highways 80–100; expressways up to 120. Conditions and signage vary hugely.`,
+    bac:0.03,bacNote:`0.03% (30 mg/100 ml) limit; strict penalties and possible jail.`,
+    toll:`National-highway toll plazas use the "FASTag" electronic sticker — mandatory; rentals carry one, double FASTag-lane charges apply without it.`,
+    park:`Use attended/paid lots in cities; street parking is congested and informal.`,
+    seatbelt:`Compulsory, all seats (rear belts now enforced).`,
+    phone:`Handheld use banned.`,
+    child:`Helmet/restraint rules vary; child seats advised.`,
+    lights:`Headlights at night; constant horn use is normal.`,
+    winter:`Snow/chains in Himalayan regions in winter; many high passes close.`,
+    emerg:'112',
+    note:`Drive on the LEFT. Carry an IDP. Traffic is dense, mixed (cattle, rickshaws, bikes) and assertive — many visitors hire a car with a driver, which is affordable and far less stressful.`},
+
+  /* ===== OCEANIA ===== */
+  AU:{side:'left',idp:'rec',unit:'km/h',urban:50,rural:100,motor:110,
+    speedNote:`Built-up areas 50 (40 in many school/shopping zones); rural 100; freeways 110 (Northern Territory up to 130). Heavy camera enforcement and low tolerance.`,
+    bac:0.05,bacNote:`0.05% general; zero for learner and provisional (P-plate) drivers. Random breath testing is routine.`,
+    toll:`Urban motorway tolls (Sydney, Melbourne, Brisbane) are all-electronic by plate/tag — arrange a visitor pass or your rental's toll account.`,
+    park:`Signs show times/permits; "clearway" times mean tow-away. Pay by app/meter.`,
+    seatbelt:`Compulsory, all seats — and strictly enforced.`,
+    phone:`Touching a handheld phone is illegal — phone-detection cameras operate. Hands-free only.`,
+    child:`Child seat/booster required to age 7 (specific stages by age).`,
+    lights:`Headlights in poor visibility.`,
+    winter:`Chains may be required in alpine (snowfields) areas in winter.`,
+    emerg:'000',
+    note:`Drive on the LEFT. On long outback roads watch for kangaroos (esp. dawn/dusk), road trains and fatigue — rest every 2 hours. Fuel up; distances are vast.`},
+  NZ:{side:'left',idp:'rec',unit:'km/h',urban:50,rural:100,motor:100,
+    speedNote:`Urban 50; open road and motorways 100 (110 on a few new expressways). Roads are often narrow, winding two-lane with one-lane bridges.`,
+    bac:0.05,bacNote:`0.05% (250 µg) general; zero for drivers under 20.`,
+    toll:`A few electronic toll roads (e.g. Northern Gateway near Auckland) — pay online within 5 days; rentals may handle it.`,
+    park:`Pay-and-display/apps in towns; obey time-limited and mobility zones.`,
+    seatbelt:`Compulsory, all seats.`,
+    phone:`Handheld use banned — hands-free only.`,
+    child:`Child restraint required until 7th birthday.`,
+    lights:`Headlights in poor visibility.`,
+    winter:`Chains may be required on alpine passes (e.g. Crown Range, Milford) in winter.`,
+    emerg:'111',
+    note:`Drive on the LEFT. Give way rules: at a one-lane bridge, the smaller red arrow means YOU give way. Journeys take longer than the distance suggests — don't rush winding roads.`},
+  FJ:{side:'left',idp:'rec',unit:'km/h',urban:50,rural:80,motor:null,
+    speedNote:`Towns/villages 50; open road up to 80. There are no motorways; the Queens/Kings roads circle the main island.`,
+    bac:0.08,bacNote:`0.08% (80 mg) limit; checkpoints operate.`,
+    toll:`No toll roads.`,
+    park:`Free or simple paid parking in towns; informal elsewhere.`,
+    seatbelt:`Compulsory in front.`,
+    phone:`Handheld use banned.`,
+    child:`Restraints advised; enforcement limited.`,
+    lights:`Headlights at night.`,
+    winter:`Not applicable; watch for flooding/potholes after tropical rain.`,
+    emerg:'911',
+    note:`Drive on the LEFT. Roads outside towns can be rough with wandering livestock and pedestrians — slow through villages and avoid driving after dark.`},
+};
+
+/* ── Universal road-sign reference (shared, country-agnostic) ── */
+const DR_SIGN_LEGEND = [
+  { t:`Red circle / red border`, d:`Prohibition or restriction — no entry, no overtaking, speed limit.` },
+  { t:`Red triangle`,            d:`A warning of a hazard ahead. Slow down and look.` },
+  { t:`Blue circle`,             d:`A mandatory instruction — you must do this (turn, use this lane).` },
+  { t:`Blue square / rectangle`, d:`Information or guidance — parking, services, directions.` },
+  { t:`Octagon & inverted triangle`, d:`STOP and GIVE WAY (yield) — the two universal priority signs.` },
+  { t:`Yellow / orange`,         d:`Temporary roadworks or diversions (in many countries).` },
+];
+const DR_SIGN_GROUPS = [
+  { g:`Priority — the must-knows`, signs:[
+    { i:`🛑`, n:`Stop`,             d:`Octagon — come to a full halt, then give way to all.` },
+    { i:`🔻`, n:`Give way / Yield`, d:`Inverted triangle — slow and yield to main-road traffic.` },
+    { i:`⛔`, n:`No entry`,         d:`Do not enter — one-way street or closed road.` },
+    { i:`🔶`, n:`Priority road`,    d:`Yellow diamond — you have right of way ahead.` },
+  ]},
+  { g:`Warning (red triangle)`, signs:[
+    { i:`⚠️`, n:`General hazard`,        d:`Unspecified danger ahead — reduce speed.` },
+    { i:`🚸`, n:`Pedestrians / school`,  d:`Crossing point or children nearby.` },
+    { i:`🦌`, n:`Wild / farm animals`,   d:`Animals may be on the road.` },
+    { i:`↩️`, n:`Sharp bend`,            d:`A curve or series of bends ahead.` },
+    { i:`🔁`, n:`Roundabout`,            d:`Roundabout ahead — give way to traffic on it.` },
+    { i:`🚧`, n:`Roadworks`,             d:`Construction or workers ahead.` },
+  ]},
+  { g:`Prohibition (red circle)`, signs:[
+    { i:`🔢`, n:`Speed limit`,          d:`Number in a red circle = maximum speed.` },
+    { i:`🚫`, n:`No overtaking`,        d:`Passing other vehicles is forbidden.` },
+    { i:`🅿️`, n:`No parking / stopping`, d:`Crossed circle = no stopping; single slash = no parking.` },
+    { i:`🚳`, n:`No vehicles`,          d:`Closed to the vehicle type shown.` },
+  ]},
+  { g:`Information (blue)`, signs:[
+    { i:`🅿️`, n:`Parking`,    d:`Permitted parking area.` },
+    { i:`⛽`, n:`Fuel`,       d:`Petrol / service station ahead.` },
+    { i:`🏥`, n:`Hospital`,   d:`Medical services nearby.` },
+    { i:`🛣️`, n:`Motorway`,   d:`Start of motorway / expressway rules.` },
+    { i:`🚻`, n:`Rest area`,  d:`Toilets and services.` },
+  ]},
+];
+
+const DR_KEY = 'tt_drivingrules_v1';
+let drState = { countryCode:null };
+let drSignsBuilt = false;
+
+function drInit(){
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(DR_KEY) || 'null'); } catch(e){}
+  if (saved && saved.countryCode){
+    drState.countryCode = saved.countryCode;
+  } else {
+    const trip = getActiveTrip();
+    if (trip && trip.destination){
+      const match = tcGuessCountryFromDest(trip.destination);
+      if (match && DR_DATA[match.c]) drState.countryCode = match.c;
+    }
+  }
+  drRenderCountryList('');
+  if (drState.countryCode && DR_DATA[drState.countryCode]){
+    drSelectCountry(drState.countryCode, false);
+  } else {
+    drState.countryCode = null;
+    document.getElementById('dr-content').style.display = 'none';
+    document.getElementById('dr-empty').style.display = '';
+  }
+  // Build the sign reference once (so it's available for print), but keep it collapsed
+  if (!drSignsBuilt) drBuildSigns();
+  document.getElementById('dr-signs-body').style.display = 'none';
+  document.getElementById('dr-signs-sec').classList.remove('open');
+  if (!document._drClickBound){
+    document.addEventListener('click', drDocClick);
+    document._drClickBound = true;
+  }
+}
+
+function drCountry(){ return TC_COUNTRIES.find(co => co.c === drState.countryCode); }
+function drSave(){ try { localStorage.setItem(DR_KEY, JSON.stringify({ countryCode: drState.countryCode })); } catch(e){} }
+
+/* ── Picker (shares the Tip Calculator picker CSS) ── */
+function drOpenPicker(){
+  const drop = document.getElementById('dr-country-drop');
+  if (drop.style.display === 'block'){ drClosePicker(); return; }
+  drop.style.display = 'block';
+  const s = document.getElementById('dr-country-search');
+  s.value = ''; drRenderCountryList('');
+  setTimeout(()=>s.focus(), 50);
+}
+function drClosePicker(){ document.getElementById('dr-country-drop').style.display = 'none'; }
+function drDocClick(e){
+  const wrap = document.getElementById('dr-country-disp');
+  const drop = document.getElementById('dr-country-drop');
+  if (!wrap || !drop || drop.style.display !== 'block') return;
+  if (wrap.contains(e.target) || drop.contains(e.target)) return;
+  drClosePicker();
+}
+function drFilterCountries(){ drRenderCountryList((document.getElementById('dr-country-search').value || '').toLowerCase().trim()); }
+function drRenderCountryList(q){
+  const list = TC_COUNTRIES.filter(co => DR_DATA[co.c] && (!q || co.n.toLowerCase().includes(q) || co.c.toLowerCase().includes(q)));
+  const html = list.length
+    ? list.map(co => {
+        const side = DR_DATA[co.c].side === 'left' ? 'Drives left' : 'Drives right';
+        return `<div class="tc-drop-item" onclick="drSelectCountry('${co.c}')"><span class="tc-drop-flag">${co.f}</span><span class="tc-drop-name">${co.n}</span><span class="tc-drop-cur">${side}</span></div>`;
+      }).join('')
+    : `<div class="tc-drop-item" style="color:var(--muted);cursor:default">No matches for "${tcEscape(q)}"</div>`;
+  document.getElementById('dr-country-list').innerHTML = html;
+}
+
+function drSelectCountry(code, save){
+  if (save === undefined) save = true;
+  if (!DR_DATA[code]) return;
+  drState.countryCode = code;
+  if (save) drSave();
+  const co = drCountry();
+  if (!co) return;
+  const d = DR_DATA[code];
+  document.getElementById('dr-disp-flag').textContent = co.f;
+  document.getElementById('dr-disp-name').textContent = co.n;
+  document.getElementById('dr-disp-side').textContent = d.side === 'left' ? 'Left' : 'Right';
+  drClosePicker();
+  document.getElementById('dr-empty').style.display = 'none';
+  document.getElementById('dr-content').style.display = '';
+  drRender();
+}
+
+/* ── Formatters ── */
+function drSpeedCard(ico, lbl, val, unit, opts){
+  opts = opts || {};
+  let big, sub;
+  if (opts.noLimit){ big = 'No limit'; sub = 'Autobahn · 130 advised'; }
+  else if (val === null || val === undefined){ big = '—'; sub = 'no motorways'; }
+  else if (unit === 'mph'){ big = val + ' mph'; sub = '≈ ' + (Math.round(val * 1.60934 / 5) * 5) + ' km/h'; }
+  else { big = val + ' km/h'; sub = '≈ ' + (Math.round(val * 0.621371 / 5) * 5) + ' mph'; }
+  return `<div class="dr-speed"><div class="dr-speed-ico">${ico}</div><div class="dr-speed-lbl">${lbl}</div><div class="dr-speed-val">${big}</div><div class="dr-speed-conv">${sub}</div></div>`;
+}
+function drBac(b){
+  if (b === 0) return `<b>Zero tolerance</b> <span class="dr-conv">(0.00%)</span>`;
+  const gl = +(b * 10).toFixed(2);
+  return `<b>${b.toFixed(2)}%</b> BAC <span class="dr-conv">(${gl} g/L)</span>`;
+}
+
+function drRender(){
+  const co = drCountry();
+  if (!co) return;
+  const d = DR_DATA[co.c];
+
+  // Hero — side of the road
+  const hero = document.getElementById('dr-hero');
+  hero.className = 'dr-hero side-' + d.side;
+  document.getElementById('dr-hero-flag').textContent = co.f;
+  document.getElementById('dr-hero-co').textContent = co.n;
+  document.getElementById('dr-hero-side').textContent = d.side === 'left' ? 'Drive on the LEFT' : 'Drive on the RIGHT';
+  document.getElementById('dr-hero-sub').textContent = d.side === 'left'
+    ? 'Right-hand-drive cars · keep left, overtake on the right'
+    : 'Left-hand-drive cars · keep right, overtake on the left';
+  document.getElementById('dr-hero-ico').textContent = d.side === 'left' ? '⬅️' : '➡️';
+
+  // At a glance
+  const idpMap = {
+    req:{ lbl:'Required', cls:'req', sub:'Carry an IDP with your home licence.' },
+    rec:{ lbl:'Recommended', cls:'rec', sub:'Bring one to be safe — your licence alone may not be accepted.' },
+    no:{ lbl:'Not required', cls:'no', sub:'Your national licence is accepted for short visits.' },
+  };
+  const ip = idpMap[d.idp] || idpMap.rec;
+  document.getElementById('dr-glance').innerHTML = `
+    <div class="dr-glance-card dr-idp-${d.idp}">
+      <div class="dr-glance-lbl">🪪 Int'l Driving Permit</div>
+      <span class="dr-pill ${ip.cls}">${ip.lbl}</span>
+      <div class="dr-glance-sub">${d.idpNote || ip.sub}</div>
+    </div>
+    <div class="dr-glance-card">
+      <div class="dr-glance-lbl">🍷 Drink-drive limit</div>
+      <div class="dr-glance-val">${drBac(d.bac)}</div>
+      <div class="dr-glance-sub">${d.bacNote || ''}</div>
+    </div>
+    <div class="dr-glance-card">
+      <div class="dr-glance-lbl">🚨 Emergency</div>
+      <div class="dr-glance-val">${d.emerg}</div>
+      <div class="dr-glance-sub">Police · fire · ambulance</div>
+    </div>`;
+
+  // Speed limits
+  document.getElementById('dr-speeds').innerHTML =
+    drSpeedCard('🏙', 'Urban / town', d.urban, d.unit) +
+    drSpeedCard('🛣️', 'Open road', d.rural, d.unit) +
+    drSpeedCard('🛤️', 'Motorway', d.motor, d.unit, { noLimit: d.motor === 0 });
+  document.getElementById('dr-speed-note').innerHTML = d.speedNote || '';
+
+  // Tolls & parking
+  document.getElementById('dr-tollpark').innerHTML =
+    drRow('💳', 'Tolls', d.toll) +
+    drRow('🅿️', 'Parking', d.park);
+
+  // Safety law essentials
+  document.getElementById('dr-safety').innerHTML =
+    drRow('🔒', 'Seatbelts', d.seatbelt) +
+    drRow('📱', 'Phone use', d.phone) +
+    drRow('👶', 'Child seats', d.child) +
+    drRow('💡', 'Headlights', d.lights) +
+    drRow('❄️', 'Winter rules', d.winter);
+
+  // Good to know
+  const knownote = document.getElementById('dr-knownote-wrap');
+  if (d.note){ knownote.style.display = ''; document.getElementById('dr-knownote').innerHTML = d.note; }
+  else { knownote.style.display = 'none'; }
+}
+function drRow(ico, lbl, val){
+  return `<div class="dr-row"><span class="dr-row-ico">${ico}</span><div class="dr-row-body"><div class="dr-row-lbl">${lbl}</div><div class="dr-row-val">${val || '—'}</div></div></div>`;
+}
+
+/* ── Road-sign reference ── */
+function drToggleSigns(){
+  const sec = document.getElementById('dr-signs-sec');
+  const body = document.getElementById('dr-signs-body');
+  const isOpen = body.style.display === 'block';
+  if (isOpen){
+    body.style.display = 'none';
+    sec.classList.remove('open');
+  } else {
+    if (!drSignsBuilt) drBuildSigns();
+    body.style.display = 'block';
+    sec.classList.add('open');
+  }
+}
+function drBuildSigns(){
+  document.getElementById('dr-sign-legend').innerHTML =
+    DR_SIGN_LEGEND.map(l => `<div class="dr-leg"><b>${l.t}</b>${l.d}</div>`).join('');
+  document.getElementById('dr-sign-groups').innerHTML = DR_SIGN_GROUPS.map(grp =>
+    `<div class="dr-sign-grp"><div class="dr-sign-grp-hd">${grp.g}</div><div class="dr-signs">` +
+    grp.signs.map(s => `<div class="dr-sign"><span class="dr-sign-ico">${s.i}</span><div><div class="dr-sign-nm">${s.n}</div><div class="dr-sign-ds">${s.d}</div></div></div>`).join('') +
+    `</div></div>`).join('');
+  drSignsBuilt = true;
 }
 
 /* ══════════════════════════════════════════════════════
