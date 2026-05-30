@@ -9458,16 +9458,256 @@ input:checked + .pb-toggle-box::after { transform:translateX(16px);background:#f
 </div>
 
 </div><!-- /view-cruise-compare -->
-<div id="view-placeholder-sea-sick" class="view">
-  <nav class="tool-topbar">
+<style>
+/* ── SEA SICKNESS GUIDE ── */
+#view-sea-sick .ss-section{margin-top:26px}
+#view-sea-sick .ss-sec-hdr{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+#view-sea-sick .ss-sec-intro{font-size:13px;color:var(--ink-2);line-height:1.55;margin:-4px 0 14px}
+
+/* self-check */
+.ss-check{border:1.5px solid var(--ink);border-radius:var(--r);background:var(--paper-2);padding:18px 18px 16px}
+.ss-check-hd{font-family:var(--serif);font-size:19px;font-weight:600;letter-spacing:-.01em;margin-bottom:3px}
+.ss-check-sub{font-size:12.5px;color:var(--muted);line-height:1.45;margin-bottom:14px}
+.ss-q{margin-bottom:15px}
+.ss-q-text{font-weight:600;font-size:14px;line-height:1.4;margin-bottom:8px}
+.ss-opts{display:flex;flex-wrap:wrap;gap:7px}
+.ss-opt{border:1.5px solid var(--rule);border-radius:var(--r);background:var(--paper);padding:8px 13px;font-family:var(--sans);font-size:13px;line-height:1.3;color:var(--ink-2);cursor:pointer;min-height:40px;transition:background .12s,color .12s,border-color .12s}
+.ss-opt:hover:not(.sel){border-color:var(--ink)}
+.ss-opt.sel{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.ss-go-row{display:flex;align-items:center;gap:14px;margin-top:4px;flex-wrap:wrap}
+.ss-retake{background:none;border:none;color:var(--muted);font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;text-decoration:underline;padding:6px 0}
+.ss-retake:hover{color:var(--ink)}
+
+/* result */
+#ss-result{margin-top:18px}
+.ss-risk{border:1.5px solid var(--ink);border-left-width:5px;border-radius:var(--r);background:var(--paper);padding:16px 18px}
+.ss-risk.low{border-left-color:var(--green)}
+.ss-risk.mod{border-left-color:var(--orange)}
+.ss-risk.high{border-left-color:var(--accent)}
+.ss-risk-top{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.ss-risk-badge{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;border-radius:2px;font-weight:600}
+.ss-risk.low .ss-risk-badge{background:#E3F4E4;color:var(--green);border:1px solid rgba(46,125,50,.3)}
+.ss-risk.mod .ss-risk-badge{background:#FFE6CC;color:var(--orange);border:1px solid rgba(230,81,0,.3)}
+.ss-risk.high .ss-risk-badge{background:#FFE5DF;color:var(--accent);border:1px solid rgba(255,77,46,.3)}
+.ss-risk-label{font-family:var(--serif);font-size:21px;font-weight:700;letter-spacing:-.02em}
+.ss-risk.low .ss-risk-label{color:var(--green)}
+.ss-risk.mod .ss-risk-label{color:var(--orange)}
+.ss-risk.high .ss-risk-label{color:var(--accent)}
+.ss-risk-blurb{font-size:13.5px;line-height:1.6;color:var(--ink-2);margin-top:10px}
+.ss-plan-hd{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:14px 0 8px}
+.ss-plan{list-style:none;display:flex;flex-direction:column;gap:8px}
+.ss-plan li{display:flex;gap:10px;font-size:13.5px;line-height:1.5;color:var(--ink-2)}
+.ss-plan li b{color:var(--ink)}
+.ss-plan li::before{content:'›';color:var(--accent);font-weight:700;flex-shrink:0}
+.ss-caution{margin-top:14px;padding:11px 14px;border-radius:var(--r);background:var(--paper-2);border-left:3px solid var(--blue);font-size:12.5px;line-height:1.55;color:var(--ink-2)}
+.ss-caution b{color:var(--ink)}
+
+/* cabin diagram */
+.ss-cabin-wrap{border:1.5px solid var(--rule);border-radius:var(--r);padding:16px 16px 14px}
+.ss-cabin-grid{display:grid;grid-template-columns:auto repeat(3,1fr);gap:6px;align-items:stretch}
+.ss-axis-y,.ss-axis-x{font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;justify-content:center;text-align:center}
+.ss-axis-x{padding-top:6px;min-height:22px}
+.ss-axis-corner{}
+.ss-cell{border-radius:var(--r);min-height:54px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:6px 4px;font-size:11px;font-weight:600;line-height:1.25;color:var(--ink)}
+.ss-cell .ss-cell-tag{font-family:var(--mono);font-size:8px;letter-spacing:.05em;text-transform:uppercase;opacity:.7;font-weight:500;margin-top:2px}
+.ss-cell.m0{background:#CDEBCF;border:1.5px solid var(--green)}
+.ss-cell.m1{background:#E3F4E4}
+.ss-cell.m2{background:#FFF1D6}
+.ss-cell.m3{background:#FFE0CC}
+.ss-cell.m4{background:#FFD9D1}
+.ss-cell.star{box-shadow:inset 0 0 0 1.5px var(--green)}
+.ss-legend{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px;font-family:var(--mono);font-size:9.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.ss-legend-bar{display:flex;height:9px;width:120px;border-radius:2px;overflow:hidden;border:1px solid var(--rule)}
+.ss-legend-bar span{flex:1}
+.ss-glance{margin-top:14px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media(max-width:600px){.ss-glance{grid-template-columns:1fr}}
+.ss-glance-card{border:1.5px solid var(--rule);border-radius:var(--r);padding:11px 13px;border-left:4px solid var(--teal)}
+.ss-glance-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:6px}
+.ss-glance-val{font-weight:600;font-size:15px;line-height:1.3;color:var(--ink);margin-top:3px}
+.ss-glance-sub{font-size:11.5px;color:var(--muted);line-height:1.4;margin-top:3px}
+
+/* medications */
+.ss-filters{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.ss-meds{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+@media(max-width:680px){.ss-meds{grid-template-columns:1fr}}
+.ss-med{border:1.5px solid var(--rule);border-radius:var(--r);padding:13px 14px;display:flex;flex-direction:column}
+.ss-med-top{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.ss-med-nm{font-family:var(--serif);font-size:16px;font-weight:600;letter-spacing:-.01em;line-height:1.2}
+.ss-med-brand{font-size:12px;color:var(--muted);font-style:italic}
+.ss-med-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.ss-tag{font-family:var(--mono);font-size:8.5px;letter-spacing:.05em;text-transform:uppercase;padding:3px 7px;border-radius:2px;border:1px solid var(--rule);color:var(--muted)}
+.ss-tag.rx{background:#FFE5DF;color:var(--accent);border-color:rgba(255,77,46,.3)}
+.ss-tag.otc{background:#E3F4E4;color:var(--green);border-color:rgba(46,125,50,.3)}
+.ss-tag.nat{background:#E1F1F3;color:var(--teal);border-color:rgba(0,131,143,.3)}
+.ss-tag.dr{background:var(--paper-2)}
+.ss-med-rows{margin-top:10px;display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:12.5px;line-height:1.45}
+.ss-med-rows dt{font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding-top:2px}
+.ss-med-rows dd{color:var(--ink-2);margin:0}
+.ss-med-rows dd b{color:var(--ink)}
+.ss-med-note{font-size:12px;color:var(--muted);line-height:1.5;margin-top:10px;padding-top:9px;border-top:1px solid var(--rule)}
+.ss-med-note b{color:var(--ink)}
+
+/* prevent / treat columns */
+.ss-cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:680px){.ss-cols{grid-template-columns:1fr}}
+.ss-col{border:1.5px solid var(--rule);border-radius:var(--r);padding:14px 16px}
+.ss-col.prevent{border-left:4px solid var(--green)}
+.ss-col.treat{border-left:4px solid var(--accent)}
+.ss-col-hd{font-family:var(--serif);font-size:16px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.ss-list{list-style:none;display:flex;flex-direction:column;gap:9px}
+.ss-list li{display:flex;gap:9px;font-size:13px;line-height:1.5;color:var(--ink-2)}
+.ss-list li b{color:var(--ink)}
+.ss-list.prevent li::before{content:'✓';color:var(--green);font-weight:700;flex-shrink:0}
+.ss-list.treat li{counter-increment:sstreat}
+.ss-list.treat li::before{content:counter(sstreat);font-family:var(--mono);font-size:11px;color:var(--accent);font-weight:700;flex-shrink:0;min-width:14px}
+.ss-list.treat{counter-reset:sstreat}
+
+.ss-disclaimer{margin-top:24px;padding:13px 16px;border-radius:var(--r);background:var(--paper-2);border:1.5px solid var(--rule);font-size:12px;line-height:1.6;color:var(--muted)}
+.ss-disclaimer b{color:var(--ink-2)}
+
+@media print{
+  #view-sea-sick .ss-opts,#view-sea-sick .ss-go-row,#view-sea-sick .ss-filters,#view-sea-sick .ss-check-sub{display:none!important}
+  #view-sea-sick .ss-med,#view-sea-sick .ss-col,#view-sea-sick .ss-cabin-wrap{break-inside:avoid}
+}
+</style>
+<div id="view-sea-sick" class="view">
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="window.print()">🖨 Print</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">🌊</span>
-    <h2>Sea Sickness Guide</h2>
-    <p style="margin-bottom:24px">Prevention, treatment & best cabin locations for motion sickness at sea.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-sea-sick"></div>
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>Sea Sickness Guide</h1>
+    <p class="tool-sub">Beat motion sickness at sea. Gauge your risk in four quick questions, then get a tailored plan — the calmest cabin to book, which medications and natural remedies actually work, and exactly what to do when the swell hits.</p>
+  </div>
+
+  <div class="tool-body">
+
+    <!-- ── SUSCEPTIBILITY SELF-CHECK ── -->
+    <div class="ss-check">
+      <div class="ss-check-hd">🌊 How prone are you to sea sickness?</div>
+      <div class="ss-check-sub">Answer four quick questions for a personalized risk level and prevention plan. Saved on this device.</div>
+      <div id="ss-questions"></div>
+      <div class="ss-go-row">
+        <button class="btn btn-p" id="ss-go" onclick="ssShowResult()" disabled>Show my risk &amp; plan</button>
+        <button class="ss-retake" id="ss-retake" onclick="ssRetake()" style="display:none">↺ Start over</button>
+      </div>
+    </div>
+    <div id="ss-result"></div>
+
+    <!-- ── BEST CABIN LOCATION ── -->
+    <div class="ss-section">
+      <div class="ss-sec-hdr">⚓ Where to book your cabin</div>
+      <p class="ss-sec-intro">A ship pivots around its center, so motion is gentlest <b>low and amidships</b> — and worst high up and toward the bow. If you're prone to sea sickness, book as low and as centered as your budget allows.</p>
+      <div class="ss-cabin-wrap">
+        <div class="ss-cabin-grid">
+          <div class="ss-axis-corner"></div>
+          <div class="ss-axis-x">⟵ Bow / Forward</div>
+          <div class="ss-axis-x">Midship</div>
+          <div class="ss-axis-x">Stern / Aft ⟶</div>
+
+          <div class="ss-axis-y">High<br>decks</div>
+          <div class="ss-cell m4">Rough<span class="ss-cell-tag">avoid</span></div>
+          <div class="ss-cell m2">Breezy<span class="ss-cell-tag">so-so</span></div>
+          <div class="ss-cell m3">Bouncy<span class="ss-cell-tag">so-so</span></div>
+
+          <div class="ss-axis-y">Mid<br>decks</div>
+          <div class="ss-cell m3">Sways<span class="ss-cell-tag">so-so</span></div>
+          <div class="ss-cell m1">Steady<span class="ss-cell-tag">good</span></div>
+          <div class="ss-cell m2">Some lift<span class="ss-cell-tag">ok</span></div>
+
+          <div class="ss-axis-y">Low<br>decks</div>
+          <div class="ss-cell m2">Pitches<span class="ss-cell-tag">ok</span></div>
+          <div class="ss-cell m0 star">★ Sweet spot<span class="ss-cell-tag">calmest</span></div>
+          <div class="ss-cell m1">Calm<span class="ss-cell-tag">good</span></div>
+        </div>
+        <div class="ss-legend">
+          <span>Calmest</span>
+          <span class="ss-legend-bar"><span style="background:#CDEBCF"></span><span style="background:#E3F4E4"></span><span style="background:#FFF1D6"></span><span style="background:#FFE0CC"></span><span style="background:#FFD9D1"></span></span>
+          <span>Roughest</span>
+        </div>
+        <div class="ss-glance">
+          <div class="ss-glance-card">
+            <div class="ss-glance-lbl">🛗 Deck height</div>
+            <div class="ss-glance-val">Low &amp; middle</div>
+            <div class="ss-glance-sub">Closer to the waterline means far less sway than the upper decks.</div>
+          </div>
+          <div class="ss-glance-card">
+            <div class="ss-glance-lbl">🎯 Position</div>
+            <div class="ss-glance-val">Midship (center)</div>
+            <div class="ss-glance-sub">The pivot point. The bow and stern rise and fall the most.</div>
+          </div>
+          <div class="ss-glance-card">
+            <div class="ss-glance-lbl">🪟 View</div>
+            <div class="ss-glance-val">Window or balcony</div>
+            <div class="ss-glance-sub">Seeing the horizon helps your brain — an inside cabin can make it worse.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── MEDICATIONS ── -->
+    <div class="ss-section">
+      <div class="ss-sec-hdr">💊 Medications &amp; remedies</div>
+      <p class="ss-sec-intro">The golden rule: take it <b>before</b> you feel sick. Most options need a head start of 30 minutes to 12 hours — once nausea sets in they work poorly. Filter to compare your options.</p>
+      <div class="ss-filters chip-grp" id="ss-filters">
+        <span class="chip on" data-f="all"       onclick="ssFilterMeds(this)">All</span>
+        <span class="chip"    data-f="otc"       onclick="ssFilterMeds(this)">🟢 Over-the-counter</span>
+        <span class="chip"    data-f="rx"        onclick="ssFilterMeds(this)">🔴 Prescription</span>
+        <span class="chip"    data-f="nat"       onclick="ssFilterMeds(this)">🌿 Natural</span>
+        <span class="chip"    data-f="lowdrowsy" onclick="ssFilterMeds(this)">😊 Least drowsy</span>
+      </div>
+      <div class="ss-meds" id="ss-meds"></div>
+    </div>
+
+    <!-- ── PREVENT / TREAT ── -->
+    <div class="ss-section">
+      <div class="ss-sec-hdr">🧭 Stay ahead of it &amp; what to do when it hits</div>
+      <div class="ss-cols">
+        <div class="ss-col prevent">
+          <div class="ss-col-hd">🛡 Prevention</div>
+          <ul class="ss-list prevent">
+            <li><b>Medicate early.</b> Take your tablet or apply a patch before you board, not after symptoms start.</li>
+            <li><b>Watch the horizon.</b> Fix your eyes on a stable distant point or the skyline when seas pick up.</li>
+            <li><b>Eat light &amp; bland.</b> Crackers, bread, apples. Don't sail on an empty or overstuffed stomach.</li>
+            <li><b>Skip the triggers.</b> Avoid alcohol, greasy or spicy food, and strong smells.</li>
+            <li><b>Put the screen down.</b> Reading and phones up close create the eye–inner-ear mismatch that triggers it.</li>
+            <li><b>Get fresh air.</b> Head to an open deck, midship, and face the direction of travel.</li>
+            <li><b>Stay hydrated.</b> Sip water or ginger ale through the day.</li>
+          </ul>
+        </div>
+        <div class="ss-col treat">
+          <div class="ss-col-hd">🆘 When it hits</div>
+          <ul class="ss-list treat">
+            <li>Get outside to fresh air and lock your eyes onto the horizon — open deck, midship.</li>
+            <li>Stop all reading and screens; loosen tight clothing and breathe slowly and deeply.</li>
+            <li>Sip cold water or ginger ale; nibble a plain cracker or ginger candy.</li>
+            <li>If you haven't medicated, a fast-acting tablet can still help once your stomach settles.</li>
+            <li>Lie down in your cabin (low, midship) with your eyes closed if it won't pass.</li>
+            <li>Most people adapt in 1–3 days — you're getting your "sea legs." Severe, non-stop vomiting? The ship's medical center can give an injection.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="ss-disclaimer">
+      <b>⚕ General information, not medical advice.</b> Medication names, doses and timings here are typical examples — always read the label and check with a doctor or pharmacist before use, especially if you are pregnant or nursing, taking other medication, or have a condition such as glaucoma, heart, prostate, or liver problems. Brand names vary by country.
+    </div>
+
+  </div><!-- /tool-body -->
+
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    Combine defenses for rough crossings: a long-acting patch or once-a-day tablet started early, acupressure bands, ginger, and a low midship cabin together work far better than any one alone. And don't wait to feel queasy — by then it's an uphill battle.
+  </div>
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('cruise-compare')">🔍 Cruise Line Comparison</button>
+      <button class="rel-btn" onclick="openTool('cruise-day')">📆 Cruise Day Planner</button>
+      <button class="rel-btn" onclick="openTool('shore-exc')">⚓ Shore Excursion Planner</button>
+      <button class="rel-btn" onclick="openTool('packing')">📝 Smart Packing List</button>
     </div>
   </div>
 </div>
@@ -11314,7 +11554,7 @@ const TOOLS = [
   {id:'toll-est',      nm:'Toll Cost Estimator',        ico:'💲', ph:'road',       on:false,live:true,  ds:'Major US toll roads. Estimated total cost city-to-city.'},
   {id:'shore-exc',     nm:'Shore Excursion Planner',    ico:'⚓', ph:'cruise',     on:false,live:true,  ds:'Per-port budget & time planner. Never miss ship departure.'},
   {id:'cruise-compare',nm:'Cruise Line Comparison',     ico:'🔍', ph:'cruise',     on:false,live:true,  ds:'Side-by-side of 12 major cruise lines across 10 attributes.'},
-  {id:'sea-sick',      nm:'Sea Sickness Guide',         ico:'🌊', ph:'cruise',     on:false,live:false, ds:'Prevention, treatment & best cabin locations for motion sickness.'},
+  {id:'sea-sick',      nm:'Sea Sickness Guide',         ico:'🌊', ph:'cruise',     on:false,live:true,  ds:'Prevention, treatment & best cabin locations for motion sickness.'},
   {id:'cruise-day',    nm:'Cruise Day Planner',         ico:'📆', ph:'cruise',     on:false,live:true,  ds:'Visual calendar: sea day vs. port day modes.'},
   {id:'park-budget',   nm:'Theme Park Budget',          ico:'🎟', ph:'theme',      on:false,live:true,  ds:'Tickets, food, merch & parking — total cost for any party size.'},
   {id:'park-optimizer',nm:'Park Day Optimizer',         ico:'🗺', ph:'theme',      on:false,live:true,  ds:'Builds an hour-by-hour park day plan: arrival time, rope-drop order, skip-the-line strategy & crowd timing for Disney, Universal, SeaWorld & more.'},
@@ -11980,6 +12220,7 @@ function injectTripCtx(id) {
   if(id==='rest-stop') rsInit();
   if(id==='flight-est') feInit();
   if(id==='cruise-compare') ccInit();
+  if(id==='sea-sick')      ssInit();
   if(id==='cruise-grat')   cgInit();
   if(id==='cruise-day')    cdInit();
   if(id==='shore-exc')     seInit();
@@ -32581,6 +32822,187 @@ const TQ_KEY = 'tt_travel_quiz_v1';
 let tqAnswers = [];   // index per question, or null
 let tqCurrent = 0;    // current question index
 let tqResult = null;  // winning archetype id once computed
+
+/* ═══════════════════ SEA SICKNESS GUIDE ═══════════════════ */
+const SS_KEY = 'triptools_seasick';
+const SS_Q = [
+  { q:'Have you ever felt motion sick — in a car, boat, plane, or on rides?',
+    opts:[
+      {t:'Almost never', s:0},
+      {t:'Once in a while, only in rough conditions', s:1},
+      {t:'Fairly often', s:2},
+      {t:'Almost every time', s:3} ] },
+  { q:'What kind of water will you be sailing?',
+    opts:[
+      {t:'Calm & sheltered — rivers, Caribbean, Med in summer', s:0},
+      {t:'A mix of calm and open stretches', s:1},
+      {t:'Mostly open ocean', s:2},
+      {t:'Known-rough — transatlantic, Alaska, Drake, North Sea', s:3} ] },
+  { q:'How big is your ship?',
+    opts:[
+      {t:'Large modern cruise ship with stabilizers', s:0},
+      {t:'Mid-size ship', s:1},
+      {t:'Small ship, expedition vessel, or ferry', s:2} ] },
+  { q:'How are you feeling about the trip?',
+    opts:[
+      {t:'Relaxed and excited', s:0},
+      {t:'A little nervous', s:1},
+      {t:'Genuinely anxious about getting sick', s:2} ] },
+];
+// risk bands keyed by total score (max 10)
+const SS_RISK = {
+  low:  { cls:'low',  badge:'Low risk', label:'You should sail smoothly',
+    blurb:'You show few of the usual risk factors. A handful of simple habits should be plenty to keep you comfortable — no need to medicate unless you want a safety net.',
+    plan:[
+      '<b>Book sensibly.</b> A midship cabin is a nice bonus, but you have flexibility.',
+      '<b>Pack a just-in-case kit:</b> ginger chews or acupressure wristbands take up no room and have no downside.',
+      '<b>Watch the horizon</b> and step out for fresh air if the seas pick up or you start to feel off.',
+      '<b>Go easy</b> on alcohol and rich food on the first night while you find your sea legs.' ] },
+  mod:  { cls:'mod',  badge:'Moderate risk', label:'Plan ahead and you’ll be fine',
+    blurb:'You have a few risk factors, so it pays to be prepared rather than reactive. Set yourself up before you sail and you’ll most likely barely notice the motion.',
+    plan:[
+      '<b>Choose a low, midship cabin</b> — see the cabin map below.',
+      '<b>Have an OTC tablet ready.</b> Meclizine (Bonine / Dramamine Less Drowsy) is the easy once-a-day pick — take it ~1 hour before you sail, not after.',
+      '<b>Add ginger and acupressure bands</b> as drug-free backup.',
+      '<b>Fresh air, the horizon, and light bland meals</b> for the first day or two until you adapt.',
+      '<b>Avoid alcohol and screens</b> when seas are lively.' ] },
+  high: { cls:'high', badge:'High risk', label:'Be proactive from day one',
+    blurb:'Several factors stack up for you, so don’t leave it to chance. The good news: with a layered plan started early, even very prone travelers usually cope well — and most people adapt within 1–3 days.',
+    plan:[
+      '<b>Ask your doctor about a scopolamine patch</b> before the trip — apply it the evening before you sail for up to 3 days of cover.',
+      '<b>Book the lowest, most midship cabin you can</b> with a window or balcony.',
+      '<b>Medicate on schedule from day one</b> — don’t wait to feel ill. Combine your patch or tablet with ginger and acupressure bands.',
+      '<b>Strictly avoid alcohol, screens, and reading</b> in open water; stay on deck watching the horizon as much as possible.',
+      '<b>If it still hits hard,</b> the ship’s medical center can give a fast-acting injection — don’t suffer through it.' ] },
+};
+const SS_MEDS = [
+  { nm:'Meclizine', brand:'Bonine · Dramamine Less Drowsy · Antivert', tags:['otc','lowdrowsy'],
+    onset:'~1 hour before', duration:'Up to 24 hours', drowsy:'Mild', dose:'25–50 mg once daily',
+    note:'The popular cruise pick — once-a-day convenience with less sedation than older antihistamines. Avoid alcohol.' },
+  { nm:'Dimenhydrinate', brand:'Dramamine Original · Gravol', tags:['otc'],
+    onset:'30–60 min before', duration:'4–6 hours', drowsy:'High', dose:'50–100 mg every 4–6 h',
+    note:'Fast, cheap and everywhere — but markedly sedating, so not ideal if you want to enjoy the day.' },
+  { nm:'Cinnarizine', brand:'Stugeron', tags:['otc','lowdrowsy'],
+    onset:'~2 hours before', duration:'~8 hours', drowsy:'Mild–moderate', dose:'15–30 mg',
+    note:'A long-standing sailor favourite in the UK and Europe — not sold in the US. Avoid if you have Parkinson’s.' },
+  { nm:'Scopolamine patch', brand:'Transderm Scōp · Scopoderm', tags:['rx','lowdrowsy'],
+    onset:'Apply 4–12 h before', duration:'Up to 72 hours', drowsy:'Low–moderate', dose:'One patch behind the ear',
+    note:'Set-and-forget cover for multi-day rough crossings with little drowsiness. Prescription only. Dry mouth and blurred vision are common; wash hands after handling and not for glaucoma.' },
+  { nm:'Promethazine', brand:'Phenergan', tags:['rx'],
+    onset:'30–60 min', duration:'4–8 hours', drowsy:'High', dose:'25 mg (sometimes with a little caffeine)',
+    note:'Strong — reserved for when seasickness is already severe (the "Coast Guard cocktail"). Prescription; very sedating.' },
+  { nm:'Ginger', brand:'Capsules · chews · tea · candied', tags:['nat','lowdrowsy'],
+    onset:'30–60 min before', duration:'A few hours; redose', drowsy:'None', dose:'~1 g, repeated',
+    note:'No drowsiness and gentle on most stomachs, including many in pregnancy (ask your provider). Evidence is modest — may not be enough alone for high seas.' },
+  { nm:'Acupressure bands', brand:'Sea-Bands', tags:['nat','lowdrowsy'],
+    onset:'Put on before boarding', duration:'As long as worn', drowsy:'None', dose:'P6 point, inner wrist',
+    note:'Reusable, drug-free and side-effect-free, so they pair with anything. Evidence is mixed — best as a supplement rather than your only defense.' },
+  { nm:'Cyclizine', brand:'Marezine', tags:['otc'],
+    onset:'~30 min before', duration:'4–6 hours', drowsy:'Moderate', dose:'50 mg',
+    note:'A solid OTC alternative if meclizine or dimenhydrinate aren’t available. Causes dry mouth and some drowsiness.' },
+];
+
+let ssAnswers = [];
+
+function ssInit() {
+  ssAnswers = new Array(SS_Q.length).fill(null);
+  try {
+    const saved = JSON.parse(localStorage.getItem(SS_KEY) || 'null');
+    if (saved && Array.isArray(saved.answers)) {
+      saved.answers.slice(0, SS_Q.length).forEach((a, i) => {
+        if (a === 0 || a > 0) ssAnswers[i] = a;
+      });
+    }
+  } catch(_) {}
+  ssRenderQuestions();
+  ssRenderMeds('all');
+  if (ssAnswers.every(a => a !== null)) ssShowResult();
+  else { document.getElementById('ss-result').innerHTML = ''; }
+}
+
+function ssRenderQuestions() {
+  const wrap = document.getElementById('ss-questions');
+  wrap.innerHTML = SS_Q.map((Q, qi) => {
+    const opts = Q.opts.map((o, oi) =>
+      `<button type="button" class="ss-opt ${ssAnswers[qi] === oi ? 'sel' : ''}" onclick="ssPick(${qi},${oi})">${o.t}</button>`
+    ).join('');
+    return `<div class="ss-q"><div class="ss-q-text">${qi+1}. ${Q.q}</div><div class="ss-opts">${opts}</div></div>`;
+  }).join('');
+  ssSyncGo();
+}
+
+function ssPick(qi, oi) {
+  ssAnswers[qi] = oi;
+  document.querySelectorAll('#ss-questions .ss-q')[qi]
+    .querySelectorAll('.ss-opt').forEach((b, idx) => b.classList.toggle('sel', idx === oi));
+  ssSave();
+  ssSyncGo();
+}
+
+function ssSyncGo() {
+  const done = ssAnswers.every(a => a !== null);
+  const go = document.getElementById('ss-go');
+  if (go) go.disabled = !done;
+  const retake = document.getElementById('ss-retake');
+  if (retake) retake.style.display = ssAnswers.some(a => a !== null) ? '' : 'none';
+}
+
+function ssSave() {
+  try { localStorage.setItem(SS_KEY, JSON.stringify({ answers: ssAnswers })); } catch(_) {}
+}
+
+function ssRetake() {
+  ssAnswers = new Array(SS_Q.length).fill(null);
+  ssSave();
+  document.getElementById('ss-result').innerHTML = '';
+  ssRenderQuestions();
+}
+
+function ssShowResult() {
+  if (!ssAnswers.every(a => a !== null)) return;
+  let total = 0;
+  ssAnswers.forEach((oi, qi) => { total += SS_Q[qi].opts[oi].s; });
+  const R = total <= 2 ? SS_RISK.low : (total <= 5 ? SS_RISK.mod : SS_RISK.high);
+  const plan = R.plan.map(p => `<li>${p}</li>`).join('');
+  document.getElementById('ss-result').innerHTML = `
+    <div class="ss-risk ${R.cls}">
+      <div class="ss-risk-top">
+        <span class="ss-risk-badge">${R.badge}</span>
+        <span class="ss-risk-label">${R.label}</span>
+      </div>
+      <div class="ss-risk-blurb">${R.blurb}</div>
+      <div class="ss-plan-hd">Your plan</div>
+      <ul class="ss-plan">${plan}</ul>
+      <div class="ss-caution"><b>Before you medicate:</b> if you’re pregnant or nursing, take other medication, or have a health condition, check with a doctor or pharmacist first — some options below aren’t suitable for everyone.</div>
+    </div>`;
+}
+
+function ssFilterMeds(el) {
+  document.querySelectorAll('#ss-filters .chip').forEach(c => c.classList.toggle('on', c === el));
+  ssRenderMeds(el.dataset.f);
+}
+
+function ssRenderMeds(filter) {
+  const tagLbl = { otc:'OTC', rx:'Rx', nat:'Natural', lowdrowsy:'Least drowsy' };
+  const tagCls = { otc:'otc', rx:'rx', nat:'nat', lowdrowsy:'dr' };
+  const list = SS_MEDS.filter(m => filter === 'all' || m.tags.includes(filter));
+  const meds = document.getElementById('ss-meds');
+  if (!meds) return;
+  meds.innerHTML = list.map(m => {
+    const tags = m.tags.map(t => `<span class="ss-tag ${tagCls[t]}">${tagLbl[t]}</span>`).join('');
+    return `<div class="ss-med">
+      <div class="ss-med-top"><span class="ss-med-nm">${m.nm}</span><span class="ss-med-brand">${m.brand}</span></div>
+      <div class="ss-med-tags">${tags}</div>
+      <dl class="ss-med-rows">
+        <dt>Timing</dt><dd><b>${m.onset}</b></dd>
+        <dt>Lasts</dt><dd>${m.duration}</dd>
+        <dt>Drowsy</dt><dd>${m.drowsy}</dd>
+        <dt>Typical</dt><dd>${m.dose}</dd>
+      </dl>
+      <div class="ss-med-note">${m.note}</div>
+    </div>`;
+  }).join('');
+}
 
 function tqInit() {
   let saved = null;
