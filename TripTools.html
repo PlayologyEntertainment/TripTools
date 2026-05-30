@@ -11145,18 +11145,156 @@ input:checked + .pb-toggle-box::after { transform:translateX(16px);background:#f
   </div>
 
 </div>
-<div id="view-placeholder-lounge-guide" class="view">
-  <nav class="tool-topbar">
+<!-- ═══════════════════════════════════════════════════
+     AIRPORT LOUNGE GUIDE  (id: lounge-guide)
+     ═══════════════════════════════════════════════════ -->
+<style>
+/* ── AIRPORT LOUNGE GUIDE ── */
+#view-lounge-guide .lg-airport-btn{display:flex;align-items:center;gap:12px;width:100%;background:var(--paper-2);border:1.5px solid var(--ink);border-radius:var(--r);padding:14px 16px;font-family:var(--sans);font-size:15px;color:var(--ink);min-height:56px;cursor:pointer;transition:border-color .12s,background .12s;text-align:left;margin-bottom:16px}
+#view-lounge-guide .lg-airport-btn:hover{background:var(--paper)}
+#view-lounge-guide .lg-airport-code{font-family:var(--mono);font-weight:700;font-size:20px;letter-spacing:.04em;color:var(--ink);background:var(--ink);color:var(--paper);padding:6px 10px;border-radius:var(--r);line-height:1;flex-shrink:0}
+#view-lounge-guide .lg-airport-meta{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+#view-lounge-guide .lg-airport-name{font-family:var(--serif);font-weight:600;font-size:16px;color:var(--ink);line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#view-lounge-guide .lg-airport-sub{font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+#view-lounge-guide .lg-airport-cta{color:var(--muted);font-size:12px;flex-shrink:0;font-family:var(--mono);letter-spacing:.06em}
+
+/* Filter chips ── "what I have" */
+#view-lounge-guide .lg-filter-card{background:var(--paper-2);border:1.5px solid var(--ink);border-radius:var(--r);padding:13px 15px;margin-bottom:18px}
+#view-lounge-guide .lg-filter-hdr{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+#view-lounge-guide .lg-filter-lbl{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+#view-lounge-guide .lg-filter-clear{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;background:none;border:none;color:var(--accent);cursor:pointer;padding:2px 4px;display:none}
+#view-lounge-guide .lg-filter-clear.show{display:inline}
+#view-lounge-guide .lg-chips{display:flex;flex-wrap:wrap;gap:8px}
+#view-lounge-guide .lg-chip{font-family:var(--sans);font-size:13px;padding:7px 13px;border:1.5px solid var(--ink);border-radius:999px;background:var(--paper);color:var(--ink-2);cursor:pointer;min-height:36px;display:inline-flex;align-items:center;gap:6px;transition:background .12s,color .12s,border-color .12s}
+#view-lounge-guide .lg-chip:hover{background:var(--paper-2)}
+#view-lounge-guide .lg-chip.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+#view-lounge-guide .lg-chip .lg-chip-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+
+/* Access-category accent colors */
+#view-lounge-guide .acc-card{--acc:var(--blue)}
+#view-lounge-guide .acc-status{--acc:var(--purple)}
+#view-lounge-guide .acc-paid{--acc:var(--green)}
+#view-lounge-guide .acc-indep{--acc:var(--teal)}
+
+/* Summary line */
+#view-lounge-guide .lg-summary{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:4px 0 12px}
+
+/* Lounge cards */
+#view-lounge-guide .lg-lounges{display:flex;flex-direction:column;gap:14px}
+#view-lounge-guide .lg-lounge{background:var(--paper);border:1.5px solid var(--ink);border-radius:var(--r);padding:0;overflow:hidden;position:relative}
+#view-lounge-guide .lg-lounge.dim{opacity:.5}
+#view-lounge-guide .lg-lounge.match{box-shadow:3px 3px 0 var(--green)}
+#view-lounge-guide .lg-lounge-top{padding:13px 15px 12px;border-bottom:1px solid var(--rule)}
+#view-lounge-guide .lg-lounge-name{font-family:var(--serif);font-weight:600;font-size:18px;color:var(--ink);line-height:1.2;letter-spacing:-.01em;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+#view-lounge-guide .lg-match-flag{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--paper);background:var(--green);padding:3px 7px;border-radius:999px;font-weight:600;white-space:nowrap}
+#view-lounge-guide .lg-lounge-loc{font-family:var(--sans);font-size:13px;color:var(--ink-2);margin-top:5px;line-height:1.4}
+#view-lounge-guide .lg-lounge-loc b{font-weight:600;color:var(--ink)}
+#view-lounge-guide .lg-lounge-hours{font-family:var(--mono);font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-top:5px}
+
+#view-lounge-guide .lg-amen{display:flex;flex-wrap:wrap;gap:6px;padding:11px 15px;border-bottom:1px solid var(--rule)}
+#view-lounge-guide .lg-amen span{font-family:var(--mono);font-size:10px;letter-spacing:.04em;color:var(--ink-2);background:var(--paper-2);border:1px solid var(--rule);border-radius:var(--r);padding:3px 8px}
+
+#view-lounge-guide .lg-access{padding:11px 15px 13px}
+#view-lounge-guide .lg-access-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+#view-lounge-guide .lg-access-row{display:flex;align-items:flex-start;gap:10px;padding:7px 0;border-bottom:1px dashed var(--rule)}
+#view-lounge-guide .lg-access-row:last-child{border-bottom:none;padding-bottom:0}
+#view-lounge-guide .lg-access-row.hit .lg-access-text{color:var(--ink);font-weight:500}
+#view-lounge-guide .lg-acc-tag{font-family:var(--mono);font-size:9px;letter-spacing:.07em;text-transform:uppercase;color:var(--paper);background:var(--acc,var(--ink));padding:4px 8px;border-radius:999px;font-weight:600;flex-shrink:0;min-width:74px;text-align:center;line-height:1.3}
+#view-lounge-guide .lg-access-text{flex:1;font-family:var(--sans);font-size:13.5px;color:var(--ink-2);line-height:1.45}
+#view-lounge-guide .lg-access-text .lg-price{font-family:var(--mono);font-size:12px;color:var(--green);font-weight:600;white-space:nowrap}
+#view-lounge-guide .lg-access-text .lg-hit-mark{color:var(--green);font-weight:700;margin-left:4px}
+
+#view-lounge-guide .lg-empty{text-align:center;padding:40px 20px;color:var(--muted);font-family:var(--sans);font-size:15px;line-height:1.6}
+#view-lounge-guide .lg-empty span{font-size:36px;display:block;margin-bottom:10px}
+
+/* Picker reuses .tz-picker visuals */
+#view-lounge-guide .lg-picker-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:300;display:none;align-items:flex-start;justify-content:center;padding:60px 12px;overflow-y:auto}
+#view-lounge-guide .lg-picker-backdrop.open{display:flex}
+.lg-picker-row .pr-code{font-family:var(--mono);font-weight:700;font-size:14px;color:var(--ink);background:var(--paper-2);border:1px solid var(--rule);border-radius:var(--r);padding:3px 7px;line-height:1;flex-shrink:0}
+
+/* Print */
+#view-lounge-guide .lg-print-hdr{display:none}
+@media print{
+  #view-lounge-guide .tool-bar,
+  #view-lounge-guide .ctx-banner,
+  #view-lounge-guide .pro-tip,
+  #view-lounge-guide .related,
+  #view-lounge-guide .lg-airport-cta,
+  #view-lounge-guide .lg-filter-card,
+  #view-lounge-guide .lg-picker-backdrop{display:none !important}
+  #view-lounge-guide .lg-airport-btn{cursor:default;border:1.5px solid #000 !important}
+  #view-lounge-guide .lg-print-hdr{display:flex !important;justify-content:space-between;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#555;padding-bottom:10px;border-bottom:2px solid #000;margin-bottom:18px}
+  body{background:#fff !important;background-image:none !important}
+  #view-lounge-guide .lg-lounge{border:1.5px solid #000 !important;break-inside:avoid;box-shadow:none !important;opacity:1 !important}
+}
+</style>
+<div id="view-lounge-guide" class="view">
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="window.print()">🖨 Print</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">🛋</span>
-    <h2>Airport Lounge Guide</h2>
-    <p style="margin-bottom:24px">Lounge access by credit card, status or paid entry at 50+ major airports.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-lounge-guide"></div>
+  <div class="lg-print-hdr"><span>TripTools · Airport Lounge Guide</span><span id="lg-print-airport"></span></div>
+
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>Airport Lounge<br>Guide</h1>
+    <p class="tool-sub">Pick an airport to see its lounges and exactly how to get in — by credit card, airline status or class, paid day pass, or pay-per-use. Tag what you carry to spotlight the lounges that let you in.</p>
+  </div>
+
+  <div class="tool-body">
+
+    <button class="lg-airport-btn" id="lg-airport-btn" onclick="lgOpenPicker()">
+      <span class="lg-airport-code" id="lg-ac-code">—</span>
+      <span class="lg-airport-meta">
+        <span class="lg-airport-name" id="lg-ac-name">Choose an airport</span>
+        <span class="lg-airport-sub" id="lg-ac-sub">Tap to search 50+ major airports</span>
+      </span>
+      <span class="lg-airport-cta">Change ↗</span>
+    </button>
+
+    <div class="lg-filter-card">
+      <div class="lg-filter-hdr">
+        <span class="lg-filter-lbl">What do you have? <span style="text-transform:none;letter-spacing:0">(optional — highlights lounges you can enter)</span></span>
+        <button class="lg-filter-clear" id="lg-filter-clear" onclick="lgClearFilters()">Clear ✕</button>
+      </div>
+      <div class="lg-chips" id="lg-chips"></div>
+    </div>
+
+    <div class="lg-summary" id="lg-summary"></div>
+    <div class="lg-lounges" id="lg-lounges"></div>
+
+  </div><!-- /tool-body -->
+
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    Lounge rules change often and many limit you to a window before departure (commonly 2–3 hours). Day-pass prices and guest policies shift with demand — treat the figures here as planning estimates and confirm at the desk or in your card's app before you rely on access.
+  </div>
+
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('ff-tracker')">🏆 Frequent Flyer Tracker</button>
+      <button class="rel-btn" onclick="openTool('meeting-tz')">🗓 Meeting Time Zone Planner</button>
+      <button class="rel-btn" onclick="openTool('biz-packing')">👔 Business Trip Packing</button>
+      <button class="rel-btn" onclick="openTool('tsa-guide')">🔒 TSA &amp; Security Guide</button>
     </div>
   </div>
+
+  <!-- Airport picker modal (shares .tz-picker styles for visuals) -->
+  <div class="lg-picker-backdrop tz-picker-backdrop" id="lg-picker-bd" onclick="lgClosePicker(event)">
+    <div class="tz-picker" onclick="event.stopPropagation()">
+      <div class="tz-picker-hdr">
+        <h3>Pick an Airport</h3>
+        <button class="tz-picker-close" onclick="lgClosePicker()" aria-label="Close">×</button>
+      </div>
+      <div class="tz-picker-search">
+        <input type="search" id="lg-picker-q" placeholder="🔍 Search by city, airport name, or code…" autocomplete="off" oninput="lgPickerFilter()">
+      </div>
+      <div class="tz-picker-list" id="lg-picker-list"></div>
+    </div>
+  </div>
+
 </div>
 <!-- ═══════════════════════════════════════════════════
      BUSINESS TRIP PACKING CHECKLIST  (id: biz-packing)
@@ -11972,7 +12110,7 @@ const TOOLS = [
   {id:'per-diem',      nm:'Per Diem Calculator',        ico:'📋', ph:'business',   on:false,live:false, ds:'US GSA per diem rates by city. International via State Dept.'},
   {id:'expense-report',nm:'Expense Report Builder',     ico:'🧾', ph:'business',   on:false,live:true,  ds:'Log business expenses. Per diem vs. actual. Mileage, billable, receipts. Export CSV.'},
   {id:'meeting-tz',    nm:'Meeting Time Zone Planner',  ico:'🗓', ph:'business',   on:false,live:true,  ds:'Participants + cities + work hours → color-coded overlap grid and copy-paste invite text.'},
-  {id:'lounge-guide',  nm:'Airport Lounge Guide',       ico:'🛋', ph:'business',   on:false,live:false, ds:'Lounge access by credit card, status or paid entry at 50+ airports.'},
+  {id:'lounge-guide',  nm:'Airport Lounge Guide',       ico:'🛋', ph:'business',   on:false,live:true,  ds:'Lounge access by credit card, status or paid entry at 50+ airports.'},
   {id:'biz-packing',   nm:'Business Trip Packing',      ico:'👔', ph:'business',   on:false,live:true,  ds:'Professional carry-on-only checklist. Tech, attire, docs & wrinkle tips.'},
   {id:'customs-duty',  nm:'Customs Duty Calculator',    ico:'🛃', ph:'home',       on:false,live:true,  ds:'Estimate US customs duties on goods purchased abroad.'},
   {id:'trip-recap',    nm:'Trip Cost Recap',            ico:'📊', ph:'home',       on:false,live:true,  ds:'Actual vs. budgeted expenses. Visual summary by category.'},
@@ -12655,6 +12793,7 @@ function injectTripCtx(id) {
   if(id==='emergency')  emInit();
   if(id==='timezone')   tzInit();
   if(id==='meeting-tz') mtpInit();
+  if(id==='lounge-guide') lgInit();
   if(id==='tip-calc')   tcInit();
   if(id==='tipping-guide') tgInit();
   if(id==='driving-rules') drInit();
@@ -34948,6 +35087,636 @@ function fdcCopyLetter(){
   if (navigator.clipboard && navigator.clipboard.writeText){
     navigator.clipboard.writeText(text).then(showOk).catch(()=>{ tcrCopyFallback(text); showOk(); });
   } else { tcrCopyFallback(text); showOk(); }
+}
+
+/* ═══════════════════════════════════════════════════
+   AIRPORT LOUNGE GUIDE  (id: lounge-guide)
+   Static, offline dataset: 50+ major airports, their
+   principal lounges, and every way to get in.
+   ═══════════════════════════════════════════════════ */
+
+/* Access categories — how you get in. */
+const LG_CATS = {
+  card:   {tag:'Card',     cls:'acc-card'},
+  status: {tag:'Status',   cls:'acc-status'},
+  paid:   {tag:'Day pass',  cls:'acc-paid'},
+  indep:  {tag:'Pay / use', cls:'acc-indep'},
+};
+
+/* "What I have" filter tokens. `has` arrays on access rows reference these ids. */
+const LG_FILTERS = [
+  {id:'pp',      lbl:'Priority Pass',              cat:'card',   c:'var(--blue)'},
+  {id:'amex',    lbl:'Amex Platinum / Centurion',  cat:'card',   c:'var(--blue)'},
+  {id:'csr',     lbl:'Chase Sapphire Reserve',     cat:'card',   c:'var(--blue)'},
+  {id:'c1',      lbl:'Capital One Venture X',      cat:'card',   c:'var(--blue)'},
+  {id:'dragon',  lbl:'DragonPass / LoungeKey',     cat:'card',   c:'var(--blue)'},
+  {id:'saGold',  lbl:'Star Alliance Gold',         cat:'status', c:'var(--purple)'},
+  {id:'owElite', lbl:'oneworld Sapphire / Emerald',cat:'status', c:'var(--purple)'},
+  {id:'stPlus',  lbl:'SkyTeam Elite Plus',         cat:'status', c:'var(--purple)'},
+  {id:'premium', lbl:'Business / First ticket',    cat:'status', c:'var(--purple)'},
+];
+/* Premium credit cards that bundle a Priority Pass membership. */
+const LG_PP = ['pp','amex','csr','c1'];
+
+/* Airport dataset. Each lounge:
+   n=name, loc=terminal/location, h=typical hours, am=[amenities],
+   acc=[ {c:category, t:access text, price?:string, has?:[filter ids]} ] */
+const LG_AIRPORTS = [
+  /* ───────── UNITED STATES ───────── */
+  {code:'ATL', name:'Hartsfield-Jackson', city:'Atlanta', country:'United States', flag:'🇺🇸', lounges:[
+    {n:'Delta Sky Club (Concourse B)', loc:'Concourse B, near gate B16', h:'5:00 AM – 10:30 PM', am:['📶 Wi-Fi','🍽 Hot buffet','🍷 Bar','🚿 Showers','🧑‍💻 Workspace'], acc:[
+      {c:'status', t:'Delta 360°, Diamond/Platinum Medallion, or same-day Delta One ticket', has:['premium','stPlus']},
+      {c:'card', t:'Amex Platinum / Delta Reserve (when flying Delta same day; 10 visits/yr on Platinum)', has:['amex']},
+      {c:'paid', t:'Individual membership only — no walk-in day pass'}]},
+    {n:'The Centurion Lounge', loc:'Concourse B, atrium', h:'5:30 AM – 9:30 PM', am:['📶 Wi-Fi','🍳 À la carte','🍷 Craft bar','🧖 Spa','🧑‍💻 Workspace'], acc:[
+      {c:'card', t:'Amex Platinum & Centurion cardholders', has:['amex']}]},
+    {n:'Club at ATL (Concourse F)', loc:'Concourse F, intl terminal', h:'7:00 AM – 9:00 PM', am:['📶 Wi-Fi','🥪 Light bites','🍷 Bar','🧑‍💻 Workspace'], acc:[
+      {c:'card', t:'Priority Pass, LoungeKey & DragonPass members', has:[...LG_PP,'dragon']},
+      {c:'paid', t:'Walk-in day pass', price:'$45'}]}]},
+  {code:'DFW', name:'Dallas/Fort Worth Intl', city:'Dallas', country:'United States', flag:'🇺🇸', lounges:[
+    {n:'American Admirals Club (Terminal D)', loc:'Terminal D, near gate D24', h:'5:00 AM – 10:00 PM', am:['📶 Wi-Fi','🥪 Light bites','🍷 Bar','🚿 Showers','🧑‍💻 Workspace'], acc:[
+      {c:'status', t:'oneworld Sapphire/Emerald or same-day intl business/first on AA', has:['owElite','premium']},
+      {c:'card', t:'Admirals Club membership or Citi/AA Executive card'},
+      {c:'paid', t:'One-day pass', price:'$79'}]},
+    {n:'Capital One Lounge', loc:'Terminal D, near gate D22', h:'6:00 AM – 9:00 PM', am:['📶 Wi-Fi','🍽 Hot food','🍷 Bar','🚿 Showers','🧘 Relaxation room'], acc:[
+      {c:'card', t:'Capital One Venture X & Venture X Business cardholders', has:['c1']},
+      {c:'paid', t:'Walk-in (Venture/Spark cardholders)', price:'$45'}]},
+    {n:'The Club DFW', loc:'Terminal D, mezzanine', h:'5:30 AM – 10:00 PM', am:['📶 Wi-Fi','🥪 Light bites','🍷 Bar','🧑‍💻 Workspace'], acc:[
+      {c:'card', t:'Priority Pass & DragonPass members', has:[...LG_PP,'dragon']},
+      {c:'paid', t:'Walk-in day pass', price:'$50'}]}]},
+  {code:'DEN', name:'Denver Intl', city:'Denver', country:'United States', flag:'🇺🇸', lounges:[
+    {n:'United Club (Concourse B)', loc:'Concourse B, central', h:'5:00 AM – 9:00 PM', am:['📶 Wi-Fi','🥪 Light bites','🍷 Bar','🧑‍💻 Workspace'], acc:[
+      {c:'status', t:'Star Alliance Gold on same-day intl flight, or United Club card', has:['saGold']},
+      {c:'card', t:'United Club membership or Chase United Club Infinite card'},
+      {c:'paid', t:'United Club day pass', price:'$59'}]},
+    {n:'The Centurion Lounge', loc:'Concourse C, near gate C42', h:'5:30 AM – 9:30 PM', am:['📶 Wi-Fi','🍳 À la carte','🍷 Bar','🧑‍💻 Workspace'], acc:[
+      {c:'card', t:'Amex Platinum & Centurion cardholders', has:['amex']}]},
+    {n:'Capital One Lounge', loc:'Concourse A, near gate A38', h:'6:00 AM – 9:00 PM', am:['📶 Wi-Fi','🍽 Hot food','🍷 Bar','🚿 Showers'], acc:[
+      {c:'card', t:'Capital One Venture X cardholders', has:['c1']},
+      {c:'paid', t:'Walk-in (Venture/Spark cardholders)', price:'$45'}]}]},
+  {code:'ORD', name:"O'Hare Intl", city:'Chicago', country:'United States', flag:'🇺🇸', lounges:[
+    {n:'United Polaris Lounge', loc:'Terminal 1, Concourse C', h:'6:00 AM – 9:30 PM', am:['📶 Wi-Fi','🍳 À la carte','🍷 Bar','🚿 Showers','🛏 Daybeds'], acc:[
+      {c:'status', t:'Same-day United/Star Alliance business or first (long-haul intl)', has:['premium']}]},
+    {n:'American Admirals Club (Terminal 3)', loc:'Terminal 3, near gate H/K', h:'5:00 AM – 9:30 PM', am:['📶 Wi-Fi','🥪 Light bites','🍷 Bar','🚿 Showers'], acc:[
+      {c:'status', t:'oneworld Sapphire/Emerald or same-day intl premium on AA', has:['owElite','premium']},
+      {c:'card', t:'Admirals Club / Citi AA Executive card'},
+      {c:'paid', t:'One-day pass', price:'$79'}]},
+    {n:'The Chase Sapphire Lounge by The Club', loc:'Terminal 5, intl', h:'6:00 AM – 9:00 PM', am:['📶 Wi-Fi','🍽 Hot food','🍷 Cocktail bar','🚿 Showers'], acc:[
+      {c:'card', t:'Chase Sapphire Reserve & J.P. Morgan Reserve', has:['csr']},
+      {c:'card', t:'Priority Pass select members', has:['pp','amex','c1']}]}]},
+  {code:'LAX', name:'Los Angeles Intl', city:'Los Angeles', country:'United States', flag:'🇺🇸', lounges:[
+    {n:'Star Alliance Lounge', loc:'Tom Bradley Intl Terminal (TBIT)', h:'7:00 AM – 11:30 PM', am:['📶 Wi-Fi','🍽 Hot food','🍷 Bar','🚿 Showers','🌅 Open terrace'], acc:[
+      {c:'status', t:'Star Alliance Gold or same-day Star business/first', has:['saGold','premium']}]},
+    {n:'The Centurion Lounge', loc:'Terminal 4, near gate 46', h:'5:30 AM – 10:00 PM', am:['📶 Wi-Fi','🍳 À la carte','🍷 Bar','🧖 Spa'], acc:[
+      {c:'card', t:'Amex Platinum & Centurion cardholders', has:['amex']}]},
+    {n:'Delta Sky Club', loc:'Terminal 3, near gate 30A', h:'5:00 AM – 11:00 PM', am:['📶 Wi-Fi','🍽 Hot buffet','🍷 Bar','🌅 Sky Deck'], acc:[
+      {c:'status', t:'Diamond/Platinum Medallion or same-day Delta One', has:['premium','stPlus']},
+      {c:'card', t:'Amex Platinum / Delta Reserve (flying Delta same day)', has:['amex']}]},
+    {n:'PPS Club / Plaza Premium (TBIT)', loc:'Tom Bradley Intl Terminal', h:'24 hours', am:['📶 Wi-Fi','🥪 Light bites','🍷 Bar','🚿 Showers'], acc:[
+      {c:'card', t:'Priority Pass & DragonPass members', has:[...LG_PP,'dragon']},
+      {c:'paid', t:'Walk-in day pass', price:'$60'}]}]},
+  {code:'JFK', name:'John F. Kennedy Intl', city:'New York', country:'United States', flag:'🇺🇸', lounges:[
+    {n:'American Flagship Lounge', loc:'Terminal 8', h:'5:00 AM – 9:00 PM', am:['📶 Wi-Fi','🍳 À la carte','🍷 Bar','🚿 Showers'], acc:[
+      {c:'status', t:'oneworld Emerald or same-day intl/transcon first/business on AA/BA', has:['owElite','premium']}]},
+    {n:'The Centurion Lounge', loc:'Terminal 4, near gate B41', h:'5:30 AM – 9:30 PM', am:['📶 Wi-Fi','🍳 À la carte','🍷 Bar','🧑‍💻 Workspace'], acc:[
+      {c:'card', t:'Amex Platinum & Centurion cardholders', has:['amex']}]},
+    {n:'Chase Sapphire Lounge by The Club', loc:'Terminal 4, mezzanine', h:'5:30 AM – 10:00 PM', am:['📶 Wi-Fi','🍽 Hot food','🍷 Cocktail bar','🚿 Showers','🧖 Wellness'], acc:[
+      {c:'card', t:'Chase Sapphire Reserve & J.P. Morgan Reserve', has:['csr']},
+      {c:'card', t:'Priority Pass select members', has:['pp','amex','c1']}]},
+    {n:'Virgin Atlantic Clubhouse', loc:'Terminal 4', h:'9:00 AM – 9:00 PM', am:['📶 Wi-Fi','🍳 À la carte','🍸 Cocktail bar','💈 Salon','🧖 Spa'], acc:[
+      {c:'status', t:'Upper Class ticket or Flying Club Gold', has:['premium']}]}]},
+  {code:'EWR', name:'Newark Liberty Intl', city:'Newark', country:'United States', flag:'🇺🇸', lounges:[
+    {n:'United Polaris Lounge', loc:'Terminal C', h:'6:00 AM – 8:30 PM', am:['📶 Wi-Fi','🍳 À la carte','🍷 Bar','🚿 Showers'], acc:[
+      {c:'status', t:'Same-day United/Star business or first (long-haul intl)', has:['premium']}]},
+    {n:'United Club (Terminal C)', loc:'Terminal C, near gate C74', h:'5:00 AM – 9:00 PM', am:['📶 Wi-Fi','🥪 Light bites','🍷 Bar','🧑‍💻 Workspace'], acc:[
+      {c:'status', t:'Star Alliance Gold on same-day intl Star flight', has:['saGold']},
+      {c:'card', t:'United Club membership / Chase United Club Infinite'},
+      {c:'paid', t:'Day pass', price:'$59'}]},
+    {n:'The Classics Lounge by Plaza Premium', loc:'Terminal B', h:'6:00 AM – 9:00 PM', am:['📶 Wi-Fi','🥪 Light bites','🍷 Bar'], acc:[
+      {c:'card', t:'Priority Pass & DragonPass members', has:[...LG_PP,'dragon']},
+      {c:'paid', t:'Walk-in day pass', price:'$45'}]}]},
+  {code:'SFO', name:'San Francisco Intl', city:'San Francisco', country:'United States', flag:'🇺🇸', lounges:[
+    {n:'United Polaris Lounge', loc:'International Terminal G', h:'7:00 AM – 11:30 PM', am:['📶 Wi-Fi','🍳 À la carte','🍷 Bar','🚿 Showers'], acc:[
+      {c:'status', t:'Same-day United/Star business or first (long-haul intl)', has:['premium']}]},
+    {n:'The Centurion Lounge', loc:'Terminal 3, near gate 75', h:'5:30 AM – 9:30 PM', am:['📶 Wi-Fi','🍳 À la carte','🍷 Bar'], acc:[
+      {c:'card', t:'Amex Platinum & Centurion cardholders', has:['amex']}]},
+    {n:'Chase Sapphire Lounge by The Club', loc:'International Terminal G', h:'6:00 AM – 9:30 PM', am:['📶 Wi-Fi','🍽 Hot food','🍷 Cocktail bar','🚿 Showers'], acc:[
+      {c:'card', t:'Chase Sapphire Reserve & J.P. Morgan Reserve', has:['csr']},
+      {c:'card', t:'Priority Pass select members', has:['pp','amex','c1']}]}]},
+  {code:'SEA', name:'Seattle-Tacoma Intl', city:'Seattle', country:'United States', flag:'🇺🇸', lounges:[
+    {n:'Alaska Lounge (N Concourse)', loc:'North satellite', h:'5:00 AM – 10:30 PM', am:['📶 Wi-Fi','🥣 Soup & pancakes','🍷 Bar','🌄 Window views'], acc:[
+      {c:'status', t:'Alaska MVP Gold 75K (flying same day) or oneworld Sapphire intl', has:['owElite']},
+      {c:'card', t:'Alaska Lounge+ membership or Alaska Visa Signature'},
+      {c:'paid', t:'Day pass', price:'$60'}]},
+    {n:'Delta Sky Club (Concourse A)', loc:'Concourse A', h:'5:00 AM – 9:30 PM', am:['📶 Wi-Fi','🍽 Hot buffet','🍷 Bar','🚿 Showers'], acc:[
+      {c:'status', t:'Diamond/Platinum Medallion or same-day Delta One', has:['premium','stPlus']},
+      {c:'card', t:'Amex Platinum / Delta Reserve (flying Delta same day)', has:['amex']}]},
+    {n:'The Club at SEA', loc:'Concourse A, near gate A1', h:'5:00 AM – 11:00 PM', am:['📶 Wi-Fi','🥪 Light bites','🍷 Bar'], acc:[
+      {c:'card', t:'Priority Pass & DragonPass members', has:[...LG_PP,'dragon']},
+      {c:'paid', t:'Walk-in day pass', price:'$50'}]}]},
+  {code:'LAS', name:'Harry Reid Intl', city:'Las Vegas', country:'United States', flag:'🇺🇸', lounges:[
+    {n:'The Centurion Lounge', loc:'Terminal 1, D gates', h:'5:30 AM – 11:00 PM', am:['📶 Wi-Fi','🍳 À la carte','🍷 Bar'], acc:[
+      {c:'card', t:'Amex Platinum & Centurion cardholders', has:['amex']}]},
+    {n:'United Club', loc:'Terminal 1, C gates', h:'5:00 AM – 9:00 PM', am:['📶 Wi-Fi','🥪 Light bites','🍷 Bar'], acc:[
+      {c:'card', t:'United Club membership / Chase United Club Infinite'},
+      {c:'paid', t:'Day pass', price:'$59'}]},
+    {n:'The Club LAS', loc:'Terminal 1, D gates', h:'5:00 AM – 10:00 PM', am:['📶 Wi-Fi','🥪 Light bites','🍷 Bar'], acc:[
+      {c:'card', t:'Priority Pass & DragonPass members', has:[...LG_PP,'dragon']},
+      {c:'paid', t:'Walk-in day pass', price:'$45'}]}]},
+  {code:'MIA', name:'Miami Intl', city:'Miami', country:'United States', flag:'🇺🇸', lounges:[
+    {n:'American Flagship Lounge', loc:'Concourse D, near gate D30', h:'5:30 AM – 9:00 PM', am:['📶 Wi-Fi','🍳 À la carte','🍷 Bar','🚿 Showers'], acc:[
+      {c:'status', t:'oneworld Emerald or same-day intl first/business on AA', has:['owElite','premium']}]},
+    {n:'American Admirals Club (Concourse D)', loc:'Concourse D, near gate D15', h:'5:00 AM – 9:30 PM', am:['📶 Wi-Fi','🥪 Light bites','🍷 Bar','🚿 Showers'], acc:[
+      {c:'status', t:'oneworld Sapphire/Emerald or same-day intl premium on AA', has:['owElite','premium']},
+      {c:'card', t:'Admirals Club / Citi AA Executive card'},
+      {c:'paid', t:'One-day pass', price:'$79'}]},
+    {n:'Turkish Airlines Lounge', loc:'Concourse E', h:'9:00 AM – 6:00 PM', am:['📶 Wi-Fi','🍽 Hot food','🍷 Bar'], acc:[
+      {c:'status', t:'Star Alliance Gold or same-day Star business', has:['saGold','premium']},
+      {c:'card', t:'Priority Pass members (when open)', has:[...LG_PP]}]}]},
+  {code:'MCO', name:'Orlando Intl', city:'Orlando', country:'United States', flag:'🇺🇸', lounges:[
+    {n:'The Club MCO (Airside 4)', loc:'Airside 4', h:'5:00 AM – 10:00 PM', am:['📶 Wi-Fi','🥪 Light bites','🍷 Bar'], acc:[
+      {c:'card', t:'Priority Pass & DragonPass members', has:[...LG_PP,'dragon']},
+      {c:'paid', t:'Walk-in day pass', price:'$45'}]},
+    {n:'Delta Sky Club', loc:'Airside 2', h:'5:00 AM – 8:30 PM', am:['📶 Wi-Fi','🥪 Light bites','🍷 Bar'], acc:[
+      {c:'status', t:'Diamond/Platinum Medallion or same-day Delta One', has:['premium','stPlus']},
+      {c:'card', t:'Amex Platinum / Delta Reserve (flying Delta same day)', has:['amex']}]},
+    {n:'Plaza Premium Lounge', loc:'Terminal C', h:'5:00 AM – 9:00 PM', am:['📶 Wi-Fi','🍽 Hot food','🍷 Bar','🚿 Showers'], acc:[
+      {c:'card', t:'Priority Pass & DragonPass members', has:[...LG_PP,'dragon']},
+      {c:'paid', t:'Walk-in day pass', price:'$50'}]}]},
+  {code:'CLT', name:'Charlotte Douglas Intl', city:'Charlotte', country:'United States', flag:'🇺🇸', lounges:[
+    {n:'American Admirals Club (Concourse B)', loc:'Concourse B, atrium', h:'5:00 AM – 9:00 PM', am:['📶 Wi-Fi','🥪 Light bites','🍷 Bar','🚿 Showers'], acc:[
+      {c:'status', t:'oneworld Sapphire/Emerald or same-day intl premium on AA', has:['owElite','premium']},
+      {c:'card', t:'Admirals Club / Citi AA Executive card'},
+      {c:'paid', t:'One-day pass', price:'$79'}]},
+    {n:'The Centurion Lounge', loc:'Concourse D/E connector', h:'5:30 AM – 9:00 PM', am:['📶 Wi-Fi','🍳 À la carte','🍷 Bar'], acc:[
+      {c:'card', t:'Amex Platinum & Centurion cardholders', has:['amex']}]}]},
+  {code:'PHX', name:'Phoenix Sky Harbor Intl', city:'Phoenix', country:'United States', flag:'🇺🇸', lounges:[
+    {n:'American Admirals Club', loc:'Terminal 4, A gates', h:'5:00 AM – 9:00 PM', am:['📶 Wi-Fi','🥪 Light bites','🍷 Bar','🚿 Showers'], acc:[
+      {c:'status', t:'oneworld Sapphire/Emerald or same-day intl premium on AA', has:['owElite','premium']},
+      {c:'card', t:'Admirals Club / Citi AA Executive card'},
+      {c:'paid', t:'One-day pass', price:'$79'}]},
+    {n:'The Club PHX', loc:'Terminal 4, near A7', h:'5:00 AM – 9:00 PM', am:['📶 Wi-Fi','🥪 Light bites','🍷 Bar'], acc:[
+      {c:'card', t:'Priority Pass & DragonPass members', has:[...LG_PP,'dragon']},
+      {c:'paid', t:'Walk-in day pass', price:'$45'}]}]},
+  {code:'IAH', name:'George Bush Interc.', city:'Houston', country:'United States', flag:'🇺🇸', lounges:[
+    {n:'United Polaris Lounge', loc:'Terminal E', h:'6:30 AM – 9:00 PM', am:['📶 Wi-Fi','🍳 À la carte','🍷 Bar','🚿 Showers'], acc:[
+      {c:'status', t:'Same-day United/Star business or first (long-haul intl)', has:['premium']}]},
+    {n:'United Club (Terminal C)', loc:'Terminal C North', h:'5:00 AM – 9:30 PM', am:['📶 Wi-Fi','🥪 Light bites','🍷 Bar'], acc:[
+      {c:'status', t:'Star Alliance Gold on same-day intl Star flight', has:['saGold']},
+      {c:'card', t:'United Club membership / Chase United Club Infinite'},
+      {c:'paid', t:'Day pass', price:'$59'}]}]},
+  {code:'BOS', name:'Logan Intl', city:'Boston', country:'United States', flag:'🇺🇸', lounges:[
+    {n:'The Centurion Lounge', loc:'Terminal E', h:'10:00 AM – 8:00 PM', am:['📶 Wi-Fi','🍳 À la carte','🍷 Bar'], acc:[
+      {c:'card', t:'Amex Platinum & Centurion cardholders', has:['amex']}]},
+    {n:'American Admirals Club', loc:'Terminal B', h:'5:00 AM – 8:30 PM', am:['📶 Wi-Fi','🥪 Light bites','🍷 Bar'], acc:[
+      {c:'status', t:'oneworld Sapphire/Emerald or same-day intl premium on AA', has:['owElite','premium']},
+      {c:'card', t:'Admirals Club / Citi AA Executive card'},
+      {c:'paid', t:'One-day pass', price:'$79'}]},
+    {n:'Delta Sky Club', loc:'Terminal A', h:'5:00 AM – 8:00 PM', am:['📶 Wi-Fi','🥪 Light bites','🍷 Bar'], acc:[
+      {c:'status', t:'Diamond/Platinum Medallion or same-day Delta One', has:['premium','stPlus']},
+      {c:'card', t:'Amex Platinum / Delta Reserve (flying Delta same day)', has:['amex']}]}]},
+  {code:'MSP', name:'Minneapolis-St Paul Intl', city:'Minneapolis', country:'United States', flag:'🇺🇸', lounges:[
+    {n:'Delta Sky Club (G Concourse)', loc:'Concourse G', h:'5:00 AM – 9:30 PM', am:['📶 Wi-Fi','🍽 Hot buffet','🍷 Bar','🌅 Sky Deck'], acc:[
+      {c:'status', t:'Diamond/Platinum Medallion or same-day Delta One', has:['premium','stPlus']},
+      {c:'card', t:'Amex Platinum / Delta Reserve (flying Delta same day)', has:['amex']}]},
+    {n:'Escape Lounge — The Centurion Studio', loc:'Terminal 1, C concourse', h:'5:30 AM – 8:30 PM', am:['📶 Wi-Fi','🥪 Light bites','🍷 Bar'], acc:[
+      {c:'card', t:'Amex Platinum & Centurion cardholders', has:['amex']},
+      {c:'card', t:'Priority Pass members', has:[...LG_PP]},
+      {c:'paid', t:'Walk-in day pass', price:'$45'}]}]},
+  {code:'DTW', name:'Detroit Metro', city:'Detroit', country:'United States', flag:'🇺🇸', lounges:[
+    {n:'Delta Sky Club (A Concourse)', loc:'McNamara Terminal, Concourse A', h:'5:00 AM – 9:30 PM', am:['📶 Wi-Fi','🍽 Hot buffet','🍷 Bar','🚿 Showers'], acc:[
+      {c:'status', t:'Diamond/Platinum Medallion or same-day Delta One', has:['premium','stPlus']},
+      {c:'card', t:'Amex Platinum / Delta Reserve (flying Delta same day)', has:['amex']}]},
+    {n:'The Club at DTW', loc:'North Terminal', h:'6:00 AM – 8:00 PM', am:['📶 Wi-Fi','🥪 Light bites','🍷 Bar'], acc:[
+      {c:'card', t:'Priority Pass & DragonPass members', has:[...LG_PP,'dragon']},
+      {c:'paid', t:'Walk-in day pass', price:'$40'}]}]},
+  {code:'IAD', name:'Washington Dulles Intl', city:'Washington, D.C.', country:'United States', flag:'🇺🇸', lounges:[
+    {n:'United Polaris Lounge', loc:'Concourse C/D', h:'6:00 AM – 9:00 PM', am:['📶 Wi-Fi','🍳 À la carte','🍷 Bar','🚿 Showers'], acc:[
+      {c:'status', t:'Same-day United/Star business or first (long-haul intl)', has:['premium']}]},
+    {n:'The Centurion Lounge', loc:'Concourse A, near gate A22', h:'5:30 AM – 9:30 PM', am:['📶 Wi-Fi','🍳 À la carte','🍷 Bar'], acc:[
+      {c:'card', t:'Amex Platinum & Centurion cardholders', has:['amex']}]},
+    {n:'Capital One Lounge', loc:'Concourse A, near gate A6', h:'6:00 AM – 9:00 PM', am:['📶 Wi-Fi','🍽 Hot food','🍷 Bar','🚿 Showers'], acc:[
+      {c:'card', t:'Capital One Venture X cardholders', has:['c1']},
+      {c:'paid', t:'Walk-in (Venture/Spark cardholders)', price:'$45'}]}]},
+  /* ───────── CANADA ───────── */
+  {code:'YYZ', name:'Toronto Pearson Intl', city:'Toronto', country:'Canada', flag:'🇨🇦', lounges:[
+    {n:'Air Canada Maple Leaf Lounge', loc:'Terminal 1, intl pier E', h:'5:00 AM – 10:00 PM', am:['📶 Wi-Fi','🍽 Hot food','🍷 Bar','🚿 Showers'], acc:[
+      {c:'status', t:'Star Alliance Gold or same-day Star business', has:['saGold','premium']},
+      {c:'card', t:'Air Canada Maple Leaf Club membership'}]},
+    {n:'Plaza Premium Lounge (Terminal 1)', loc:'Terminal 1, domestic', h:'5:00 AM – 11:00 PM', am:['📶 Wi-Fi','🍽 Hot food','🍷 Bar','🚿 Showers'], acc:[
+      {c:'card', t:'Priority Pass, DragonPass & LoungeKey members', has:[...LG_PP,'dragon']},
+      {c:'paid', t:'Walk-in day pass', price:'C$50'}]},
+    {n:'Capital One Lounge', loc:'Terminal 1, intl', h:'6:00 AM – 9:00 PM', am:['📶 Wi-Fi','🍽 Hot food','🍷 Bar','🚿 Showers'], acc:[
+      {c:'card', t:'Capital One Venture X cardholders', has:['c1']}]}]},
+  {code:'YVR', name:'Vancouver Intl', city:'Vancouver', country:'Canada', flag:'🇨🇦', lounges:[
+    {n:'Air Canada Maple Leaf Lounge', loc:'International terminal', h:'5:00 AM – 11:00 PM', am:['📶 Wi-Fi','🍽 Hot food','🍷 Bar','🚿 Showers'], acc:[
+      {c:'status', t:'Star Alliance Gold or same-day Star business', has:['saGold','premium']},
+      {c:'card', t:'Air Canada Maple Leaf Club membership'}]},
+    {n:'Plaza Premium Lounge', loc:'International terminal', h:'5:30 AM – midnight', am:['📶 Wi-Fi','🍽 Hot food','🍷 Bar','🚿 Showers'], acc:[
+      {c:'card', t:'Priority Pass, DragonPass & LoungeKey members', has:[...LG_PP,'dragon']},
+      {c:'paid', t:'Walk-in day pass', price:'C$55'}]}]},
+  /* ───────── UNITED KINGDOM & IRELAND ───────── */
+  {code:'LHR', name:'Heathrow', city:'London', country:'United Kingdom', flag:'🇬🇧', lounges:[
+    {n:'British Airways Concorde Room', loc:'Terminal 5', h:'5:00 AM – 10:00 PM', am:['📶 Wi-Fi','🍳 À la carte','🥂 Champagne','💈 Cabana suites'], acc:[
+      {c:'status', t:'BA First ticket or oneworld Emerald with BA First booked', has:['premium']}]},
+    {n:'British Airways Galleries Lounge', loc:'Terminal 5', h:'5:00 AM – 10:00 PM', am:['📶 Wi-Fi','🍽 Hot food','🍷 Bar','🚿 Showers'], acc:[
+      {c:'status', t:'oneworld Sapphire/Emerald or same-day BA business/first', has:['owElite','premium']}]},
+    {n:'Plaza Premium Lounge (Terminal 2)', loc:'Terminal 2', h:'5:00 AM – 10:00 PM', am:['📶 Wi-Fi','🍽 Hot food','🍷 Bar','🚿 Showers'], acc:[
+      {c:'card', t:'Priority Pass, DragonPass & LoungeKey members', has:[...LG_PP,'dragon']},
+      {c:'paid', t:'Walk-in day pass', price:'£40'}]},
+    {n:'Star Alliance Lounge', loc:'Terminal 2', h:'5:00 AM – 9:30 PM', am:['📶 Wi-Fi','🍽 Hot food','🍷 Bar','🚿 Showers'], acc:[
+      {c:'status', t:'Star Alliance Gold or same-day Star business/first', has:['saGold','premium']}]}]},
+  {code:'LGW', name:'Gatwick', city:'London', country:'United Kingdom', flag:'🇬🇧', lounges:[
+    {n:'No1 Lounge (South Terminal)', loc:'South Terminal', h:'4:00 AM – 9:00 PM', am:['📶 Wi-Fi','🍽 Hot food','🍷 Bar','🚿 Showers'], acc:[
+      {c:'card', t:'Priority Pass, DragonPass & LoungeKey members', has:[...LG_PP,'dragon']},
+      {c:'paid', t:'Pre-booked entry', price:'£35'}]},
+    {n:'British Airways Lounge', loc:'South Terminal', h:'4:30 AM – 9:00 PM', am:['📶 Wi-Fi','🥪 Light bites','🍷 Bar'], acc:[
+      {c:'status', t:'oneworld Sapphire/Emerald or same-day BA business/first', has:['owElite','premium']}]}]},
+  {code:'DUB', name:'Dublin', city:'Dublin', country:'Ireland', flag:'🇮🇪', lounges:[
+    {n:'Aer Lingus 51st&Green Lounge', loc:'Terminal 2', h:'5:00 AM – 9:00 PM', am:['📶 Wi-Fi','🍽 Hot food','🍷 Bar','🚿 Showers'], acc:[
+      {c:'status', t:'Aer Lingus Business or AerClub Concierge', has:['premium']},
+      {c:'paid', t:'Pre-booked entry', price:'€45'}]},
+    {n:'DAA Lounge (US Preclearance)', loc:'Terminal 2, US gates', h:'5:00 AM – 7:00 PM', am:['📶 Wi-Fi','🥪 Light bites','🍷 Bar'], acc:[
+      {c:'card', t:'Priority Pass, DragonPass & LoungeKey members', has:[...LG_PP,'dragon']},
+      {c:'paid', t:'Walk-in day pass', price:'€35'}]}]},
+  /* ───────── EUROPE ───────── */
+  {code:'CDG', name:'Charles de Gaulle', city:'Paris', country:'France', flag:'🇫🇷', lounges:[
+    {n:'Air France La Première', loc:'Terminal 2E, Hall M', h:'6:00 AM – 10:00 PM', am:['📶 Wi-Fi','🍳 À la carte','🥂 Champagne','🧖 Spa','🚿 Showers'], acc:[
+      {c:'status', t:'Air France La Première (first class) ticket only', has:['premium']}]},
+    {n:'Air France Lounge (2E, Hall L)', loc:'Terminal 2E, Hall L', h:'5:30 AM – 10:30 PM', am:['📶 Wi-Fi','🍽 Hot food','🍷 Bar','🚿 Showers'], acc:[
+      {c:'status', t:'SkyTeam Elite Plus or same-day SkyTeam business', has:['stPlus','premium']}]},
+    {n:'Star Alliance / Partner lounges', loc:'Terminal 1', h:'5:30 AM – 9:00 PM', am:['📶 Wi-Fi','🥪 Light bites','🍷 Bar'], acc:[
+      {c:'status', t:'Star Alliance Gold or same-day Star business', has:['saGold','premium']},
+      {c:'card', t:'Priority Pass members (Yotelair / contract lounges)', has:[...LG_PP]}]}]},
+  {code:'ORY', name:'Orly', city:'Paris', country:'France', flag:'🇫🇷', lounges:[
+    {n:'Air France Lounge', loc:'Orly 4', h:'5:00 AM – 9:00 PM', am:['📶 Wi-Fi','🥪 Light bites','🍷 Bar'], acc:[
+      {c:'status', t:'SkyTeam Elite Plus or same-day SkyTeam business', has:['stPlus','premium']}]},
+    {n:'Icare Lounge', loc:'Orly 1', h:'5:00 AM – 9:00 PM', am:['📶 Wi-Fi','🥪 Light bites','🍷 Bar'], acc:[
+      {c:'card', t:'Priority Pass & DragonPass members', has:[...LG_PP,'dragon']},
+      {c:'paid', t:'Walk-in day pass', price:'€32'}]}]},
+  {code:'AMS', name:'Schiphol', city:'Amsterdam', country:'Netherlands', flag:'🇳🇱', lounges:[
+    {n:'KLM Crown Lounge 52 (non-Schengen)', loc:'Pier E/F', h:'5:30 AM – 10:00 PM', am:['📶 Wi-Fi','🍽 Hot food','🍷 Bar','🚿 Showers','🌅 Terrace'], acc:[
+      {c:'status', t:'SkyTeam Elite Plus or same-day SkyTeam business', has:['stPlus','premium']}]},
+    {n:'Aspire Lounge 41', loc:'Schengen, near gate D', h:'5:00 AM – 9:00 PM', am:['📶 Wi-Fi','🥪 Light bites','🍷 Bar'], acc:[
+      {c:'card', t:'Priority Pass, DragonPass & LoungeKey members', has:[...LG_PP,'dragon']},
+      {c:'paid', t:'Walk-in day pass', price:'€40'}]}]},
+  {code:'FRA', name:'Frankfurt', city:'Frankfurt', country:'Germany', flag:'🇩🇪', lounges:[
+    {n:'Lufthansa First Class Terminal', loc:'Separate FCT building', h:'5:30 AM – 10:00 PM', am:['📶 Wi-Fi','🍳 À la carte','🛁 Bathtubs','🧖 Spa','🚗 Tarmac transfer'], acc:[
+      {c:'status', t:'Lufthansa First ticket or HON Circle', has:['premium']}]},
+    {n:'Lufthansa Senator Lounge', loc:'Concourse A / Z', h:'5:00 AM – 10:00 PM', am:['📶 Wi-Fi','🍽 Hot food','🍷 Bar','🚿 Showers'], acc:[
+      {c:'status', t:'Star Alliance Gold or same-day Star business', has:['saGold','premium']}]},
+    {n:'LuxxLounge', loc:'Concourse B, level 3', h:'6:00 AM – 9:00 PM', am:['📶 Wi-Fi','🥪 Light bites','🍷 Bar'], acc:[
+      {c:'card', t:'Priority Pass, DragonPass & LoungeKey members', has:[...LG_PP,'dragon']},
+      {c:'paid', t:'Walk-in day pass', price:'€39'}]}]},
+  {code:'MUC', name:'Munich', city:'Munich', country:'Germany', flag:'🇩🇪', lounges:[
+    {n:'Lufthansa Senator Lounge', loc:'Terminal 2, Satellite', h:'5:30 AM – 9:30 PM', am:['📶 Wi-Fi','🍽 Hot food','🍷 Bar','🚿 Showers'], acc:[
+      {c:'status', t:'Star Alliance Gold or same-day Star business', has:['saGold','premium']}]},
+    {n:'Airport Lounge World Sky', loc:'Terminal 1, Module D', h:'6:00 AM – 8:00 PM', am:['📶 Wi-Fi','🥪 Light bites','🍷 Bar'], acc:[
+      {c:'card', t:'Priority Pass & DragonPass members', has:[...LG_PP,'dragon']},
+      {c:'paid', t:'Walk-in day pass', price:'€38'}]}]},
+  {code:'MAD', name:'Adolfo Suárez Barajas', city:'Madrid', country:'Spain', flag:'🇪🇸', lounges:[
+    {n:'Iberia Velázquez Premium Lounge', loc:'Terminal 4S, non-Schengen', h:'5:00 AM – 11:00 PM', am:['📶 Wi-Fi','🍳 À la carte','🍷 Bar','🚿 Showers'], acc:[
+      {c:'status', t:'oneworld Emerald or same-day Iberia business/first', has:['owElite','premium']}]},
+    {n:'Sala VIP Cibeles', loc:'Terminal 4, Schengen', h:'5:30 AM – 10:00 PM', am:['📶 Wi-Fi','🥪 Light bites','🍷 Bar'], acc:[
+      {c:'card', t:'Priority Pass, DragonPass & LoungeKey members', has:[...LG_PP,'dragon']},
+      {c:'paid', t:'Walk-in day pass', price:'€35'}]}]},
+  {code:'BCN', name:'Josep Tarradellas El Prat', city:'Barcelona', country:'Spain', flag:'🇪🇸', lounges:[
+    {n:'Sala VIP Pau Casals', loc:'Terminal 1, non-Schengen', h:'5:00 AM – 10:00 PM', am:['📶 Wi-Fi','🍽 Hot food','🍷 Bar','🚿 Showers'], acc:[
+      {c:'status', t:'oneworld Sapphire/Emerald or same-day Iberia/partner business', has:['owElite','premium']},
+      {c:'card', t:'Priority Pass & DragonPass members', has:[...LG_PP,'dragon']},
+      {c:'paid', t:'Walk-in day pass', price:'€35'}]},
+    {n:'Sala VIP Miró', loc:'Terminal 1, Schengen', h:'5:30 AM – 9:30 PM', am:['📶 Wi-Fi','🥪 Light bites','🍷 Bar'], acc:[
+      {c:'card', t:'Priority Pass & DragonPass members', has:[...LG_PP,'dragon']},
+      {c:'paid', t:'Walk-in day pass', price:'€32'}]}]},
+  {code:'FCO', name:'Leonardo da Vinci–Fiumicino', city:'Rome', country:'Italy', flag:'🇮🇹', lounges:[
+    {n:'ITA Airways Casa Italia Lounge', loc:'Terminal 1/3, intl', h:'5:30 AM – 9:30 PM', am:['📶 Wi-Fi','🍽 Hot food','🍷 Bar','🚿 Showers'], acc:[
+      {c:'status', t:'SkyTeam Elite Plus or same-day SkyTeam business', has:['stPlus','premium']}]},
+    {n:'Plaza Premium Lounge', loc:'Terminal 3, intl', h:'5:30 AM – 9:30 PM', am:['📶 Wi-Fi','🍽 Hot food','🍷 Bar'], acc:[
+      {c:'card', t:'Priority Pass, DragonPass & LoungeKey members', has:[...LG_PP,'dragon']},
+      {c:'paid', t:'Walk-in day pass', price:'€40'}]}]},
+  {code:'ZRH', name:'Zürich', city:'Zürich', country:'Switzerland', flag:'🇨🇭', lounges:[
+    {n:'SWISS First Lounge', loc:'Airside E (non-Schengen)', h:'5:30 AM – 10:00 PM', am:['📶 Wi-Fi','🍳 À la carte','🥂 Champagne','🚿 Showers','🌅 Terrace'], acc:[
+      {c:'status', t:'SWISS/Star First ticket or HON Circle', has:['premium']}]},
+    {n:'SWISS Senator Lounge', loc:'Airside E', h:'5:30 AM – 10:00 PM', am:['📶 Wi-Fi','🍽 Hot food','🍷 Bar','🚿 Showers'], acc:[
+      {c:'status', t:'Star Alliance Gold or same-day Star business', has:['saGold','premium']}]},
+    {n:'Aspire Lounge', loc:'Airside A', h:'6:00 AM – 8:30 PM', am:['📶 Wi-Fi','🥪 Light bites','🍷 Bar'], acc:[
+      {c:'card', t:'Priority Pass & DragonPass members', has:[...LG_PP,'dragon']},
+      {c:'paid', t:'Walk-in day pass', price:'CHF 50'}]}]},
+  {code:'IST', name:'Istanbul', city:'Istanbul', country:'Türkiye', flag:'🇹🇷', lounges:[
+    {n:'Turkish Airlines Lounge Business', loc:'International departures', h:'24 hours', am:['📶 Wi-Fi','🍽 Hot food','🍷 Bar','🎬 Cinema','🏎 Simulator','🚿 Showers'], acc:[
+      {c:'status', t:'Star Alliance Gold or same-day Star business', has:['saGold','premium']}]},
+    {n:'IGA Lounge', loc:'Domestic & international', h:'24 hours', am:['📶 Wi-Fi','🍽 Hot food','🍷 Bar','🚿 Showers','🛏 Rest cabins'], acc:[
+      {c:'card', t:'Priority Pass, DragonPass & LoungeKey members', has:[...LG_PP,'dragon']},
+      {c:'paid', t:'Walk-in day pass', price:'$55'}]}]},
+  /* ───────── MIDDLE EAST ───────── */
+  {code:'DXB', name:'Dubai Intl', city:'Dubai', country:'United Arab Emirates', flag:'🇦🇪', lounges:[
+    {n:'Emirates First Class Lounge', loc:'Terminal 3, Concourse A/B', h:'24 hours', am:['📶 Wi-Fi','🍳 À la carte','🍷 Cigar lounge','🧖 Spa','🚿 Showers','🛒 Duty-free walkway'], acc:[
+      {c:'status', t:'Emirates First ticket or Skywards Platinum', has:['premium']}]},
+    {n:'Emirates Business Class Lounge', loc:'Terminal 3, Concourse A/B/C', h:'24 hours', am:['📶 Wi-Fi','🍽 Hot food','🍷 Bar','🚿 Showers'], acc:[
+      {c:'status', t:'Emirates Business ticket or Skywards Gold', has:['premium']}]},
+    {n:'Marhaba Lounge', loc:'Terminal 1 & 3', h:'24 hours', am:['📶 Wi-Fi','🍽 Hot food','🍷 Bar','🚿 Showers'], acc:[
+      {c:'card', t:'Priority Pass, DragonPass & LoungeKey members', has:[...LG_PP,'dragon']},
+      {c:'paid', t:'Walk-in day pass', price:'$65'}]}]},
+  {code:'DOH', name:'Hamad Intl', city:'Doha', country:'Qatar', flag:'🇶🇦', lounges:[
+    {n:'Al Safwa First Lounge', loc:'Concourse A/B', h:'24 hours', am:['📶 Wi-Fi','🍳 À la carte','🧖 Spa','🛏 Bedrooms','🎨 Art gallery'], acc:[
+      {c:'status', t:'Qatar Airways First ticket or Privilege Club Platinum', has:['premium']}]},
+    {n:'Al Mourjan Business Lounge', loc:'Central, departures', h:'24 hours', am:['📶 Wi-Fi','🍽 Hot food','🍷 Bar','🚿 Showers','🛏 Quiet rooms'], acc:[
+      {c:'status', t:'oneworld Sapphire/Emerald or same-day Qatar business', has:['owElite','premium']}]},
+    {n:'Oryx Lounge', loc:'Concourse C', h:'24 hours', am:['📶 Wi-Fi','🥪 Light bites','🍷 Bar'], acc:[
+      {c:'card', t:'Priority Pass & DragonPass members', has:[...LG_PP,'dragon']},
+      {c:'paid', t:'Walk-in day pass', price:'$55'}]}]},
+  {code:'AUH', name:'Zayed Intl', city:'Abu Dhabi', country:'United Arab Emirates', flag:'🇦🇪', lounges:[
+    {n:'Etihad First & Business Lounge', loc:'Terminal A', h:'24 hours', am:['📶 Wi-Fi','🍳 À la carte','🍷 Bar','🧖 Spa','🚿 Showers'], acc:[
+      {c:'status', t:'Etihad First/Business ticket or Etihad Guest Gold/Platinum', has:['premium']}]},
+    {n:'Aspire Lounge', loc:'Terminal A', h:'24 hours', am:['📶 Wi-Fi','🥪 Light bites','🍷 Bar'], acc:[
+      {c:'card', t:'Priority Pass, DragonPass & LoungeKey members', has:[...LG_PP,'dragon']},
+      {c:'paid', t:'Walk-in day pass', price:'$50'}]}]},
+  /* ───────── ASIA-PACIFIC ───────── */
+  {code:'SIN', name:'Changi', city:'Singapore', country:'Singapore', flag:'🇸🇬', lounges:[
+    {n:'Singapore Airlines The Private Room', loc:'Terminal 3', h:'24 hours', am:['📶 Wi-Fi','🍳 À la carte','🥂 Champagne','🚿 Showers'], acc:[
+      {c:'status', t:'Singapore Airlines Suites/First ticket', has:['premium']}]},
+    {n:'SilverKris Business Lounge', loc:'Terminal 3', h:'24 hours', am:['📶 Wi-Fi','🍽 Hot food','🍷 Bar','🚿 Showers'], acc:[
+      {c:'status', t:'Star Alliance Gold or same-day SQ business', has:['saGold','premium']}]},
+    {n:'Plaza Premium Lounge', loc:'Terminal 1', h:'24 hours', am:['📶 Wi-Fi','🍽 Hot food','🍷 Bar','🚿 Showers'], acc:[
+      {c:'card', t:'Priority Pass, DragonPass & LoungeKey members', has:[...LG_PP,'dragon']},
+      {c:'paid', t:'Walk-in day pass', price:'S$70'}]}]},
+  {code:'HKG', name:'Hong Kong Intl', city:'Hong Kong', country:'Hong Kong', flag:'🇭🇰', lounges:[
+    {n:'Cathay Pacific The Pier First', loc:'Departures, near gate 63', h:'5:30 AM – midnight', am:['📶 Wi-Fi','🍳 À la carte','🛁 Day suites','🚿 Showers'], acc:[
+      {c:'status', t:'oneworld Emerald or same-day Cathay first', has:['owElite','premium']}]},
+    {n:'Cathay Pacific The Wing Business', loc:'Departures, near gate 1', h:'5:30 AM – midnight', am:['📶 Wi-Fi','🍜 Noodle bar','🍷 Bar','🚿 Cabanas'], acc:[
+      {c:'status', t:'oneworld Sapphire/Emerald or same-day Cathay business', has:['owElite','premium']}]},
+    {n:'Plaza Premium Lounge', loc:'Departures, near gate 1 & 35', h:'24 hours', am:['📶 Wi-Fi','🍽 Hot food','🍷 Bar','🚿 Showers'], acc:[
+      {c:'card', t:'Priority Pass, DragonPass & LoungeKey members', has:[...LG_PP,'dragon']},
+      {c:'paid', t:'Walk-in day pass', price:'HK$520'}]}]},
+  {code:'NRT', name:'Narita Intl', city:'Tokyo', country:'Japan', flag:'🇯🇵', lounges:[
+    {n:'ANA Suite Lounge', loc:'Terminal 1, Satellite 5', h:'7:00 AM – last departure', am:['📶 Wi-Fi','🍜 Hot food','🍶 Sake bar','🚿 Showers'], acc:[
+      {c:'status', t:'Star Alliance Gold or same-day Star first/business', has:['saGold','premium']}]},
+    {n:'Japan Airlines Sakura Lounge', loc:'Terminal 2', h:'7:00 AM – last departure', am:['📶 Wi-Fi','🍣 Hot food','🍶 Sake bar','🚿 Showers'], acc:[
+      {c:'status', t:'oneworld Sapphire/Emerald or same-day JAL business/first', has:['owElite','premium']}]},
+    {n:'IASS Executive Lounge', loc:'Terminal 1 & 2', h:'7:00 AM – 9:00 PM', am:['📶 Wi-Fi','🥪 Light bites','🍷 Bar'], acc:[
+      {c:'card', t:'Priority Pass & DragonPass members', has:[...LG_PP,'dragon']},
+      {c:'paid', t:'Walk-in day pass', price:'¥4,500'}]}]},
+  {code:'HND', name:'Haneda', city:'Tokyo', country:'Japan', flag:'🇯🇵', lounges:[
+    {n:'JAL First Class Lounge', loc:'Terminal 3, intl', h:'24 hours', am:['📶 Wi-Fi','🍣 À la carte','🍶 Sake bar','🚿 Showers'], acc:[
+      {c:'status', t:'oneworld Emerald or same-day JAL first', has:['owElite','premium']}]},
+    {n:'ANA Lounge', loc:'Terminal 3, intl', h:'24 hours', am:['📶 Wi-Fi','🍜 Hot food','🍶 Bar','🚿 Showers'], acc:[
+      {c:'status', t:'Star Alliance Gold or same-day Star business', has:['saGold','premium']}]},
+    {n:'Sky Lounge / TIAT Lounge', loc:'Terminal 3', h:'24 hours', am:['📶 Wi-Fi','🥪 Light bites','🍷 Bar'], acc:[
+      {c:'card', t:'Priority Pass & DragonPass members', has:[...LG_PP,'dragon']},
+      {c:'paid', t:'Walk-in day pass', price:'¥4,000'}]}]},
+  {code:'ICN', name:'Incheon Intl', city:'Seoul', country:'South Korea', flag:'🇰🇷', lounges:[
+    {n:'Korean Air Prestige/First Lounge', loc:'Terminal 2', h:'24 hours', am:['📶 Wi-Fi','🍽 Hot food','🍷 Bar','🚿 Showers'], acc:[
+      {c:'status', t:'SkyTeam Elite Plus or same-day Korean Air business/first', has:['stPlus','premium']}]},
+    {n:'Asiana Lounge', loc:'Terminal 1', h:'24 hours', am:['📶 Wi-Fi','🍽 Hot food','🍷 Bar','🚿 Showers'], acc:[
+      {c:'status', t:'Star Alliance Gold or same-day Asiana/Star business', has:['saGold','premium']}]},
+    {n:'Matina / SKY HUB Lounge', loc:'Terminal 1 & 2', h:'6:00 AM – 9:00 PM', am:['📶 Wi-Fi','🥪 Light bites','🍷 Bar'], acc:[
+      {c:'card', t:'Priority Pass, DragonPass & LoungeKey members', has:[...LG_PP,'dragon']},
+      {c:'paid', t:'Walk-in day pass', price:'₩45,000'}]}]},
+  {code:'BKK', name:'Suvarnabhumi', city:'Bangkok', country:'Thailand', flag:'🇹🇭', lounges:[
+    {n:'Thai Airways Royal First Lounge', loc:'Concourse D', h:'24 hours', am:['📶 Wi-Fi','🍽 Hot food','🧖 Spa massage','🚿 Showers'], acc:[
+      {c:'status', t:'Thai/Star First ticket or Royal Orchid Plus', has:['premium']}]},
+    {n:'Thai Airways Royal Silk Lounge', loc:'Concourse D/E/F', h:'24 hours', am:['📶 Wi-Fi','🍽 Hot food','🍷 Bar','🧖 Spa'], acc:[
+      {c:'status', t:'Star Alliance Gold or same-day Star business', has:['saGold','premium']}]},
+    {n:'Miracle / Oman Air / Coral Lounges', loc:'Multiple concourses', h:'24 hours', am:['📶 Wi-Fi','🍽 Hot food','🍷 Bar','🚿 Showers'], acc:[
+      {c:'card', t:'Priority Pass, DragonPass & LoungeKey members', has:[...LG_PP,'dragon']},
+      {c:'paid', t:'Walk-in day pass', price:'฿1,200'}]}]},
+  {code:'KUL', name:'Kuala Lumpur Intl', city:'Kuala Lumpur', country:'Malaysia', flag:'🇲🇾', lounges:[
+    {n:'Malaysia Airlines Golden Lounge', loc:'Satellite, intl', h:'24 hours', am:['📶 Wi-Fi','🍽 Hot food','🍷 Bar','🚿 Showers'], acc:[
+      {c:'status', t:'oneworld Sapphire/Emerald or same-day MH business/first', has:['owElite','premium']}]},
+    {n:'Plaza Premium Lounge', loc:'Satellite & Main terminal', h:'24 hours', am:['📶 Wi-Fi','🍽 Hot food','🍷 Bar','🚿 Showers','🛏 Rest suites'], acc:[
+      {c:'card', t:'Priority Pass, DragonPass & LoungeKey members', has:[...LG_PP,'dragon']},
+      {c:'paid', t:'Walk-in day pass', price:'RM160'}]}]},
+  {code:'SYD', name:'Sydney Kingsford Smith', city:'Sydney', country:'Australia', flag:'🇦🇺', lounges:[
+    {n:'Qantas First Lounge', loc:'T1 International', h:'5:00 AM – last departure', am:['📶 Wi-Fi','🍳 À la carte','🧖 Spa','🚿 Showers'], acc:[
+      {c:'status', t:'oneworld Emerald or same-day Qantas first', has:['owElite','premium']}]},
+    {n:'Qantas Business Lounge', loc:'T1 International', h:'5:00 AM – last departure', am:['📶 Wi-Fi','🍽 Hot food','🍷 Bar','🚿 Showers'], acc:[
+      {c:'status', t:'oneworld Sapphire/Emerald or same-day Qantas business', has:['owElite','premium']}]},
+    {n:'Plaza Premium / SkyTeam Lounge', loc:'T1 International', h:'5:00 AM – 11:00 PM', am:['📶 Wi-Fi','🍽 Hot food','🍷 Bar'], acc:[
+      {c:'card', t:'Priority Pass, DragonPass & LoungeKey members', has:[...LG_PP,'dragon']},
+      {c:'paid', t:'Walk-in day pass', price:'A$65'}]}]},
+  {code:'MEL', name:'Melbourne (Tullamarine)', city:'Melbourne', country:'Australia', flag:'🇦🇺', lounges:[
+    {n:'Qantas International Business Lounge', loc:'Terminal 2, intl', h:'5:00 AM – last departure', am:['📶 Wi-Fi','🍽 Hot food','🍷 Bar','🚿 Showers'], acc:[
+      {c:'status', t:'oneworld Sapphire/Emerald or same-day Qantas business', has:['owElite','premium']}]},
+    {n:'Plaza Premium Lounge', loc:'Terminal 2', h:'5:00 AM – 11:00 PM', am:['📶 Wi-Fi','🍽 Hot food','🍷 Bar'], acc:[
+      {c:'card', t:'Priority Pass, DragonPass & LoungeKey members', has:[...LG_PP,'dragon']},
+      {c:'paid', t:'Walk-in day pass', price:'A$60'}]}]},
+  {code:'PEK', name:'Beijing Capital Intl', city:'Beijing', country:'China', flag:'🇨🇳', lounges:[
+    {n:'Air China First/Business Lounge', loc:'Terminal 3E, intl', h:'24 hours', am:['📶 Wi-Fi','🍽 Hot food','🍷 Bar','🚿 Showers'], acc:[
+      {c:'status', t:'Star Alliance Gold or same-day Air China business/first', has:['saGold','premium']}]},
+    {n:'BGS Premier Lounge', loc:'Terminal 3', h:'6:00 AM – 9:00 PM', am:['📶 Wi-Fi','🥪 Light bites','🍷 Bar'], acc:[
+      {c:'card', t:'Priority Pass & DragonPass members', has:[...LG_PP,'dragon']},
+      {c:'paid', t:'Walk-in day pass', price:'¥280'}]}]},
+  {code:'PVG', name:'Shanghai Pudong Intl', city:'Shanghai', country:'China', flag:'🇨🇳', lounges:[
+    {n:'China Eastern Lounge', loc:'Terminal 1, intl', h:'24 hours', am:['📶 Wi-Fi','🍽 Hot food','🍷 Bar','🚿 Showers'], acc:[
+      {c:'status', t:'SkyTeam Elite Plus or same-day China Eastern business', has:['stPlus','premium']}]},
+    {n:'Plaza Premium / FU Anto Lounge', loc:'Terminal 2', h:'6:00 AM – 11:00 PM', am:['📶 Wi-Fi','🍽 Hot food','🍷 Bar','🚿 Showers'], acc:[
+      {c:'card', t:'Priority Pass, DragonPass & LoungeKey members', has:[...LG_PP,'dragon']},
+      {c:'paid', t:'Walk-in day pass', price:'¥320'}]}]},
+  {code:'DEL', name:'Indira Gandhi Intl', city:'Delhi', country:'India', flag:'🇮🇳', lounges:[
+    {n:'Air India Maharaja Lounge', loc:'Terminal 3, intl', h:'24 hours', am:['📶 Wi-Fi','🍽 Hot food','🍷 Bar','🚿 Showers'], acc:[
+      {c:'status', t:'Star Alliance Gold or same-day Air India business/first', has:['saGold','premium']}]},
+    {n:'Encalm / Plaza Premium Lounge', loc:'Terminal 3', h:'24 hours', am:['📶 Wi-Fi','🍽 Hot food','🍷 Bar','🚿 Showers','🛏 Rest pods'], acc:[
+      {c:'card', t:'Priority Pass, DragonPass & LoungeKey members', has:[...LG_PP,'dragon']},
+      {c:'paid', t:'Walk-in day pass', price:'₹3,500'}]}]},
+  {code:'BOM', name:'Chhatrapati Shivaji Maharaj', city:'Mumbai', country:'India', flag:'🇮🇳', lounges:[
+    {n:'Air India Maharaja Lounge', loc:'Terminal 2, intl', h:'24 hours', am:['📶 Wi-Fi','🍽 Hot food','🍷 Bar','🚿 Showers'], acc:[
+      {c:'status', t:'Star Alliance Gold or same-day Air India business/first', has:['saGold','premium']}]},
+    {n:'Adani / GVK Lounge', loc:'Terminal 2', h:'24 hours', am:['📶 Wi-Fi','🍽 Hot food','🍷 Bar','🚿 Showers'], acc:[
+      {c:'card', t:'Priority Pass, DragonPass & LoungeKey members', has:[...LG_PP,'dragon']},
+      {c:'paid', t:'Walk-in day pass', price:'₹3,200'}]}]},
+  /* ───────── LATIN AMERICA & AFRICA ───────── */
+  {code:'GRU', name:'São Paulo–Guarulhos', city:'São Paulo', country:'Brazil', flag:'🇧🇷', lounges:[
+    {n:'American Airlines Flagship/Admirals', loc:'Terminal 3', h:'7:00 AM – 11:00 PM', am:['📶 Wi-Fi','🍽 Hot food','🍷 Bar','🚿 Showers'], acc:[
+      {c:'status', t:'oneworld Sapphire/Emerald or same-day intl premium on AA', has:['owElite','premium']}]},
+    {n:'GRU Lounge (Plaza Premium network)', loc:'Terminal 3, intl', h:'24 hours', am:['📶 Wi-Fi','🍽 Hot food','🍷 Bar','🚿 Showers'], acc:[
+      {c:'card', t:'Priority Pass, DragonPass & LoungeKey members', has:[...LG_PP,'dragon']},
+      {c:'paid', t:'Walk-in day pass', price:'R$200'}]}]},
+  {code:'MEX', name:'Benito Juárez Intl', city:'Mexico City', country:'Mexico', flag:'🇲🇽', lounges:[
+    {n:'Aeroméxico Salón Premier', loc:'Terminal 2, intl', h:'5:00 AM – 11:00 PM', am:['📶 Wi-Fi','🍽 Hot food','🍷 Bar','🚿 Showers'], acc:[
+      {c:'status', t:'SkyTeam Elite Plus or same-day Aeroméxico business', has:['stPlus','premium']}]},
+    {n:'The Grand Lounge Elite', loc:'Terminal 1', h:'5:00 AM – 11:00 PM', am:['📶 Wi-Fi','🍽 Hot food','🍷 Bar'], acc:[
+      {c:'card', t:'Priority Pass, DragonPass & LoungeKey members', has:[...LG_PP,'dragon']},
+      {c:'paid', t:'Walk-in day pass', price:'US$45'}]}]},
+  {code:'JNB', name:'O. R. Tambo Intl', city:'Johannesburg', country:'South Africa', flag:'🇿🇦', lounges:[
+    {n:'South African Airways Premium Lounge', loc:'Terminal A, intl', h:'5:00 AM – last departure', am:['📶 Wi-Fi','🍽 Hot food','🍷 Bar','🚿 Showers'], acc:[
+      {c:'status', t:'Star Alliance Gold or same-day SAA/Star business', has:['saGold','premium']}]},
+    {n:'Bidair / SLOW Lounge', loc:'Domestic & international', h:'5:00 AM – 9:30 PM', am:['📶 Wi-Fi','🍽 Hot food','🍷 Bar'], acc:[
+      {c:'card', t:'Priority Pass, DragonPass & LoungeKey members', has:[...LG_PP,'dragon']},
+      {c:'paid', t:'Walk-in day pass', price:'R450'}]}]},
+];
+
+let lgState = { airport: null, filters: [] };
+const LG_KEY = 'tt_lounge_guide';
+
+function lgEsc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function lgInit(){
+  lgLoad();
+  lgRenderChips();
+  lgRenderAirport();
+  lgRenderLounges();
+}
+
+function lgLoad(){
+  try {
+    const raw = localStorage.getItem(LG_KEY);
+    if (raw){
+      const s = JSON.parse(raw);
+      if (s && typeof s === 'object'){
+        lgState.airport = (s.airport && LG_AIRPORTS.some(a=>a.code===s.airport)) ? s.airport : null;
+        lgState.filters = Array.isArray(s.filters) ? s.filters.filter(f=>LG_FILTERS.some(x=>x.id===f)) : [];
+      }
+    }
+  } catch(e){ lgState = { airport:null, filters:[] }; }
+}
+function lgSave(){
+  try { localStorage.setItem(LG_KEY, JSON.stringify(lgState)); } catch(e){}
+}
+
+function lgRenderChips(){
+  const wrap = document.getElementById('lg-chips');
+  wrap.innerHTML = LG_FILTERS.map(f =>
+    `<button class="lg-chip${lgState.filters.includes(f.id)?' on':''}" onclick="lgToggleFilter('${f.id}')">
+       <span class="lg-chip-dot" style="background:${f.c}"></span>${lgEsc(f.lbl)}
+     </button>`).join('');
+  document.getElementById('lg-filter-clear').classList.toggle('show', lgState.filters.length>0);
+}
+
+function lgToggleFilter(id){
+  const i = lgState.filters.indexOf(id);
+  if (i>=0) lgState.filters.splice(i,1); else lgState.filters.push(id);
+  lgSave();
+  lgRenderChips();
+  lgRenderLounges();
+}
+function lgClearFilters(){
+  lgState.filters = [];
+  lgSave();
+  lgRenderChips();
+  lgRenderLounges();
+}
+
+function lgRenderAirport(){
+  const a = LG_AIRPORTS.find(x=>x.code===lgState.airport);
+  const code = document.getElementById('lg-ac-code');
+  const name = document.getElementById('lg-ac-name');
+  const sub  = document.getElementById('lg-ac-sub');
+  if (a){
+    code.textContent = a.code;
+    name.textContent = a.name;
+    sub.textContent = `${a.city}, ${a.country} · ${a.lounges.length} lounge${a.lounges.length===1?'':'s'}`;
+    document.getElementById('lg-print-airport').textContent = `${a.code} · ${a.city}`;
+  } else {
+    code.textContent = '—';
+    name.textContent = 'Choose an airport';
+    sub.textContent = 'Tap to search 50+ major airports';
+    document.getElementById('lg-print-airport').textContent = '';
+  }
+}
+
+/* Does this lounge have at least one access row the user qualifies for? */
+function lgRowMatches(row){
+  return Array.isArray(row.has) && row.has.some(t => lgState.filters.includes(t));
+}
+function lgLoungeMatches(lounge){
+  return lounge.acc.some(lgRowMatches);
+}
+
+function lgRenderLounges(){
+  const wrap = document.getElementById('lg-lounges');
+  const summary = document.getElementById('lg-summary');
+  const a = LG_AIRPORTS.find(x=>x.code===lgState.airport);
+  if (!a){
+    summary.textContent = '';
+    wrap.innerHTML = `<div class="lg-empty"><span>🛋</span>Pick an airport above to see its lounges and how to get in.</div>`;
+    return;
+  }
+  const hasFilters = lgState.filters.length>0;
+  // Order: matching lounges first when filtering
+  let lounges = a.lounges.map((l,idx)=>({l,idx,match:lgLoungeMatches(l)}));
+  if (hasFilters){
+    lounges = lounges.slice().sort((x,y)=>(y.match?1:0)-(x.match?1:0) || x.idx-y.idx);
+    const n = lounges.filter(x=>x.match).length;
+    summary.textContent = n>0
+      ? `${n} of ${a.lounges.length} lounges you can enter with what you selected`
+      : `None of ${a.lounges.length} lounges match what you selected — paid day passes may still be available`;
+  } else {
+    summary.textContent = `${a.lounges.length} lounge${a.lounges.length===1?'':'s'} at ${a.code}`;
+  }
+
+  wrap.innerHTML = lounges.map(({l,match}) => {
+    const cls = hasFilters ? (match ? ' match' : ' dim') : '';
+    const flag = (hasFilters && match) ? `<span class="lg-match-flag">✓ You're in</span>` : '';
+    const amen = (l.am||[]).map(x=>`<span>${lgEsc(x)}</span>`).join('');
+    const rows = l.acc.map(r=>{
+      const cat = LG_CATS[r.c] || LG_CATS.indep;
+      const hit = lgRowMatches(r);
+      const price = r.price ? ` <span class="lg-price">${lgEsc(r.price)}</span>` : '';
+      const mark = hit ? `<span class="lg-hit-mark">✓</span>` : '';
+      return `<div class="lg-access-row ${cat.cls}${hit?' hit':''}">
+        <span class="lg-acc-tag">${cat.tag}</span>
+        <span class="lg-access-text">${lgEsc(r.t)}${price}${mark}</span>
+      </div>`;
+    }).join('');
+    return `<div class="lg-lounge${cls}">
+      <div class="lg-lounge-top">
+        <div class="lg-lounge-name">${lgEsc(l.n)}${flag}</div>
+        <div class="lg-lounge-loc"><b>${lgEsc(l.loc)}</b></div>
+        <div class="lg-lounge-hours">🕑 ${lgEsc(l.h)}</div>
+      </div>
+      ${amen?`<div class="lg-amen">${amen}</div>`:''}
+      <div class="lg-access">
+        <div class="lg-access-lbl">How to get in</div>
+        ${rows}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ── Airport picker ── */
+function lgOpenPicker(){
+  const bd = document.getElementById('lg-picker-bd');
+  bd.classList.add('open');
+  const q = document.getElementById('lg-picker-q');
+  q.value = '';
+  lgRenderPickerList('');
+  setTimeout(()=>q.focus(), 50);
+}
+function lgClosePicker(ev){
+  if (ev && ev.target && !ev.target.classList.contains('tz-picker-backdrop')) return;
+  document.getElementById('lg-picker-bd').classList.remove('open');
+}
+function lgPickerFilter(){
+  lgRenderPickerList((document.getElementById('lg-picker-q').value||'').trim().toLowerCase());
+}
+function lgRenderPickerList(q){
+  const list = document.getElementById('lg-picker-list');
+  let rows = LG_AIRPORTS;
+  if (q){
+    rows = LG_AIRPORTS.filter(a =>
+      a.code.toLowerCase().includes(q) ||
+      a.name.toLowerCase().includes(q) ||
+      a.city.toLowerCase().includes(q) ||
+      a.country.toLowerCase().includes(q));
+  }
+  if (!rows.length){
+    list.innerHTML = `<div class="tz-picker-empty">No airports match "${lgEsc(q)}".<br>Try a city name or 3-letter code like "LHR".</div>`;
+    return;
+  }
+  list.innerHTML = rows.map(a =>
+    `<div class="tz-picker-row lg-picker-row" onclick="lgPickAirport('${a.code}')">
+       <span class="pr-code">${lgEsc(a.code)}</span>
+       <span style="font-size:16px;line-height:1">${a.flag}</span>
+       <span class="pr-city">${lgEsc(a.name)}</span>
+       <span class="pr-country">${lgEsc(a.city)}, ${lgEsc(a.country)}</span>
+     </div>`).join('');
+}
+function lgPickAirport(code){
+  lgState.airport = code;
+  lgSave();
+  document.getElementById('lg-picker-bd').classList.remove('open');
+  lgRenderAirport();
+  lgRenderLounges();
 }
 
 </script>
