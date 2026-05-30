@@ -6784,19 +6784,189 @@ body.no-scroll { overflow: hidden; }
     </div>
   </div>
 </div>
-<div id="view-placeholder-uv-index" class="view">
-  <nav class="tool-topbar">
+<div id="view-uv-index" class="view">
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="window.print()">🖨 Print</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">☀️</span>
-    <h2>UV Index & Sun Safety</h2>
-    <p style="margin-bottom:24px">Live UV index, SPF recommendations by skin type & reapplication schedule.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-uv-index"></div>
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-on" id="uv-conn-bdg">🌐 Live UV Data</div>
+    <h1>UV Index &amp; Sun Safety</h1>
+    <p class="tool-sub">Live UV index via Open-Meteo — recommended SPF, time-to-burn by skin type, and a reapplication plan.</p>
+  </div>
+
+  <div class="tool-body">
+
+    <!-- ── LOCATION SEARCH ── -->
+    <div class="fg" style="margin-bottom:12px">
+      <label for="uv-q">Location</label>
+      <div class="uv-search-row">
+        <input type="text" id="uv-q" placeholder="e.g. Cancún, or Sydney, Australia" autocomplete="off" autocapitalize="words">
+        <button class="btn btn-p" id="uv-go-btn" onclick="uvSearch()">Get UV →</button>
+      </div>
+      <button class="btn btn-s btn-sm uv-geo-btn" id="uv-geo-btn" onclick="uvGeoLocate()">📍 Use my location</button>
+    </div>
+
+    <div class="uv-meta-row">
+      <span class="uv-status" id="uv-status"></span>
+    </div>
+
+    <!-- ── SKIN TYPE SELECTOR ── -->
+    <div class="sec-lbl" style="margin-top:8px">Your skin type · Fitzpatrick scale</div>
+    <div class="uv-skin-chips" id="uv-skin-chips"></div>
+    <div class="uv-skin-desc" id="uv-skin-desc"></div>
+
+    <!-- ── RESULTS ── -->
+    <div id="uv-result" style="display:none">
+      <div class="uv-loc" id="uv-loc"></div>
+      <div class="uv-now" id="uv-now"></div>
+      <div class="uv-cards" id="uv-cards"></div>
+      <div class="sec-lbl">Today's UV Timeline</div>
+      <div class="uv-chart-wrap"><canvas id="uv-chart"></canvas></div>
+      <div class="uv-scale" id="uv-scale"></div>
+      <div class="sec-lbl">Sunscreen Reapplication Plan</div>
+      <div class="uv-reapply" id="uv-reapply"></div>
+      <div class="uv-offline-notice" id="uv-offline-notice" style="display:none"></div>
+    </div>
+
+    <!-- ── EMPTY STATE ── -->
+    <div id="uv-empty" class="uv-empty">
+      <span style="font-size:54px;display:block">☀️</span>
+      <p style="margin-top:14px">Enter a location to check the live UV index.</p>
+      <p class="uv-empty-sub">Open-Meteo · no API key · 1-hour cache</p>
+    </div>
+
+  </div><!-- /tool-body -->
+
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    UV burns skin even on cloudy days — up to 80% gets through clouds — and reflects off water, sand, and snow, which can nearly double your exposure. The UV index peaks in the 2–3 hours around solar noon, so the shadow rule works anywhere: if your shadow is shorter than you are tall, the sun is strong enough to burn.
+  </div>
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('weather')">🌦 Weather Forecast</button>
+      <button class="rel-btn" onclick="openTool('wardrobe')">🌤 Weather-Based Wardrobe</button>
+      <button class="rel-btn" onclick="openTool('packing')">🎒 Smart Packing List</button>
+      <button class="rel-btn" onclick="openTool('best-time')">📅 Best Time to Visit</button>
     </div>
   </div>
+
+  <!-- Print-only header -->
+  <div class="uv-print-header">
+    <strong>TripTools — UV Index &amp; Sun Safety</strong>
+    <span id="uv-print-date"></span>
+  </div>
 </div>
+<style>
+/* ── UV INDEX & SUN SAFETY ── */
+.uv-search-row { display:flex; gap:8px; align-items:stretch; }
+.uv-search-row input {
+  flex:1; min-width:0; background:var(--paper-2); border:1.5px solid var(--ink); color:var(--ink);
+  font-family:var(--sans); font-size:15px; padding:10px 12px; border-radius:var(--r);
+  outline:none; transition:border-color .15s; min-height:44px;
+}
+.uv-search-row input:focus { border-color:var(--accent); }
+.uv-search-row input::placeholder { color:var(--muted); }
+.uv-search-row .btn { flex-shrink:0; white-space:nowrap; }
+@media(max-width:520px){ .uv-search-row { flex-direction:column; } }
+.uv-geo-btn { margin-top:8px; }
+
+.uv-meta-row { display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin:12px 0 2px; }
+.uv-status { flex:1; min-height:18px; font-family:var(--mono); font-size:11px; letter-spacing:.04em; color:var(--muted); display:flex; align-items:center; gap:6px; }
+.uv-status-err { color:#8B0000; }
+.uv-status-ok  { color:var(--green); }
+.uv-status-loading { color:var(--blue); }
+.uv-status-cached  { color:var(--ink-2); }
+
+/* skin selector */
+.uv-skin-chips { display:flex; flex-wrap:wrap; gap:8px; margin:4px 0 10px; }
+.uv-skin-chip {
+  display:flex; align-items:center; gap:8px; min-height:44px; padding:6px 12px;
+  border:1.5px solid var(--ink); border-radius:var(--r); background:var(--paper); cursor:pointer;
+  font-family:var(--mono); font-size:13px; color:var(--ink-2); transition:background .12s, color .12s;
+}
+.uv-skin-chip:hover:not(.on) { background:var(--paper-2); }
+.uv-skin-chip.on { background:var(--ink); color:var(--paper); }
+.uv-skin-sw { width:18px; height:18px; border-radius:50%; border:1.5px solid rgba(23,21,20,.35); flex-shrink:0; }
+.uv-skin-chip.on .uv-skin-sw { border-color:rgba(244,239,230,.6); }
+.uv-skin-rn { font-weight:600; letter-spacing:.04em; }
+.uv-skin-desc { font-size:13px; line-height:1.55; color:var(--ink-2); padding:10px 14px; background:var(--paper-2); border:1px solid var(--rule); border-radius:var(--r); }
+.uv-skin-desc b { color:var(--ink); }
+
+.uv-empty { text-align:center; padding:48px 24px 28px; color:var(--muted); font-family:var(--serif); font-style:italic; font-size:18px; border:1.5px dashed var(--rule); border-radius:var(--r); margin-top:18px; }
+.uv-empty-sub { font-family:var(--mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-top:10px; font-style:normal; }
+
+.uv-loc { padding:14px 16px; border:1.5px solid var(--ink); border-radius:var(--r); background:var(--paper-2); margin:18px 0 14px; }
+.uv-loc-name { font-family:var(--serif); font-weight:600; font-size:22px; letter-spacing:-.01em; line-height:1.2; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.uv-flag { font-size:24px; line-height:1; }
+.uv-loc-sub { font-family:var(--mono); font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-top:6px; }
+
+/* current dial */
+.uv-now {
+  display:grid; grid-template-columns:auto 1fr; gap:20px; align-items:center;
+  padding:20px 22px; border:2px solid var(--ink); border-radius:var(--r);
+  background:linear-gradient(135deg, var(--paper) 0%, var(--paper-2) 100%); margin-bottom:16px;
+}
+@media(max-width:520px){ .uv-now { grid-template-columns:1fr; gap:14px; text-align:center; padding:18px 16px; } }
+.uv-dial {
+  width:118px; height:118px; border-radius:50%; flex-shrink:0; justify-self:center;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  border:5px solid var(--uvc, var(--muted)); background:var(--paper);
+  box-shadow:inset 0 0 0 2px rgba(23,21,20,.04);
+}
+.uv-dial-num { font-family:var(--serif); font-weight:600; font-size:46px; line-height:1; letter-spacing:-.03em; color:var(--uvc, var(--ink)); }
+.uv-dial-lbl { font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-2); margin-top:4px; }
+.uv-now-body { min-width:0; }
+.uv-now-head { font-family:var(--mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); }
+.uv-now-advice { font-family:var(--serif); font-size:17px; line-height:1.35; color:var(--ink); margin:5px 0 8px; }
+.uv-now-peak { font-size:12.5px; color:var(--ink-2); font-family:var(--mono); letter-spacing:.02em; }
+.uv-now-peak b { font-weight:600; }
+
+/* SPF + burn cards */
+.uv-cards { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:8px; }
+@media(max-width:560px){ .uv-cards { grid-template-columns:1fr; } }
+.uv-card { border:1.5px solid var(--ink); border-radius:var(--r); background:var(--paper); padding:14px 16px; }
+.uv-card-lbl { font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); }
+.uv-card-big { font-family:var(--serif); font-weight:600; font-size:30px; letter-spacing:-.02em; line-height:1.1; margin:4px 0 6px; }
+.uv-card-sub { font-size:12.5px; line-height:1.5; color:var(--ink-2); }
+.uv-burn-row { display:flex; flex-wrap:wrap; gap:4px 6px; margin-top:7px; }
+.uv-burn-cell { font-family:var(--mono); font-size:10px; letter-spacing:.02em; color:var(--muted); background:var(--paper-2); border:1px solid var(--rule); border-radius:2px; padding:2px 6px; }
+.uv-burn-cell.on { color:var(--paper); background:var(--ink); border-color:var(--ink); }
+
+/* timeline chart */
+.uv-chart-wrap { position:relative; height:170px; border:1.5px solid var(--rule); border-radius:var(--r); background:var(--paper); padding:10px 8px 6px; }
+.uv-scale { display:flex; flex-wrap:wrap; gap:6px 12px; margin-top:10px; }
+.uv-scale-item { display:flex; align-items:center; gap:6px; font-family:var(--mono); font-size:10px; letter-spacing:.04em; color:var(--ink-2); }
+.uv-scale-sw { width:12px; height:12px; border-radius:2px; flex-shrink:0; }
+
+/* reapplication plan */
+.uv-reapply { border:1.5px solid var(--ink); border-radius:var(--r); background:var(--paper-2); padding:14px 16px; }
+.uv-reapply-rule { font-size:13.5px; line-height:1.6; color:var(--ink-2); }
+.uv-reapply-rule b { color:var(--ink); }
+.uv-reapply-marks { display:flex; align-items:center; flex-wrap:wrap; gap:6px; margin:14px 0 4px; }
+.uv-mark { display:flex; flex-direction:column; align-items:center; gap:3px; min-width:52px; padding:8px 6px; border:1px solid var(--rule); border-radius:var(--r); background:var(--paper); }
+.uv-mark-dot { font-size:15px; line-height:1; }
+.uv-mark-t { font-family:var(--mono); font-size:11px; font-weight:600; color:var(--ink); }
+.uv-mark-sep { flex:1; min-width:8px; height:1px; background:var(--rule); }
+.uv-reapply-note { font-family:var(--mono); font-size:11px; letter-spacing:.02em; color:var(--muted); margin-top:10px; }
+.uv-reapply-note b { color:var(--ink-2); }
+
+.uv-offline-notice { display:flex; align-items:center; gap:10px; padding:12px 14px; background:rgba(255,210,63,.18); border:1px solid var(--yellow); border-radius:var(--r); margin-top:14px; font-size:13px; color:var(--ink-2); }
+.uv-offline-notice strong { color:var(--ink); display:block; }
+
+.uv-print-header { display:none; }
+@media print {
+  #view-uv-index .tool-bar, #view-uv-index .ctx-banner, #view-uv-index .pro-tip,
+  #view-uv-index .related, #view-uv-index .uv-search-row, #view-uv-index .uv-geo-btn,
+  #view-uv-index .uv-meta-row, #view-uv-index .uv-empty { display:none !important; }
+  #view-uv-index .uv-now, #view-uv-index .uv-card, #view-uv-index .uv-loc,
+  #view-uv-index .uv-reapply, #view-uv-index .uv-chart-wrap { background:#fff !important; border-color:#000 !important; }
+  #view-uv-index .uv-dial { background:#fff !important; }
+  .uv-print-header { display:flex; justify-content:space-between; font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:#666; padding:0 0 12px; border-bottom:1px solid #ccc; margin:16px 24px; }
+}
+</style>
 <div id="view-placeholder-altitude" class="view">
   <nav class="tool-topbar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
@@ -11130,7 +11300,7 @@ const TOOLS = [
   {id:'unit-conv',     nm:'Universal Unit Converter',   ico:'📏', ph:'destination',on:false,live:true,  ds:'Temp, distance, weight, volume, speed — all traveler conversions.'},
   {id:'phrasebook',    nm:'Language Phrasebook',        ico:'💬', ph:'destination',on:false,live:false, ds:'Essential travel phrases in 25 languages with pronunciation.'},
   {id:'emergency',     nm:'Emergency Numbers',          ico:'🚨', ph:'destination',on:false,live:true,  ds:'Police, fire & ambulance for 150+ countries. Embassy finder & your insurance card, always offline.'},
-  {id:'uv-index',      nm:'UV Index & Sun Safety',      ico:'☀️', ph:'destination',on:true, live:false, ds:'Live UV index, SPF recommendations by skin type.'},
+  {id:'uv-index',      nm:'UV Index & Sun Safety',      ico:'☀️', ph:'destination',on:true, live:true,  ds:'Live UV index, SPF recommendations by skin type.'},
   {id:'altitude',      nm:'Altitude Sickness Guide',    ico:'⛰', ph:'destination',on:false,live:false, ds:'Enter elevation → risk level + acclimatization timeline.'},
   {id:'weather',       nm:'Weather Forecast',           ico:'🌦', ph:'destination',on:true, live:true,  ds:'5-day forecast via Open-Meteo. Free, no API key.'},
   {id:'tipping-guide', nm:'Tipping Culture Guide',      ico:'🍽', ph:'destination',on:false,live:true,  ds:'Country-by-country etiquette: expected / optional / offensive per venue.'},
@@ -11844,6 +12014,7 @@ function injectTripCtx(id) {
   if(id==='tsa-guide')  tsaInit();
   if(id==='vaccination') vacInit();
   if(id==='weather')    wxInit();
+  if(id==='uv-index')   uvInit();
   if(id==='trip-recap') tcrInit();
   if(id==='customs-duty') cdcInit();
   if(id==='customs-decl') cdhInit();
@@ -31832,6 +32003,400 @@ function wxWriteCache(d) {
 function wxReadCache() {
   try {
     const raw = localStorage.getItem(WX_CACHE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw); // returned even if expired so we can offer offline fallback
+  } catch(_) { return null; }
+}
+
+/* ════════════════════════════════════════════════════════════
+   UV INDEX & SUN SAFETY  (id: uv-index)
+   Live UV via Open-Meteo (shares geocoder + flag helpers with the
+   Weather tool). Surfaces current + peak UV, recommended SPF,
+   time-to-burn by Fitzpatrick skin type, an hourly UV timeline
+   chart, and a 2-hour reapplication plan. Online tool with a
+   1-hour cache + offline fallback, per the connectivity spec.
+   ════════════════════════════════════════════════════════════ */
+
+const UV_CACHE_KEY = 'tt_uv_cache';
+const UV_SKIN_KEY  = 'tt_uv_skin';
+const UV_TTL_MS    = 60 * 60 * 1000; // 1 hour — UV shifts through the day
+
+/* Fitzpatrick skin types. `base` = approx. minutes of unprotected
+   sun to reach a mild burn (1 MED) at UV index 1; burn time at any
+   UV ≈ base / UV. Values are practical estimates, rounded for display. */
+const UV_SKIN = [
+  { id:'I',   name:'Type I',   label:'Very fair', desc:'Always burns, never tans. Pale skin, often freckles, light or red hair.',        base:100, swatch:'#F6E2D2' },
+  { id:'II',  name:'Type II',  label:'Fair',      desc:'Burns easily, tans minimally. Fair skin, light eyes.',                          base:150, swatch:'#EBCFAA' },
+  { id:'III', name:'Type III', label:'Medium',    desc:'Sometimes burns, tans gradually to light brown.',                               base:250, swatch:'#D4A878' },
+  { id:'IV',  name:'Type IV',  label:'Olive',     desc:'Burns minimally, tans easily. Mediterranean / olive skin.',                     base:350, swatch:'#B17E50' },
+  { id:'V',   name:'Type V',   label:'Brown',     desc:'Rarely burns, tans darkly. Brown skin.',                                        base:520, swatch:'#8A5A34' },
+  { id:'VI',  name:'Type VI',  label:'Deep brown',desc:'Almost never burns. Deeply pigmented, dark brown to black skin.',               base:700, swatch:'#5A3620' }
+];
+
+let uvCurrent = null;   // { query, location, data, ts }
+let uvSkin    = 'II';   // selected Fitzpatrick type
+let uvInited  = false;
+let uvChart   = null;
+
+function uvInit() {
+  const savedSkin = localStorage.getItem(UV_SKIN_KEY);
+  if (savedSkin && UV_SKIN.some(s => s.id === savedSkin)) uvSkin = savedSkin;
+  uvRenderSkinChips();
+
+  const pd = document.getElementById('uv-print-date');
+  if (pd) pd.textContent = 'Printed ' + new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+
+  const input = document.getElementById('uv-q');
+  if (!uvInited) {
+    uvInited = true;
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); uvSearch(); }
+    });
+  }
+
+  const cached = uvReadCache();
+  const trip = getActiveTrip();
+
+  if (cached) {
+    uvCurrent = cached;
+    input.value = cached.query || '';
+    uvRender();
+    const age = Date.now() - cached.ts;
+    uvSetStatus('cached', age < UV_TTL_MS
+      ? `Cached UV · ${wxAgo(cached.ts)}`
+      : `Cached UV is stale (${wxAgo(cached.ts)}) — refresh for today's reading.`);
+  } else if (trip && trip.destination) {
+    input.value = trip.destination;
+    uvSetStatus('idle', `Loaded "${trip.destination}" from your trip — tap "Get UV" to fetch.`);
+  } else {
+    uvSetStatus('idle', '');
+  }
+}
+
+async function uvSearch() {
+  const q = document.getElementById('uv-q').value.trim();
+  if (!q) { uvSetStatus('err', '⚠ Enter a location first.'); return; }
+  if (!navigator.onLine) { uvSetStatus('err', '✈️ Offline — connect to load live UV.'); return; }
+
+  const btn = document.getElementById('uv-go-btn');
+  btn.disabled = true; btn.style.opacity = '.6';
+  try {
+    uvSetStatus('loading', '🔄 Looking up location…');
+    const loc  = await wxGeocode(q); // shared with Weather tool
+    uvSetStatus('loading', `🔄 Fetching UV for ${loc.name}…`);
+    const data = await uvFetchUv(loc.lat, loc.lng);
+    uvCurrent = { query: q, location: loc, data, ts: Date.now() };
+    uvWriteCache(uvCurrent);
+    uvRender();
+    uvSetStatus('ok', `✓ Live UV · updated ${wxAgo(uvCurrent.ts)}`);
+  } catch (err) {
+    uvSetStatus('err', '⚠ ' + (err.message || 'Could not fetch UV.'));
+  } finally {
+    btn.disabled = false; btn.style.opacity = '';
+  }
+}
+
+function uvGeoLocate() {
+  if (!navigator.geolocation) { uvSetStatus('err', '⚠ Geolocation isn’t supported on this device — search by city.'); return; }
+  if (!navigator.onLine)      { uvSetStatus('err', '✈️ Offline — connect to use your location.'); return; }
+  uvSetStatus('loading', '📍 Getting your location…');
+  navigator.geolocation.getCurrentPosition(async (pos) => {
+    try {
+      const { latitude, longitude } = pos.coords;
+      uvSetStatus('loading', '🔄 Fetching UV for your location…');
+      const data = await uvFetchUv(latitude, longitude);
+      const loc = { name:'My location', country:'', admin:'', lat:latitude, lng:longitude, tz:data.timezone || 'local', flag:'📍' };
+      uvCurrent = { query:'', location:loc, data, ts:Date.now() };
+      uvWriteCache(uvCurrent);
+      document.getElementById('uv-q').value = '';
+      uvRender();
+      uvSetStatus('ok', `✓ Live UV · your location · ${wxAgo(uvCurrent.ts)}`);
+    } catch (err) {
+      uvSetStatus('err', '⚠ ' + (err.message || 'Could not fetch UV.'));
+    }
+  }, (err) => {
+    uvSetStatus('err', err && err.code === 1
+      ? '⚠ Location permission denied — search by city instead.'
+      : '⚠ Couldn’t get your location — search by city instead.');
+  }, { enableHighAccuracy:false, timeout:10000, maximumAge:600000 });
+}
+
+async function uvFetchUv(lat, lng) {
+  const params = new URLSearchParams({
+    latitude:  String(lat),
+    longitude: String(lng),
+    current:   'uv_index,uv_index_clear_sky,is_day',
+    hourly:    'uv_index',
+    daily:     'uv_index_max,sunrise,sunset',
+    timezone:  'auto',
+    forecast_days: '1'
+  });
+  const res = await fetch(`${WX_API_URL}?${params}`); // WX_API_URL defined by Weather tool
+  if (!res.ok) throw new Error(`UV data unavailable (HTTP ${res.status}).`);
+  return await res.json();
+}
+
+/* ── UV classification (WHO bands) ── */
+function uvBand(uv) {
+  if (uv == null || isNaN(uv)) return { lbl:'—',         cls:'uv-na',    color:'#6B645A' };
+  if (uv < 3)                  return { lbl:'Low',       cls:'uv-low',   color:'#2E7D32' };
+  if (uv < 6)                  return { lbl:'Moderate',  cls:'uv-mod',   color:'#9E7A00' };
+  if (uv < 8)                  return { lbl:'High',      cls:'uv-high',  color:'#E65100' };
+  if (uv < 11)                 return { lbl:'Very High', cls:'uv-vhigh', color:'#FF4D2E' };
+  return                              { lbl:'Extreme',   cls:'uv-ext',   color:'#7B3FA0' };
+}
+function uvSpf(uv) {
+  if (uv == null || isNaN(uv)) return null;
+  if (uv < 3)  return { spf:'15',  advice:'Low risk — SPF 15 if you’ll be out for long stretches; sunglasses on bright water or snow.' };
+  if (uv < 6)  return { spf:'30',  advice:'Apply SPF 30, wear sunglasses, and seek shade around midday.' };
+  if (uv < 8)  return { spf:'30+', advice:'SPF 30+, a wide-brim hat and sunglasses. Limit sun between 10am and 4pm.' };
+  if (uv < 11) return { spf:'50',  advice:'SPF 50, hat, sunglasses and shade. Avoid the sun 10am–4pm — skin burns fast.' };
+  return             { spf:'50+', advice:'SPF 50+ and cover up. Stay out of the sun midday — unprotected skin burns within minutes.' };
+}
+function uvBurnMin(uv, base) {
+  if (uv == null || isNaN(uv) || uv < 0.5) return null; // negligible burn risk
+  return Math.max(5, Math.round((base / uv) / 5) * 5);  // round to nearest 5 min
+}
+function uvBurnStr(min) {
+  if (min == null) return 'No burn risk';
+  if (min >= 120) { const h = Math.floor(min/60), m = min % 60; return h + ' hr' + (m ? ' ' + m + 'm' : ''); }
+  return min + ' min';
+}
+
+/* ── Local-time helpers (Open-Meteo returns destination-local naive ISO) ── */
+function uvTime(iso) {
+  if (!iso) return '';
+  const m = iso.match(/T(\d{2}):(\d{2})/);
+  if (!m) return iso;
+  let h = +m[1]; const mm = m[2]; const ap = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12;
+  return h + ':' + mm + ' ' + ap;
+}
+function uvHourLabel(hh) {
+  const ap = hh >= 12 ? 'PM' : 'AM'; const h = hh % 12 || 12; return h + ' ' + ap;
+}
+function uvShortHour(iso) {
+  const m = iso.match(/T(\d{2})/); if (!m) return '';
+  let h = +m[1]; const ap = h >= 12 ? 'p' : 'a'; h = h % 12 || 12; return h + ap;
+}
+/* Hourly UV entries for the first (current) calendar day in the payload. */
+function uvDayHours(data) {
+  const h = data.hourly || {};
+  const times = h.time || [], uvs = h.uv_index || [];
+  if (!times.length) return [];
+  const day0 = times[0].slice(0,10);
+  const out = [];
+  for (let i = 0; i < times.length; i++) {
+    if (times[i].slice(0,10) !== day0) break;
+    out.push({ t: times[i], uv: uvs[i] });
+  }
+  return out;
+}
+
+/* ── Skin selector ── */
+function uvSetSkin(id) {
+  uvSkin = id;
+  try { localStorage.setItem(UV_SKIN_KEY, id); } catch(_){}
+  uvRenderSkinChips();
+  if (uvCurrent) uvRender(); // recompute burn time / SPF without refetching
+}
+function uvRenderSkinChips() {
+  const wrap = document.getElementById('uv-skin-chips');
+  if (!wrap) return;
+  wrap.innerHTML = UV_SKIN.map(s =>
+    `<button class="uv-skin-chip ${s.id === uvSkin ? 'on' : ''}" onclick="uvSetSkin('${s.id}')" title="${escapeHtml(s.name + ' — ' + s.label)}">
+       <span class="uv-skin-sw" style="background:${s.swatch}"></span>
+       <span class="uv-skin-rn">${s.id}</span>
+     </button>`).join('');
+  uvRenderSkinDesc();
+}
+function uvRenderSkinDesc() {
+  const el = document.getElementById('uv-skin-desc');
+  if (!el) return;
+  const s = UV_SKIN.find(x => x.id === uvSkin);
+  el.innerHTML = s ? `<b>${s.name} · ${escapeHtml(s.label)}.</b> ${escapeHtml(s.desc)}` : '';
+}
+
+/* ── Render ── */
+function uvRender() {
+  if (!uvCurrent) return;
+  const { location, data, ts } = uvCurrent;
+  const cur   = data.current || {};
+  const daily = data.daily   || {};
+
+  document.getElementById('uv-empty').style.display = 'none';
+  document.getElementById('uv-result').style.display = '';
+
+  // Location header
+  const locParts = [location.name, location.admin, location.country].filter(Boolean);
+  document.getElementById('uv-loc').innerHTML = `
+    <div class="uv-loc-name">
+      ${location.flag ? `<span class="uv-flag">${location.flag}</span>` : ''}
+      <span>${escapeHtml(locParts.join(', '))}</span>
+    </div>
+    <div class="uv-loc-sub">
+      ${location.lat.toFixed(2)}°, ${location.lng.toFixed(2)}° · ${escapeHtml(location.tz || '')} · Updated ${wxAgo(ts)}
+    </div>`;
+
+  const nowUv   = cur.uv_index;
+  const isDay   = cur.is_day;
+  const peakUv  = daily.uv_index_max ? daily.uv_index_max[0] : null;
+  const band    = uvBand(nowUv);
+  const sunDown = (isDay === 0) || (nowUv != null && nowUv < 0.5);
+
+  // Reference UV for SPF + burn time: live value during the day, else the day's peak (for planning)
+  const useCurrent = (!sunDown && nowUv != null && nowUv >= 1);
+  const refUv    = useCurrent ? nowUv : peakUv;
+  const refWord  = useCurrent ? 'current' : 'today’s peak';
+  const refBand  = uvBand(refUv);
+  const spf      = uvSpf(refUv);
+
+  // Current dial + advice
+  const sunWin = (daily.sunrise && daily.sunset)
+    ? ` · ☀ ${uvTime(daily.sunrise[0])}–${uvTime(daily.sunset[0])}` : '';
+  document.getElementById('uv-now').innerHTML = `
+    <div class="uv-dial ${band.cls}" style="--uvc:${band.color}">
+      <div class="uv-dial-num">${nowUv != null ? Math.round(nowUv * 10) / 10 : '—'}</div>
+      <div class="uv-dial-lbl">${band.lbl}</div>
+    </div>
+    <div class="uv-now-body">
+      <div class="uv-now-head">${sunDown ? '☾ Sun is down — UV is negligible right now' : 'Current UV index'}</div>
+      <div class="uv-now-advice">${escapeHtml(spf ? spf.advice : 'No live UV reading available.')}</div>
+      <div class="uv-now-peak">Today’s peak: <b style="color:${uvBand(peakUv).color}">${peakUv != null ? Math.round(peakUv * 10) / 10 : '—'} · ${uvBand(peakUv).lbl}</b>${sunWin}</div>
+    </div>`;
+
+  // SPF + time-to-burn cards
+  const skin    = UV_SKIN.find(s => s.id === uvSkin) || UV_SKIN[1];
+  const burnMin = uvBurnMin(refUv, skin.base);
+  document.getElementById('uv-cards').innerHTML = `
+    <div class="uv-card">
+      <div class="uv-card-lbl">Recommended SPF</div>
+      <div class="uv-card-big" style="color:${refBand.color}">SPF ${spf ? spf.spf : '—'}</div>
+      <div class="uv-card-sub">Based on ${refWord} UV ${refUv != null ? Math.round(refUv * 10) / 10 : '—'} (${refBand.lbl}).</div>
+    </div>
+    <div class="uv-card">
+      <div class="uv-card-lbl">Time to burn · ${skin.name}</div>
+      <div class="uv-card-big" style="color:${refBand.color}">${uvBurnStr(burnMin)}</div>
+      <div class="uv-card-sub">Unprotected ${escapeHtml(skin.label.toLowerCase())} skin at ${refWord} UV. By skin type:
+        <span class="uv-burn-row">${UV_SKIN.map(s =>
+          `<span class="uv-burn-cell ${s.id === uvSkin ? 'on' : ''}">${s.id}: ${uvBurnStr(uvBurnMin(refUv, s.base))}</span>`).join('')}</span>
+      </div>
+    </div>`;
+
+  // Hourly timeline chart + legend
+  uvRenderChart(data);
+  uvRenderScale();
+
+  // Reapplication plan (timezone-safe: built from destination-local hourly data)
+  uvRenderReapply(data);
+
+  // Offline / staleness notice + connectivity badge
+  const stale = Date.now() - ts > UV_TTL_MS;
+  const off = document.getElementById('uv-offline-notice');
+  if (!navigator.onLine) {
+    off.style.display = '';
+    off.innerHTML = `<span>✈️</span><div><strong>Showing cached UV data.</strong>Captured ${wxAgo(ts)} — connect to refresh.</div>`;
+  } else if (stale) {
+    off.style.display = '';
+    off.innerHTML = `<span>⏳</span><div><strong>Cached UV is over an hour old.</strong>Tap "Get UV" for the current reading.</div>`;
+  } else {
+    off.style.display = 'none';
+  }
+  const bdg = document.getElementById('uv-conn-bdg');
+  if (!navigator.onLine) { bdg.className = 'conn-bdg bdg-off'; bdg.textContent = '✈️ Cached UV'; }
+  else if (stale)        { bdg.className = 'conn-bdg bdg-off'; bdg.textContent = '⚠ Refresh Needed'; }
+  else                   { bdg.className = 'conn-bdg bdg-on';  bdg.textContent = '🌐 Live UV Data'; }
+}
+
+function uvRenderChart(data) {
+  const hrs = uvDayHours(data);
+  if (uvChart) { uvChart.destroy(); uvChart = null; }
+  const canvas = document.getElementById('uv-chart');
+  if (!canvas || typeof Chart === 'undefined') return;
+
+  const labels = hrs.map(x => uvShortHour(x.t));
+  const vals   = hrs.map(x => x.uv != null ? Math.round(x.uv * 10) / 10 : 0);
+  const colors = hrs.map(x => uvBand(x.uv).color);
+  const maxVal = vals.length ? Math.max.apply(null, vals) : 0;
+
+  uvChart = new Chart(canvas.getContext('2d'), {
+    type: 'bar',
+    data: { labels, datasets: [{ data: vals, backgroundColor: colors, borderWidth: 0, borderRadius: 2, categoryPercentage: 0.92, barPercentage: 0.96 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            title: (it) => hrs[it[0].dataIndex] ? uvTime(hrs[it[0].dataIndex].t) : '',
+            label: (it) => { const u = hrs[it.dataIndex] ? hrs[it.dataIndex].uv : null; return ' UV ' + (u != null ? Math.round(u * 10) / 10 : '—') + ' · ' + uvBand(u).lbl; }
+          }
+        }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: '#6B645A', font: { family: "'JetBrains Mono', monospace", size: 9 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 8 } },
+        y: { beginAtZero: true, suggestedMax: Math.max(11, Math.ceil(maxVal + 1)), grid: { color: 'rgba(23,21,20,.08)' }, ticks: { color: '#6B645A', font: { family: "'JetBrains Mono', monospace", size: 9 }, stepSize: 2 } }
+      },
+      animation: { duration: 300 }
+    }
+  });
+}
+
+function uvRenderScale() {
+  const el = document.getElementById('uv-scale');
+  if (!el) return;
+  const bands = [
+    { lbl:'Low 0–2',       color:'#2E7D32' },
+    { lbl:'Moderate 3–5',  color:'#9E7A00' },
+    { lbl:'High 6–7',      color:'#E65100' },
+    { lbl:'Very High 8–10',color:'#FF4D2E' },
+    { lbl:'Extreme 11+',   color:'#7B3FA0' }
+  ];
+  el.innerHTML = bands.map(b =>
+    `<span class="uv-scale-item"><span class="uv-scale-sw" style="background:${b.color}"></span>${b.lbl}</span>`).join('');
+}
+
+function uvRenderReapply(data) {
+  const wrap = document.getElementById('uv-reapply');
+  if (!wrap) return;
+  const hrs  = uvDayHours(data);
+  const prot = hrs.filter(x => x.uv != null && x.uv >= 3);
+
+  const rule = `🧴 Reapply <b>every 2 hours</b>, and right after swimming, sweating, or towel-drying. Use about <b>1 oz (a shot glass)</b> for the whole body — two-finger lengths for face and neck — and apply <b>15–30 min before</b> heading out.`;
+
+  if (!prot.length) {
+    wrap.innerHTML = `<div class="uv-reapply-rule">${rule}</div>
+      <div class="uv-reapply-note">UV stays below 3 all day here — burn risk is low, but reapply if you’ll be out for several hours.</div>`;
+    return;
+  }
+
+  const firstH = parseInt(prot[0].t.slice(11,13), 10);
+  const lastH  = parseInt(prot[prot.length-1].t.slice(11,13), 10);
+  const marks = [];
+  for (let hh = firstH; hh <= lastH && marks.length < 7; hh += 2) marks.push(hh);
+
+  const marksHtml = marks.map((hh, i) =>
+    `<div class="uv-mark"><span class="uv-mark-dot">${i === 0 ? '🧴' : '↻'}</span><span class="uv-mark-t">${uvHourLabel(hh)}</span></div>`
+  ).join('<span class="uv-mark-sep"></span>');
+
+  wrap.innerHTML = `
+    <div class="uv-reapply-rule">${rule}</div>
+    <div class="uv-reapply-marks">${marksHtml}</div>
+    <div class="uv-reapply-note">Sun protection window today (UV ≥ 3): <b>${uvTime(prot[0].t)} – ${uvTime(prot[prot.length-1].t)}</b> local time.</div>`;
+}
+
+function uvSetStatus(kind, msg) {
+  const el = document.getElementById('uv-status');
+  if (!el) return;
+  el.className = 'uv-status' + (kind && kind !== 'idle' ? ' uv-status-' + kind : '');
+  el.textContent = msg || '';
+}
+
+function uvWriteCache(d) {
+  try { localStorage.setItem(UV_CACHE_KEY, JSON.stringify(d)); } catch(_){}
+}
+function uvReadCache() {
+  try {
+    const raw = localStorage.getItem(UV_CACHE_KEY);
     if (!raw) return null;
     return JSON.parse(raw); // returned even if expired so we can offer offline fallback
   } catch(_) { return null; }
