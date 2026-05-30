@@ -2568,17 +2568,152 @@ body.no-scroll { overflow: hidden; }
     </div>
   </div>
 </div>
-<div id="view-placeholder-trip-duration" class="view">
-  <nav class="tool-topbar">
+<div id="view-trip-duration" class="view">
+  <style>
+  /* ── TRIP DURATION CALCULATOR ── */
+  #view-trip-duration .td-section-lbl { font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 18px 0 8px; }
+  #view-trip-duration .td-hint { font-size: 12px; color: var(--muted); margin: -2px 0 8px; line-height: 1.45; }
+  #view-trip-duration .td-results { border-top: 2px solid var(--ink); margin-top: 26px; padding-top: 24px; }
+  #view-trip-duration .td-results-inner { animation: fc-result-in .22s cubic-bezier(.2,.8,.2,1) both; }
+  #view-trip-duration .td-range-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 20px; }
+  @media(max-width:540px){ #view-trip-duration .td-range-grid { grid-template-columns: 1fr; } }
+  #view-trip-duration .td-range-card { border: 1.5px solid var(--ink); border-radius: var(--r); background: var(--paper); padding: 16px 18px; position: relative; overflow: hidden; text-align: center; }
+  #view-trip-duration .td-range-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; }
+  #view-trip-duration .td-range-card.min::before  { background: var(--blue); }
+  #view-trip-duration .td-range-card.rec::before  { background: var(--accent); }
+  #view-trip-duration .td-range-card.comf::before { background: var(--green); }
+  #view-trip-duration .td-range-card.rec { background: var(--paper-2); border-width: 2px; }
+  #view-trip-duration .td-range-lbl { font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  #view-trip-duration .td-range-num { font-family: var(--serif); font-weight: 600; font-size: clamp(30px,7vw,48px); letter-spacing: -.03em; line-height: 1; color: var(--ink); font-variation-settings: "opsz" 72, "SOFT" 30, "WONK" 1; }
+  #view-trip-duration .td-range-card.rec .td-range-num { color: var(--accent); }
+  #view-trip-duration .td-range-unit { font-family: var(--serif); font-size: 17px; color: var(--ink-2); margin-left: 3px; }
+  #view-trip-duration .td-range-sub { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-top: 8px; }
+  #view-trip-duration .td-breakdown-lbl { font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 4px 0 10px; }
+  #view-trip-duration .td-bar { display: flex; width: 100%; height: 26px; border-radius: var(--r); overflow: hidden; border: 1.5px solid var(--ink); margin-bottom: 12px; }
+  #view-trip-duration .td-seg { height: 100%; min-width: 2px; transition: width .35s cubic-bezier(.2,.8,.2,1); }
+  #view-trip-duration .td-seg.s-transit { background: var(--blue); }
+  #view-trip-duration .td-seg.s-jetlag  { background: var(--purple); }
+  #view-trip-duration .td-seg.s-sight   { background: var(--green); }
+  #view-trip-duration .td-seg.s-rest    { background: var(--orange); }
+  #view-trip-duration .td-legend { display: grid; grid-template-columns: repeat(auto-fit,minmax(150px,1fr)); gap: 8px; margin-bottom: 18px; }
+  #view-trip-duration .td-leg { display: flex; align-items: center; gap: 9px; background: var(--paper); border: 1px solid var(--rule); border-radius: var(--r); padding: 9px 11px; }
+  #view-trip-duration .td-leg .swatch { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+  #view-trip-duration .td-leg .swatch.s-transit { background: var(--blue); }
+  #view-trip-duration .td-leg .swatch.s-jetlag  { background: var(--purple); }
+  #view-trip-duration .td-leg .swatch.s-sight   { background: var(--green); }
+  #view-trip-duration .td-leg .swatch.s-rest    { background: var(--orange); }
+  #view-trip-duration .td-leg .lk { font-size: 12.5px; color: var(--ink-2); flex: 1; }
+  #view-trip-duration .td-leg .lv { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--ink); white-space: nowrap; }
+  #view-trip-duration .td-factors { border: 1.5px solid var(--rule); border-radius: var(--r); background: var(--paper); padding: 2px 14px; margin-bottom: 16px; }
+  #view-trip-duration .td-factor-row { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid var(--rule); padding: 9px 0; font-size: 13px; color: var(--ink-2); gap: 12px; }
+  #view-trip-duration .td-factor-row:last-child { border-bottom: none; }
+  #view-trip-duration .td-factor-val { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--ink); white-space: nowrap; }
+  #view-trip-duration .td-compare { display: flex; align-items: flex-start; gap: 12px; border: 1.5px solid var(--ink); border-radius: var(--r); background: var(--paper-2); padding: 14px 16px; margin-bottom: 16px; }
+  #view-trip-duration .td-compare .ce { font-size: 22px; line-height: 1; }
+  #view-trip-duration .td-compare .ct { font-size: 14px; color: var(--ink); line-height: 1.5; }
+  #view-trip-duration .td-compare .ct b { font-weight: 600; }
+  #view-trip-duration .td-compare.fit    { border-color: var(--green); }
+  #view-trip-duration .td-compare.tight  { border-color: var(--accent); }
+  #view-trip-duration .td-compare.roomy  { border-color: var(--blue); }
+  #view-trip-duration .td-disclaimer { font-size: 12px; color: var(--ink-2); line-height: 1.5; border-left: 3px solid var(--blue); padding: 10px 14px; background: rgba(21,101,192,.05); border-radius: 0 var(--r) var(--r) 0; }
+  #view-trip-duration .td-print-header { display: none; }
+  @media print {
+    #view-trip-duration .tool-bar, #view-trip-duration .ctx-banner, #view-trip-duration .pro-tip,
+    #view-trip-duration .related, #view-trip-duration .btn-ghost { display: none !important; }
+    #view-trip-duration .td-print-header { display: flex !important; justify-content: space-between; font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid #ccc; padding-bottom: 8px; margin-bottom: 16px; }
+    #view-trip-duration .td-results { border-top: 1px solid #ccc; }
+    body { background: #fff !important; background-image: none !important; }
+  }
+  </style>
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="window.print()">🖨 Print</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">🗓</span>
-    <h2>Trip Duration Calculator</h2>
-    <p style="margin-bottom:24px">How many days do you really need? Accounts for jet lag, transit & must-do density.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-trip-duration"></div>
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>Trip Duration Calculator</h1>
+    <p class="tool-sub">How many days do you really need? This blends transit time, jet-lag recovery, and how much you want to do into a recommended trip length — so you don't come home needing a vacation from your vacation.</p>
+  </div>
+
+  <div class="tool-body">
+
+    <!-- ── GETTING THERE ── -->
+    <div class="td-section-lbl">Getting There</div>
+    <div class="frow">
+      <div class="fg" style="margin-bottom:8px">
+        <label for="td-transit">One-way travel time (hours)</label>
+        <input type="number" id="td-transit" value="5" min="0" max="48" step="0.5" oninput="tdCalc()">
+      </div>
+      <div class="fg" style="margin-bottom:8px">
+        <label for="td-tz">Time zones crossed</label>
+        <input type="number" id="td-tz" value="0" min="0" max="14" step="1" oninput="tdCalc()">
+      </div>
     </div>
+    <p class="td-hint">Door-to-door each way, including airport time. Time zones is the hour difference between home and destination.</p>
+    <div class="fg" id="td-dir-wrap">
+      <label>Direction of travel</label>
+      <div class="chip-grp" id="td-grp-dir">
+        <button class="chip on" data-td-grp="dir" data-td-val="east" onclick="tdSetOpt(this)">➡️ Eastbound (harder)</button>
+        <button class="chip"    data-td-grp="dir" data-td-val="west" onclick="tdSetOpt(this)">⬅️ Westbound (easier)</button>
+      </div>
+    </div>
+
+    <!-- ── ON THE GROUND ── -->
+    <div class="td-section-lbl">On the Ground</div>
+    <div class="fg">
+      <label for="td-mustdo">Must-do experiences</label>
+      <input type="number" id="td-mustdo" value="6" min="0" max="60" step="1" oninput="tdCalc()">
+    </div>
+    <p class="td-hint">The big sights, tours, day trips & meals you'd be sad to miss — not every little thing.</p>
+
+    <div class="fg">
+      <label>Travel pace</label>
+      <div class="chip-grp" id="td-grp-pace">
+        <button class="chip"    data-td-grp="pace" data-td-val="relaxed"  onclick="tdSetOpt(this)">🍃 Relaxed</button>
+        <button class="chip on" data-td-grp="pace" data-td-val="balanced" onclick="tdSetOpt(this)">⚖️ Balanced</button>
+        <button class="chip"    data-td-grp="pace" data-td-val="packed"   onclick="tdSetOpt(this)">🔥 Packed</button>
+      </div>
+    </div>
+
+    <div class="fg">
+      <label>Build in rest / downtime days?</label>
+      <div class="chip-grp" id="td-grp-rest">
+        <button class="chip on" data-td-grp="rest" data-td-val="yes" onclick="tdSetOpt(this)">😌 Yes, leave breathing room</button>
+        <button class="chip"    data-td-grp="rest" data-td-val="no"  onclick="tdSetOpt(this)">⚡ No, maximize the trip</button>
+      </div>
+    </div>
+
+    <!-- ── RESULTS ── -->
+    <div class="td-results" id="td-results" aria-live="polite">
+      <div class="td-results-inner" id="td-results-inner"><!-- injected by JS --></div>
+    </div>
+
+    <!-- ── RESET ── -->
+    <div style="margin-top:16px;text-align:right">
+      <button class="btn-ghost" onclick="tdReset()">↺ Reset</button>
+    </div>
+
+  </div><!-- /tool-body -->
+
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    The biggest mistake is cramming a long-haul, big-time-zone trip into too few days — the jet lag eats your first two mornings and the flight home eats the last one. If your numbers come out tight, it's usually cheaper in the long run to add a day than to fly all that way and only half-see the place. And the first day after a big eastward flight? Plan something gentle, not a 6 a.m. tour.
+  </div>
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('flight-est')">✈️ Flight Cost Estimator</button>
+      <button class="rel-btn" onclick="openTool('budget-plan')">💰 Budget Planner</button>
+      <button class="rel-btn" onclick="openTool('best-time')">📅 Best Time to Visit</button>
+      <button class="rel-btn" onclick="openTool('itinerary')">📋 Itinerary Builder</button>
+    </div>
+  </div>
+
+  <!-- Print-only header -->
+  <div class="td-print-header">
+    <strong>TripTools — Trip Duration Calculator</strong>
+    <span id="td-print-date"></span>
   </div>
 </div>
 <div id="view-budget-plan" class="view">
@@ -10771,7 +10906,7 @@ const TOOLS = [
   {id:'best-time',     nm:'Best Time to Visit',         ico:'📅', ph:'discovery', on:false, live:true,  ds:'Month-by-month weather, crowd & cost heat map for 100+ destinations.'},
   {id:'travel-quiz',   nm:'Travel Style Quiz',          ico:'🧠', ph:'discovery', on:false, live:true,  ds:'10-question quiz to discover your travel personality.'},
   {id:'bucket-list',   nm:'Bucket List Builder',        ico:'⭐', ph:'discovery', on:false, live:true,  ds:'Create, organize & check off dream destinations. Printable.'},
-  {id:'trip-duration', nm:'Trip Duration Calculator',   ico:'🗓', ph:'discovery', on:false, live:false, ds:'How many days do you really need? Accounts for jet lag & transit.'},
+  {id:'trip-duration', nm:'Trip Duration Calculator',   ico:'🗓', ph:'discovery', on:false, live:true,  ds:'How many days do you really need? Accounts for jet lag & transit.'},
   {id:'budget-plan',   nm:'Travel Budget Planner',      ico:'💰', ph:'discovery', on:false, live:true,  ds:'Full trip budget builder: flights, hotels, food & activities. Pie chart.'},
   {id:'group-trip',    nm:'Group Trip Organizer',       ico:'👥', ph:'discovery', on:false, live:true,  ds:'Headcounts, preferences & destination voting for groups.'},
   {id:'flight-est',    nm:'Flight Cost Estimator',      ico:'✈️', ph:'discovery', on:false, live:true,  ds:'Budget calculator estimating round-trip airfare (low/avg/high).'},
@@ -11477,6 +11612,7 @@ function injectTripCtx(id) {
   } else if(ctx){ ctx.classList.remove('show'); }
   if(id==='doc-checklist') dcInit();
   if(id==='bucket-list') blInit();
+  if(id==='trip-duration') tdInit();
   if(id==='dest-picker') dpInit();
   if(id==='dest-compare') cmpInit();
   if(id==='best-time')   btInit();
@@ -17886,6 +18022,219 @@ function feReset() {
   feSelectVal('book', 'soon');
   document.getElementById('fe-msg').classList.remove('show');
   document.getElementById('fe-results').style.display = 'none';
+}
+
+/* ══════════════════════════════════════════════════════
+   TRIP DURATION CALCULATOR
+   ══════════════════════════════════════════════════════ */
+
+const TD_DEFAULTS = { transit:5, tz:0, dir:'east', mustdo:6, pace:'balanced', rest:'yes' };
+const TD_PACE = {
+  relaxed:  { perDay:1.5, label:'Relaxed — soak it in',     restEvery:4 },
+  balanced: { perDay:2.5, label:'Balanced — see a lot, still rest', restEvery:6 },
+  packed:   { perDay:3.5, label:'Packed — go go go',        restEvery:9 },
+};
+let tdState = { ...TD_DEFAULTS };
+let tdBuilt = false;
+
+function tdKey() {
+  const trip = getActiveTrip();
+  return trip ? 'tt_trip_duration_' + trip.id : 'tt_trip_duration_default';
+}
+
+function tdLoad() {
+  const raw = localStorage.getItem(tdKey());
+  if(raw) { try { return { ...TD_DEFAULTS, ...JSON.parse(raw) }; } catch(e){} }
+  return { ...TD_DEFAULTS };
+}
+
+function tdSave() {
+  localStorage.setItem(tdKey(), JSON.stringify(tdState));
+}
+
+function tdInit() {
+  const pd = document.getElementById('td-print-date');
+  if(pd) pd.textContent = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+
+  // Restore any saved state for the active trip (or default workspace)
+  tdState = tdLoad();
+  document.getElementById('td-transit').value = tdState.transit;
+  document.getElementById('td-tz').value      = tdState.tz;
+  document.getElementById('td-mustdo').value  = tdState.mustdo;
+  tdReflectChips();
+
+  tdBuilt = true;
+  tdCalc();
+}
+
+function tdReflectChips() {
+  ['dir','pace','rest'].forEach(grp => {
+    document.querySelectorAll(`#td-grp-${grp} [data-td-grp="${grp}"]`).forEach(b => {
+      b.classList.toggle('on', b.dataset.tdVal === tdState[grp]);
+    });
+  });
+}
+
+function tdSetOpt(btn) {
+  const grp = btn.dataset.tdGrp, val = btn.dataset.tdVal;
+  if(!(grp in tdState)) return;
+  tdState[grp] = val;
+  document.querySelectorAll(`#td-grp-${grp} [data-td-grp="${grp}"]`).forEach(b => {
+    b.classList.toggle('on', b.dataset.tdVal === val);
+  });
+  tdCalc();
+}
+
+/* Days mostly consumed by getting there & back (door-to-door, each way) */
+function tdTransitDays(h) {
+  if(h <= 0) return 0;
+  const arrival   = h >= 8 ? 1   : h >= 4 ? 0.6 : h >= 2 ? 0.4 : 0.25;
+  const departure = h >= 8 ? 0.6 : h >= 4 ? 0.4 : 0.25;
+  return arrival + departure;
+}
+
+/* Ease-in days lost to jet lag. Eastward is harder than westward. */
+function tdJetlagDays(tz, dir) {
+  if(tz < 3) return 0;
+  const per = dir === 'east' ? 0.6 : 0.4;   // days of adjustment per zone
+  return Math.min(tz * per, 5);
+}
+
+function tdRound1(n) { return Math.round(n * 10) / 10; }
+function tdDayStr(n) { const r = tdRound1(n); return r + (r === 1 ? ' day' : ' days'); }
+
+function tdCalc() {
+  if(!tdBuilt) return;
+
+  const transitH = Math.max(0, parseFloat(document.getElementById('td-transit').value) || 0);
+  const tz       = Math.max(0, Math.round(parseFloat(document.getElementById('td-tz').value) || 0));
+  const mustdo   = Math.max(0, Math.round(parseFloat(document.getElementById('td-mustdo').value) || 0));
+
+  tdState.transit = transitH;
+  tdState.tz      = tz;
+  tdState.mustdo  = mustdo;
+  tdSave();
+
+  // Hide the eastbound/westbound choice when no zones are crossed
+  document.getElementById('td-dir-wrap').style.display = tz >= 3 ? '' : 'none';
+
+  const pace = TD_PACE[tdState.pace];
+
+  // ── Day segments ──
+  const transitDays = tdTransitDays(transitH);
+  const jetlagDays  = tdJetlagDays(tz, tdState.dir);
+  const sightDays   = mustdo / pace.perDay;
+  const groundDays  = jetlagDays + sightDays;
+  const restDays    = tdState.rest === 'yes' ? Math.floor(groundDays / pace.restEvery) : 0;
+
+  const core    = transitDays + jetlagDays + sightDays + restDays;
+  const idealDays = Math.max(2, Math.round(core));
+
+  // "If you push it" — packed pace, jet lag trimmed, no rest days
+  const minCore = transitDays + jetlagDays * 0.6 + mustdo / TD_PACE.packed.perDay;
+  let minDays = Math.max(2, Math.round(minCore));
+
+  // "Comfortable" — relaxed pace, a little extra cushion
+  const relaxedSight = mustdo / TD_PACE.relaxed.perDay;
+  const maxCore = transitDays + jetlagDays + relaxedSight
+                + (tdState.rest === 'yes' ? Math.max(restDays, Math.floor((jetlagDays + relaxedSight) / TD_PACE.relaxed.restEvery)) : 0)
+                + 1;
+  let maxDays = Math.round(maxCore);
+
+  // Keep the range ordered & sensible
+  minDays = Math.min(minDays, idealDays);
+  maxDays = Math.max(maxDays, idealDays + 1);
+
+  // ── Breakdown bar (proportional to the ideal composition) ──
+  const segs = [
+    { cls:'s-transit', key:'Transit',       val:transitDays },
+    { cls:'s-jetlag',  key:'Jet-lag ease-in', val:jetlagDays },
+    { cls:'s-sight',   key:'Sightseeing',   val:sightDays },
+    { cls:'s-rest',    key:'Rest / downtime', val:restDays },
+  ];
+  const segTotal = segs.reduce((s,x) => s + x.val, 0) || 1;
+  const barHtml = segs.filter(s => s.val > 0)
+    .map(s => `<div class="td-seg ${s.cls}" style="width:${(s.val/segTotal*100).toFixed(1)}%" title="${s.key}: ${tdDayStr(s.val)}"></div>`)
+    .join('');
+  const legendHtml = segs.filter(s => s.val > 0)
+    .map(s => `<div class="td-leg"><span class="swatch ${s.cls}"></span><span class="lk">${s.key}</span><span class="lv">${tdDayStr(s.val)}</span></div>`)
+    .join('');
+
+  // ── Factor rows (plain-language explanation) ──
+  const dirLabel = tdState.dir === 'east' ? 'eastbound' : 'westbound';
+  let factorRows = '';
+  factorRows += `<div class="td-factor-row"><span>Travel time — ${transitH || 0} h each way</span><span class="td-factor-val">${tdDayStr(transitDays)}</span></div>`;
+  factorRows += `<div class="td-factor-row"><span>Jet lag — ${tz} zone${tz===1?'':'s'}${tz>=3?', '+dirLabel:''}</span><span class="td-factor-val">${tz>=3 ? tdDayStr(jetlagDays) : 'none'}</span></div>`;
+  factorRows += `<div class="td-factor-row"><span>${mustdo} must-do${mustdo===1?'':'s'} at a ${tdState.pace} pace</span><span class="td-factor-val">${tdDayStr(sightDays)}</span></div>`;
+  factorRows += `<div class="td-factor-row"><span>Rest / downtime</span><span class="td-factor-val">${restDays>0 ? tdDayStr(restDays) : (tdState.rest==='yes'?'none needed':'skipped')}</span></div>`;
+
+  // ── MyTrip comparison (if an active trip has both dates) ──
+  let compareHtml = '';
+  const trip = getActiveTrip();
+  if(trip && trip.departDate && trip.returnDate) {
+    const dd = new Date(trip.departDate), rd = new Date(trip.returnDate);
+    if(!isNaN(dd) && !isNaN(rd) && rd > dd) {
+      const tripDays = Math.max(1, Math.round((rd - dd) / 864e5));
+      let cls, emoji, msg;
+      if(tripDays < minDays) {
+        const add = idealDays - tripDays;
+        cls='tight'; emoji='⏳';
+        msg = `Your <b>${trip.name}</b> is booked for <b>${tripDays} days</b> — tighter than the recommended ${idealDays}. You can make it work, but it'll feel rushed. If you can, add about <b>${add} day${add===1?'':'s'}</b>.`;
+      } else if(tripDays > maxDays) {
+        cls='roomy'; emoji='🌴';
+        msg = `Your <b>${trip.name}</b> runs <b>${tripDays} days</b> — more than enough for this plan (recommended ${idealDays}). Plenty of room to slow down, add side trips, or just relax.`;
+      } else {
+        cls='fit'; emoji='✅';
+        msg = `Your <b>${trip.name}</b> is set for <b>${tripDays} days</b> — right in the sweet spot for what you want to do. Nice fit.`;
+      }
+      compareHtml = `<div class="td-compare ${cls}"><span class="ce">${emoji}</span><span class="ct">${msg}</span></div>`;
+    }
+  }
+
+  const nights = Math.max(1, idealDays - 1);
+
+  document.getElementById('td-results-inner').innerHTML = `
+    <div class="td-range-grid">
+      <div class="td-range-card min">
+        <div class="td-range-lbl">If you push it</div>
+        <div class="td-range-num">${minDays}<span class="td-range-unit">d</span></div>
+        <div class="td-range-sub">fast pace, no slack</div>
+      </div>
+      <div class="td-range-card rec">
+        <div class="td-range-lbl">Recommended</div>
+        <div class="td-range-num">${idealDays}<span class="td-range-unit">d</span></div>
+        <div class="td-range-sub">≈ ${nights} night${nights===1?'':'s'}</div>
+      </div>
+      <div class="td-range-card comf">
+        <div class="td-range-lbl">Comfortable</div>
+        <div class="td-range-num">${maxDays}<span class="td-range-unit">d</span></div>
+        <div class="td-range-sub">unhurried, room to breathe</div>
+      </div>
+    </div>
+
+    <div class="td-breakdown-lbl">Where the days go</div>
+    <div class="td-bar">${barHtml}</div>
+    <div class="td-legend">${legendHtml}</div>
+
+    <div class="td-breakdown-lbl">How we got here</div>
+    <div class="td-factors">${factorRows}</div>
+
+    ${compareHtml}
+
+    <div class="td-disclaimer">
+      A planning estimate, not a rule. Everyone's stamina, sleep, and sightseeing style differ — treat the <strong>recommended</strong> number as a starting point and lean toward the comfortable end for big time-zone, long-haul, or once-in-a-lifetime trips.
+    </div>
+  `;
+}
+
+function tdReset() {
+  tdState = { ...TD_DEFAULTS };
+  document.getElementById('td-transit').value = tdState.transit;
+  document.getElementById('td-tz').value      = tdState.tz;
+  document.getElementById('td-mustdo').value  = tdState.mustdo;
+  tdReflectChips();
+  tdSave();
+  tdCalc();
 }
 
 /* ══════════════════════════════════════════════════════
