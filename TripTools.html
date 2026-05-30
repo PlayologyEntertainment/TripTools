@@ -11857,19 +11857,180 @@ input:checked + .pb-toggle-box::after { transform:translateX(16px);background:#f
     </div>
   </div>
 </div>
-<div id="view-placeholder-souvenir" class="view">
-  <nav class="tool-topbar">
+<div id="view-souvenir" class="view">
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="svPrint()">🖨 Print List</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">🎁</span>
-    <h2>Souvenir & Gift Tracker</h2>
-    <p style="margin-bottom:24px">Gift list with person, idea, cost & purchased checkbox. Running total.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-souvenir"></div>
+  <!-- Print header (hidden on screen) -->
+  <div class="sv-print-header" id="sv-print-hdr">
+    <span id="sv-ph-title">Souvenir &amp; Gift List</span>
+    <span id="sv-ph-date"></span>
+  </div>
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>Souvenir &amp; Gift Tracker</h1>
+    <p class="tool-sub">Track who you're shopping for, what to get, and what it costs — against your souvenir budget.</p>
+  </div>
+  <div class="tool-body">
+
+    <!-- Trip selector -->
+    <div id="sv-trip-selector-wrap" class="tj-trip-selector">
+      <label>Trip</label>
+      <select id="sv-trip-select" onchange="svSwitchTrip(this.value)"></select>
+    </div>
+
+    <!-- Budget + currency -->
+    <div class="sv-setup">
+      <div class="sv-fg">
+        <label>Souvenir budget</label>
+        <div class="sv-budget-input">
+          <span id="sv-cur-sym">$</span>
+          <input type="number" id="sv-budget" min="0" step="any" inputmode="decimal" placeholder="0" oninput="svSetBudget(this.value)">
+        </div>
+      </div>
+      <div class="sv-fg sv-fg-cur">
+        <label>Currency</label>
+        <select id="sv-currency" onchange="svSetCurrency(this.value)"></select>
+      </div>
+    </div>
+    <div id="sv-suggest" class="sv-suggest" style="display:none"></div>
+
+    <!-- Summary stats -->
+    <div class="tj-stats sv-stats" id="sv-stats" style="display:none">
+      <div class="tj-stat"><b id="sv-stat-spent">—</b>Total Cost</div>
+      <div class="tj-stat"><b id="sv-stat-bought">—</b>Purchased</div>
+      <div class="tj-stat"><b id="sv-stat-gifts">0</b>Gifts</div>
+      <div class="tj-stat"><b id="sv-stat-people">0</b>People</div>
+    </div>
+
+    <!-- Budget bar -->
+    <div id="sv-budget-bar-wrap" class="sv-budget-bar-wrap" style="display:none">
+      <div class="sv-bb-row"><span id="sv-bb-label"></span><span id="sv-bb-remain" class="sv-bb-remain"></span></div>
+      <div class="prog-bar"><div class="prog-fill" id="sv-bb-fill" style="width:0%"></div></div>
+    </div>
+
+    <!-- Add a gift -->
+    <div class="sv-sec">Add a Gift or Souvenir</div>
+    <div class="sv-add">
+      <div class="sv-add-grid">
+        <div class="sv-fg">
+          <label>For (person)</label>
+          <input type="text" id="sv-new-person" list="sv-people" placeholder="e.g. Mom" autocomplete="off">
+          <datalist id="sv-people"></datalist>
+        </div>
+        <div class="sv-fg">
+          <label>Gift idea / item</label>
+          <input type="text" id="sv-new-idea" placeholder="e.g. Hand-painted scarf" onkeydown="if(event.key==='Enter')svAddGift()">
+        </div>
+        <div class="sv-fg sv-fg-cost">
+          <label>Cost</label>
+          <input type="number" id="sv-new-cost" min="0" step="any" inputmode="decimal" placeholder="0" onkeydown="if(event.key==='Enter')svAddGift()">
+        </div>
+        <label class="sv-new-check"><input type="checkbox" id="sv-new-purchased"><span>Bought</span></label>
+      </div>
+      <div class="sv-add-actions">
+        <button class="btn btn-p btn-sm" onclick="svAddGift()">+ Add Gift</button>
+      </div>
+    </div>
+
+    <!-- Gift list (grouped by person) -->
+    <div id="sv-list" class="sv-list"></div>
+
+  </div><!-- /tool-body -->
+
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    Jot down sizes, colors, and recipients before you shop — it's easy to lose track of who you've covered. Mark each gift "bought" as you go so your running total stays honest and you always know how much room is left in your souvenir budget.
+  </div>
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('budget-plan')">💰 Travel Budget Planner</button>
+      <button class="rel-btn" onclick="openTool('customs-duty')">🛃 Customs Duty Calculator</button>
+      <button class="rel-btn" onclick="openTool('trip-recap')">📊 Trip Cost Recap</button>
     </div>
   </div>
 </div>
+
+<style>
+/* ══════════════════════════════════════════════════════
+   SOUVENIR & GIFT TRACKER  (id: souvenir)
+   ══════════════════════════════════════════════════════ */
+.sv-setup { display:flex; gap:16px; align-items:flex-end; margin-bottom:14px; flex-wrap:wrap; }
+.sv-fg { display:flex; flex-direction:column; gap:5px; }
+.sv-fg label { font-family:var(--mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); }
+.sv-fg > input, .sv-fg select { background:var(--paper); border:1.5px solid var(--ink); color:var(--ink); font-family:var(--sans); font-size:14px; padding:8px 10px; border-radius:var(--r); outline:none; min-height:42px; }
+.sv-fg > input:focus, .sv-fg select:focus { border-color:var(--accent); }
+.sv-fg select { appearance:none; cursor:pointer; }
+.sv-budget-input { display:flex; align-items:center; gap:6px; background:var(--paper); border:1.5px solid var(--ink); border-radius:var(--r); padding:0 12px; }
+.sv-budget-input:focus-within { border-color:var(--accent); }
+.sv-budget-input span { font-family:var(--serif); font-weight:600; color:var(--muted); }
+.sv-budget-input input { border:none; padding:9px 0; min-height:40px; width:130px; background:transparent; color:var(--ink); font-family:var(--sans); font-size:15px; outline:none; }
+.sv-fg-cur select { min-width:120px; }
+
+.sv-suggest { background:rgba(255,210,63,.1); border:1px dashed var(--yellow); border-radius:var(--r); padding:9px 12px; font-size:13.5px; color:var(--ink-2); margin-bottom:18px; display:flex; align-items:center; gap:12px; flex-wrap:wrap; line-height:1.45; }
+.sv-suggest button { margin-left:auto; flex-shrink:0; }
+
+.sv-stats { margin-bottom:16px; }
+.sv-budget-bar-wrap { margin-bottom:24px; }
+.sv-bb-row { display:flex; justify-content:space-between; align-items:baseline; font-family:var(--mono); font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin-bottom:6px; gap:10px; }
+.sv-bb-remain b { font-family:var(--serif); color:var(--green); }
+.prog-fill.over { background:var(--accent) !important; }
+.sv-bb-remain.over b { color:var(--accent); }
+
+.sv-sec { font-family:var(--mono); font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin:6px 0 10px; }
+.sv-add { background:var(--paper-2); border:1.5px solid var(--ink); border-radius:var(--r); padding:16px; margin-bottom:26px; }
+.sv-add-grid { display:grid; grid-template-columns:1fr 1.4fr auto auto; gap:14px; align-items:end; }
+@media(max-width:640px){ .sv-add-grid { grid-template-columns:1fr 1fr; } }
+.sv-fg-cost input { width:110px; }
+.sv-new-check { display:flex; align-items:center; gap:8px; font-family:var(--mono); font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-2); cursor:pointer; padding-bottom:11px; white-space:nowrap; }
+.sv-new-check input { width:19px; height:19px; accent-color:var(--green); cursor:pointer; }
+.sv-add-actions { display:flex; justify-content:flex-end; margin-top:14px; }
+
+.sv-list { display:flex; flex-direction:column; gap:18px; margin-bottom:20px; }
+.sv-group { border:1.5px solid var(--ink); border-radius:var(--r); overflow:hidden; background:var(--paper); }
+.sv-group-hdr { display:flex; align-items:center; gap:10px; padding:11px 14px; background:var(--paper-2); border-bottom:1.5px solid var(--ink); border-left:4px solid var(--green); flex-wrap:wrap; }
+.sv-group-name { font-family:var(--serif); font-weight:600; font-size:17px; color:var(--ink); letter-spacing:-.01em; word-break:break-word; }
+.sv-group-meta { margin-left:auto; font-family:var(--mono); font-size:11px; letter-spacing:.05em; color:var(--muted); white-space:nowrap; }
+.sv-group-meta b { color:var(--ink); font-family:var(--serif); }
+.sv-row { display:flex; align-items:center; gap:10px; padding:9px 14px; border-bottom:1px solid var(--rule); }
+.sv-row:last-child { border-bottom:none; }
+.sv-row.bought { background:var(--paper-2); }
+.sv-check { width:21px; height:21px; flex-shrink:0; cursor:pointer; border:1.5px solid var(--ink); border-radius:4px; background:var(--paper); display:flex; align-items:center; justify-content:center; transition:background .12s, border-color .12s; }
+.sv-row.bought .sv-check { background:var(--green); border-color:var(--green); }
+.sv-row.bought .sv-check::after { content:'\2713'; color:#fff; font-size:13px; font-weight:700; }
+.sv-idea { flex:1; min-width:0; border:1px solid transparent; background:transparent; font-family:var(--sans); font-size:14.5px; color:var(--ink); padding:6px 5px; border-radius:3px; outline:none; }
+.sv-idea:focus { background:var(--paper); border-color:var(--rule); }
+.sv-row.bought .sv-idea { text-decoration:line-through; color:var(--muted); }
+.sv-cost-wrap { display:flex; align-items:center; gap:1px; flex-shrink:0; }
+.sv-cost-wrap .sym { font-size:13px; color:var(--muted); }
+.sv-cost { width:78px; border:1px solid transparent; background:transparent; font-family:var(--mono); font-size:14px; color:var(--ink-2); padding:6px 4px; text-align:right; border-radius:3px; outline:none; }
+.sv-cost:focus { background:var(--paper); border-color:var(--rule); }
+.sv-del { background:none; border:1px solid var(--rule); border-radius:3px; color:var(--muted); cursor:pointer; width:30px; height:30px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:13px; transition:color .12s, border-color .12s; }
+.sv-del:hover { color:var(--accent); border-color:var(--accent); }
+
+.sv-empty { text-align:center; padding:40px 24px; border:1.5px dashed var(--rule); border-radius:var(--r); }
+.sv-empty span { font-size:40px; display:block; margin-bottom:12px; }
+.sv-empty h3 { font-family:var(--serif); font-weight:600; font-size:20px; margin:0 0 8px; }
+.sv-empty p { color:var(--muted); margin:0 auto; max-width:400px; font-size:14px; line-height:1.5; }
+
+.sv-print-header { display:none; }
+@media print {
+  #view-souvenir .tool-bar, #view-souvenir .ctx-banner, #view-souvenir .pro-tip,
+  #view-souvenir .related, #view-souvenir .tj-trip-selector, #view-souvenir .sv-setup,
+  #view-souvenir .sv-suggest, #view-souvenir .sv-sec, #view-souvenir .sv-add,
+  #view-souvenir .sv-del { display:none !important; }
+  #view-souvenir .sv-print-header { display:flex !important; justify-content:space-between; font-family:monospace; font-size:11px; color:#666; border-bottom:1px solid #ccc; padding-bottom:8px; margin-bottom:18px; }
+  body { background:#fff !important; background-image:none !important; }
+  #view-souvenir .sv-group, #view-souvenir .sv-row { border-color:#ccc !important; break-inside:avoid; }
+  #view-souvenir .sv-group-hdr { background:#f5f5f5 !important; border-left:3px solid #2E7D32 !important; }
+  #view-souvenir .prog-fill { background:#333 !important; }
+  #view-souvenir .prog-bar { background:#ddd !important; }
+  #view-souvenir .sv-idea, #view-souvenir .sv-cost { border:none !important; background:transparent !important; }
+}
+</style>
 <div id="view-placeholder-health-check" class="view">
   <nav class="tool-topbar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
@@ -12114,7 +12275,7 @@ const TOOLS = [
   {id:'biz-packing',   nm:'Business Trip Packing',      ico:'👔', ph:'business',   on:false,live:true,  ds:'Professional carry-on-only checklist. Tech, attire, docs & wrinkle tips.'},
   {id:'customs-duty',  nm:'Customs Duty Calculator',    ico:'🛃', ph:'home',       on:false,live:true,  ds:'Estimate US customs duties on goods purchased abroad.'},
   {id:'trip-recap',    nm:'Trip Cost Recap',            ico:'📊', ph:'home',       on:false,live:true,  ds:'Actual vs. budgeted expenses. Visual summary by category.'},
-  {id:'souvenir',      nm:'Souvenir & Gift Tracker',    ico:'🎁', ph:'home',       on:false,live:false, ds:'Gift list with person, idea, cost & purchased checkbox.'},
+  {id:'souvenir',      nm:'Souvenir & Gift Tracker',    ico:'🎁', ph:'home',       on:false,live:true,  ds:'Gift list with person, idea, cost & purchased checkbox.'},
   {id:'health-check',  nm:'Post-Trip Health Checklist', ico:'🏥', ph:'home',       on:false,live:false, ds:'Symptom awareness for common post-travel illnesses.'},
   {id:'trip-journal',  nm:'Trip Journal',               ico:'📔', ph:'home',       on:false,live:true,  ds:'Day-by-day journal. Star ratings, mood emoji, highlights.'},
   {id:'review-draft',  nm:'Review Drafter',             ico:'✍️', ph:'home',       on:false,live:false, ds:'Guided form → publish-ready hotel & airline review draft.'},
@@ -12807,6 +12968,7 @@ function injectTripCtx(id) {
   if(id==='uv-index')   uvInit();
   if(id==='altitude')   asInit();
   if(id==='trip-recap') tcrInit();
+  if(id==='souvenir')   svInit();
   if(id==='customs-duty') cdcInit();
   if(id==='customs-decl') cdhInit();
   if(id==='flight-delay') fdcInit();
@@ -20285,6 +20447,299 @@ function tjPrint() {
 function tjEsc(str) {
   return (str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
+
+/* ════════════════════════════════════════════════════════════
+   SOUVENIR & GIFT TRACKER  (id: souvenir)
+   Storage:  tt_souvenir_{tripId|default}
+   Shape:    { currency, budget, items:[{id,person,idea,cost,purchased}] }
+   Forward-compatible with the Customs Duty Calculator importer
+   (reads tt_souvenir_{id} → items[].{idea,cost}).
+   ════════════════════════════════════════════════════════════ */
+const SV_CUR_SYM = {USD:'$',EUR:'€',GBP:'£',CAD:'CA$',AUD:'A$',JPY:'¥',MXN:'MX$',CHF:'Fr',INR:'₹',BRL:'R$',KRW:'₩',THB:'฿',SGD:'S$',NZD:'NZ$',ZAR:'R',CNY:'¥',HKD:'HK$'};
+let svCurrentTripId = 'default';
+let svData = null;
+
+function svKey(id) { return 'tt_souvenir_' + (id && id !== '__free__' ? id : 'default'); }
+
+function svDefaultCurrency() {
+  const trip = getTrips().find(t => t.id === svCurrentTripId) || null;
+  return (trip && trip.homeCurrency) || 'USD';
+}
+
+function svLoad() {
+  let d = null;
+  try { const raw = localStorage.getItem(svKey(svCurrentTripId)); if (raw) d = JSON.parse(raw); } catch(_) {}
+  if (!d || typeof d !== 'object') d = {};
+  if (!Array.isArray(d.items)) d.items = Array.isArray(d.gifts) ? d.gifts : [];
+  // normalize items
+  d.items = d.items.map(it => ({
+    id: it.id || ('sv_' + Date.now() + '_' + Math.random().toString(36).slice(2,6)),
+    person: it.person || '',
+    idea: it.idea || it.desc || it.item || '',
+    cost: (it.cost === '' || it.cost == null) ? (it.amt != null ? it.amt : '') : it.cost,
+    purchased: !!it.purchased,
+  }));
+  if (d.budget == null) d.budget = '';
+  if (!d.currency) d.currency = svDefaultCurrency();
+  svData = d;
+}
+
+function svSave() {
+  if (!svData) return;
+  try {
+    localStorage.setItem(svKey(svCurrentTripId), JSON.stringify({
+      currency: svData.currency, budget: svData.budget, items: svData.items
+    }));
+  } catch(_) {}
+}
+
+function svSym() { return SV_CUR_SYM[svData.currency] || (svData.currency + ' '); }
+function svFmt(n) {
+  const sym = svSym();
+  n = Math.round((parseFloat(n)||0) * 100) / 100;
+  if (Math.abs(n) >= 1000) return sym + n.toLocaleString('en-US',{maximumFractionDigits:0});
+  return sym + n.toFixed(2).replace(/\.00$/,'');
+}
+function svEsc(s) {
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+/* Suggested souvenir budget pulled from the Travel Budget Planner */
+function svSuggestBudget(id) {
+  try {
+    const raw = localStorage.getItem('tt_budget_' + (id && id !== '__free__' ? id : 'default'));
+    if (!raw) return null;
+    const bp = JSON.parse(raw);
+    if (!bp || !Array.isArray(bp.categories)) return null;
+    let sum = 0, found = false;
+    bp.categories.forEach(c => {
+      (c.items || []).forEach(it => {
+        if (/souvenir|gift/i.test(it.desc || '')) {
+          const v = parseFloat(it.amt) || 0;
+          if (v > 0) { sum += v; found = true; }
+        }
+      });
+    });
+    return found ? Math.round(sum * 100) / 100 : null;
+  } catch(_) { return null; }
+}
+
+function svInit() {
+  const trips  = getTrips();
+  const active = getActiveTripId();
+  const selEl  = document.getElementById('sv-trip-select');
+  const sWrap  = document.getElementById('sv-trip-selector-wrap');
+
+  // Currency dropdown (build once)
+  const curSel = document.getElementById('sv-currency');
+  if (curSel && !curSel.options.length) {
+    curSel.innerHTML = CURRENCIES.map(c => `<option value="${c}">${c}</option>`).join('');
+  }
+
+  // Trip selector
+  selEl.innerHTML = '';
+  const freeOpt = document.createElement('option');
+  freeOpt.value = '__free__';
+  freeOpt.textContent = '— No specific trip —';
+  selEl.appendChild(freeOpt);
+  trips.forEach(t => {
+    const opt = document.createElement('option');
+    opt.value = t.id;
+    opt.textContent = t.name + (t.destination ? ' · ' + t.destination : '');
+    selEl.appendChild(opt);
+  });
+  sWrap.style.display = trips.length === 0 ? 'none' : '';
+
+  const preferred = active && trips.find(t => t.id === active) ? active : (trips[0] ? trips[0].id : '__free__');
+  selEl.value = preferred;
+  svCurrentTripId = preferred;
+
+  svLoad();
+  svRender();
+}
+
+function svSwitchTrip(id) {
+  svCurrentTripId = id;
+  svLoad();
+  svRender();
+}
+
+function svSetBudget(v) {
+  if (!svData) return;
+  svData.budget = v === '' ? '' : (parseFloat(v) || 0);
+  svSave();
+  svRenderSummary();
+  svRenderSuggest();
+}
+function svSetCurrency(v) {
+  if (!svData) return;
+  svData.currency = v;
+  svSave();
+  svRender();
+}
+function svApplySuggested(v) {
+  document.getElementById('sv-budget').value = v;
+  svSetBudget(v);
+}
+
+function svAddGift() {
+  if (!svData) return;
+  const personEl = document.getElementById('sv-new-person');
+  const ideaEl   = document.getElementById('sv-new-idea');
+  const costEl   = document.getElementById('sv-new-cost');
+  const boughtEl = document.getElementById('sv-new-purchased');
+  const person = personEl.value.trim();
+  const idea   = ideaEl.value.trim();
+  if (!idea && !person) { ideaEl.focus(); return; }
+  const cost = costEl.value === '' ? '' : (parseFloat(costEl.value) || 0);
+  svData.items.push({
+    id: 'sv_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
+    person, idea: idea || 'Souvenir', cost, purchased: !!boughtEl.checked
+  });
+  svSave();
+  // keep person for fast multi-add to the same recipient
+  ideaEl.value = ''; costEl.value = ''; boughtEl.checked = false;
+  svRender();
+  ideaEl.focus();
+}
+
+function svToggle(itemId) {
+  const it = svData.items.find(i => i.id === itemId);
+  if (!it) return;
+  it.purchased = !it.purchased;
+  svSave();
+  svRender();
+}
+function svEdit(itemId, field, value) {
+  const it = svData.items.find(i => i.id === itemId);
+  if (!it) return;
+  if (field === 'cost') it.cost = value === '' ? '' : (parseFloat(value) || 0);
+  else it[field] = value;
+  svSave();
+  svRender();
+}
+function svDelete(itemId) {
+  svData.items = svData.items.filter(i => i.id !== itemId);
+  svSave();
+  svRender();
+}
+
+function svTotals() {
+  let total = 0, bought = 0, boughtCount = 0;
+  svData.items.forEach(i => {
+    const c = parseFloat(i.cost) || 0;
+    total += c;
+    if (i.purchased) { bought += c; boughtCount++; }
+  });
+  const people = new Set(svData.items.map(i => (i.person||'').trim() || '—'));
+  return { total, bought, boughtCount, count: svData.items.length, people: people.size };
+}
+
+function svRenderSummary() {
+  const t = svTotals();
+  const statsEl = document.getElementById('sv-stats');
+  if (t.count === 0) {
+    statsEl.style.display = 'none';
+  } else {
+    statsEl.style.display = '';
+    document.getElementById('sv-stat-spent').textContent  = svFmt(t.total);
+    document.getElementById('sv-stat-bought').textContent = svFmt(t.bought);
+    document.getElementById('sv-stat-gifts').textContent  = t.count;
+    document.getElementById('sv-stat-people').textContent = t.people;
+  }
+  // Budget bar
+  const bbWrap = document.getElementById('sv-budget-bar-wrap');
+  const budget = parseFloat(svData.budget) || 0;
+  if (budget > 0) {
+    bbWrap.style.display = '';
+    const pct  = Math.min(100, (t.total / budget) * 100);
+    const over = t.total > budget;
+    const fill = document.getElementById('sv-bb-fill');
+    fill.style.width = pct + '%';
+    fill.classList.toggle('over', over);
+    document.getElementById('sv-bb-label').textContent = `${svFmt(t.total)} of ${svFmt(budget)} budget`;
+    const rem  = document.getElementById('sv-bb-remain');
+    const diff = budget - t.total;
+    rem.innerHTML = over ? `<b>${svFmt(Math.abs(diff))} over</b>` : `<b>${svFmt(diff)} left</b>`;
+    rem.classList.toggle('over', over);
+  } else {
+    bbWrap.style.display = 'none';
+  }
+}
+
+function svRenderSuggest() {
+  const sg = document.getElementById('sv-suggest');
+  const suggested = svSuggestBudget(svCurrentTripId);
+  const noBudget = (svData.budget === '' || svData.budget == null);
+  if (suggested && noBudget) {
+    sg.style.display = '';
+    sg.innerHTML = `<span>💡 Your Budget Planner sets aside <b>${svFmt(suggested)}</b> for shopping &amp; souvenirs on this trip.</span><button class="btn btn-s btn-sm" onclick="svApplySuggested(${suggested})">Use as budget</button>`;
+  } else {
+    sg.style.display = 'none';
+  }
+}
+
+function svRender() {
+  if (!svData) return;
+
+  // Sync controls
+  document.getElementById('sv-budget').value   = (svData.budget === '' || svData.budget == null) ? '' : svData.budget;
+  document.getElementById('sv-currency').value = svData.currency;
+  document.getElementById('sv-cur-sym').textContent = svSym();
+
+  // People datalist for quick re-use
+  const people = [...new Set(svData.items.map(i => (i.person||'').trim()).filter(Boolean))];
+  document.getElementById('sv-people').innerHTML = people.map(p => `<option value="${svEsc(p)}"></option>`).join('');
+
+  svRenderSuggest();
+  svRenderSummary();
+
+  // Print header
+  const trip = getTrips().find(t => t.id === svCurrentTripId) || null;
+  document.getElementById('sv-ph-title').textContent = (trip ? trip.name + ' — ' : '') + 'Souvenir & Gift List';
+  document.getElementById('sv-ph-date').textContent  = 'Printed ' + new Date().toLocaleDateString();
+
+  // List
+  const listEl = document.getElementById('sv-list');
+  if (svData.items.length === 0) {
+    listEl.innerHTML = `<div class="sv-empty"><span>🎁</span><h3>No gifts yet</h3><p>Add the people you're shopping for and what you'd like to get them. Check off each gift as you buy it — your running total updates automatically.</p></div>`;
+    return;
+  }
+
+  // Group by person, preserving first-seen order
+  const order = [], groups = {};
+  svData.items.forEach(it => {
+    const key = (it.person||'').trim() || '__none__';
+    if (!groups[key]) { groups[key] = []; order.push(key); }
+    groups[key].push(it);
+  });
+
+  let html = '';
+  order.forEach(key => {
+    const items = groups[key];
+    const name  = key === '__none__' ? 'Unassigned' : key;
+    let gTotal = 0, gBought = 0;
+    items.forEach(i => { gTotal += parseFloat(i.cost)||0; if (i.purchased) gBought++; });
+    html += `<div class="sv-group">
+      <div class="sv-group-hdr">
+        <span class="sv-group-name">${svEsc(name)}</span>
+        <span class="sv-group-meta"><b>${gBought}/${items.length}</b> bought · <b>${svFmt(gTotal)}</b></span>
+      </div>`;
+    items.forEach(it => {
+      const costVal = (it.cost === '' || it.cost == null) ? '' : it.cost;
+      html += `<div class="sv-row ${it.purchased ? 'bought' : ''}">
+        <div class="sv-check" role="checkbox" aria-checked="${it.purchased}" tabindex="0" title="Mark bought" onclick="svToggle('${it.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();svToggle('${it.id}')}"></div>
+        <input class="sv-idea" type="text" value="${svEsc(it.idea)}" placeholder="Gift idea…" onchange="svEdit('${it.id}','idea',this.value)">
+        <div class="sv-cost-wrap"><span class="sym">${svSym()}</span><input class="sv-cost" type="number" min="0" step="any" inputmode="decimal" value="${costVal}" placeholder="0" onchange="svEdit('${it.id}','cost',this.value)"></div>
+        <button class="sv-del" title="Remove gift" onclick="svDelete('${it.id}')">✕</button>
+      </div>`;
+    });
+    html += `</div>`;
+  });
+  listEl.innerHTML = html;
+}
+
+function svPrint() { window.print(); }
 
 /* ════════════════════════════════════════════════════════════
    THEME PARK BUDGET CALCULATOR
