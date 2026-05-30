@@ -5921,16 +5921,203 @@ body.no-scroll { overflow: hidden; }
     </div>
   </div>
 </div>
-<div id="view-placeholder-atm-fee" class="view">
-  <nav class="tool-topbar">
+<style>
+/* ── ATM FEE ESTIMATOR ── */
+.af-opt{font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted)}
+.af-input-cur{position:relative}
+.af-cur-prefix{position:absolute;left:14px;top:50%;transform:translateY(-50%);pointer-events:none;font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.04em;max-width:46px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.af-input-cur input{padding-left:52px!important}
+.af-input-pct{position:relative}
+.af-input-pct input{padding-right:30px!important}
+.af-pct-suffix{position:absolute;right:13px;top:50%;transform:translateY(-50%);pointer-events:none;font-family:var(--mono);font-size:13px;color:var(--muted)}
+.af-rate-row{align-items:end}
+.af-rate-note{font-family:var(--sans);font-size:12px;color:var(--muted);margin-top:7px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.af-rate-badge{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;background:rgba(46,125,50,.12);color:var(--green,#2E7D32);border:1px solid rgba(46,125,50,.4);border-radius:20px;padding:2px 9px}
+.af-rate-link{background:none;border:none;color:var(--accent);font-family:var(--sans);font-size:12px;font-weight:600;cursor:pointer;padding:0;text-decoration:underline}
+.af-card-box{background:var(--paper-2);border:1.5px solid var(--rule);border-radius:var(--r);padding:14px 16px;margin:8px 0 4px}
+.af-check-row{display:flex;align-items:flex-start;gap:9px;margin-top:14px;font-size:13px;color:var(--ink-2);font-family:var(--sans);cursor:pointer;user-select:none;line-height:1.45}
+.af-check-row input{accent-color:var(--accent);cursor:pointer;width:16px;height:16px;flex-shrink:0;margin-top:1px}
+/* DCC warning */
+.af-dcc-warn{margin:22px 0 4px;border:1.5px solid var(--orange);border-left-width:5px;border-radius:var(--r);background:rgba(230,81,0,.06);padding:14px 16px}
+.af-dcc-warn h4{font-family:var(--sans);font-size:14px;font-weight:700;color:var(--orange);margin:0 0 6px;display:flex;align-items:center;gap:7px;letter-spacing:.01em}
+.af-dcc-warn p{font-family:var(--sans);font-size:13px;line-height:1.55;color:var(--ink-2);margin:0}
+.af-dcc-warn strong{color:var(--ink)}
+/* results */
+.af-results{margin-top:26px}
+.af-compare{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
+@media(max-width:600px){.af-compare{grid-template-columns:1fr}}
+.af-rcard{border:1.5px solid var(--ink);border-radius:var(--r);padding:16px;background:var(--paper);position:relative;display:flex;flex-direction:column}
+.af-rcard.good{border-color:var(--green,#2E7D32);box-shadow:0 0 0 1px var(--green,#2E7D32) inset}
+.af-rcard.bad{border-color:var(--orange)}
+.af-rcard-tag{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;margin-bottom:10px;align-self:flex-start}
+.af-rcard.good .af-rcard-tag{background:rgba(46,125,50,.14);color:var(--green,#2E7D32)}
+.af-rcard.bad .af-rcard-tag{background:rgba(230,81,0,.14);color:var(--orange)}
+.af-rcard-ttl{font-family:var(--serif);font-size:16px;font-weight:600;color:var(--ink);margin-bottom:3px;line-height:1.25}
+.af-rcard-sub{font-family:var(--sans);font-size:12px;color:var(--muted);margin-bottom:12px}
+.af-rcard-big{font-family:var(--mono);font-size:30px;font-weight:700;color:var(--ink);line-height:1;margin-bottom:3px}
+.af-rcard-rate{font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:12px}
+.af-break{font-family:var(--mono);font-size:12px;color:var(--ink-2);line-height:1.85;border-top:1px solid var(--rule);padding-top:10px;margin-top:auto}
+.af-break .row{display:flex;justify-content:space-between;gap:10px}
+.af-break .row.muted{color:var(--muted)}
+.af-break .row.sum{font-weight:700;color:var(--ink);border-top:1px solid var(--rule);margin-top:5px;padding-top:6px}
+.af-break .row .v{white-space:nowrap}
+.af-break .row.dcc .v{color:var(--orange);font-weight:700}
+/* penalty callout */
+.af-penalty{border:2px solid var(--ink);border-radius:var(--r);padding:16px;text-align:center;margin-bottom:16px;background:var(--paper)}
+.af-penalty.save{border-color:var(--green,#2E7D32);background:rgba(46,125,50,.06)}
+.af-penalty .amt{font-family:var(--mono);font-size:26px;font-weight:700;color:var(--orange);display:block;margin-bottom:4px}
+.af-penalty.save .amt{color:var(--green,#2E7D32)}
+.af-penalty .lbl{font-family:var(--sans);font-size:13px;color:var(--ink-2);line-height:1.5}
+.af-penalty .lbl strong{color:var(--ink)}
+/* facts strip */
+.af-facts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+@media(max-width:520px){.af-facts{grid-template-columns:1fr}}
+.af-fact{border:1.5px solid var(--rule);border-radius:var(--r);padding:12px 14px;background:var(--paper-2)}
+.af-fact .v{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--ink);line-height:1.1}
+.af-fact .k{font-family:var(--sans);font-size:11px;color:var(--muted);margin-top:4px;line-height:1.3}
+.af-hint{font-family:var(--sans);font-size:13px;color:var(--ink-2);line-height:1.55;border-left:3px solid var(--yellow,#FFD23F);padding:10px 14px;background:rgba(255,210,63,.08);border-radius:0 var(--r) var(--r) 0;margin-bottom:16px}
+.af-actions{display:flex;align-items:center;gap:16px;margin-top:4px;flex-wrap:wrap}
+.af-copy-btn{padding:11px 20px;border:1.5px solid var(--ink);border-radius:var(--r);background:var(--ink);color:var(--paper);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer}
+.af-copy-btn:hover{background:var(--accent);border-color:var(--accent)}
+.af-empty{margin-top:20px;padding:24px;text-align:center;color:var(--muted);font-family:var(--sans);font-size:14px;font-style:italic;border:1.5px dashed var(--rule);border-radius:var(--r)}
+.af-print-header{display:none}
+@media print{
+  .af-rate-link,.af-actions,.af-empty,.af-dcc-warn{display:none!important}
+  .af-print-header{display:flex!important;justify-content:space-between;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#666;padding:0 0 12px;border-bottom:1px solid #ccc;margin-bottom:16px}
+  .af-rcard,.af-penalty{break-inside:avoid}
+}
+</style>
+<div id="view-atm-fee" class="view">
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="window.print()">🖨 Print</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">🏧</span>
-    <h2>ATM Fee Estimator</h2>
-    <p style="margin-bottom:24px">True cost of foreign ATM withdrawals: bank fee + operator fee + DCC warning.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-atm-fee"></div>
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>ATM Fee Estimator</h1>
+    <p class="tool-sub">See the true cost of a foreign cash withdrawal — your bank's flat fee and foreign-transaction percentage, the local ATM's surcharge, and the Dynamic Currency Conversion (DCC) trap — all in your home currency.</p>
+  </div>
+
+  <div class="tool-body">
+
+    <!-- ── WHERE & WHAT ── -->
+    <div class="sec-lbl">Where are you withdrawing?</div>
+    <div class="frow">
+      <div class="fg">
+        <label for="af-country">Country / region <span class="af-opt">— fills typical values</span></label>
+        <select id="af-country" onchange="afOnCountry()"></select>
+      </div>
+      <div class="fg">
+        <label for="af-foreign">Cash currency <span class="af-opt">(what the ATM dispenses)</span></label>
+        <select id="af-foreign" onchange="afOnForeignCur()"></select>
+      </div>
+    </div>
+    <div class="frow">
+      <div class="fg">
+        <label for="af-amount">Amount to withdraw</label>
+        <div class="af-input-cur">
+          <span class="af-cur-prefix" id="af-amt-sym">€</span>
+          <input type="number" id="af-amount" placeholder="0" min="0" step="any" inputmode="decimal" oninput="afRender()">
+        </div>
+      </div>
+      <div class="fg">
+        <label for="af-home">Your card bills in</label>
+        <select id="af-home" onchange="afOnHomeCur()"></select>
+      </div>
+    </div>
+
+    <!-- ── EXCHANGE RATE ── -->
+    <div class="fg af-rate-row" id="af-rate-fg">
+      <label for="af-rate">Mid-market exchange rate <span class="af-opt" id="af-rate-pairlbl"></span></label>
+      <div class="af-input-cur">
+        <span class="af-cur-prefix" id="af-rate-sym">$</span>
+        <input type="number" id="af-rate" placeholder="0.00" min="0" step="any" inputmode="decimal" oninput="afOnRateEdit()">
+      </div>
+      <div class="af-rate-note" id="af-rate-note"></div>
+    </div>
+
+    <!-- ── YOUR CARD'S FEES ── -->
+    <div class="sec-lbl" style="margin-top:6px">Your card's fees</div>
+    <div class="fg">
+      <label for="af-bank">Card / bank profile <span class="af-opt">— or set values below</span></label>
+      <select id="af-bank" onchange="afOnBank()"></select>
+    </div>
+    <div class="frow">
+      <div class="fg">
+        <label for="af-ftf">Foreign-transaction fee</label>
+        <div class="af-input-pct">
+          <input type="number" id="af-ftf" placeholder="0" min="0" step="any" inputmode="decimal" oninput="afOnFeeEdit()">
+          <span class="af-pct-suffix">%</span>
+        </div>
+      </div>
+      <div class="fg">
+        <label for="af-flat">Out-of-network ATM fee <span class="af-opt">(flat, home currency)</span></label>
+        <div class="af-input-cur">
+          <span class="af-cur-prefix" id="af-flat-sym">$</span>
+          <input type="number" id="af-flat" placeholder="0.00" min="0" step="any" inputmode="decimal" oninput="afOnFeeEdit()">
+        </div>
+      </div>
+    </div>
+
+    <!-- ── THIS ATM ── -->
+    <div class="sec-lbl">This ATM</div>
+    <div class="fg">
+      <label for="af-op">Operator surcharge <span class="af-opt">— the local ATM's own fee, shown on screen (in cash currency)</span></label>
+      <div class="af-input-cur">
+        <span class="af-cur-prefix" id="af-op-sym">€</span>
+        <input type="number" id="af-op" placeholder="0" min="0" step="any" inputmode="decimal" oninput="afRender()">
+      </div>
+    </div>
+
+    <!-- ── DCC WARNING ── -->
+    <div class="af-dcc-warn">
+      <h4>⚠️ The Dynamic Currency Conversion (DCC) trap</h4>
+      <p>The ATM will ask whether to charge you in <strong>your home currency</strong> or the <strong>local currency</strong>. Choosing your home currency lets the ATM set the exchange rate — and it adds a hidden markup, typically <strong>5–12%</strong>. <strong>Always choose the local currency.</strong> The comparison below shows exactly what DCC would cost you.</p>
+    </div>
+    <div class="frow">
+      <div class="fg">
+        <label for="af-dcc">If you accepted DCC, its markup would be</label>
+        <div class="af-input-pct">
+          <input type="number" id="af-dcc" placeholder="7" min="0" step="any" inputmode="decimal" oninput="afRender()">
+          <span class="af-pct-suffix">%</span>
+        </div>
+      </div>
+      <div class="fg" style="display:flex;align-items:flex-end">
+        <label class="af-check-row" style="margin:0">
+          <input type="checkbox" id="af-dcc-ftf" onchange="afRender()">
+          <span>My card still charges its foreign-transaction fee even on DCC (most do)</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- ── RESULTS ── -->
+    <div class="af-results" id="af-results" style="display:none">
+      <div class="af-print-header"><strong>TripTools — ATM Fee Estimator</strong><span id="af-print-date"></span></div>
+      <div class="af-penalty" id="af-penalty"></div>
+      <div class="af-compare" id="af-compare"></div>
+      <div class="af-facts" id="af-facts"></div>
+      <div class="af-hint" id="af-hint"></div>
+      <div class="af-actions">
+        <button class="af-copy-btn" id="af-copy-btn" onclick="afCopy()">📋 Copy summary</button>
+        <button class="btn-ghost" onclick="afReset()" style="color:var(--accent);font-size:13px;background:none;border:none;cursor:pointer">↺ Reset</button>
+      </div>
+    </div>
+    <div class="af-empty" id="af-empty">Enter an amount to withdraw to see the true cost.</div>
+
+  </div><!-- /tool-body -->
+
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    Flat fees (your bank's ATM fee plus the operator surcharge) cost the same whether you take out $50 or $500 — so fewer, larger withdrawals dramatically cut your percentage cost. Decline DCC every time, decline the operator's "conversion," and if your home bank charges a foreign-transaction fee, a no-FX-fee debit or travel card usually pays for itself on the first trip.
+  </div>
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('currency')">💱 Currency Converter</button>
+      <button class="rel-btn" onclick="openTool('expense-track')">📊 Expense Tracker</button>
+      <button class="rel-btn" onclick="openTool('tip-calc')">🤝 Tip Calculator</button>
+      <button class="rel-btn" onclick="openTool('budget-plan')">🧮 Budget Planner</button>
     </div>
   </div>
 </div>
@@ -10934,7 +11121,7 @@ const TOOLS = [
   {id:'tip-calc',      nm:'Tip Calculator by Country',  ico:'🤝', ph:'money',     on:false, live:true,  ds:'Local tipping culture + standard % by venue. Exact tip calculator.'},
   {id:'expense-track', nm:'Daily Expense Tracker',      ico:'📊', ph:'money',     on:false, live:true,  ds:'Log expenses by category. Auto-converts to home currency. Running total vs. daily budget.'},
   {id:'bill-split',    nm:'Bill Splitter',              ico:'➗', ph:'money',     on:false, live:true,  ds:'Split any bill evenly or item-by-item. Names, per-person extras, tip & tax shared fairly.'},
-  {id:'atm-fee',       nm:'ATM Fee Estimator',          ico:'🏧', ph:'money',     on:false, live:false, ds:'True cost of foreign ATM withdrawals including DCC.'},
+  {id:'atm-fee',       nm:'ATM Fee Estimator',          ico:'🏧', ph:'money',     on:false, live:true,  ds:'True cost of foreign ATM withdrawals including DCC.'},
   {id:'cost-living',   nm:'Cost of Living Comparison',  ico:'🌐', ph:'money',     on:false, live:false, ds:'How far will $100/day go in Bangkok vs. Paris vs. Tokyo?'},
   {id:'vat-refund',    nm:'VAT & Tax Refund Guide',     ico:'🧾', ph:'money',     on:false, live:false, ds:'Country-by-country guide to claiming VAT refunds as a tourist.'},
   {id:'cruise-grat',   nm:'Cruise Gratuity Calculator', ico:'🚢', ph:'money',     on:false, live:true,  ds:'Daily gratuity per person by cruise line and cabin type.'},
@@ -11639,6 +11826,7 @@ function injectTripCtx(id) {
   if(id==='passport')   paInit();
   if(id==='expense-track') etInit();
   if(id==='bill-split') bsInit();
+  if(id==='atm-fee')    afInit();
   if(id==='expense-report') erInit();
   if(id==='baggage')    bfcInit();
   if(id==='carry-on')   cosInit();
@@ -27769,6 +27957,446 @@ function bsReset(){
   document.getElementById('bs-tip-pct').value = '';
   document.getElementById('bs-tip-on-total').checked = false;
   bsRenderTipQuick(); bsRenderItemForm(); bsRender();
+}
+
+/* ══════════════════════════════════════════════════════
+   ATM FEE ESTIMATOR  (af*)
+   ══════════════════════════════════════════════════════ */
+
+const AF_CUR = [
+  {c:'USD',s:'$',  n:'US Dollar'},        {c:'EUR',s:'€',  n:'Euro'},
+  {c:'GBP',s:'£',  n:'British Pound'},     {c:'JPY',s:'¥',  n:'Japanese Yen'},
+  {c:'CAD',s:'CA$',n:'Canadian Dollar'},   {c:'AUD',s:'A$', n:'Australian Dollar'},
+  {c:'CHF',s:'Fr', n:'Swiss Franc'},       {c:'CNY',s:'¥',  n:'Chinese Yuan'},
+  {c:'INR',s:'₹',  n:'Indian Rupee'},      {c:'MXN',s:'MX$',n:'Mexican Peso'},
+  {c:'BRL',s:'R$', n:'Brazilian Real'},    {c:'KRW',s:'₩',  n:'South Korean Won'},
+  {c:'THB',s:'฿',  n:'Thai Baht'},         {c:'SGD',s:'S$', n:'Singapore Dollar'},
+  {c:'NZD',s:'NZ$',n:'New Zealand Dollar'},{c:'ZAR',s:'R',  n:'South African Rand'},
+  {c:'AED',s:'د.إ',n:'UAE Dirham'},        {c:'HKD',s:'HK$',n:'Hong Kong Dollar'},
+  {c:'TWD',s:'NT$',n:'Taiwan Dollar'},     {c:'SEK',s:'kr', n:'Swedish Krona'},
+  {c:'NOK',s:'kr', n:'Norwegian Krone'},   {c:'DKK',s:'kr', n:'Danish Krone'},
+  {c:'PLN',s:'zł', n:'Polish Zloty'},      {c:'TRY',s:'₺',  n:'Turkish Lira'},
+  {c:'IDR',s:'Rp', n:'Indonesian Rupiah'}, {c:'PHP',s:'₱',  n:'Philippine Peso'},
+  {c:'VND',s:'₫',  n:'Vietnamese Dong'},   {c:'ARS',s:'AR$',n:'Argentine Peso'},
+];
+const AF_NO_DEC = ['JPY','KRW','VND','IDR','HUF','CLP','ISK'];
+
+/* Country presets → cash currency + typical local ATM operator surcharge (in cash currency).
+   Surcharges are rough, real-world typical values; 0 = local ATMs commonly free of an operator fee. */
+const AF_COUNTRIES = [
+  {id:'th', n:'Thailand',        flag:'🇹🇭', cur:'THB', op:220},
+  {id:'vn', n:'Vietnam',         flag:'🇻🇳', cur:'VND', op:22000},
+  {id:'id', n:'Indonesia',       flag:'🇮🇩', cur:'IDR', op:25000},
+  {id:'jp', n:'Japan',           flag:'🇯🇵', cur:'JPY', op:110},
+  {id:'eu', n:'Eurozone (Euronet)',flag:'🇪🇺', cur:'EUR', op:5},
+  {id:'gb', n:'United Kingdom',  flag:'🇬🇧', cur:'GBP', op:0},
+  {id:'us', n:'United States',   flag:'🇺🇸', cur:'USD', op:3.5},
+  {id:'ca', n:'Canada',          flag:'🇨🇦', cur:'CAD', op:3},
+  {id:'mx', n:'Mexico',          flag:'🇲🇽', cur:'MXN', op:60},
+  {id:'au', n:'Australia',       flag:'🇦🇺', cur:'AUD', op:0},
+  {id:'nz', n:'New Zealand',     flag:'🇳🇿', cur:'NZD', op:0},
+  {id:'in', n:'India',           flag:'🇮🇳', cur:'INR', op:0},
+  {id:'za', n:'South Africa',    flag:'🇿🇦', cur:'ZAR', op:60},
+  {id:'tr', n:'Turkey',          flag:'🇹🇷', cur:'TRY', op:0},
+  {id:'ae', n:'United Arab Emirates',flag:'🇦🇪', cur:'AED', op:0},
+  {id:'ph', n:'Philippines',     flag:'🇵🇭', cur:'PHP', op:250},
+];
+
+/* Home card / bank profiles → foreign-transaction fee % + flat out-of-network ATM fee (home currency).
+   Flat-fee magnitudes assume a USD-scale home currency; users can edit after selecting. */
+const AF_BANKS = [
+  {id:'norate', n:'No-foreign-fee travel card (0% · no ATM fee)',   ftf:0, flat:0},
+  {id:'rebate', n:'Fee-reimbursing account (0% · ATM fees refunded)',ftf:0, flat:0},
+  {id:'low',    n:'Low-fee card (1% · no ATM fee)',                 ftf:1, flat:0},
+  {id:'typical',n:'Typical bank (3% · $5 ATM fee)',                 ftf:3, flat:5},
+  {id:'high',   n:'High-fee bank (3% · $7 ATM fee)',                ftf:3, flat:7},
+];
+
+let afData = null;
+
+function afKey(){ const trip = getActiveTrip(); return 'tt_atm_' + (trip ? trip.id : 'default'); }
+function afCurMeta(code){ return AF_CUR.find(x => x.c === code) || {c:code,s:code+' ',n:code}; }
+function afSym(code){ return afCurMeta(code).s; }
+function afNum(v){ const n = parseFloat(v); return isFinite(n) ? n : 0; }
+function afEsc(s){ return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function afFmt(n, code){
+  n = (typeof n === 'number' && isFinite(n)) ? n : 0;
+  const neg = n < 0; n = Math.abs(n);
+  const dec = AF_NO_DEC.includes(code) ? 0 : 2;
+  const body = n.toLocaleString('en-US', {minimumFractionDigits:dec, maximumFractionDigits:dec});
+  return (neg ? '−' : '') + afSym(code) + body;
+}
+/* Rate shown with extra precision for small-value currencies */
+function afFmtRate(n, code){
+  if (!isFinite(n)) n = 0;
+  const dec = n !== 0 && Math.abs(n) < 0.1 ? 6 : (Math.abs(n) < 10 ? 4 : 2);
+  return afSym(code) + n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:dec});
+}
+
+/* Pull a mid-market rate (home per 1 foreign) from the Currency Converter's cache, if fresh. */
+function afCachedRate(foreign, home){
+  if (foreign === home) return 1;
+  let cache = null;
+  try { cache = JSON.parse(localStorage.getItem('tt_fx_cache') || 'null'); } catch(_){ }
+  const data = cache && cache.data;
+  const r = data && data.rates;            // X per 1 USD
+  if (!r) return null;
+  const rf = foreign === 'USD' ? 1 : r[foreign];
+  const rh = home    === 'USD' ? 1 : r[home];
+  if (!rf || !rh) return null;
+  return rh / rf;                          // home per 1 foreign
+}
+
+function afDefault(){
+  const trip = getActiveTrip();
+  let home = 'USD';
+  if (trip && trip.homeCurrency && afCurMeta(trip.homeCurrency).c === trip.homeCurrency) home = trip.homeCurrency;
+  return {
+    country: '', foreign: 'EUR', home: home,
+    amount: '', rate: '', rateAuto: true,
+    bank: 'typical', ftf: '3', flat: '5',
+    op: '', dcc: '7', dccFtf: true,
+  };
+}
+function afLoad(){
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(afKey()) || 'null'); } catch(e){}
+  afData = (saved && typeof saved === 'object') ? Object.assign(afDefault(), saved) : afDefault();
+}
+function afSave(){ try { localStorage.setItem(afKey(), JSON.stringify(afData)); } catch(e){} }
+
+function afInit(){
+  afLoad();
+  // Country select
+  const cSel = document.getElementById('af-country');
+  cSel.innerHTML = '<option value="">— pick to autofill —</option>' +
+    AF_COUNTRIES.map(c => `<option value="${c.id}">${c.flag} ${afEsc(c.n)}</option>`).join('');
+  cSel.value = afData.country || '';
+  // Currency selects
+  const curOpts = AF_CUR.map(x => `<option value="${x.c}">${x.c} ${x.s} · ${afEsc(x.n)}</option>`).join('');
+  ['af-foreign','af-home'].forEach(id => { document.getElementById(id).innerHTML = curOpts; });
+  document.getElementById('af-foreign').value = afData.foreign;
+  document.getElementById('af-home').value = afData.home;
+  // Bank select
+  const bSel = document.getElementById('af-bank');
+  bSel.innerHTML = AF_BANKS.map(b => `<option value="${b.id}">${afEsc(b.n)}</option>`).join('') +
+    '<option value="custom">Custom — values I set below</option>';
+  bSel.value = afData.bank || 'custom';
+  // Scalar inputs
+  document.getElementById('af-amount').value = afData.amount || '';
+  document.getElementById('af-ftf').value = afData.ftf || '';
+  document.getElementById('af-flat').value = afData.flat || '';
+  document.getElementById('af-op').value = afData.op || '';
+  document.getElementById('af-dcc').value = afData.dcc || '';
+  document.getElementById('af-dcc-ftf').checked = !!afData.dccFtf;
+  // Rate: auto-fill if user hasn't pinned a manual value
+  afRefreshAutoRate(false);
+  document.getElementById('af-rate').value = afData.rate || '';
+  const pd = document.getElementById('af-print-date');
+  if (pd) pd.textContent = new Date().toLocaleDateString();
+
+  afApplySymbols();
+  afRender();
+}
+
+function afApplySymbols(){
+  document.getElementById('af-amt-sym').textContent = afSym(afData.foreign);
+  document.getElementById('af-op-sym').textContent  = afSym(afData.foreign);
+  document.getElementById('af-rate-sym').textContent = afSym(afData.home);
+  document.getElementById('af-flat-sym').textContent = afSym(afData.home);
+}
+
+/* Try to set an auto rate from cache. If force, overwrite even a previous auto value. */
+function afRefreshAutoRate(force){
+  if (!afData.rateAuto && !force) return;
+  const r = afCachedRate(afData.foreign, afData.home);
+  if (r != null){
+    afData.rate = afData.foreign === afData.home ? '1' : String(Number(r.toPrecision(8)));
+    afData.rateAuto = true;
+    const inp = document.getElementById('af-rate');
+    if (inp) inp.value = afData.rate;
+  }
+}
+
+/* ── INPUT HANDLERS ── */
+function afOnCountry(){
+  const id = document.getElementById('af-country').value;
+  afData.country = id;
+  const c = AF_COUNTRIES.find(x => x.id === id);
+  if (c){
+    afData.foreign = c.cur;
+    document.getElementById('af-foreign').value = c.cur;
+    afData.op = String(c.op);
+    document.getElementById('af-op').value = c.op ? String(c.op) : (c.op === 0 ? '0' : '');
+    afRefreshAutoRate(true);
+    afApplySymbols();
+  }
+  afSave(); afRender();
+}
+function afOnForeignCur(){
+  afData.foreign = document.getElementById('af-foreign').value;
+  afData.country = '';                       // currency no longer tied to the picked country
+  document.getElementById('af-country').value = '';
+  afRefreshAutoRate(true);
+  afApplySymbols(); afSave(); afRender();
+}
+function afOnHomeCur(){
+  afData.home = document.getElementById('af-home').value;
+  afRefreshAutoRate(true);
+  afApplySymbols(); afSave(); afRender();
+}
+function afOnRateEdit(){
+  afData.rate = document.getElementById('af-rate').value;
+  afData.rateAuto = false;                   // user took manual control
+  afSave(); afRender();
+}
+function afUseCachedRate(){
+  afData.rateAuto = true;
+  afRefreshAutoRate(true);
+  afSave(); afRender();
+}
+function afOnBank(){
+  const id = document.getElementById('af-bank').value;
+  afData.bank = id;
+  const b = AF_BANKS.find(x => x.id === id);
+  if (b){
+    afData.ftf = String(b.ftf); afData.flat = String(b.flat);
+    document.getElementById('af-ftf').value = String(b.ftf);
+    document.getElementById('af-flat').value = String(b.flat);
+  }
+  afSave(); afRender();
+}
+function afOnFeeEdit(){
+  afData.ftf = document.getElementById('af-ftf').value;
+  afData.flat = document.getElementById('af-flat').value;
+  afData.bank = 'custom';
+  document.getElementById('af-bank').value = 'custom';
+  afSave(); afRender();
+}
+
+/* ── CORE CALCULATION ── */
+function afCompute(){
+  const amount = afNum(document.getElementById('af-amount').value);
+  const op     = afNum(document.getElementById('af-op').value);
+  const rate   = afData.foreign === afData.home ? 1 : afNum(document.getElementById('af-rate').value);
+  const ftf    = afNum(document.getElementById('af-ftf').value) / 100;
+  const flat   = afNum(document.getElementById('af-flat').value);
+  const dcc    = afNum(document.getElementById('af-dcc').value) / 100;
+  const dccFtf = document.getElementById('af-dcc-ftf').checked;
+
+  const foreignDebited = amount + op;                 // local-currency total the ATM processes
+  const baseHome = foreignDebited * rate;             // mid-market value in home currency
+
+  // Decline DCC: home bank converts at network (≈ mid-market) and adds its FX fee.
+  const declFx   = baseHome * ftf;
+  const declTotal = baseHome + declFx + flat;
+
+  // Accept DCC: ATM converts at a marked-up rate; many cards still add their FX fee.
+  const dccConverted = baseHome * (1 + dcc);
+  const dccFxFee = dccFtf ? dccConverted * ftf : 0;
+  const accTotal = dccConverted + dccFxFee + flat;
+
+  const cashValue = amount * rate;                    // mid-market home value of the cash you keep
+  return {
+    amount, op, rate, ftf, flat, dcc, dccFtf, foreignDebited,
+    baseHome, declFx, declTotal, dccConverted, dccFxFee, accTotal,
+    cashValue,
+    penalty: accTotal - declTotal,
+    declFeeTotal: declTotal - cashValue,              // all fees over true cash value
+  };
+}
+
+function afRender(){
+  // keep state in sync with raw inputs
+  afData.amount = document.getElementById('af-amount').value;
+  afData.op     = document.getElementById('af-op').value;
+  afData.dcc    = document.getElementById('af-dcc').value;
+  afData.dccFtf = document.getElementById('af-dcc-ftf').checked;
+  afSave();
+
+  // Rate field visibility / label (hidden when no conversion needed)
+  const sameCur = afData.foreign === afData.home;
+  const rateFg = document.getElementById('af-rate-fg');
+  rateFg.style.display = sameCur ? 'none' : '';
+  document.getElementById('af-rate-pairlbl').textContent = sameCur ? '' : `— home ${afData.home} per 1 ${afData.foreign}`;
+  afRenderRateNote();
+
+  const results = document.getElementById('af-results');
+  const empty   = document.getElementById('af-empty');
+  const c = afCompute();
+
+  const needsRate = !sameCur && c.rate <= 0;
+  if (c.amount <= 0 || needsRate){
+    results.style.display = 'none';
+    empty.style.display = '';
+    empty.textContent = needsRate
+      ? 'Enter the mid-market exchange rate above to see the true cost.'
+      : 'Enter an amount to withdraw to see the true cost.';
+    return;
+  }
+  empty.style.display = 'none';
+  results.style.display = '';
+
+  const H = afData.home, F = afData.foreign;
+  const showDcc = c.dcc > 0;
+
+  // ── Penalty / verdict callout ──
+  const penaltyEl = document.getElementById('af-penalty');
+  if (showDcc){
+    const pct = c.declTotal > 0 ? (c.penalty / c.declTotal * 100) : 0;
+    penaltyEl.className = 'af-penalty';
+    penaltyEl.innerHTML =
+      `<span class="amt">+${afFmt(c.penalty, H)}</span>` +
+      `<span class="lbl">is what <strong>accepting DCC</strong> would cost you on this withdrawal — about <strong>${pct.toFixed(1)}% more</strong>. ` +
+      `When the ATM offers to charge you in ${afEsc(H)}, <strong>say no</strong> and pick ${afEsc(F)}.</span>`;
+  } else {
+    penaltyEl.className = 'af-penalty save';
+    penaltyEl.innerHTML =
+      `<span class="amt">✓ ${afFmt(c.declTotal, H)}</span>` +
+      `<span class="lbl">total for this withdrawal. Set a DCC markup above to see what accepting "charge in ${afEsc(H)}" would add.</span>`;
+  }
+
+  // ── Comparison cards ──
+  const declBreak = afBreakRows(c, false);
+  let cards =
+    `<div class="af-rcard good">
+       <span class="af-rcard-tag">✓ Recommended</span>
+       <div class="af-rcard-ttl">Pay in local currency</div>
+       <div class="af-rcard-sub">Decline DCC — your bank converts</div>
+       <div class="af-rcard-big">${afFmt(c.declTotal, H)}</div>
+       <div class="af-rcard-rate">effective: 1 ${afEsc(F)} = ${afFmtRate(c.declTotal / c.amount, H)} all-in</div>
+       <div class="af-break">${declBreak}</div>
+     </div>`;
+  if (showDcc){
+    const accBreak = afBreakRows(c, true);
+    cards +=
+      `<div class="af-rcard bad">
+         <span class="af-rcard-tag">✗ Avoid</span>
+         <div class="af-rcard-ttl">Pay in home currency</div>
+         <div class="af-rcard-sub">Accept DCC — the ATM converts</div>
+         <div class="af-rcard-big">${afFmt(c.accTotal, H)}</div>
+         <div class="af-rcard-rate">effective: 1 ${afEsc(F)} = ${afFmtRate(c.accTotal / c.amount, H)} all-in</div>
+         <div class="af-break">${accBreak}</div>
+       </div>`;
+  }
+  document.getElementById('af-compare').innerHTML = cards;
+
+  // ── Fact strip (based on the recommended path) ──
+  const feePct = c.cashValue > 0 ? (c.declFeeTotal / c.cashValue * 100) : 0;
+  document.getElementById('af-facts').innerHTML =
+    `<div class="af-fact"><div class="v">${afFmt(c.amount, F)}</div><div class="k">cash in hand</div></div>` +
+    `<div class="af-fact"><div class="v">${afFmt(c.declFeeTotal, H)}</div><div class="k">total fees (best case)</div></div>` +
+    `<div class="af-fact"><div class="v">${feePct.toFixed(1)}%</div><div class="k">fees as % of cash value</div></div>`;
+
+  // ── Smart hint ──
+  document.getElementById('af-hint').innerHTML = afHint(c, feePct);
+}
+
+function afBreakRows(c, isDcc){
+  const H = afData.home, F = afData.foreign;
+  const sameCur = F === H;
+  let rows = `<div class="row"><span>Cash dispensed</span><span class="v">${afFmt(c.amount, F)}</span></div>`;
+  if (c.op > 0)
+    rows += `<div class="row"><span>ATM operator surcharge</span><span class="v">${afFmt(c.op, F)}</span></div>`;
+  if (!sameCur){
+    if (isDcc){
+      rows += `<div class="row dcc"><span>Converted at DCC rate (+${(c.dcc*100).toFixed(1)}%)</span><span class="v">${afFmt(c.dccConverted, H)}</span></div>`;
+      if (c.dccFxFee > 0)
+        rows += `<div class="row muted"><span>+ card foreign-transaction fee</span><span class="v">${afFmt(c.dccFxFee, H)}</span></div>`;
+    } else {
+      rows += `<div class="row"><span>Converted at mid-market</span><span class="v">${afFmt(c.baseHome, H)}</span></div>`;
+      if (c.declFx > 0)
+        rows += `<div class="row muted"><span>+ card foreign-transaction fee</span><span class="v">${afFmt(c.declFx, H)}</span></div>`;
+    }
+  } else if (c.op > 0){
+    // same currency: operator fee already in home currency
+  }
+  if (c.flat > 0)
+    rows += `<div class="row muted"><span>+ out-of-network ATM fee</span><span class="v">${afFmt(c.flat, H)}</span></div>`;
+  rows += `<div class="row sum"><span>Total charged</span><span class="v">${afFmt(isDcc ? c.accTotal : c.declTotal, H)}</span></div>`;
+  return rows;
+}
+
+function afHint(c, feePct){
+  const H = afData.home;
+  const flatish = c.flat + (c.op * c.rate);     // fixed, withdrawal-size-independent fees (home value)
+  // Suggest the effect of withdrawing double.
+  if (flatish > 0 && c.amount > 0){
+    const dblValue = c.cashValue * 2;
+    const dblFees  = c.declFeeTotal + (c.baseHome * c.ftf);  // % fees double, flat fees stay
+    const dblPct   = dblValue > 0 ? (dblFees / dblValue * 100) : 0;
+    if (dblPct < feePct - 0.3){
+      return `💡 Flat fees (${afFmt(flatish, H)}) don't grow with the amount. Withdraw <strong>twice as much</strong> and your fee rate drops from <strong>${feePct.toFixed(1)}%</strong> to about <strong>${dblPct.toFixed(1)}%</strong> — take out more, less often.`;
+    }
+  }
+  if (c.ftf > 0){
+    return `💡 Your card's <strong>${(c.ftf*100).toFixed(1)}% foreign-transaction fee</strong> alone costs <strong>${afFmt(c.declFx, H)}</strong> here. A no-FX-fee debit or travel card would skip it entirely.`;
+  }
+  return `💡 You're already on a low-fee setup — just remember to <strong>decline DCC</strong> and the operator's offer to "convert for you" at the screen.`;
+}
+
+function afRenderRateNote(){
+  const note = document.getElementById('af-rate-note');
+  if (afData.foreign === afData.home){ note.innerHTML = ''; return; }
+  const cached = afCachedRate(afData.foreign, afData.home);
+  let html = '';
+  if (afData.rateAuto && cached != null){
+    html = `<span class="af-rate-badge">⚡ auto from Currency Converter</span><span>editable — uses your latest cached rate</span>`;
+  } else if (cached != null){
+    html = `<button class="af-rate-link" onclick="afUseCachedRate()">↻ Use cached rate (${afFmtRate(cached, afData.home)})</button>`;
+  } else {
+    html = `<span>Enter today's mid-market rate. <button class="af-rate-link" onclick="openTool('currency')">Open Currency Converter →</button></span>`;
+  }
+  note.innerHTML = html;
+}
+
+function afCopy(){
+  const c = afCompute();
+  if (c.amount <= 0) return;
+  const H = afData.home, F = afData.foreign;
+  const country = AF_COUNTRIES.find(x => x.id === afData.country);
+  const feePct = c.cashValue > 0 ? (c.declFeeTotal / c.cashValue * 100) : 0;
+  let t = `ATM FEE ESTIMATE${country ? ' — ' + country.n : ''}\n`;
+  t += `Withdraw ${afFmt(c.amount, F)} (cash in hand)\n\n`;
+  t += `✓ Pay in local currency (decline DCC): ${afFmt(c.declTotal, H)}\n`;
+  if (c.dcc > 0){
+    t += `✗ Pay in home currency (accept DCC):  ${afFmt(c.accTotal, H)}\n`;
+    t += `   → DCC would cost you +${afFmt(c.penalty, H)} extra\n`;
+  }
+  t += `\nFees (best case): ${afFmt(c.declFeeTotal, H)}  (${feePct.toFixed(1)}% of cash value)\n`;
+  if (c.flat > 0) t += `  • Bank ATM fee: ${afFmt(c.flat, H)}\n`;
+  if (c.declFx > 0) t += `  • Card FX fee (${(c.ftf*100).toFixed(1)}%): ${afFmt(c.declFx, H)}\n`;
+  if (c.op > 0) t += `  • Operator surcharge: ${afFmt(c.op, F)}\n`;
+  t += `\nAlways choose to be charged in ${F}, not ${H}.\n— via TripTools`;
+  const btn = document.getElementById('af-copy-btn');
+  const done = () => { if (btn){ const o = btn.textContent; btn.textContent = '✓ Copied'; setTimeout(() => btn.textContent = o, 1600); } };
+  if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(t).then(done).catch(() => afCopyFallback(t, done));
+  } else { afCopyFallback(t, done); }
+}
+function afCopyFallback(text, cb){
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta); cb && cb();
+  } catch(_){}
+}
+
+function afReset(){
+  if (!confirm('Reset the amount and fees? Country and currencies are kept.')) return;
+  const keep = { country: afData.country, foreign: afData.foreign, home: afData.home, rate: afData.rate, rateAuto: afData.rateAuto };
+  afData = Object.assign(afDefault(), keep);
+  afData.amount = ''; afData.op = '';
+  document.getElementById('af-amount').value = '';
+  document.getElementById('af-op').value = '';
+  document.getElementById('af-ftf').value = afData.ftf;
+  document.getElementById('af-flat').value = afData.flat;
+  document.getElementById('af-dcc').value = afData.dcc;
+  document.getElementById('af-dcc-ftf').checked = !!afData.dccFtf;
+  document.getElementById('af-bank').value = afData.bank;
+  afSave(); afRender();
 }
 
 /* ══════════════════════════════════════════════════════
