@@ -8115,6 +8115,96 @@ input:checked + .pb-toggle-box::after { transform:translateX(16px);background:#f
 .rh-legend i { width:9px;height:9px;border-radius:50%;display:inline-block; }
 
 /* ══════════════════════════════════════════════════════
+   PARK DAY OPTIMIZER CSS  (po-)
+   ══════════════════════════════════════════════════════ */
+.po-skip-note { font-size:12px;color:var(--muted);font-style:italic;margin:-2px 0 2px;line-height:1.5; }
+.po-prompt { text-align:center;padding:38px 24px;color:var(--muted);font-family:var(--serif);font-style:italic;font-size:18px;border:1.5px dashed var(--rule);border-radius:var(--r);margin-top:6px; }
+.po-prompt span { font-size:34px;display:block;margin-bottom:10px;font-style:normal; }
+
+/* Generated plan */
+.po-plan { margin-top:10px;animation:pb-in .22s cubic-bezier(.2,.8,.2,1) both; }
+.po-arrival { border:1.5px solid var(--ink);border-radius:var(--r);background:var(--ink);color:var(--paper);padding:18px 18px 16px;margin-bottom:18px; }
+.po-arrival .po-a-lbl { font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#cfc7b8;margin-bottom:8px; }
+.po-arrival .po-a-time { font-family:var(--serif);font-weight:600;font-size:30px;line-height:1.1;letter-spacing:-.01em;margin-bottom:8px; }
+.po-arrival .po-a-sub { font-size:13.5px;line-height:1.55;color:#e6dfd0; }
+.po-arrival .po-a-sub strong { color:#fff;font-weight:600; }
+
+.po-step { border:1.5px solid var(--ink);border-radius:var(--r);background:var(--paper);margin-bottom:14px;overflow:hidden; }
+.po-step-hdr { display:flex;align-items:baseline;gap:10px;padding:12px 15px 10px;border-bottom:1px solid var(--rule);flex-wrap:wrap; }
+.po-step-time { font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;color:var(--paper);background:var(--accent);padding:3px 8px;border-radius:2px;white-space:nowrap; }
+.po-step-time.po-t-cool { background:var(--blue); }
+.po-step-time.po-t-mid  { background:var(--orange); }
+.po-step-time.po-t-eve  { background:var(--purple); }
+.po-step-time.po-t-prep { background:var(--ink-2); }
+.po-step-hdr h4 { font-family:var(--serif);font-weight:600;font-size:18px;letter-spacing:-.01em;color:var(--ink);margin:0; }
+.po-step-body { padding:12px 15px;font-size:14px;line-height:1.6;color:var(--ink-2); }
+.po-step-body p { margin:0 0 9px; }
+.po-step-body p:last-child { margin-bottom:0; }
+.po-step-body strong { color:var(--ink);font-weight:600; }
+
+/* Rope-drop ordered list */
+.po-rd { list-style:none;margin:2px 0 0;padding:0;counter-reset:po-rd; }
+.po-rd li { display:flex;align-items:flex-start;gap:11px;padding:8px 0;border-bottom:1px dotted var(--rule);counter-increment:po-rd; }
+.po-rd li:last-child { border-bottom:none;padding-bottom:0; }
+.po-rd li::before { content:counter(po-rd);flex-shrink:0;width:24px;height:24px;border-radius:50%;background:var(--ink);color:var(--paper);font-family:var(--mono);font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;margin-top:1px; }
+.po-rd .po-rd-name { flex:1;min-width:0;font-size:14px;line-height:1.4;color:var(--ink);font-weight:500; }
+.po-rd .po-rd-tag { font-family:var(--mono);font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);background:var(--paper-2);border:1px solid var(--rule);padding:2px 7px;border-radius:2px;white-space:nowrap;margin-top:1px; }
+
+/* Skip-line callout inside steps + reference */
+.po-skip-tier { display:flex;gap:9px;padding:7px 0;border-bottom:1px dotted var(--rule);font-size:13.5px;line-height:1.55; }
+.po-skip-tier:last-child { border-bottom:none; }
+.po-skip-tier .po-sk-dot { flex-shrink:0;color:var(--accent);font-weight:700;line-height:1.5; }
+.po-verdict { margin-top:10px;padding:9px 12px;background:var(--paper-2);border-left:3px solid var(--green);border-radius:0 var(--r) var(--r) 0;font-size:13px;line-height:1.55;color:var(--ink-2); }
+.po-verdict strong { color:var(--ink); }
+
+/* Reference accordion */
+.po-ref { margin-top:6px; }
+.po-ref-grp { font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:18px 0 8px;border-bottom:1px solid var(--rule);padding-bottom:5px; }
+.po-ref details { border:1.5px solid var(--ink);border-radius:var(--r);background:var(--paper);margin-bottom:8px;overflow:hidden; }
+.po-ref summary { cursor:pointer;list-style:none;padding:12px 14px;display:flex;align-items:center;gap:10px;font-family:var(--serif);font-weight:600;font-size:16px;color:var(--ink);user-select:none; }
+.po-ref summary::-webkit-details-marker { display:none; }
+.po-ref summary .po-ref-loc { margin-left:auto;font-family:var(--mono);font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);font-weight:400; }
+.po-ref summary .po-ref-chev { transition:transform .18s;color:var(--muted);font-size:13px; }
+.po-ref details[open] summary { border-bottom:1px solid var(--rule); }
+.po-ref details[open] summary .po-ref-chev { transform:rotate(90deg); }
+.po-ref-body { padding:12px 14px;font-size:13.5px;line-height:1.6;color:var(--ink-2); }
+.po-ref-sub { font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;color:var(--ink);margin:12px 0 6px; }
+.po-ref-sub:first-child { margin-top:0; }
+.po-ref-body ul { margin:4px 0 0;padding-left:18px; }
+.po-ref-body li { margin-bottom:5px; }
+.po-ref-body strong { color:var(--ink);font-weight:600; }
+
+/* ══════════════════════════════════════════════════════
+   PARK DINING STRATEGY CSS  (pd-)
+   ══════════════════════════════════════════════════════ */
+.pd-cal { background:var(--paper-2);border:1.5px solid var(--ink);border-radius:var(--r);padding:14px; }
+.pd-open { border:1.5px solid var(--ink);border-radius:var(--r);padding:16px 16px 14px;margin-top:14px;background:var(--ink);color:var(--paper);animation:pb-in .2s cubic-bezier(.2,.8,.2,1) both; }
+.pd-open .pd-o-lbl { font-family:var(--mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:#cfc7b8;margin-bottom:7px; }
+.pd-open .pd-o-big { font-family:var(--serif);font-weight:600;font-size:26px;line-height:1.12;letter-spacing:-.01em;margin-bottom:8px; }
+.pd-open .pd-o-sub { font-size:13.5px;line-height:1.55;color:#e6dfd0; }
+.pd-open .pd-o-sub strong { color:#fff;font-weight:600; }
+.pd-open.pd-now { background:#1f4d24;border-color:#1f4d24; }
+.pd-open.pd-now .pd-o-lbl { color:#bfe3c2; }
+.pd-open.pd-now .pd-o-sub { color:#dcefdd; }
+.pd-rules { margin-top:12px;font-size:13.5px;line-height:1.6;color:var(--ink-2); }
+.pd-rules strong { color:var(--ink);font-weight:600; }
+
+.pd-count { font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:2px 0 10px; }
+.pd-rest { border:1.5px solid var(--ink);border-radius:var(--r);background:var(--paper);padding:12px 14px;margin-bottom:10px;animation:pb-in .2s cubic-bezier(.2,.8,.2,1) both; }
+.pd-rest-top { display:flex;align-items:baseline;gap:10px; }
+.pd-rest-name { font-family:var(--serif);font-weight:600;font-size:17px;letter-spacing:-.01em;color:var(--ink);flex:1;min-width:0;line-height:1.25; }
+.pd-rest-star { color:var(--orange);font-size:14px; }
+.pd-rest-price { font-family:var(--mono);font-size:13px;color:var(--green);font-weight:600;white-space:nowrap; }
+.pd-badges { display:flex;flex-wrap:wrap;gap:5px;margin:8px 0; }
+.pd-badge { font-family:var(--mono);font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;font-weight:600;padding:3px 7px;border-radius:2px;border:1px solid var(--rule);color:var(--ink-2);background:var(--paper-2); }
+.pd-badge.pd-r-must { background:var(--accent);color:#fff;border-color:var(--accent); }
+.pd-badge.pd-r-rec  { background:rgba(230,81,0,.12);color:var(--orange);border-color:rgba(230,81,0,.3); }
+.pd-badge.pd-r-walk { background:rgba(46,125,50,.12);color:var(--green);border-color:rgba(46,125,50,.3); }
+.pd-badge.pd-diet { background:var(--paper);color:var(--muted);text-transform:none;letter-spacing:.02em; }
+.pd-rest-note { font-size:13px;line-height:1.5;color:var(--ink-2);margin:2px 0 0; }
+.pd-finder-empty { text-align:center;padding:26px 18px;color:var(--muted);font-family:var(--serif);font-style:italic;font-size:15px;border:1.5px dashed var(--rule);border-radius:var(--r);line-height:1.5; }
+
+/* ══════════════════════════════════════════════════════
    TRIP JOURNAL CSS
    ══════════════════════════════════════════════════════ */
 .tj-trip-selector {
@@ -9274,16 +9364,85 @@ input:checked + .pb-toggle-box::after { transform:translateX(16px);background:#f
     </div>
   </div>
 </div>
-<div id="view-placeholder-park-optimizer" class="view">
-  <nav class="tool-topbar">
+<div id="view-park-optimizer" class="view">
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="window.print()">🖨 Print</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">🗺</span>
-    <h2>Park Day Optimizer</h2>
-    <p style="margin-bottom:24px">Rope-drop strategy, crowd timing & Lightning Lane tips for Disney & Universal.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-park-optimizer"></div>
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Offline</div>
+    <h1 class="tool-title">Park Day Optimizer</h1>
+    <p class="tool-sub">Tell us the park and a few details about your day, and we'll build an hour-by-hour game plan: when to arrive, what to rope-drop, how to use the paid skip-the-line system, and when to take a breather — across Disney, Universal, SeaWorld &amp; more.</p>
+  </div>
+  <div class="tool-body">
+
+    <!-- STEP 1: PARK -->
+    <div class="sec-lbl">Choose a Park</div>
+    <div class="fg" style="margin-bottom:14px">
+      <label for="po-park">Park / Resort</label>
+      <select id="po-park" onchange="poRender()"></select>
+    </div>
+    <div id="po-park-info" class="pb-info-card" style="margin-bottom:4px"></div>
+
+    <!-- STEP 2: CROWDS -->
+    <div class="sec-lbl" style="margin-top:24px">Expected Crowds</div>
+    <div class="chip-grp" id="po-crowd-chips" style="margin-bottom:4px">
+      <span class="chip" data-v="low" onclick="poSetChip('po-crowd-chips','crowd','low')">Low</span>
+      <span class="chip on" data-v="mod" onclick="poSetChip('po-crowd-chips','crowd','mod')">Moderate</span>
+      <span class="chip" data-v="high" onclick="poSetChip('po-crowd-chips','crowd','high')">High</span>
+      <span class="chip" data-v="peak" onclick="poSetChip('po-crowd-chips','crowd','peak')">Peak / Holiday</span>
+    </div>
+    <p class="po-skip-note">Not sure? Check the Best Time to Visit tool. Weekends, summer & holiday weeks skew High–Peak.</p>
+
+    <!-- STEP 3: STAY -->
+    <div class="sec-lbl" style="margin-top:22px">Where Are You Staying?</div>
+    <div class="chip-grp" id="po-stay-chips" style="margin-bottom:0">
+      <span class="chip on" data-v="onsite" onclick="poSetChip('po-stay-chips','stay','onsite')">On-site (early entry)</span>
+      <span class="chip" data-v="offsite" onclick="poSetChip('po-stay-chips','stay','offsite')">Off-site / day trip</span>
+    </div>
+
+    <!-- STEP 4: SKIP-THE-LINE -->
+    <div class="sec-lbl" style="margin-top:22px"><span id="po-skip-step-lbl">Skip-the-Line Plan</span></div>
+    <div class="chip-grp" id="po-skip-chips" style="margin-bottom:0"></div>
+
+    <!-- STEP 5: STYLE -->
+    <div class="sec-lbl" style="margin-top:22px">Touring Style</div>
+    <div class="chip-grp" id="po-style-chips" style="margin-bottom:0">
+      <span class="chip" data-v="thrill" onclick="poSetChip('po-style-chips','style','thrill')">Thrill-seekers</span>
+      <span class="chip on" data-v="balanced" onclick="poSetChip('po-style-chips','style','balanced')">A bit of everything</span>
+      <span class="chip" data-v="family" onclick="poSetChip('po-style-chips','style','family')">Family &amp; characters</span>
+    </div>
+
+    <!-- STEP 6: YOUNG KIDS -->
+    <div class="sec-lbl" style="margin-top:22px">Little Ones</div>
+    <div class="chip-grp" id="po-kids-chips" style="margin-bottom:0">
+      <span class="chip on" data-v="no" onclick="poSetChip('po-kids-chips','kids','no')">No young kids</span>
+      <span class="chip" data-v="yes" onclick="poSetChip('po-kids-chips','kids','yes')">Traveling with toddlers / preschoolers</span>
+    </div>
+
+    <!-- GENERATED PLAN -->
+    <div class="sec-lbl" style="margin-top:26px">Your Game Plan</div>
+    <div id="po-plan"></div>
+
+    <!-- PER-PARK REFERENCE -->
+    <div class="sec-lbl" style="margin-top:28px">Park-by-Park Strategy Guide</div>
+    <p style="font-size:13px;color:var(--ink-2);line-height:1.55;margin:0 0 6px">Quick reference for every park we cover — rope-drop targets, how the paid skip-the-line system works, and the timing tricks locals swear by.</p>
+    <div id="po-ref" class="po-ref"></div>
+
+  </div><!-- /tool-body -->
+
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    The single biggest lever on a park day is being at the gate <em>before</em> rope drop. The first hour after opening is worth two or three in the afternoon — you can knock out the headliners with walk-on waits while everyone else is still parking. Download the official park app the night before, set a wake-up alarm, and screenshot your plan so it works even with no signal in the queue.
+  </div>
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('ride-height')">📏 Ride Height Checker</button>
+      <button class="rel-btn" onclick="openTool('park-budget')">🎟 Theme Park Budget</button>
+      <button class="rel-btn" onclick="openTool('park-dining')">🍴 Park Dining Strategy</button>
+      <button class="rel-btn" onclick="openTool('best-time')">📅 Best Time to Visit</button>
     </div>
   </div>
 </div>
@@ -9339,16 +9498,69 @@ input:checked + .pb-toggle-box::after { transform:translateX(16px);background:#f
     </div>
   </div>
 </div>
-<div id="view-placeholder-park-dining" class="view">
-  <nav class="tool-topbar">
+<div id="view-park-dining" class="view">
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="window.print()">🖨 Print</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">🍴</span>
-    <h2>Park Dining Strategy</h2>
-    <p style="margin-bottom:24px">ADR windows, which restaurants need reservations, value picks & dietary guidance.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-park-dining"></div>
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Offline</div>
+    <h1 class="tool-title">Park Dining Strategy</h1>
+    <p class="tool-sub">Know exactly when to book, what's worth reserving, where to find the best value, and how each resort handles dietary needs — so you're never stuck hungry or shut out of the table you wanted.</p>
+  </div>
+  <div class="tool-body">
+
+    <!-- SECTION 1: BOOKING WINDOW -->
+    <div class="sec-lbl">When Do Reservations Open?</div>
+    <div class="pd-cal">
+      <div class="frow" style="margin-bottom:0">
+        <div class="fg">
+          <label for="pd-resort">Resort</label>
+          <select id="pd-resort" onchange="pdCalc()"></select>
+        </div>
+        <div class="fg">
+          <label for="pd-date">Your Arrival Date</label>
+          <input type="date" id="pd-date" oninput="pdCalc()">
+        </div>
+      </div>
+      <div id="pd-cal-result"></div>
+    </div>
+
+    <!-- SECTION 2: RESTAURANT FINDER -->
+    <div class="sec-lbl" style="margin-top:26px">Find a Restaurant</div>
+    <div class="fg" style="margin-bottom:12px">
+      <label for="pd-park">Park</label>
+      <select id="pd-park" onchange="pdRenderFinder()"></select>
+    </div>
+    <div class="chip-grp" id="pd-filter-chips" style="margin-bottom:8px">
+      <span class="chip on" data-v="all"  onclick="pdSetFilter('all')">All</span>
+      <span class="chip" data-v="must"  onclick="pdSetFilter('must')">Must-book</span>
+      <span class="chip" data-v="walk"  onclick="pdSetFilter('walk')">Walk-up OK</span>
+      <span class="chip" data-v="value" onclick="pdSetFilter('value')">Value picks</span>
+      <span class="chip" data-v="char"  onclick="pdSetFilter('char')">Character meals</span>
+      <span class="chip" data-v="veg"   onclick="pdSetFilter('veg')">Veg &amp; vegan</span>
+    </div>
+    <div id="pd-finder"></div>
+
+    <!-- SECTION 3: REFERENCE -->
+    <div class="sec-lbl" style="margin-top:28px">Resort-by-Resort Dining Guide</div>
+    <p style="font-size:13px;color:var(--ink-2);line-height:1.55;margin:0 0 6px">When booking opens, what to prioritize, the best value picks, and how each resort handles allergies &amp; dietary needs.</p>
+    <div id="pd-ref" class="po-ref"></div>
+
+  </div><!-- /tool-body -->
+
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    At Walt Disney World and Disneyland the most sought-after tables — Cinderella's Royal Table, Space 220, Oga's Cantina, Blue Bayou — can vanish within minutes of the 60-day window opening. Set an alarm, log in early, have a backup date in mind, and keep checking back: cancellations free up tables constantly, especially in the 24–48 hours before your visit.
+  </div>
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('park-optimizer')">🗺 Park Day Optimizer</button>
+      <button class="rel-btn" onclick="openTool('park-budget')">🎟 Theme Park Budget</button>
+      <button class="rel-btn" onclick="openTool('ride-height')">📏 Ride Height Checker</button>
+      <button class="rel-btn" onclick="openTool('best-time')">📅 Best Time to Visit</button>
     </div>
   </div>
 </div>
@@ -10613,9 +10825,9 @@ const TOOLS = [
   {id:'sea-sick',      nm:'Sea Sickness Guide',         ico:'🌊', ph:'cruise',     on:false,live:false, ds:'Prevention, treatment & best cabin locations for motion sickness.'},
   {id:'cruise-day',    nm:'Cruise Day Planner',         ico:'📆', ph:'cruise',     on:false,live:true,  ds:'Visual calendar: sea day vs. port day modes.'},
   {id:'park-budget',   nm:'Theme Park Budget',          ico:'🎟', ph:'theme',      on:false,live:true,  ds:'Tickets, food, merch & parking — total cost for any party size.'},
-  {id:'park-optimizer',nm:'Park Day Optimizer',         ico:'🗺', ph:'theme',      on:false,live:false, ds:'Rope-drop strategy & Lightning Lane tips for Disney & Universal.'},
+  {id:'park-optimizer',nm:'Park Day Optimizer',         ico:'🗺', ph:'theme',      on:false,live:true,  ds:'Builds an hour-by-hour park day plan: arrival time, rope-drop order, skip-the-line strategy & crowd timing for Disney, Universal, SeaWorld & more.'},
   {id:'ride-height',   nm:'Ride Height Checker',        ico:'📏', ph:'theme',      on:false,live:true,  ds:'Height requirements across Disney, Universal, SeaWorld & more. Check who can ride what.'},
-  {id:'park-dining',   nm:'Park Dining Strategy',       ico:'🍴', ph:'theme',      on:false,live:false, ds:'ADR windows, value picks & dietary restriction guidance.'},
+  {id:'park-dining',   nm:'Park Dining Strategy',       ico:'🍴', ph:'theme',      on:false,live:true,  ds:'When reservations open, which tables to book, the best value picks & dietary guidance across Disney, Universal & more.'},
   {id:'per-diem',      nm:'Per Diem Calculator',        ico:'📋', ph:'business',   on:false,live:false, ds:'US GSA per diem rates by city. International via State Dept.'},
   {id:'expense-report',nm:'Expense Report Builder',     ico:'🧾', ph:'business',   on:false,live:true,  ds:'Log business expenses. Per diem vs. actual. Mileage, billable, receipts. Export CSV.'},
   {id:'meeting-tz',    nm:'Meeting Time Zone Planner',  ico:'🗓', ph:'business',   on:false,live:true,  ds:'Participants + cities + work hours → color-coded overlap grid and copy-paste invite text.'},
@@ -11281,6 +11493,8 @@ function injectTripCtx(id) {
   if(id==='trip-journal') tjInit();
   if(id==='park-budget') pbInit();
   if(id==='ride-height') rhInit();
+  if(id==='park-optimizer') poInit();
+  if(id==='park-dining') pdInit();
   if(id==='biz-packing') bpInit();
   if(id==='group-trip') gtInit();
   if(id==='itinerary') ibInit();
@@ -20029,6 +20243,811 @@ function rhFmtDiff(diffInches) {
 function rhEsc(s) {
   return String(s == null ? '' : s).replace(/[&<>"']/g, c =>
     ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+}
+
+/* ══════════════════════════════════════════════════════
+   PARK DAY OPTIMIZER  (id: park-optimizer)
+   Builds an hour-by-hour game plan + a per-park reference.
+   Reuses RH_PARKS / RH_GROUPS for park names, locations & grouping.
+   ══════════════════════════════════════════════════════ */
+
+// Resort-level paid skip-the-line systems. Keyed by RH_PARKS[pid].resort.
+const PO_SKIP = {
+  'Walt Disney World': {
+    name:'Lightning Lane', chip:'Lightning Lane Multi', hasMax:true, maxChip:'Multi + Single Pass',
+    tiers:[
+      'Multi Pass — pre-book 3 ride times in the My Disney Experience app (7 days ahead for on-site guests, 3 days for everyone else), then add another each time you tap in.',
+      'Single Pass — pay per ride for the one or two top headliners not in Multi Pass (TRON, Guardians: Cosmic Rewind, Rise of the Resistance). Buy at 7:00 AM the day of your visit.',
+      'Premier Pass — one flat price to skip every Lightning Lane once; expensive, but the ultimate peak-day shortcut.'
+    ],
+    worthIt:'Worth it on Moderate days and up. Book your hardest ride first, then stack the rest around lunch and the afternoon heat.'
+  },
+  'Disneyland Resort': {
+    name:'Lightning Lane', chip:'Lightning Lane Multi', hasMax:true, maxChip:'Multi + Single Pass',
+    tiers:[
+      'Multi Pass — buy it in the Disneyland app the morning of your visit; reserve your first ride at park open, then a new one as each is redeemed.',
+      'Single Pass — a per-ride purchase for the very top headliners like Rise of the Resistance and Radiator Springs Racers.'
+    ],
+    worthIt:'Disneyland is compact and walkable, so Multi Pass pays off most on weekends, holidays and during events.'
+  },
+  'Universal Orlando': {
+    name:'Universal Express', chip:'Universal Express', hasMax:false,
+    tiers:[
+      'Express Pass — skip the regular line once per ride; Express Unlimited skips as many times as you like.',
+      'FREE with a stay at a Premier hotel (Hard Rock, Portofino Bay, Royal Pacific) — Express Unlimited for two parks, often cheaper than buying it for a family.',
+      'Not valid on a few rides (notably Hagrid’s) and sold separately for Epic Universe.'
+    ],
+    worthIt:'On High and Peak days Express can save 3–4 hours. If you skip it, rope-drop the rides Express doesn’t cover first.'
+  },
+  'Universal Studios Hollywood': {
+    name:'Universal Express', chip:'Universal Express', hasMax:false,
+    tiers:[
+      'Universal Express — one skip per ride and attraction for the day, sold as a ticket tier above general admission.',
+      'VIP Experience — a guided small-group tour with unlimited front-of-line access plus backlot extras.'
+    ],
+    worthIt:'Hollywood is a single park that crowds fast — Express can be the difference between 5 rides and 15.'
+  },
+  'SeaWorld': {
+    name:'Quick Queue', chip:'Quick Queue', hasMax:false,
+    tiers:[
+      'Quick Queue — reserved skip-the-line access, once per ride.',
+      'Quick Queue Unlimited — skip as many times as you like on the big coasters; the better value on busy days.'
+    ],
+    worthIt:'Coaster lines spike after lunch. Unlimited is worth it on weekends and during seasonal events.'
+  },
+  'Busch Gardens': {
+    name:'Quick Queue', chip:'Quick Queue', hasMax:false,
+    tiers:[
+      'Quick Queue — a reserved one-time skip per coaster.',
+      'Quick Queue Unlimited — unlimited skips; the move on hot, crowded afternoons.'
+    ],
+    worthIt:'With Iron Gwazi and Tigris drawing the longest waits, Unlimited pays for itself on a busy day.'
+  },
+  'Six Flags': {
+    name:'THE FLASH Pass', chip:'FLASH Pass', hasMax:false,
+    tiers:[
+      'THE FLASH Pass (Gold) — a virtual queue app/device holds your place in line while you wait elsewhere.',
+      'Platinum & Diamond — shorter virtual waits and repeat-ride privileges on the headliners.'
+    ],
+    worthIt:'Six Flags lines move slowly — a higher FLASH Pass tier is the single biggest time-saver on a busy summer day.'
+  },
+  'Knott’s Berry Farm': {
+    name:'Fast Lane', chip:'Fast Lane', hasMax:false,
+    tiers:[
+      'Fast Lane — a wristband for expedited boarding on the major rides throughout the day.'
+    ],
+    worthIt:'A single Fast Lane wristband transforms a crowded Saturday; skip it on a quiet weekday morning.'
+  }
+};
+
+// RH_PARKS uses the apostrophe form "Knott's Berry Farm"; PO_SKIP key uses a typographic apostrophe.
+// Normalise so lookups always succeed.
+function poSkipFor(pid) {
+  const resort = (RH_PARKS[pid] || {}).resort || '';
+  return PO_SKIP[resort] || PO_SKIP[resort.replace(/'/g, '’')] || PO_SKIP['Knott’s Berry Farm'];
+}
+
+// Per-park strategy data, keyed by the same IDs as RH_PARKS.
+// ropeDrop entries: { n: ride name, s: 't' thrill | 'f' family | 'b' both }
+const PO_PARKS = {
+  /* ── Walt Disney World ── */
+  'wdw-magic': { earlyEntry:true,
+    ropeDrop:[ {n:'Seven Dwarfs Mine Train',s:'b'}, {n:'Peter Pan’s Flight',s:'f'}, {n:'Tiana’s Bayou Adventure',s:'b'}, {n:'Space Mountain',s:'t'}, {n:'Big Thunder Mountain Railroad',s:'t'}, {n:'TRON Lightcycle / Run',s:'t'} ],
+    tips:[
+      'Seven Dwarfs Mine Train and Peter Pan’s Flight build the longest standby lines in the park — ride them in the first 30 minutes or the last 30.',
+      'TRON Lightcycle / Run uses a free virtual queue — join at 7:00 AM sharp in the app, with Lightning Lane Single Pass as a paid backup.',
+      'Fantasyland and the back of the park empty out during parades; use parade times to ride.'
+    ],
+    closing:'Watch the nighttime fireworks from Main Street, then ride headliners during the show and the 30 minutes after — waits crater.' },
+  'wdw-epcot': { earlyEntry:true,
+    ropeDrop:[ {n:'Guardians of the Galaxy: Cosmic Rewind',s:'t'}, {n:'Remy’s Ratatouille Adventure',s:'f'}, {n:'Test Track',s:'t'}, {n:'Frozen Ever After',s:'f'}, {n:'Soarin’ Around the World',s:'b'} ],
+    tips:[
+      'Guardians: Cosmic Rewind is virtual-queue only — grab a boarding group at 7:00 AM (and again at 1:00 PM) in the app; Single Pass is the paid alternative.',
+      'Remy’s and Frozen Ever After sit in World Showcase, which opens later than the front of the park — Lightning Lane them or visit at dinner.',
+      'World Showcase pavilions are quiet at opening and after 8 PM — perfect for the slower, walk-through experiences.'
+    ],
+    closing:'End your night with the lagoon fireworks; stake out a spot along World Showcase 30–45 minutes early.' },
+  'wdw-hs': { earlyEntry:true,
+    ropeDrop:[ {n:'Star Wars: Rise of the Resistance',s:'b'}, {n:'Slinky Dog Dash',s:'f'}, {n:'Mickey & Minnie’s Runaway Railway',s:'b'}, {n:'Millennium Falcon: Smugglers Run',s:'t'}, {n:'The Twilight Zone Tower of Terror',s:'t'}, {n:'Rock ’n’ Roller Coaster',s:'t'} ],
+    tips:[
+      'Hollywood Studios is the hardest WDW park to tour — having Lightning Lane Multi Pass here matters most.',
+      'Slinky Dog Dash and Rise of the Resistance are the two big bottlenecks; rope-drop one and Lightning Lane the other.',
+      'Rise of the Resistance sells as Lightning Lane Single Pass — buy it at 7 AM if you don’t want to rope-drop it.'
+    ],
+    closing:'Fantasmic! and the evening shows pull crowds off the rides — late evening is prime time for the coasters.' },
+  'wdw-ak': { earlyEntry:true,
+    ropeDrop:[ {n:'Avatar Flight of Passage',s:'b'}, {n:'Na’vi River Journey',s:'f'}, {n:'Expedition Everest',s:'t'}, {n:'Kilimanjaro Safaris',s:'f'} ],
+    tips:[
+      'Flight of Passage has the longest line in all of Disney World — make it your very first stop, or use Lightning Lane.',
+      'Do Kilimanjaro Safaris early or late; animals are most active in the cooler hours and hide in the midday heat.',
+      'Animal Kingdom closes earlier than the other parks — front-load your must-dos.'
+    ],
+    closing:'Catch the Tree of Life Awakenings and any river show before the park’s early close.' },
+
+  /* ── Disneyland Resort ── */
+  'dl-disneyland': { earlyEntry:true,
+    ropeDrop:[ {n:'Star Wars: Rise of the Resistance',s:'b'}, {n:'Space Mountain',s:'t'}, {n:'Indiana Jones Adventure',s:'t'}, {n:'Matterhorn Bobsleds',s:'t'}, {n:'Tiana’s Bayou Adventure',s:'b'}, {n:'Peter Pan’s Flight',s:'f'} ],
+    tips:[
+      'Disneyland is compact — you can rope-drop two or three headliners before the crowds arrive if you move quickly.',
+      'Buy Lightning Lane Multi Pass in the app at 7 AM; Disneyland sells it day-of, so set an alarm.',
+      'Peter Pan’s Flight gets a long line fast — hit it first thing or during fireworks.'
+    ],
+    closing:'Watch the fireworks or night show, then ride during and after — Disneyland’s late-night waits are the shortest of the day.' },
+  'dl-dca': { earlyEntry:true,
+    ropeDrop:[ {n:'Radiator Springs Racers',s:'b'}, {n:'WEB SLINGERS: A Spider-Man Adventure',s:'f'}, {n:'Guardians of the Galaxy – Mission: BREAKOUT!',s:'t'}, {n:'Incredicoaster',s:'t'} ],
+    tips:[
+      'Radiator Springs Racers is the must-do — rope-drop it or grab Lightning Lane Single Pass the second it opens.',
+      'WEB SLINGERS builds a long line quickly; pair it with a Lightning Lane reservation.',
+      'Cars Land glows after dark — save photos for the evening when ride lines drop.'
+    ],
+    closing:'World of Color (when running) clears the rides — ride during the water show, not before it.' },
+
+  /* ── Universal Orlando ── */
+  'uo-usf': { earlyEntry:true,
+    ropeDrop:[ {n:'Harry Potter and the Escape from Gringotts',s:'b'}, {n:'Hollywood Rip Ride Rockit',s:'t'}, {n:'Revenge of the Mummy',s:'t'}, {n:'MEN IN BLACK Alien Attack',s:'b'}, {n:'TRANSFORMERS: The Ride 3D',s:'t'} ],
+    tips:[
+      'Diagon Alley (Gringotts) is tucked in the back — head straight there at opening before it bottlenecks.',
+      'Ride the Hogwarts Express between the two parks early; its line grows all day.',
+      'Most rides here accept Universal Express — with it, ride out of order and skip the standby planning.'
+    ],
+    closing:'Catch the nighttime lagoon show, then ride as the park empties toward closing.' },
+  'uo-ioa': { earlyEntry:true,
+    skipExclude:'Express Pass does NOT cover Hagrid’s Magical Creatures Motorbike Adventure — you must ride standby or rope-drop it.',
+    ropeDrop:[ {n:'Hagrid’s Magical Creatures Motorbike Adventure',s:'b'}, {n:'Jurassic World VelociCoaster',s:'t'}, {n:'Harry Potter and the Forbidden Journey',s:'b'}, {n:'The Incredible Hulk Coaster',s:'t'}, {n:'The Amazing Adventures of Spider-Man',s:'f'} ],
+    tips:[
+      'Hagrid’s is the single longest wait at Universal and is NOT covered by Express — rope-drop it first, period.',
+      'VelociCoaster is the second-longest line; ride it right after Hagrid’s or late in the day.',
+      'Hogsmeade is gorgeous and quiet first thing — explore before the crowds fill the streets.'
+    ],
+    closing:'Hogsmeade at night is worth lingering for; ride the big coasters in the final hour.' },
+  'uo-epic': { earlyEntry:true,
+    skipExclude:'Epic Universe Express is sold separately from the standard Universal Orlando two-park Express Pass.',
+    ropeDrop:[ {n:'Stardust Racers',s:'t'}, {n:'Harry Potter and the Battle at the Ministry',s:'b'}, {n:'Monsters Unchained: The Frankenstein Experiment',s:'t'}, {n:'Mario Kart: Bowser’s Challenge',s:'f'}, {n:'Hiccup’s Wing Gliders',s:'f'} ],
+    tips:[
+      'Epic Universe is brand new and in extreme demand — Early Entry for on-site guests is a huge advantage here.',
+      'Super Nintendo World and the Ministry of Magic draw the biggest crowds; rope-drop one and save the other for evening.',
+      'Epic Universe sells its own separate Express Pass — it is not included with the standard two-park Express.'
+    ],
+    closing:'The lands are spectacular after dark — tour the themed worlds in the evening once ride waits ease.' },
+
+  /* ── Universal Studios Hollywood ── */
+  'ush': { earlyEntry:false,
+    ropeDrop:[ {n:'Mario Kart: Bowser’s Challenge',s:'f'}, {n:'Harry Potter and the Forbidden Journey',s:'b'}, {n:'Jurassic World – The Ride',s:'t'}, {n:'Revenge of the Mummy – The Ride',s:'t'}, {n:'TRANSFORMERS: The Ride-3D',s:'t'} ],
+    tips:[
+      'Head to the Lower Lot first (Jurassic World, Transformers, Mummy) — the escalators down create a bottleneck later.',
+      'Do the Studio Tour midday when ride lines peak; it has huge capacity and shorter relative waits.',
+      'Super Nintendo World can need a free virtual line on busy days — grab a return time early in the app.'
+    ],
+    closing:'Stay for the evening — the Lower Lot and Nintendo World clear out near closing.' },
+
+  /* ── SeaWorld ── */
+  'sw-orlando': { earlyEntry:false,
+    ropeDrop:[ {n:'Pipeline: The Surf Coaster',s:'t'}, {n:'Mako',s:'t'}, {n:'Ice Breaker',s:'t'}, {n:'Kraken',s:'t'}, {n:'Manta',s:'t'} ],
+    tips:[
+      'SeaWorld is coaster-heavy and walkable — knock out Mako, Kraken and Manta in a morning loop before lines build.',
+      'Shows run on a schedule — plan your coaster laps around showtimes and ride during the big shows.',
+      'The Florida afternoon heat thins the coaster crowds; midday can be a sweet spot if you can take the sun.'
+    ],
+    closing:'During event nights (Howl-O-Scream, Christmas), coaster waits drop once the houses and shows open.' },
+  'sw-sandiego': { earlyEntry:false,
+    ropeDrop:[ {n:'Emperor',s:'t'}, {n:'Electric Eel',s:'t'}, {n:'Manta',s:'t'}, {n:'Journey to Atlantis',s:'b'} ],
+    tips:[
+      'Emperor and Electric Eel are the headliners — ride them first while the park is quiet.',
+      'Coastal mornings can be cool and uncrowded; the park fills up by late morning.',
+      'Build your day around the show schedule and ride between performances.'
+    ],
+    closing:'Evenings during seasonal events offer the shortest coaster lines of the day.' },
+
+  /* ── Busch Gardens ── */
+  'bg-tampa': { earlyEntry:false,
+    ropeDrop:[ {n:'Iron Gwazi',s:'t'}, {n:'Tigris',s:'t'}, {n:'Cheetah Hunt',s:'t'}, {n:'SheiKra',s:'t'}, {n:'Montu',s:'t'} ],
+    tips:[
+      'Iron Gwazi is the must-ride and draws the longest line — make it your first stop at opening.',
+      'The park is large; do the far coasters (Montu, Cheetah Hunt) early and work back toward the entrance.',
+      'Tampa heat is brutal by midday — front-load coasters and use the water rides or animal areas in the afternoon.'
+    ],
+    closing:'Quick Queue Unlimited pays off on hot, busy days when standby waits balloon after lunch.' },
+
+  /* ── Six Flags ── */
+  'sf-magic': { earlyEntry:false,
+    ropeDrop:[ {n:'X2',s:'t'}, {n:'Twisted Colossus',s:'t'}, {n:'Tatsu',s:'t'}, {n:'Full Throttle',s:'t'}, {n:'Goliath',s:'t'} ],
+    tips:[
+      'X2 and Twisted Colossus have the slowest-loading, longest lines — ride them first thing.',
+      'Magic Mountain is hilly and huge; plan a loop so you’re not backtracking up the mountain.',
+      'Lines balloon by late morning on weekends — a FLASH Pass is the biggest time-saver here.'
+    ],
+    closing:'Cooler evenings bring shorter lines; save a few re-rides for the last hour.' },
+  'sf-great': { earlyEntry:false,
+    ropeDrop:[ {n:'El Toro',s:'t'}, {n:'Nitro',s:'t'}, {n:'Jersey Devil Coaster',s:'t'}, {n:'Batman: The Ride',s:'t'}, {n:'Superman: Ultimate Flight',s:'t'} ],
+    tips:[
+      'El Toro and Jersey Devil Coaster draw the longest lines — start there before the park fills.',
+      'The park is sprawling; ride the back-of-park coasters early and work toward the entrance.',
+      'Summer weekends get extremely busy — a higher FLASH Pass tier is well worth it.'
+    ],
+    closing:'Evening rides are cooler and quicker; end on the big coasters as the crowds thin.' },
+
+  /* ── Knott's Berry Farm ── */
+  'kbf': { earlyEntry:false,
+    ropeDrop:[ {n:'Xcelerator: The Ride',s:'t'}, {n:'GhostRider',s:'t'}, {n:'HangTime',s:'t'}, {n:'Silver Bullet',s:'t'}, {n:'Montezooma: The Forbidden Fortress',s:'t'} ],
+    tips:[
+      'Xcelerator and GhostRider build the longest lines — ride them in the first hour.',
+      'Knott’s is compact, so a morning loop can cover every major coaster before lunch.',
+      'Weekends and Knott’s Scary Farm nights get packed — a Fast Lane wristband transforms the day.'
+    ],
+    closing:'During Scary Farm, ride coasters while guests are in the mazes — waits drop sharply after dark.' }
+};
+
+const PO_STATE_KEY = 'tt_po_state';
+const PO_CROWD_LBL = { low:'low-crowd', mod:'moderate', high:'high-crowd', peak:'peak' };
+const PO_RD_TAG    = { t:'Thrill', f:'Family', b:'Top pick' };
+const PO_ARRIVE    = { low:30, mod:45, high:60, peak:75 };
+const PO_RD_COUNT  = { low:3, mod:4, high:5, peak:5 };
+
+let poState = { park:'wdw-magic', crowd:'mod', stay:'onsite', skip:'none', style:'balanced', kids:'no' };
+let poSelectBuilt = false, poRefBuilt = false;
+
+function poSave() {
+  try { localStorage.setItem(PO_STATE_KEY, JSON.stringify(poState)); } catch(_) {}
+}
+
+function poInit() {
+  // Restore saved choices
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(PO_STATE_KEY) || 'null'); } catch(_) {}
+  if (saved && typeof saved === 'object') poState = Object.assign(poState, saved);
+  if (!PO_PARKS[poState.park]) poState.park = 'wdw-magic';
+
+  // Build the park <select> once (mirrors the Ride Height Checker)
+  if (!poSelectBuilt) {
+    const sel = document.getElementById('po-park');
+    sel.innerHTML = RH_GROUPS.map(g =>
+      `<optgroup label="${g.label}">` +
+      g.parks.map(pid => `<option value="${pid}">${rhEsc(RH_PARKS[pid].name)}</option>`).join('') +
+      `</optgroup>`).join('');
+    poSelectBuilt = true;
+  }
+  document.getElementById('po-park').value = poState.park;
+
+  // Reflect saved chip state for the static chip groups
+  poSyncChips('po-crowd-chips', poState.crowd);
+  poSyncChips('po-stay-chips',  poState.stay);
+  poSyncChips('po-style-chips', poState.style);
+  poSyncChips('po-kids-chips',  poState.kids);
+
+  if (!poRefBuilt) { poBuildRef(); poRefBuilt = true; }
+  poRender();
+}
+
+function poSyncChips(grpId, val) {
+  document.querySelectorAll('#' + grpId + ' .chip').forEach(c =>
+    c.classList.toggle('on', c.dataset.v === val));
+}
+
+function poSetChip(grpId, field, val) {
+  poState[field] = val;
+  poSyncChips(grpId, val);
+  poSave();
+  poRender();
+}
+
+// Reorder the rope-drop list by touring style (stable).
+function poOrderRopeDrop(list, style) {
+  if (style === 'balanced') return list.slice();
+  const rank = style === 'thrill' ? { t:0, b:1, f:2 } : { f:0, b:1, t:2 };
+  return list.map((r,i) => ({ r, i }))
+             .sort((a,b) => (rank[a.r.s] - rank[b.r.s]) || (a.i - b.i))
+             .map(x => x.r);
+}
+
+function poRender() {
+  const pid  = document.getElementById('po-park').value;
+  poState.park = pid;
+  const meta = RH_PARKS[pid];
+  const park = PO_PARKS[pid];
+  const sk   = poSkipFor(pid);
+  const info = document.getElementById('po-park-info');
+  info.innerHTML = `<strong>${rhEsc(meta.name)}</strong> · ${rhEsc(meta.loc)} · ${park.ropeDrop.length} headliners · ${rhEsc(sk.name)}`;
+
+  // Rebuild the skip-the-line chips for this resort (options vary by park)
+  document.getElementById('po-skip-step-lbl').textContent = sk.name + ' Plan';
+  const opts = [{ v:'none', l:'Standby only' }, { v:'paid', l:sk.chip }];
+  if (sk.hasMax) opts.push({ v:'paidmax', l:sk.maxChip });
+  if (!opts.some(o => o.v === poState.skip)) poState.skip = 'none';
+  document.getElementById('po-skip-chips').innerHTML = opts.map(o =>
+    `<span class="chip${o.v === poState.skip ? ' on' : ''}" data-v="${o.v}" onclick="poSetChip('po-skip-chips','skip','${o.v}')">${rhEsc(o.l)}</span>`).join('');
+
+  document.getElementById('po-plan').innerHTML = poBuildPlan(pid);
+  poSave();
+}
+
+function poStep(timeCls, time, title, bodyHtml) {
+  return `<div class="po-step">
+    <div class="po-step-hdr"><span class="po-step-time ${timeCls}">${rhEsc(time)}</span><h4>${rhEsc(title)}</h4></div>
+    <div class="po-step-body">${bodyHtml}</div>
+  </div>`;
+}
+
+function poBuildPlan(pid) {
+  const meta  = RH_PARKS[pid];
+  const park  = PO_PARKS[pid];
+  const sk    = poSkipFor(pid);
+  const crowd = poState.crowd, stay = poState.stay, skip = poState.skip,
+        style = poState.style, kids = poState.kids === 'yes';
+  const clabel = PO_CROWD_LBL[crowd];
+  const offset = PO_ARRIVE[crowd];
+  const ee = park.earlyEntry && stay === 'onsite';
+
+  /* ── Arrival hero ── */
+  const arriveTime = ee
+    ? `Arrive ${offset} min before Early Entry`
+    : `Arrive ${offset} min before official opening`;
+  let arriveSub;
+  if (ee) {
+    arriveSub = 'On-site guests get in <strong>30–60 minutes early</strong>. Be at the gate when Early Entry begins — not when the park officially opens — and head straight to your first ride.';
+  } else if (park.earlyEntry) {
+    arriveSub = 'You don’t get Early Entry, so beat that crowd by being at the tap-stiles the moment standard guests are let in. The pre-open line forms early — join it.';
+  } else {
+    arriveSub = 'Be through the entrance and security before the gates open so you’re moving the instant the rides start.';
+  }
+  const hero = `<div class="po-arrival">
+    <div class="po-a-lbl">Recommended arrival · ${rhEsc(clabel)} day</div>
+    <div class="po-a-time">${rhEsc(arriveTime)}</div>
+    <div class="po-a-sub">${arriveSub}</div>
+  </div>`;
+
+  /* ── Before you go ── */
+  const prep = poStep('po-t-prep', 'The night before', 'Before You Go',
+    '<p><strong>Buy tickets and lock in reservations early.</strong> Dining — and for some parks a park reservation — can be required and books out weeks ahead.</p>' +
+    '<p>Download the official park app, create your account and link your tickets. Set a <strong>7:00 AM alarm</strong>: that’s when most free virtual queues and paid passes open. Screenshot your plan so it works with no signal in the queue.</p>');
+
+  /* ── Rope drop ── */
+  const rides = poOrderRopeDrop(park.ropeDrop, style);
+  const n = Math.min(PO_RD_COUNT[crowd], rides.length);
+  const rdItems = rides.slice(0, n).map(r =>
+    `<li><span class="po-rd-name">${rhEsc(r.n)}</span><span class="po-rd-tag">${PO_RD_TAG[r.s]}</span></li>`).join('');
+  const styleNote = style === 'thrill' ? 'We’ve put the biggest thrills first.'
+                  : style === 'family' ? 'We’ve front-loaded the family rides and characters.'
+                  : 'This is the highest-demand order — adjust to taste.';
+  const ropeStep = poStep('po-t-cool', 'Park open – 11 AM', 'Rope Drop: Hit These First',
+    `<p>The first hour is worth two or three in the afternoon. Move fast and knock these out while waits are near walk-on — ${rhEsc(styleNote)}</p>` +
+    `<ol class="po-rd">${rdItems}</ol>`);
+
+  /* ── Skip the line ── */
+  let skipBody;
+  if (skip === 'none') {
+    if (crowd === 'high' || crowd === 'peak') {
+      skipBody = `<p><strong>Seriously consider buying ${rhEsc(sk.name)}.</strong> ${sk.worthIt}</p>` +
+                 `<div class="po-verdict">On a ${rhEsc(clabel)} day without it, lean hard on rope drop and ride during shows, meals and the final hour — that’s where your time savings will come from.</div>`;
+    } else {
+      skipBody = `<p>You can likely skip the paid line system on a ${rhEsc(clabel)} day. Rope drop plus riding during shows and meals should keep your waits reasonable.</p>` +
+                 `<div class="po-verdict">Keep <strong>${rhEsc(sk.name)}</strong> in your back pocket — you can usually buy it on the spot if lines surprise you.</div>`;
+    }
+  } else {
+    const showTiers = (sk.hasMax && skip === 'paid') ? sk.tiers.slice(0, 1) : sk.tiers;
+    skipBody = `<p>Great call — here’s how to squeeze the most out of <strong>${rhEsc(sk.name)}</strong>:</p>` +
+               showTiers.map(t => `<div class="po-skip-tier"><span class="po-sk-dot">▸</span><span>${rhEsc(t)}</span></div>`).join('') +
+               `<div class="po-verdict">${rhEsc(sk.worthIt)}</div>`;
+  }
+  if (park.skipExclude) skipBody += `<p class="po-skip-note" style="margin-top:10px">⚠️ ${rhEsc(park.skipExclude)}</p>`;
+  const skipStep = poStep('po-t-cool', 'All day', 'Skip the Line — ' + sk.name, skipBody);
+
+  /* ── Midday ── */
+  let middayBody = '<p>This is the busiest, hottest stretch. Slow down: catch an indoor show, do a sit-down or <strong>mobile-ordered lunch</strong> (order from the app before you’re hungry), and save the long standby lines for later.</p>';
+  if (kids) middayBody += '<p>With little ones, head back for a <strong>nap or pool break</strong> around now and return refreshed for the evening — a midday reset prevents meltdowns and lets you stay late.</p>';
+  if (skip !== 'none') middayBody += `<p>Keep tapping your <strong>${rhEsc(sk.name)}</strong> return times through this window to skip the worst of the lines.</p>`;
+  const midStep = poStep('po-t-mid', '11 AM – 3 PM', 'Midday: Pace Yourself', middayBody);
+
+  /* ── Evening ── */
+  const eveStep = poStep('po-t-eve', 'Late afternoon – close', 'Evening: Your Second Rope Drop',
+    `<p>Crowds thin at dinner and during the nighttime shows. This is your second wind — <strong>re-ride headliners</strong> while everyone else is eating or watching fireworks.</p>` +
+    `<p>${rhEsc(park.closing)}</p>`);
+
+  return `<div class="po-plan">${hero}${prep}${ropeStep}${skipStep}${midStep}${eveStep}</div>`;
+}
+
+function poBuildRef() {
+  const wrap = document.getElementById('po-ref');
+  wrap.innerHTML = RH_GROUPS.map(g => {
+    const items = g.parks.map(pid => {
+      const meta = RH_PARKS[pid], park = PO_PARKS[pid], sk = poSkipFor(pid);
+      const rd = park.ropeDrop.map(r => `<li>${rhEsc(r.n)}</li>`).join('');
+      const tips = park.tips.map(t => `<li>${rhEsc(t)}</li>`).join('');
+      const tiers = sk.tiers.slice(0, 2).map(t => `<li>${rhEsc(t)}</li>`).join('');
+      const excl = park.skipExclude ? `<li><strong>Heads-up:</strong> ${rhEsc(park.skipExclude)}</li>` : '';
+      return `<details>
+        <summary><span class="po-ref-chev">▶</span>${rhEsc(meta.name)}<span class="po-ref-loc">${rhEsc(meta.loc)}</span></summary>
+        <div class="po-ref-body">
+          <div class="po-ref-sub">Rope-Drop Targets</div>
+          <ul>${rd}</ul>
+          <div class="po-ref-sub">Skip the Line — ${rhEsc(sk.name)}</div>
+          <ul>${tiers}${excl}</ul>
+          <p style="margin:8px 0 0"><strong>Verdict:</strong> ${rhEsc(sk.worthIt)}</p>
+          <div class="po-ref-sub">Timing Tips</div>
+          <ul>${tips}</ul>
+          <div class="po-ref-sub">Before You Leave</div>
+          <p style="margin:0">${rhEsc(park.closing)}</p>
+        </div>
+      </details>`;
+    }).join('');
+    return `<div class="po-ref-grp">${rhEsc(g.label)}</div>${items}`;
+  }).join('');
+}
+
+/* ══════════════════════════════════════════════════════
+   PARK DINING STRATEGY  (id: park-dining)
+   Booking-window calculator + filterable restaurant finder +
+   resort-by-resort reference. Reuses RH_PARKS / RH_GROUPS and the
+   .po-ref accordion styles.
+   ══════════════════════════════════════════════════════ */
+
+// Resort-level booking & dietary info. Keyed by RH_PARKS[pid].resort.
+// window: days before arrival reservations open (null = mostly walk-up).
+const PD_RESORTS = {
+  'Walt Disney World': {
+    window:60,
+    booking:'Advance Dining Reservations (ADRs) open <strong>60 days before arrival</strong> at 5:45–6:00 AM ET in the My Disney Experience app. Disney resort guests can book their whole trip (up to 10 days) on day 60 — a real edge for the hardest tables. A credit card holds each booking; cancel 24+ hours ahead to avoid a per-person no-show fee.',
+    dietary:'The gold standard for special diets. Note allergies when you book and again with your server — table-service chefs will personally walk you through safe options, and allergy-friendly menus are available almost everywhere. Mobile Order lets you flag common allergens at quick-service spots too.',
+    tips:[
+      'Grab Cinderella’s Royal Table, Space 220 and Oga’s Cantina the minute your window opens — they vanish in minutes.',
+      'No luck? Check back 24–48 hours out, when cancellations flood back in.',
+      'Park-hopping? An EPCOT World Showcase table is usually easier to land than one in Magic Kingdom.'
+    ]
+  },
+  'Disneyland Resort': {
+    window:60,
+    booking:'Reservations open on a rolling <strong>60-day window</strong> in the Disneyland app at 6:00 AM PT — you book one day at a time (no length-of-stay perk like Disney World). A card holds the booking; cancel at least a day ahead to avoid a fee.',
+    dietary:'Excellent allergy handling like its Florida sibling — flag allergies in the app or with your server and a chef will help. Plant-based options are marked on most menus.',
+    tips:[
+      'Blue Bayou, Lamplight Lounge and Carthay Circle are the tables to grab first.',
+      'Most Disneyland quick-service classics (Bengal Barbecue, Dole Whip) never need a reservation — plan around the few that do.',
+      'A same-day walk-up waitlist often opens in the app — worth a try if your window has closed.'
+    ]
+  },
+  'Universal Orlando': {
+    window:45,
+    booking:'Universal is far more walk-up friendly than Disney. Table-service and priority-seating spots can be reserved up to about <strong>45 days ahead</strong> through the Universal Orlando app or OpenTable, but you can often just walk in — especially before noon and after 8 PM. Character dining and on-site hotel restaurants are the ones worth booking.',
+    dietary:'Allergy-aware kitchens with chefs available on request; vegetarian and vegan options appear on most menus. Less formalized than Disney, so ask for a manager or chef at table-service spots.',
+    tips:[
+      'Mythos in Islands of Adventure is the value play — a top-rated sit-down meal you can usually book or walk into.',
+      'Eat early or late; the Wizarding World restaurants jam up right at lunch.',
+      'Express Pass doesn’t apply to dining — but mobile order skips the counter lines.'
+    ]
+  },
+  'Universal Studios Hollywood': {
+    window:null,
+    booking:'Almost entirely walk-up quick-service dining — <strong>no reservations needed</strong>. Toadstool Cafe in Super Nintendo World is the one spot that can draw a wait; grab a virtual place in line through the app on busy days.',
+    dietary:'Vegetarian and allergy-friendly options are available at most counters; ask staff to point you to allergen menus.',
+    tips:[
+      'Eat lunch early — the single park gets packed and seating is limited midday.',
+      'CityWalk just outside the gates has fuller sit-down options for a real meal.'
+    ]
+  },
+  'SeaWorld': {
+    window:null,
+    booking:'Mostly counter service with <strong>no reservations required</strong>. The exception is Sharks Underwater Grill in Orlando — a table-service restaurant beside a floor-to-ceiling shark tank that’s worth reserving ahead. Consider the All-Day Dining Deal wristband for unlimited counter meals on a long day.',
+    dietary:'Vegetarian and gluten-free items are available at most counters; allergy questions are best directed to a stand manager.',
+    tips:[
+      'The All-Day Dining Deal pays off if you’ll eat two meals plus snacks.',
+      'Sharks Underwater Grill is the one reservation worth making at SeaWorld Orlando.'
+    ]
+  },
+  'Busch Gardens': {
+    window:null,
+    booking:'Counter-service dining with <strong>no reservations needed</strong>. The All-Day Dining Deal is the move for a full day of coasters — unlimited counter meals at participating spots.',
+    dietary:'Standard park fare with vegetarian and gluten-free options at most counters. Ask a manager for allergy guidance.',
+    tips:[
+      'Zambia Smokehouse near SheiKra is the best counter meal in the park.',
+      'Pair the All-Day Dining Deal with a hot, busy day to skip repeated lines and cash-outs.'
+    ]
+  },
+  'Six Flags': {
+    window:null,
+    booking:'Counter-service only — <strong>no reservations</strong>. A Season Dining Pass or single-day Dining Deal gets you unlimited meals and snacks, the smart play if you visit often or stay all day.',
+    dietary:'Limited but improving; vegetarian options at most stands. Allergy guidance is counter-by-counter, so ask before ordering.',
+    tips:[
+      'The Dining Pass pays for itself in about two visits.',
+      'Food-stand lines peak with the ride lines around 1 PM — eat early or late.'
+    ]
+  },
+  'Knott\'s Berry Farm': {
+    window:null,
+    booking:'Inside the park it’s walk-up counter service. The famous <strong>Mrs. Knott’s Chicken Dinner Restaurant</strong> sits just outside the gate (no park admission needed) and takes a call-ahead waitlist — the one dining experience worth planning around.',
+    dietary:'Vegetarian options at most counters; ask staff about allergens. Mrs. Knott’s is a traditional comfort-food menu.',
+    tips:[
+      'Do Mrs. Knott’s Chicken Dinner for an early dinner before the evening crowds.',
+      'Boysenberry everything — the seasonal Boysenberry Festival is a food highlight.'
+    ]
+  }
+};
+
+// Curated restaurant database, keyed by the same park IDs as RH_PARKS.
+// t: sig|tbl|char|qs|lng|snk · r: must|rec|walk · p: 1–4 ($) · v: value pick · d: dietary tags
+const PD_PARKS = {
+  /* ── Walt Disney World ── */
+  'wdw-magic':[
+    {n:'Cinderella’s Royal Table', t:'char', r:'must', p:4, d:['allergy'], note:'Dine inside the castle with Disney princesses — books out the instant the window opens.'},
+    {n:'Be Our Guest Restaurant', t:'tbl', r:'must', p:3, d:['allergy'], note:'The Beast’s castle from Beauty and the Beast; prix-fixe French-inspired menu.'},
+    {n:'The Crystal Palace', t:'char', r:'rec', p:3, d:['veg','allergy'], note:'Buffet with Winnie the Pooh & friends — great for younger kids.'},
+    {n:'Liberty Tree Tavern', t:'tbl', r:'rec', p:3, d:['allergy'], note:'All-you-care-to-eat Thanksgiving-style feast in Liberty Square.'},
+    {n:'Jungle Navigation Co. Skipper Canteen', t:'tbl', r:'rec', p:3, d:['veg','allergy'], note:'Punny Jungle Cruise-themed table service; often easier to book.'},
+    {n:'Pecos Bill Tall Tale Inn & Café', t:'qs', r:'walk', p:2, v:true, d:['veg'], note:'Tex-Mex with a loaded toppings bar — one of the best quick-service values.'},
+    {n:'Sleepy Hollow', t:'snk', r:'walk', p:1, v:true, d:['veg'], note:'Famous fresh-fruit-and-Nutella waffle sandwiches.'},
+    {n:'Aloha Isle (Dole Whip)', t:'snk', r:'walk', p:1, v:true, d:['veg','vegan','gf'], note:'The iconic pineapple soft-serve — vegan and gluten-free.'}
+  ],
+  'wdw-epcot':[
+    {n:'Space 220 Restaurant', t:'sig', r:'must', p:4, d:['allergy'], note:'Dine “in space” 220 miles above Earth — one of the hardest WDW reservations.'},
+    {n:'Le Cellier Steakhouse', t:'sig', r:'must', p:4, d:['allergy'], note:'Canada pavilion steakhouse famous for its cheddar-cheese soup.'},
+    {n:'Garden Grill', t:'char', r:'rec', p:3, d:['veg','allergy'], note:'Rotating restaurant with Chip ’n’ Dale and farm-fresh, family-style plates.'},
+    {n:'Teppan Edo', t:'tbl', r:'rec', p:3, d:['allergy'], note:'Hibachi showmanship in the Japan pavilion — fun for groups.'},
+    {n:'Via Napoli Ristorante', t:'tbl', r:'rec', p:3, d:['veg'], note:'Wood-fired Neapolitan pizza; great for sharing.'},
+    {n:'Regal Eagle Smokehouse', t:'qs', r:'walk', p:2, v:true, d:['gf'], note:'American BBQ counter service in the America pavilion — strong value.'},
+    {n:'Les Halles Boulangerie-Pâtisserie', t:'snk', r:'walk', p:1, v:true, d:['veg'], note:'French bakery for pastries, quiches and quick sandwiches.'}
+  ],
+  'wdw-hs':[
+    {n:'Oga’s Cantina', t:'lng', r:'must', p:3, d:['veg'], note:'Star Wars cantina with exotic cocktails — a reservation is essential.'},
+    {n:'The Hollywood Brown Derby', t:'sig', r:'must', p:4, d:['allergy'], note:'Signature Cobb salad and old-Hollywood glamour.'},
+    {n:'Sci-Fi Dine-In Theater', t:'tbl', r:'rec', p:3, d:['allergy'], note:'Eat in a vintage “car” watching B-movie clips under the stars.'},
+    {n:'50’s Prime Time Café', t:'tbl', r:'rec', p:3, d:['allergy'], note:'Comfort food while “Mom” reminds you to eat your veggies.'},
+    {n:'Docking Bay 7 Food and Cargo', t:'qs', r:'walk', p:2, v:true, d:['veg','gf'], note:'Galaxy’s Edge quick service with creative, well-priced themed plates.'},
+    {n:'Ronto Roasters', t:'snk', r:'walk', p:1, v:true, d:[], note:'The Ronto Wrap — a Galaxy’s Edge must-eat.'},
+    {n:'Milk Stand (Blue & Green Milk)', t:'snk', r:'walk', p:1, v:true, d:['veg','vegan','gf'], note:'The plant-based frozen milk from the Star Wars films.'}
+  ],
+  'wdw-ak':[
+    {n:'Tiffins', t:'sig', r:'rec', p:4, d:['allergy'], note:'Animal Kingdom’s fine-dining gem with globally inspired plates.'},
+    {n:'Tusker House Restaurant', t:'char', r:'rec', p:3, d:['veg','allergy'], note:'Donald’s safari buffet with character visits.'},
+    {n:'Yak & Yeti Restaurant', t:'tbl', r:'rec', p:3, d:['veg'], note:'Pan-Asian table service in the Asia section.'},
+    {n:'Satu’li Canteen', t:'qs', r:'walk', p:2, v:true, d:['veg','vegan','gf'], note:'Pandora quick service — healthy build-your-own bowls, the best QS at WDW.'},
+    {n:'Flame Tree Barbecue', t:'qs', r:'walk', p:2, v:true, d:['gf'], note:'Ribs and pulled pork with peaceful waterfront seating.'}
+  ],
+
+  /* ── Disneyland Resort ── */
+  'dl-disneyland':[
+    {n:'Blue Bayou Restaurant', t:'sig', r:'must', p:4, d:['allergy'], note:'Dine in the perpetual dusk of the bayou inside Pirates of the Caribbean.'},
+    {n:'Café Orleans', t:'tbl', r:'rec', p:3, d:['veg'], note:'Home of the Monte Cristo sandwich and garlic pommes frites.'},
+    {n:'Carnation Café', t:'tbl', r:'rec', p:2, v:true, d:['veg'], note:'Main Street classics and Walt’s favorite — solid sit-down value.'},
+    {n:'Plaza Inn', t:'qs', r:'walk', p:2, v:true, d:['allergy'], note:'Famous fried chicken; a character breakfast is also offered here.'},
+    {n:'Bengal Barbecue', t:'snk', r:'walk', p:1, v:true, d:['gf'], note:'Grilled skewers — cheap, fast and beloved.'},
+    {n:'Tiki Juice Bar (Dole Whip)', t:'snk', r:'walk', p:1, v:true, d:['veg','vegan','gf'], note:'The original Dole Whip, next to the Enchanted Tiki Room.'}
+  ],
+  'dl-dca':[
+    {n:'Carthay Circle Restaurant', t:'sig', r:'must', p:4, d:['allergy'], note:'DCA’s upscale signature; pairs with a great fireworks dining package.'},
+    {n:'Lamplight Lounge', t:'tbl', r:'must', p:3, d:['veg'], note:'Pixar Pier hotspot — the lobster nachos are legendary.'},
+    {n:'Wine Country Trattoria', t:'tbl', r:'rec', p:3, d:['veg'], note:'Relaxed Italian on a sunny terrace; good fireworks-package option.'},
+    {n:'Pym Test Kitchen', t:'qs', r:'walk', p:2, v:true, d:['veg','vegan'], note:'Avengers Campus quick service with oversized “experiment” food.'},
+    {n:'Cocina Cucamonga Mexican Grill', t:'qs', r:'walk', p:2, v:true, d:['veg','gf'], note:'Fresh Mexican counter eats — a reliable value pick.'}
+  ],
+
+  /* ── Universal Orlando ── */
+  'uo-usf':[
+    {n:'The Leaky Cauldron', t:'qs', r:'walk', p:2, v:true, d:['veg'], note:'Diagon Alley’s British fare — bangers & mash, fish & chips, Butterbeer.'},
+    {n:'Lombard’s Seafood Grille', t:'tbl', r:'rec', p:3, d:['allergy'], note:'Sit-down seafood on the San Francisco waterfront.'},
+    {n:'Finnegan’s Bar & Grill', t:'tbl', r:'rec', p:3, d:['veg'], note:'Irish pub fare and live music in the New York area.'},
+    {n:'Florean Fortescue’s Ice-Cream Parlour', t:'snk', r:'walk', p:1, v:true, d:['veg'], note:'Whimsical Wizarding World flavors like Butterbeer soft-serve.'}
+  ],
+  'uo-ioa':[
+    {n:'Mythos Restaurant', t:'tbl', r:'rec', p:3, v:true, d:['veg','allergy'], note:'Repeatedly voted a top theme-park restaurant — a sit-down meal that’s genuine value.'},
+    {n:'Three Broomsticks', t:'qs', r:'walk', p:2, v:true, d:['veg'], note:'Hogsmeade’s rotisserie feast and the original Butterbeer.'},
+    {n:'Confisco Grille', t:'tbl', r:'walk', p:2, v:true, d:['veg'], note:'An underrated, easy-to-book sit-down spot near the park entrance.'},
+    {n:'Thunder Falls Terrace', t:'qs', r:'walk', p:2, v:true, d:['gf'], note:'Rotisserie chicken and ribs with a Jurassic Park waterfall view.'}
+  ],
+  'uo-epic':[
+    {n:'Atlantic', t:'sig', r:'must', p:4, d:['allergy'], note:'Celestial Park’s upscale seafood — Epic Universe’s marquee reservation.'},
+    {n:'Toadstool Cafe', t:'qs', r:'rec', p:2, d:['veg'], note:'Super Nintendo World’s themed Mushroom Kingdom plates; can need a virtual wait.'},
+    {n:'Pizza Moon', t:'tbl', r:'rec', p:3, d:['veg'], note:'Wood-fired pizza in Celestial Park — a relaxed sit-down option.'},
+    {n:'Das Stakehaus', t:'tbl', r:'rec', p:3, d:['allergy'], note:'Hearty fare in the Dark Universe land.'}
+  ],
+
+  /* ── Universal Studios Hollywood ── */
+  'ush':[
+    {n:'Toadstool Cafe', t:'qs', r:'rec', p:2, d:['veg'], note:'Super Nintendo World themed quick service — the standout meal in the park.'},
+    {n:'Three Broomsticks', t:'qs', r:'walk', p:2, v:true, d:['veg'], note:'The Wizarding World rotisserie feast and Butterbeer, West Coast edition.'},
+    {n:'Krusty Burger', t:'qs', r:'walk', p:2, v:true, d:['veg'], note:'Simpsons-themed Springfield burgers and a Flaming Moe.'}
+  ],
+
+  /* ── SeaWorld ── */
+  'sw-orlando':[
+    {n:'Sharks Underwater Grill', t:'tbl', r:'rec', p:3, d:['allergy'], note:'Dine beside a floor-to-ceiling shark tank — the one SeaWorld reservation worth making.'},
+    {n:'Spice Mill', t:'qs', r:'walk', p:2, v:true, d:['veg'], note:'Waterfront counter service with burgers, wings and global bowls.'}
+  ],
+  'sw-sandiego':[
+    {n:'Shipwreck Reef Café', t:'qs', r:'walk', p:2, v:true, d:['veg'], note:'Casual counter meals near the sea-lion exhibits.'}
+  ],
+
+  /* ── Busch Gardens ── */
+  'bg-tampa':[
+    {n:'Zambia Smokehouse', t:'qs', r:'walk', p:2, v:true, d:['gf'], note:'BBQ ribs and chicken near SheiKra — the park’s best counter meal.'},
+    {n:'Zagora Café', t:'qs', r:'walk', p:2, v:true, d:['veg'], note:'Central quick-service spot good for the All-Day Dining Deal.'}
+  ],
+
+  /* ── Six Flags ── */
+  'sf-magic':[
+    {n:'Full Throttle Sports Bar & Grill', t:'tbl', r:'walk', p:2, d:['veg'], note:'Sit-down burgers and beer beside the Full Throttle coaster.'},
+    {n:'Chop Six', t:'qs', r:'walk', p:2, v:true, d:['veg'], note:'Asian-inspired rice and noodle bowls — solid Dining Pass value.'}
+  ],
+  'sf-great':[
+    {n:'Johnny Rockets', t:'tbl', r:'walk', p:2, d:['veg'], note:'Classic diner burgers, fries and shakes.'},
+    {n:'Granny’s Country Kitchen', t:'qs', r:'walk', p:2, v:true, d:['veg'], note:'Comfort-food platters that pair well with the Dining Pass.'}
+  ],
+
+  /* ── Knott's Berry Farm ── */
+  'kbf':[
+    {n:'Mrs. Knott’s Chicken Dinner Restaurant', t:'tbl', r:'rec', p:2, v:true, d:[], note:'The original fried-chicken dinner that built the park — just outside the gate, no admission needed.'},
+    {n:'Ghost Town Grill', t:'qs', r:'walk', p:2, v:true, d:['veg'], note:'Hearty Old West counter fare in the heart of the park.'}
+  ]
+};
+
+const PD_TYPE = { sig:'Signature', tbl:'Table Service', char:'Character Dining', qs:'Quick Service', lng:'Lounge', snk:'Snack' };
+const PD_RES  = { must:{l:'Must book', c:'pd-r-must'}, rec:{l:'Reserve ahead', c:'pd-r-rec'}, walk:{l:'Walk-up OK', c:'pd-r-walk'} };
+const PD_DIET = { veg:'Veg-friendly', vegan:'Vegan', gf:'Gluten-free', allergy:'Allergy-aware' };
+const PD_STATE_KEY = 'tt_pd_state';
+
+let pdState = { resort:'Walt Disney World', date:'', park:'wdw-magic', filter:'all' };
+let pdSelectsBuilt = false, pdRefBuilt = false;
+
+function pdSave() { try { localStorage.setItem(PD_STATE_KEY, JSON.stringify(pdState)); } catch(_) {} }
+
+function pdInit() {
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(PD_STATE_KEY) || 'null'); } catch(_) {}
+  if (saved && typeof saved === 'object') pdState = Object.assign(pdState, saved);
+  if (!PD_RESORTS[pdState.resort]) pdState.resort = 'Walt Disney World';
+  if (!RH_PARKS[pdState.park]) pdState.park = 'wdw-magic';
+
+  if (!pdSelectsBuilt) {
+    document.getElementById('pd-resort').innerHTML = RH_GROUPS.map(g => {
+      const resort = RH_PARKS[g.parks[0]].resort;
+      return `<option value="${rhEsc(resort)}">${rhEsc(g.label)}</option>`;
+    }).join('');
+    document.getElementById('pd-park').innerHTML = RH_GROUPS.map(g =>
+      `<optgroup label="${rhEsc(g.label)}">` +
+      g.parks.map(pid => `<option value="${pid}">${rhEsc(RH_PARKS[pid].name)}</option>`).join('') +
+      `</optgroup>`).join('');
+    pdSelectsBuilt = true;
+  }
+  document.getElementById('pd-resort').value = pdState.resort;
+  document.getElementById('pd-park').value = pdState.park;
+
+  // Prefill arrival date: saved value, else the active trip's departure date
+  let d = pdState.date;
+  if (!d) {
+    const trip = (typeof getActiveTrip === 'function') ? getActiveTrip() : null;
+    if (trip && trip.departDate) d = trip.departDate;
+  }
+  if (d) document.getElementById('pd-date').value = d;
+
+  pdSyncFilter(pdState.filter);
+  if (!pdRefBuilt) { pdBuildRef(); pdRefBuilt = true; }
+  pdCalc();
+  pdRenderFinder();
+}
+
+function pdSyncFilter(v) {
+  document.querySelectorAll('#pd-filter-chips .chip').forEach(c =>
+    c.classList.toggle('on', c.dataset.v === v));
+}
+function pdSetFilter(v) {
+  pdState.filter = v;
+  pdSyncFilter(v);
+  pdSave();
+  pdRenderFinder();
+}
+
+function pdFmtDate(d) {
+  return d.toLocaleDateString(undefined, { weekday:'short', month:'long', day:'numeric', year:'numeric' });
+}
+
+function pdCalc() {
+  const resort = document.getElementById('pd-resort').value; pdState.resort = resort;
+  const dateStr = document.getElementById('pd-date').value;  pdState.date = dateStr;
+  const info = PD_RESORTS[resort] || {};
+  const box = document.getElementById('pd-cal-result');
+  let hero = '';
+
+  if (info.window) {
+    if (dateStr) {
+      const arrival = new Date(dateStr + 'T00:00:00');
+      const today = new Date(); today.setHours(0,0,0,0);
+      if (isNaN(arrival) || arrival < today) {
+        hero = `<div class="pd-open"><div class="pd-o-lbl">Heads up</div><div class="pd-o-big">That date has passed</div><div class="pd-o-sub">Pick an upcoming arrival date to see when your ${info.window}-day reservation window opens.</div></div>`;
+      } else {
+        const open = new Date(arrival); open.setDate(open.getDate() - info.window);
+        const daysToOpen = Math.round((open - today) / 86400000);
+        const daysToTrip = Math.round((arrival - today) / 86400000);
+        if (daysToOpen <= 0) {
+          hero = `<div class="pd-open pd-now"><div class="pd-o-lbl">Your trip is ${daysToTrip} day${daysToTrip === 1 ? '' : 's'} away</div><div class="pd-o-big">Booking is open now ✓</div><div class="pd-o-sub">Your ${info.window}-day window is already open — <strong>book your must-have tables today</strong> before they fill up.</div></div>`;
+        } else {
+          hero = `<div class="pd-open"><div class="pd-o-lbl">Reservations open in ${daysToOpen} day${daysToOpen === 1 ? '' : 's'}</div><div class="pd-o-big">${pdFmtDate(open)}</div><div class="pd-o-sub">That’s ${info.window} days before your ${pdFmtDate(arrival)} arrival. <strong>Set a reminder</strong> and be ready the moment it opens.</div></div>`;
+        }
+      }
+    } else {
+      hero = `<div class="pd-open"><div class="pd-o-lbl">Booking window</div><div class="pd-o-big">${info.window} days before arrival</div><div class="pd-o-sub">Enter your arrival date above to see the exact day — and a live countdown — to when you can book.</div></div>`;
+    }
+  } else {
+    hero = `<div class="pd-open"><div class="pd-o-lbl">Good news</div><div class="pd-o-big">No booking race here</div><div class="pd-o-sub">This resort is mostly walk-up dining — there’s no 60-day scramble. See the details below.</div></div>`;
+  }
+
+  const rules = info.booking ? `<div class="pd-rules">${info.booking}</div>` : '';
+  box.innerHTML = hero + rules;
+  pdSave();
+}
+
+function pdMatch(r, f) {
+  switch (f) {
+    case 'must':  return r.r === 'must';
+    case 'walk':  return r.r === 'walk';
+    case 'value': return !!r.v;
+    case 'char':  return r.t === 'char';
+    case 'veg':   return (r.d || []).indexOf('veg') >= 0 || (r.d || []).indexOf('vegan') >= 0;
+    default:      return true;
+  }
+}
+
+function pdCard(r) {
+  const res = PD_RES[r.r] || PD_RES.walk;
+  const diet = (r.d || []).map(k => `<span class="pd-badge pd-diet">${rhEsc(PD_DIET[k] || k)}</span>`).join('');
+  const star = r.v ? ' <span class="pd-rest-star" title="Value pick">★</span>' : '';
+  return `<div class="pd-rest">
+    <div class="pd-rest-top">
+      <span class="pd-rest-name">${rhEsc(r.n)}${star}</span>
+      <span class="pd-rest-price">${'$'.repeat(r.p || 1)}</span>
+    </div>
+    <div class="pd-badges">
+      <span class="pd-badge">${rhEsc(PD_TYPE[r.t] || r.t)}</span>
+      <span class="pd-badge ${res.c}">${res.l}</span>
+      ${diet}
+    </div>
+    <p class="pd-rest-note">${rhEsc(r.note || '')}</p>
+  </div>`;
+}
+
+function pdRenderFinder() {
+  const pid = document.getElementById('pd-park').value; pdState.park = pid;
+  const list = PD_PARKS[pid] || [];
+  const shown = list.filter(r => pdMatch(r, pdState.filter));
+  const wrap = document.getElementById('pd-finder');
+  if (!list.length) {
+    wrap.innerHTML = `<div class="pd-finder-empty">Dining at ${rhEsc(RH_PARKS[pid].name)} is mostly walk-up counter service — no reservations needed. See the resort guide below for details.</div>`;
+  } else if (!shown.length) {
+    wrap.innerHTML = `<div class="pd-finder-empty">No spots match this filter at ${rhEsc(RH_PARKS[pid].name)}. Try “All”.</div>`;
+  } else {
+    wrap.innerHTML = `<div class="pd-count">${shown.length} of ${list.length} spots</div>` + shown.map(pdCard).join('');
+  }
+  pdSave();
+}
+
+function pdBuildRef() {
+  const wrap = document.getElementById('pd-ref');
+  wrap.innerHTML = RH_GROUPS.map(g => {
+    const resort = RH_PARKS[g.parks[0]].resort;
+    const info = PD_RESORTS[resort] || {};
+    const loc = RH_PARKS[g.parks[0]].loc;
+    const must = [], val = [];
+    g.parks.forEach(pid => (PD_PARKS[pid] || []).forEach(r => {
+      if (r.r === 'must') must.push(r.n);
+      if (r.v) val.push(r.n);
+    }));
+    const mustHtml = must.length
+      ? `<ul>${must.map(n => `<li>${rhEsc(n)}</li>`).join('')}</ul>`
+      : '<p style="margin:0">Walk-ups are the norm — no must-book scramble here.</p>';
+    const valHtml = val.length
+      ? `<ul>${val.map(n => `<li>${rhEsc(n)}</li>`).join('')}</ul>`
+      : '<p style="margin:0">Counter-service spots throughout — see the finder above.</p>';
+    const tips = (info.tips || []).map(t => `<li>${rhEsc(t)}</li>`).join('');
+    return `<details>
+      <summary><span class="po-ref-chev">▶</span>${rhEsc(g.label)}<span class="po-ref-loc">${rhEsc(loc)}</span></summary>
+      <div class="po-ref-body">
+        <div class="po-ref-sub">When Reservations Open</div>
+        <p style="margin:0">${info.booking || ''}</p>
+        <div class="po-ref-sub">Book These Early</div>
+        ${mustHtml}
+        <div class="po-ref-sub">Best Value Picks</div>
+        ${valHtml}
+        <div class="po-ref-sub">Dietary &amp; Allergies</div>
+        <p style="margin:0">${info.dietary || ''}</p>
+        ${tips ? `<div class="po-ref-sub">Strategy Tips</div><ul>${tips}</ul>` : ''}
+      </div>
+    </details>`;
+  }).join('');
 }
 
 /* ══════════════════════════════════════════════════════
