@@ -7787,16 +7787,117 @@ body.no-scroll { overflow: hidden; }
     </div>
   </div>
 </div>
-<div id="view-placeholder-quiet-hours" class="view">
-  <nav class="tool-topbar">
+<style>
+@media print{
+  #view-quiet-hours .tc-country-caret,#view-quiet-hours .tc-drop{display:none!important}
+  #view-quiet-hours #qh-empty{display:none!important}
+  #view-quiet-hours #qh-tips-body{display:block!important}
+}
+</style>
+<div id="view-quiet-hours" class="view">
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="window.print()">🖨 Print</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">🤫</span>
-    <h2>Local Quiet Hours Guide</h2>
-    <p style="margin-bottom:24px">Siesta hours, Sunday trading, noise ordinances & photography restrictions.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-quiet-hours"></div>
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>Local Quiet Hours Guide</h1>
+    <p class="tool-sub">Siesta &amp; quiet hours, Sunday and holiday trading restrictions, noise ordinances, dress codes and photography rules — for 20 of the world's most-visited destinations. Plus universal quiet-travel etiquette.</p>
+  </div>
+
+  <div class="tool-body">
+    <!-- ── COUNTRY PICKER ── -->
+    <div class="fg">
+      <label>Country</label>
+      <div class="tc-country-wrap">
+        <div class="tc-country-input" id="qh-country-disp" onclick="qhOpenPicker()" tabindex="0" role="button" aria-label="Choose country">
+          <span class="tc-country-flag" id="qh-disp-flag">🌐</span>
+          <span class="tc-country-name" id="qh-disp-name">Select a country</span>
+          <span class="tc-country-cur" id="qh-disp-tag"></span>
+          <span class="tc-country-caret">▾</span>
+        </div>
+        <div class="tc-drop" id="qh-country-drop" style="display:none">
+          <div class="tc-drop-search">
+            <input type="search" id="qh-country-search" class="tc-search-input" placeholder="🔍 Search 20 countries…" autocomplete="off" oninput="qhFilterCountries()">
+          </div>
+          <div id="qh-country-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty prompt before a country is chosen -->
+    <div class="tg-empty" id="qh-empty">
+      <span class="tg-empty-ico">🤫</span>
+      Pick a country to see local siesta &amp; quiet hours, Sunday trading rules, noise ordinances, dress codes and the photography restrictions that catch visitors out.
+    </div>
+
+    <!-- ── RESULTS ── -->
+    <div id="qh-content" style="display:none">
+      <div class="dr-hero" id="qh-hero">
+        <div class="dr-hero-flag" id="qh-hero-flag">🌐</div>
+        <div class="dr-hero-meta">
+          <div class="dr-hero-co" id="qh-hero-co"></div>
+          <div class="dr-hero-side" id="qh-hero-side">Quiet hours &amp; etiquette</div>
+          <div class="dr-hero-sub" id="qh-hero-sub"></div>
+        </div>
+        <div class="dr-hero-ico">🤫</div>
+      </div>
+
+      <div class="dr-section">
+        <div class="dr-sec-hdr">Quiet hours &amp; siesta</div>
+        <div class="dr-rows" id="qh-quiet"></div>
+      </div>
+
+      <div class="dr-section">
+        <div class="dr-sec-hdr">Trading &amp; opening hours</div>
+        <div class="dr-rows" id="qh-trade"></div>
+      </div>
+
+      <div class="dr-section">
+        <div class="dr-sec-hdr">Noise rules</div>
+        <div class="dr-rows" id="qh-noise"></div>
+      </div>
+
+      <div class="dr-section">
+        <div class="dr-sec-hdr">Dress &amp; photography</div>
+        <div class="dr-rows" id="qh-etiq"></div>
+      </div>
+
+      <div class="dr-knownote" id="qh-knownote-wrap">
+        <div class="dr-knownote-hd">ⓘ Good to know</div>
+        <div id="qh-knownote"></div>
+      </div>
+    </div>
+
+    <!-- ── UNIVERSAL ETIQUETTE (always available) ── -->
+    <div class="dr-section dr-signs-sec" id="qh-tips-sec">
+      <div class="dr-sec-hdr dr-signs-hdr" onclick="qhToggleTips()" id="qh-tips-toggle" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();qhToggleTips();}">
+        <span>🌍 Universal quiet-travel etiquette</span>
+        <span class="dr-signs-caret" id="qh-tips-caret">▾</span>
+      </div>
+      <div id="qh-tips-body" style="display:none">
+        <div class="dr-sign-intro">Customs differ everywhere, but these habits keep you out of trouble — and out of an argument with the neighbours — almost anywhere you travel.</div>
+        <div id="qh-tips"></div>
+      </div>
+    </div>
+
+    <div style="margin-top:16px;padding:12px 16px;background:var(--paper-2);border-left:3px solid var(--yellow);border-radius:var(--r);font-size:13px;color:var(--muted);line-height:1.55">
+      ⚠️ <strong>Customs and rules vary locally — verify on the ground.</strong> Quiet hours, trading restrictions, noise limits, dress codes and photography rules are set by municipalities, individual buildings, religious sites and venues, and change over time. Treat this as general orientation and confirm with local signage, your accommodation or official sources.
+    </div>
+  </div><!-- /tool-body -->
+
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    When in doubt, watch what locals do. If a street, shop or temple has gone quiet, lower your voice and silence your phone too. Keep a light scarf in your day bag — it covers shoulders or hair in seconds for a church, mosque or temple — and always ask before pointing a camera at people or religious rituals.
+  </div>
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('tipping-guide')">🍽 Tipping Culture Guide</button>
+      <button class="rel-btn" onclick="openTool('driving-rules')">🚦 Driving &amp; Road Rules</button>
+      <button class="rel-btn" onclick="openTool('emergency')">🚨 Emergency Numbers</button>
+      <button class="rel-btn" onclick="openTool('phrasebook')">💬 Phrasebook</button>
     </div>
   </div>
 </div>
@@ -11853,7 +11954,7 @@ const TOOLS = [
   {id:'weather',       nm:'Weather Forecast',           ico:'🌦', ph:'destination',on:true, live:true,  ds:'5-day forecast via Open-Meteo. Free, no API key.'},
   {id:'tipping-guide', nm:'Tipping Culture Guide',      ico:'🍽', ph:'destination',on:false,live:true,  ds:'Country-by-country etiquette: expected / optional / offensive per venue.'},
   {id:'driving-rules', nm:'Driving & Road Rules',       ico:'🚦', ph:'destination',on:false,live:true,  ds:'Speed limits, BAC limits, toll systems & road sign reference.'},
-  {id:'quiet-hours',   nm:'Local Quiet Hours Guide',    ico:'🤫', ph:'destination',on:false,live:false, ds:'Siesta hours, noise ordinances & photography restrictions.'},
+  {id:'quiet-hours',   nm:'Local Quiet Hours Guide',    ico:'🤫', ph:'destination',on:false,live:true,  ds:'Siesta & quiet hours, Sunday trading, noise ordinances, dress codes & photography restrictions by country.'},
   {id:'fuel-cost',     nm:'Fuel Cost Calculator',       ico:'⛽', ph:'road',       on:false,live:true,  ds:'Distance + MPG + fuel price = total cost. Compare two vehicles.'},
   {id:'rest-stop',     nm:'Rest Stop Planner',          ico:'⏸', ph:'road',       on:false,live:true,  ds:'Recommended break schedule. Adjusts for kids, pets & elderly.'},
   {id:'playlist-time', nm:'Road Trip Playlist Timer',   ico:'🎵', ph:'road',       on:false,live:false, ds:'Enter drive hours → how many albums/podcasts to download.'},
@@ -12557,6 +12658,7 @@ function injectTripCtx(id) {
   if(id==='tip-calc')   tcInit();
   if(id==='tipping-guide') tgInit();
   if(id==='driving-rules') drInit();
+  if(id==='quiet-hours') qhInit();
   if(id==='power-plug') ppInit();
   if(id==='toll-est')   teInit();
   if(id==='road-planner') rpInit();
@@ -28217,6 +28319,293 @@ function drBuildSigns(){
     grp.signs.map(s => `<div class="dr-sign"><span class="dr-sign-ico">${s.i}</span><div><div class="dr-sign-nm">${s.n}</div><div class="dr-sign-ds">${s.d}</div></div></div>`).join('') +
     `</div></div>`).join('');
   drSignsBuilt = true;
+}
+
+/* ══════════════════════════════════════════════════════
+   LOCAL QUIET HOURS GUIDE
+   ══════════════════════════════════════════════════════ */
+
+const QH_DATA = {
+  /* ===== EUROPE ===== */
+  ES:{ tag:'Siesta culture',
+    siesta:'Many shops, pharmacies and family businesses close for a midday <b>siesta</b>, roughly <b>2–5 PM</b>, especially in smaller towns and the south. Residential "horas de descanso" (rest hours) are widely observed at lunchtime and after ~10–11 PM.',
+    trade:'Most large shops stay shut on <b>Sundays</b> and public holidays, though designated tourist zones in big cities (and many in Madrid) trade on Sundays. Restaurants and bars keep their own, often late, hours.',
+    noise:'Municipal noise ordinances are common; many towns enforce quiet at night (often from ~11 PM or midnight) and during the afternoon rest. Apartment buildings post their own quiet hours.',
+    dress:'Cover shoulders and knees to enter cathedrals and churches; beachwear is fine on the coast but frowned on in town centres and increasingly fined in some resort towns.',
+    photo:'No flash and often no photography inside churches and museums — watch for signs. Avoid photographing police, military and Guardia Civil.',
+    note:'Lunch and dinner run late (lunch ~2 PM, dinner from 9 PM). Sunday is genuinely quiet outside tourist hubs — plan shopping for Saturday.' },
+  IT:{ tag:'Riposo / siesta',
+    siesta:'The <b>riposo</b> (midday closing) shuts many shops roughly <b>1–4 PM</b>, especially in the south and smaller towns. Residential quiet hours ("ore di silenzio") typically cover early afternoon and night.',
+    trade:'Smaller shops commonly close <b>Sunday</b> and often Monday morning; large stores and tourist-area shops usually open. Many businesses shut for much of <b>August</b> (Ferragosto).',
+    noise:'Local ordinances restrict noise at night and during the afternoon rest; condominium rules ("regolamento") often forbid noise ~2–4 PM and after ~10–11 PM.',
+    dress:'Churches (including St Peter\'s and most cathedrals) enforce covered shoulders and knees — no shorts, short skirts or bare midriffs. Cover-ups are sometimes sold at the door.',
+    photo:'No photos inside the Sistine Chapel and many churches; flash and tripods are widely banned. Don\'t photograph military or police installations.',
+    note:'Restaurants observe set lunch (≈12:30–2:30) and dinner (≈7:30–10:30) service; kitchens close between. Coperto (cover charge) is normal, not a scam.' },
+  FR:{ tag:'Rest hours',
+    siesta:'Outside big cities, many shops and rural businesses close <b>12–2 PM</b> for lunch. Residential calm is expected at lunchtime and at night.',
+    trade:'Most shops are closed or reduced on <b>Sundays</b> (a long-standing labour-law tradition), with exceptions in designated tourist and international zones. Some close Monday too.',
+    noise:'France regulates "tapage nocturne" (night noise) — typically any disturbing noise after ~10 PM can draw a fine. Many towns also restrict noisy garden/DIY work to set daytime hours.',
+    dress:'Smart-casual is the norm; cover shoulders and knees in churches and at Versailles-style sites. Topless/beach attire belongs on the beach only.',
+    photo:'No flash in many museums; the Eiffel Tower light show is copyrighted at night (fine for personal photos). Avoid photographing soldiers and police on patrol.',
+    note:'Lunch is a real break (≈12–2 PM); many restaurants don\'t serve outside set meal windows. Greet shopkeepers with "Bonjour" on entering — silence reads as rude.' },
+  DE:{ tag:'Ruhezeit / Sundays quiet',
+    siesta:'No siesta, but Germany strictly observes <b>Ruhezeit</b> (quiet hours): typically <b>10 PM–6/7 AM</b> nightly, often <b>1–3 PM</b> midday, and effectively all day <b>Sunday</b> and public holidays.',
+    trade:'Almost all shops are <b>closed on Sundays</b> and holidays by law (Ladenschlussgesetz) — stock up Saturday. Exceptions: bakeries (limited), petrol stations, and shops in major train stations and airports.',
+    noise:'Quiet hours are taken seriously — no loud music, vacuuming, drilling or laundry-spinning during Ruhezeit. Sunday is a legally protected "day of rest"; mowing and washing the car are restricted.',
+    dress:'Generally relaxed; modest cover for churches. FKK (nudism) is legal and normal at designated lakes, parks and saunas — mixed-gender, swimwear-free saunas are standard.',
+    photo:'Strong privacy culture — don\'t photograph people without consent. No photos in some museums; avoid police and military sites.',
+    note:'Plan around closed Sundays: restaurants and cafés stay open, but supermarkets don\'t. Recycling and rules are followed closely — jaywalking on a red light draws disapproval.' },
+  CH:{ tag:'Strict quiet hours',
+    siesta:'No siesta, but Switzerland enforces some of Europe\'s strictest <b>quiet hours</b>: generally <b>10 PM–6/7 AM</b>, midday <b>12–1 PM</b>, and all day <b>Sunday</b> plus holidays.',
+    trade:'Shops <b>close Sundays</b> and most evenings; Saturday is the main shopping day. Station and airport shops are the usual exceptions.',
+    noise:'Building rules ("Hausordnung") commonly forbid showering/flushing late at night, laundry on Sundays, and any drilling, mowing or loud music during quiet hours. Recycling glass is barred on Sundays.',
+    dress:'Neat and understated; cover shoulders and knees in churches. Swimwear only at pools and lakes.',
+    photo:'Privacy is valued — ask before photographing people. Military installations are sensitive; obey "no photography" signs in the mountains near them.',
+    note:'Sunday is for rest — expect closed shops and very low tolerance for noise in apartments. Many quiet rules are enforced by neighbours, not just police.' },
+  AT:{ tag:'Ruhezeit',
+    siesta:'No siesta, but <b>Ruhezeit</b> applies: typically <b>10 PM–6 AM</b>, often a midday rest, and <b>Sundays</b> and holidays are protected quiet days.',
+    trade:'Shops are <b>closed on Sundays</b> and holidays by law, except at stations, airports and some tourist zones. Saturday afternoons can also be limited in smaller towns.',
+    noise:'Apartment house rules restrict noise at night, midday and on Sundays — no drilling, loud music or vacuuming. Quiet is widely respected.',
+    dress:'Cover shoulders and knees for churches and monasteries (e.g. Melk, St Stephen\'s). Smart-casual for the opera and concerts.',
+    photo:'No flash in many churches and museums; ask before photographing people. Avoid military sites.',
+    note:'Sundays are genuinely quiet — plan shopping for Saturday. Coffee-house culture means lingering is welcome; rushing service is not.' },
+  GR:{ tag:'Mesimeri rest',
+    siesta:'The afternoon rest ("mesimeri", roughly <b>3–5:30 PM</b>) is legally recognised quiet time in many municipalities — avoid noise then. Night quiet typically starts ~11 PM.',
+    trade:'Many smaller shops close <b>Sundays</b> and take a long afternoon break on weekdays, reopening in the evening. Tourist-area and island shops keep longer hours in season.',
+    noise:'Municipal rules protect the midday and night rest; on islands and in villages, loud music and works are restricted during "koini isihia" (common quiet).',
+    dress:'Cover shoulders and knees at monasteries and churches — Meteora and Mount Athos enforce this strictly (Athos admits men only, with a permit). Skirts/wraps often provided.',
+    photo:'Photography is banned in many monasteries and of icons; no flash near frescoes. Avoid military zones and the airport perimeter.',
+    note:'Shops often reopen ~5:30–9 PM after the afternoon break — and dinner is late. The midday quiet is socially enforced, especially in summer.' },
+  PT:{ tag:'Lunch closures',
+    siesta:'Smaller shops and rural businesses often close for lunch (≈<b>1–3 PM</b>). Residential quiet is expected at night, generally after ~11 PM.',
+    trade:'Large shops and malls open <b>Sundays</b>; many small, family-run shops close Sunday and holidays. Restaurants set their own hours.',
+    noise:'Local ordinances limit night noise; apartment rules commonly bar loud activity late at night and during lunch.',
+    dress:'Modest cover for churches (shoulders and knees). Beachwear stays at the beach.',
+    photo:'No flash in churches and many museums; some ban photography entirely. Avoid military and police installations.',
+    note:'Dinner is late (≈8–10 PM) and lunch is a real pause. Sundays are quieter outside Lisbon and Porto.' },
+  NL:{ tag:'Relaxed, but rules',
+    siesta:'No siesta. Quiet is expected late at night; many municipalities apply night quiet from ~10–11 PM.',
+    trade:'Sunday trading is common in cities (often a monthly "koopzondag" or weekly in tourist areas), but some towns and smaller shops still close <b>Sundays</b> and holidays.',
+    noise:'Noise nuisance ("geluidsoverlast") is regulated locally; building rules restrict drilling and loud music at night and on Sundays.',
+    dress:'Very relaxed and informal; modest cover for churches. Note the Red Light District bans photographing sex workers — strictly enforced.',
+    photo:'<b>Do not photograph people in the Red Light District</b> — it can provoke confrontation. Otherwise photography is generally free; ask before close-ups of people.',
+    note:'Cycle-friendly and informal, but respect bike lanes and don\'t photograph workers in De Wallen. Coffeeshops have their own no-photo etiquette.' },
+  GB:{ tag:'Sunday trading limits',
+    siesta:'No siesta. Residential quiet is expected late at night; councils act on noise after ~11 PM.',
+    trade:'<b>Sunday Trading laws</b> limit large shops (over 280 m²) in England &amp; Wales to <b>6 continuous hours</b> between 10 AM–6 PM; small shops open freely. Scotland is unrestricted. Most shops shut early on Christmas Day and Easter Sunday.',
+    noise:'Councils enforce "statutory noise nuisance"; many tenancy and flat rules set quiet hours (commonly 11 PM–7 AM).',
+    dress:'Generally relaxed; some cathedrals, clubs, racecourses and fine-dining venues have dress codes. Cover modestly in places of worship.',
+    photo:'Photography in public is broadly allowed, but avoid railway/airport security areas and don\'t photograph children without consent. Some museums restrict flash and tripods.',
+    note:'"Sunday hours" mean later opening and earlier closing for big stores — check before a Sunday shop. Pubs keep their own, often early-closing, hours.' },
+  /* ===== MIDDLE EAST &amp; AFRICA ===== */
+  AE:{ tag:'Prayer &amp; modesty',
+    siesta:'No siesta, but business pauses briefly for the five daily prayers, and hours shift during <b>Ramadan</b> (shorter days; eating, drinking or smoking in public during daylight is prohibited and fined).',
+    trade:'The weekend is <b>Saturday–Sunday</b> (Friday is the main prayer day, with a late-morning pause). Malls open daily and late; some services slow on Friday mornings.',
+    noise:'Public decency laws cover loud music, swearing and rude gestures — all can bring fines. Keep noise down near mosques, especially at prayer times.',
+    dress:'Dress modestly in public — cover shoulders and knees; malls and government offices can refuse entry to revealing clothing. Beachwear is for the beach/pool only. Cover more at mosques (women cover hair).',
+    photo:'<b>Never photograph people — especially local women — without clear permission.</b> No photos of government buildings, military, ports or airports. Public displays of affection and drone use are restricted.',
+    note:'Tolerant for tourists but laws are strict and enforced: no public intoxication, no PDA, and respect Ramadan daytime fasting in public.' },
+  SA:{ tag:'Prayer closures',
+    siesta:'No siesta. Shops and restaurants traditionally <b>pause during each of the five daily prayer times</b> (a few minutes to ~30 min); plan around them. Ramadan reshapes all daytime hours.',
+    trade:'The weekend is <b>Friday–Saturday</b>. Friday midday prayer is the week\'s focus. During Ramadan, eating, drinking or smoking in public during daylight is prohibited.',
+    noise:'Conduct in public is expected to be restrained and respectful, particularly near mosques and during prayer.',
+    dress:'Dress modestly and conservatively — cover shoulders, arms and knees. Women no longer must wear an abaya but should dress loosely and modestly; carry a scarf for mosques and conservative areas.',
+    photo:'<b>Do not photograph people (especially women), government, military or religious sites without permission.</b> Photography in/around Mecca and Medina is tightly restricted; non-Muslims cannot enter the holy core of those cities.',
+    note:'Rules are strict and enforced. Respect prayer-time closures, modest dress and Ramadan fasting in public; alcohol is illegal.' },
+  EG:{ tag:'Prayer &amp; modesty',
+    siesta:'Afternoon rest is common in summer heat; many shops reopen in the cooler evening. Business pauses around the five prayers; Ramadan shifts hours dramatically.',
+    trade:'Friday is the main prayer/rest day; many offices also close Saturday. Bazaars and tourist shops trade daily, often late into the evening.',
+    noise:'Cities are lively and loud, but keep quiet and respectful around mosques, especially at prayer times.',
+    dress:'Dress modestly, particularly away from beach resorts — cover shoulders and knees. Women cover hair and wear long sleeves/skirts to enter mosques; remove shoes.',
+    photo:'<b>No photos of military, police, bridges, or government buildings</b> — taken very seriously. Ask before photographing people; expect requests for a tip ("baksheesh"). Cameras may need a ticket at some sites; tripods/flash often banned in tombs.',
+    note:'Haggling is normal in bazaars. Baksheesh (small tips) oils many interactions. Respect Ramadan fasting in public during daylight.' },
+  MA:{ tag:'Prayer &amp; medina rhythm',
+    siesta:'Many shops, especially outside the medinas, close for a long midday break (≈<b>1–3/4 PM</b>) and reopen into the evening. Business pauses around prayer; Friday afternoon is quiet.',
+    trade:'Friday is the main prayer day — many shops shut around midday prayer and reopen later. Tourist-area shops and souks trade daily.',
+    noise:'Medinas are bustling, but be calm and respectful near mosques and at prayer times. The pre-dawn call to prayer is part of life.',
+    dress:'Dress modestly — cover shoulders and knees, more so in rural areas and medinas. <b>Non-Muslims cannot enter most mosques</b> (Hassan II in Casablanca is a notable exception).',
+    photo:'Always ask before photographing people — many will decline or expect a few dirhams. Don\'t photograph police, military or the royal palace. Some craftsmen charge for photos.',
+    note:'Hard bargaining is expected in souks. Friday couscous lunch slows things down. Alcohol is limited to licensed venues.' },
+  /* ===== ASIA-PACIFIC ===== */
+  JP:{ tag:'Quiet by default',
+    siesta:'No siesta, but Japan prizes public quiet. <b>Trains are near-silent</b> — phone calls are taboo and phones go on "manner mode". Keep your voice low in restaurants, temples and residential streets.',
+    trade:'Convenience stores and many shops open daily and late; smaller shops may close one weekday. New Year (around Jan 1–3) is the big nationwide closure.',
+    noise:'Apartment living means thin walls and real sensitivity to noise — no loud music or stomping at night. Eating while walking and loud talking on public transport are frowned upon.',
+    dress:'Generally relaxed and neat; remove shoes when entering homes, ryokan, temples and some restaurants (look for the genkan/step). Cover modestly at shrines and temples; tattoos may bar entry to public baths (onsen).',
+    photo:'No photos of geisha without consent (enforced in Kyoto\'s Gion). Many temples, shrines and shops ban indoor photography — watch for signs. Don\'t photograph strangers, especially children.',
+    note:'Quiet, queuing and tidiness are core etiquette. Don\'t tip. Slurping noodles is fine; talking loudly on the train is not. Carry your rubbish until you find a bin.' },
+  KR:{ tag:'Quiet, fast-paced',
+    siesta:'No siesta. Cities run late, but apartments enforce real quiet at night — "floor noise" ("layer noise") between neighbours is a well-known, sensitive issue.',
+    trade:'Open daily and late; big-box marts (e.g. Emart, Homeplus) close <b>two Sundays a month</b> by regulation. Convenience stores are 24/7.',
+    noise:'Be considerate at night in residential buildings — heavy footsteps and loud noise after ~10 PM draw complaints. Keep transit calm.',
+    dress:'Trendy and modest up top — covered shoulders are the norm, though short skirts are common. Remove shoes in homes, temples and many guesthouses. Cover modestly at temples.',
+    photo:'No flash and often no photos inside temple halls; ask before photographing people. Avoid military sites and anything near the DMZ unless permitted.',
+    note:'Use two hands to give/receive items and when pouring drinks for elders. Subway and bus rides are quiet; loud phone calls stand out.' },
+  TH:{ tag:'Respect &amp; royalty',
+    siesta:'No siesta. Markets and street life run early and late; temple grounds expect calm and quiet, especially during chanting.',
+    trade:'Shops, malls and markets open daily and late. Alcohol sales are legally restricted to roughly <b>11 AM–2 PM and 5 PM–midnight</b>, and banned on certain Buddhist holidays.',
+    noise:'Keep calm and avoid public anger — losing your temper ("jai rawn") causes loss of face. Lower your voice in temples.',
+    dress:'<b>Cover shoulders and knees to enter temples</b> (wats); sarongs are often available to borrow. Remove shoes and hats; never point your feet at Buddha images or people, and don\'t touch anyone\'s head.',
+    photo:'Don\'t pose disrespectfully with Buddha images (climbing on them is illegal). Avoid photographing the military. Be very careful with anything involving the royal family — <b>lèse-majesté laws are strict</b> and seriously enforced.',
+    note:'Never insult the monarchy or step on money/images bearing the king. Monks should not be touched by women. A "wai" (palms-together) is the standard greeting.' },
+  IN:{ tag:'Sacred-site etiquette',
+    siesta:'No siesta, but small shops often shut for a midday break in hot regions and reopen into the late evening. Temple timings include morning and evening worship windows with a midday closure.',
+    trade:'Markets open daily and late; a regional weekly closing day varies by city/trade. Major festivals (e.g. Diwali, Holi) and "dry days" can close shops and bars.',
+    noise:'Cities are loud, but be respectful and quiet at temples, mosques and during prayers/aarti. Some cities restrict loudspeakers and firecrackers by time.',
+    dress:'Dress modestly — cover shoulders and knees, especially at religious sites. <b>Remove shoes (and often cover your head)</b> at temples, mosques and gurdwaras; some sites bar leather items.',
+    photo:'Photography is banned inside many temple sanctums and at sensitive sites; some charge a camera fee. <b>No photos of military, airports, bridges or border areas.</b> Always ask before photographing people, especially women.',
+    note:'Use your right hand for eating and giving. Remove footwear before entering homes and temples. Public affection is frowned upon in much of the country.' },
+  /* ===== AMERICAS &amp; OCEANIA ===== */
+  US:{ tag:'Local noise ordinances',
+    siesta:'No siesta. "Quiet hours" are set locally — many cities and most hotels, dorms and HOAs enforce them, commonly <b>10/11 PM–7 AM</b>.',
+    trade:'Shops open daily, often late; 24-hour stores are common. A few "blue laws" survive — some states restrict <b>Sunday alcohol sales</b> or car dealerships.',
+    noise:'Municipal noise ordinances govern amplified sound, parties and construction hours; persistent noise can bring police and fines. National parks enforce generator and quiet hours at campgrounds.',
+    dress:'Very relaxed overall; some restaurants, clubs and houses of worship have dress codes. Cover modestly in churches.',
+    photo:'Public photography is broadly legal, but federal buildings, TSA security areas, military bases and some tribal lands restrict it. Don\'t photograph people on private property without consent.',
+    note:'Tipping is expected (15–20%+). Quiet hours and noise rules are local — check your hotel or rental\'s posted policy.' },
+  AU:{ tag:'Noise &amp; sun rules',
+    siesta:'No siesta. Residential noise is regulated by state/council rules — typically tighter limits at night (e.g. no power tools or loud music after ~8–10 PM, later start on weekends/holidays).',
+    trade:'Shops open daily; some states limit hours on <b>Good Friday, Christmas and Anzac Day morning</b> (25 April), when many businesses close out of respect.',
+    noise:'EPA/council noise rules set times for lawnmowers, construction and amplified music; complaints are common in apartments. Beaches and parks may ban alcohol and amplified sound.',
+    dress:'Casual and relaxed; cover modestly in churches. "Slip, Slop, Slap" sun rules mean shirts/hats are encouraged outdoors. Some venues enforce smart-casual.',
+    photo:'Public photography is generally fine, but ask before photographing people, and respect <b>Aboriginal sacred sites</b> — some (e.g. parts of Uluru) prohibit photography entirely.',
+    note:'Anzac Day morning is solemn and many places close. Respect Indigenous site signage. Surf only between the red-and-yellow flags.' },
+};
+
+const QH_TIPS = [
+  { i:'🔇', n:'Phones on silent', d:'Silence your phone in temples, churches, museums, trains and quiet residential areas — and never take calls on public transport in Japan, Korea or similar quiet-transit cultures.' },
+  { i:'🗣️', n:'Lower your voice', d:'A loud foreign voice carries. Match the volume of the locals around you, especially indoors, after dark and on the street late at night.' },
+  { i:'🧣', n:'Carry a scarf', d:'A light scarf covers shoulders or hair in seconds — enough for most churches, mosques and temples that require modest dress.' },
+  { i:'👟', n:'Watch for shoes-off', d:'Remove shoes for homes, temples, mosques and many guesthouses across Asia and the Middle East. Look for a step, a pile of shoes, or a sign.' },
+  { i:'📸', n:'Ask before you shoot', d:'Always ask before photographing people, religious rituals, and especially women and children. Obey "no photography" signs in museums and places of worship.' },
+  { i:'🚫', n:'Never photograph security', d:'Avoid military, police, airports, bridges, ports and government buildings — it is illegal in many countries and can lead to detention.' },
+  { i:'🌙', n:'Mind night quiet hours', d:'Most countries and buildings have night quiet hours (often 10/11 PM–6/7 AM). No loud music, drilling, or parties — apartment walls are thin.' },
+  { i:'🛍️', n:'Plan around closures', d:'Sundays, Fridays, prayer times, siesta breaks and religious holidays close shops in much of the world. Stock up the day before.' },
+];
+
+const QH_KEY = 'tt_quiethours_v1';
+let qhState = { countryCode:null };
+let qhTipsBuilt = false;
+
+function qhInit(){
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(QH_KEY) || 'null'); } catch(e){}
+  if (saved && saved.countryCode){
+    qhState.countryCode = saved.countryCode;
+  } else {
+    const trip = getActiveTrip();
+    if (trip && trip.destination){
+      const match = tcGuessCountryFromDest(trip.destination);
+      if (match && QH_DATA[match.c]) qhState.countryCode = match.c;
+    }
+  }
+  qhRenderCountryList('');
+  if (qhState.countryCode && QH_DATA[qhState.countryCode]){
+    qhSelectCountry(qhState.countryCode, false);
+  } else {
+    qhState.countryCode = null;
+    document.getElementById('qh-content').style.display = 'none';
+    document.getElementById('qh-empty').style.display = '';
+  }
+  if (!qhTipsBuilt) qhBuildTips();
+  document.getElementById('qh-tips-body').style.display = 'none';
+  document.getElementById('qh-tips-sec').classList.remove('open');
+  if (!document._qhClickBound){
+    document.addEventListener('click', qhDocClick);
+    document._qhClickBound = true;
+  }
+}
+
+function qhCountry(){ return TC_COUNTRIES.find(co => co.c === qhState.countryCode); }
+function qhSave(){ try { localStorage.setItem(QH_KEY, JSON.stringify({ countryCode: qhState.countryCode })); } catch(e){} }
+
+/* ── Picker (shares the Tip Calculator picker CSS) ── */
+function qhOpenPicker(){
+  const drop = document.getElementById('qh-country-drop');
+  if (drop.style.display === 'block'){ qhClosePicker(); return; }
+  drop.style.display = 'block';
+  const s = document.getElementById('qh-country-search');
+  s.value = ''; qhRenderCountryList('');
+  setTimeout(()=>s.focus(), 50);
+}
+function qhClosePicker(){ document.getElementById('qh-country-drop').style.display = 'none'; }
+function qhDocClick(e){
+  const wrap = document.getElementById('qh-country-disp');
+  const drop = document.getElementById('qh-country-drop');
+  if (!wrap || !drop || drop.style.display !== 'block') return;
+  if (wrap.contains(e.target) || drop.contains(e.target)) return;
+  qhClosePicker();
+}
+function qhFilterCountries(){ qhRenderCountryList((document.getElementById('qh-country-search').value || '').toLowerCase().trim()); }
+function qhRenderCountryList(q){
+  const list = TC_COUNTRIES.filter(co => QH_DATA[co.c] && (!q || co.n.toLowerCase().includes(q) || co.c.toLowerCase().includes(q)));
+  const html = list.length
+    ? list.map(co => {
+        const tag = QH_DATA[co.c].tag || '';
+        return `<div class="tc-drop-item" onclick="qhSelectCountry('${co.c}')"><span class="tc-drop-flag">${co.f}</span><span class="tc-drop-name">${co.n}</span><span class="tc-drop-cur">${tag}</span></div>`;
+      }).join('')
+    : `<div class="tc-drop-item" style="color:var(--muted);cursor:default">No matches for "${tcEscape(q)}"</div>`;
+  document.getElementById('qh-country-list').innerHTML = html;
+}
+
+function qhSelectCountry(code, save){
+  if (save === undefined) save = true;
+  if (!QH_DATA[code]) return;
+  qhState.countryCode = code;
+  if (save) qhSave();
+  const co = qhCountry();
+  if (!co) return;
+  const d = QH_DATA[code];
+  document.getElementById('qh-disp-flag').textContent = co.f;
+  document.getElementById('qh-disp-name').textContent = co.n;
+  document.getElementById('qh-disp-tag').textContent = d.tag || '';
+  qhClosePicker();
+  document.getElementById('qh-empty').style.display = 'none';
+  document.getElementById('qh-content').style.display = '';
+  qhRender();
+}
+
+function qhRender(){
+  const co = qhCountry();
+  if (!co) return;
+  const d = QH_DATA[co.c];
+
+  // Hero
+  document.getElementById('qh-hero-flag').textContent = co.f;
+  document.getElementById('qh-hero-co').textContent = co.n;
+  document.getElementById('qh-hero-sub').textContent = d.tag || '';
+
+  // Sections (reuse the Driving-Rules row component)
+  document.getElementById('qh-quiet').innerHTML = drRow('🤫', 'Siesta / quiet hours', d.siesta);
+  document.getElementById('qh-trade').innerHTML = drRow('🛍️', 'Sunday & holiday trading', d.trade);
+  document.getElementById('qh-noise').innerHTML = drRow('🔊', 'Noise ordinances', d.noise);
+  document.getElementById('qh-etiq').innerHTML  = drRow('🧥', 'Dress codes', d.dress) + drRow('📷', 'Photography', d.photo);
+
+  const knownote = document.getElementById('qh-knownote-wrap');
+  if (d.note){ knownote.style.display = ''; document.getElementById('qh-knownote').innerHTML = d.note; }
+  else { knownote.style.display = 'none'; }
+}
+
+/* ── Universal etiquette ── */
+function qhToggleTips(){
+  const sec = document.getElementById('qh-tips-sec');
+  const body = document.getElementById('qh-tips-body');
+  const isOpen = body.style.display === 'block';
+  if (isOpen){
+    body.style.display = 'none';
+    sec.classList.remove('open');
+  } else {
+    if (!qhTipsBuilt) qhBuildTips();
+    body.style.display = 'block';
+    sec.classList.add('open');
+  }
+}
+function qhBuildTips(){
+  document.getElementById('qh-tips').innerHTML =
+    `<div class="dr-signs">` +
+    QH_TIPS.map(s => `<div class="dr-sign"><span class="dr-sign-ico">${s.i}</span><div><div class="dr-sign-nm">${s.n}</div><div class="dr-sign-ds">${s.d}</div></div></div>`).join('') +
+    `</div>`;
+  qhTipsBuilt = true;
 }
 
 /* ══════════════════════════════════════════════════════
