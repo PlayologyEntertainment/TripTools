@@ -6967,16 +6967,324 @@ body.no-scroll { overflow: hidden; }
   .uv-print-header { display:flex; justify-content:space-between; font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:#666; padding:0 0 12px; border-bottom:1px solid #ccc; margin:16px 24px; }
 }
 </style>
-<div id="view-placeholder-altitude" class="view">
-  <nav class="tool-topbar">
+<style>
+/* ── ALTITUDE SICKNESS GUIDE ── */
+#view-altitude .as-section{margin-top:26px}
+#view-altitude .as-sec-hdr{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+#view-altitude .as-sec-intro{font-size:13px;color:var(--ink-2);line-height:1.55;margin:-4px 0 14px}
+
+/* elevation input */
+.as-calc{border:1.5px solid var(--ink);border-radius:var(--r);background:var(--paper-2);padding:18px 18px 16px}
+.as-calc-hd{font-family:var(--serif);font-size:19px;font-weight:600;letter-spacing:-.01em;margin-bottom:3px}
+.as-calc-sub{font-size:12.5px;color:var(--muted);line-height:1.45;margin-bottom:14px}
+.as-elev-row{display:flex;gap:10px;align-items:stretch;flex-wrap:wrap}
+.as-elev-row input{flex:1;min-width:140px;background:var(--paper);border:1.5px solid var(--ink);border-radius:var(--r);color:var(--ink);font-family:var(--sans);font-size:18px;font-weight:600;padding:11px 14px}
+.as-elev-row input:focus{outline:none;border-color:var(--accent)}
+.as-unit{display:flex;border:1.5px solid var(--ink);border-radius:var(--r);overflow:hidden;flex-shrink:0}
+.as-unit button{background:var(--paper);border:none;font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:.04em;color:var(--ink-2);padding:0 16px;cursor:pointer;transition:background .12s,color .12s}
+.as-unit button.on{background:var(--ink);color:var(--paper)}
+.as-presets-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:16px 0 8px}
+.as-presets{display:flex;flex-wrap:wrap;gap:7px}
+.as-preset{border:1.5px solid var(--rule);border-radius:var(--r);background:var(--paper);padding:7px 12px;font-family:var(--sans);font-size:12.5px;line-height:1.25;color:var(--ink-2);cursor:pointer;text-align:left;transition:border-color .12s}
+.as-preset:hover{border-color:var(--ink)}
+.as-preset b{display:block;color:var(--ink);font-weight:600}
+.as-preset span{font-family:var(--mono);font-size:10px;color:var(--muted)}
+.as-factors{margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:600px){.as-factors{grid-template-columns:1fr}}
+.as-q-text{font-weight:600;font-size:13px;line-height:1.4;margin-bottom:8px}
+.as-opts{display:flex;flex-direction:column;gap:6px}
+.as-opt{border:1.5px solid var(--rule);border-radius:var(--r);background:var(--paper);padding:8px 12px;font-family:var(--sans);font-size:12.5px;line-height:1.3;color:var(--ink-2);cursor:pointer;text-align:left;transition:background .12s,color .12s,border-color .12s}
+.as-opt:hover:not(.sel){border-color:var(--ink)}
+.as-opt.sel{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+
+/* result */
+#as-result{margin-top:18px}
+.as-empty{margin-top:18px;padding:20px;border:1.5px dashed var(--rule);border-radius:var(--r);text-align:center;font-size:13px;color:var(--muted);line-height:1.5}
+.as-risk{border:1.5px solid var(--ink);border-left-width:5px;border-radius:var(--r);background:var(--paper);padding:16px 18px}
+.as-risk.l0,.as-risk.l1{border-left-color:var(--green)}
+.as-risk.l2{border-left-color:var(--orange)}
+.as-risk.l3{border-left-color:var(--accent)}
+.as-risk.l4{border-left-color:var(--purple)}
+.as-risk-top{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.as-risk-badge{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;border-radius:2px;font-weight:600}
+.as-risk.l0 .as-risk-badge,.as-risk.l1 .as-risk-badge{background:#E3F4E4;color:var(--green);border:1px solid rgba(46,125,50,.3)}
+.as-risk.l2 .as-risk-badge{background:#FFE6CC;color:var(--orange);border:1px solid rgba(230,81,0,.3)}
+.as-risk.l3 .as-risk-badge{background:#FFE5DF;color:var(--accent);border:1px solid rgba(255,77,46,.3)}
+.as-risk.l4 .as-risk-badge{background:#F0E1F6;color:var(--purple);border:1px solid rgba(106,27,154,.3)}
+.as-risk-label{font-family:var(--serif);font-size:21px;font-weight:700;letter-spacing:-.02em}
+.as-risk.l0 .as-risk-label,.as-risk.l1 .as-risk-label{color:var(--green)}
+.as-risk.l2 .as-risk-label{color:var(--orange)}
+.as-risk.l3 .as-risk-label{color:var(--accent)}
+.as-risk.l4 .as-risk-label{color:var(--purple)}
+.as-risk-zone{margin-left:auto;font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;color:var(--muted);text-align:right;line-height:1.4}
+.as-risk-zone b{display:block;color:var(--ink);font-size:15px;letter-spacing:-.01em}
+.as-risk-blurb{font-size:13.5px;line-height:1.6;color:var(--ink-2);margin-top:10px}
+.as-plan-hd{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:14px 0 8px}
+.as-plan{list-style:none;display:flex;flex-direction:column;gap:8px}
+.as-plan li{display:flex;gap:10px;font-size:13.5px;line-height:1.5;color:var(--ink-2)}
+.as-plan li b{color:var(--ink)}
+.as-plan li::before{content:'›';color:var(--accent);font-weight:700;flex-shrink:0}
+
+/* altitude scale */
+.as-scale{margin-top:14px;border:1.5px solid var(--rule);border-radius:var(--r);overflow:hidden}
+.as-scale-row{display:grid;grid-template-columns:96px 1fr;align-items:center;gap:12px;padding:9px 14px;font-size:12.5px;line-height:1.35;border-left:5px solid transparent;border-top:1px solid var(--rule)}
+.as-scale-row:first-child{border-top:none}
+.as-scale-row.here{background:var(--paper-2);font-weight:600}
+.as-scale-row.here .as-scale-band{color:var(--ink)}
+.as-scale-alt{font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap}
+.as-scale-band b{color:var(--ink)}
+.as-scale-row.z0{border-left-color:#9CCC9E}
+.as-scale-row.z1{border-left-color:var(--green)}
+.as-scale-row.z2{border-left-color:var(--orange)}
+.as-scale-row.z3{border-left-color:var(--accent)}
+.as-scale-row.z4{border-left-color:var(--purple)}
+.as-here-tag{font-family:var(--mono);font-size:8.5px;letter-spacing:.06em;text-transform:uppercase;background:var(--ink);color:var(--paper);padding:2px 6px;border-radius:2px;margin-left:8px;vertical-align:middle}
+
+/* acclimatization timeline */
+.as-accl-top{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+@media(max-width:600px){.as-accl-top{grid-template-columns:1fr}}
+.as-accl-card{border:1.5px solid var(--rule);border-radius:var(--r);padding:11px 13px;border-left:4px solid var(--teal)}
+.as-accl-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:6px}
+.as-accl-val{font-weight:600;font-size:16px;line-height:1.25;color:var(--ink);margin-top:3px}
+.as-accl-sub{font-size:11.5px;color:var(--muted);line-height:1.4;margin-top:3px}
+.as-rules{list-style:none;display:flex;flex-direction:column;gap:9px}
+.as-rules li{display:flex;gap:10px;font-size:13px;line-height:1.5;color:var(--ink-2)}
+.as-rules li b{color:var(--ink)}
+.as-rules li::before{content:'⛰';flex-shrink:0;font-size:13px}
+
+/* prevent / descend columns */
+.as-cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:680px){.as-cols{grid-template-columns:1fr}}
+.as-col{border:1.5px solid var(--rule);border-radius:var(--r);padding:14px 16px}
+.as-col.prevent{border-left:4px solid var(--green)}
+.as-col.descend{border-left:4px solid var(--accent)}
+.as-col-hd{font-family:var(--serif);font-size:16px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.as-list{list-style:none;display:flex;flex-direction:column;gap:9px}
+.as-list li{display:flex;gap:9px;font-size:13px;line-height:1.5;color:var(--ink-2)}
+.as-list li b{color:var(--ink)}
+.as-list.prevent li::before{content:'✓';color:var(--green);font-weight:700;flex-shrink:0}
+.as-list.descend li{counter-increment:asdesc}
+.as-list.descend li::before{content:counter(asdesc);font-family:var(--mono);font-size:11px;color:var(--accent);font-weight:700;flex-shrink:0;min-width:14px}
+.as-list.descend{counter-reset:asdesc}
+
+/* the three illnesses */
+.as-ills{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media(max-width:760px){.as-ills{grid-template-columns:1fr}}
+.as-ill{border:1.5px solid var(--rule);border-radius:var(--r);padding:14px 15px;border-top:4px solid var(--rule)}
+.as-ill.ams{border-top-color:var(--orange)}
+.as-ill.hace{border-top-color:var(--accent)}
+.as-ill.hape{border-top-color:var(--purple)}
+.as-ill-abbr{font-family:var(--serif);font-size:20px;font-weight:700;letter-spacing:-.02em;line-height:1}
+.as-ill.ams .as-ill-abbr{color:var(--orange)}
+.as-ill.hace .as-ill-abbr{color:var(--accent)}
+.as-ill.hape .as-ill-abbr{color:var(--purple)}
+.as-ill-name{font-size:12px;color:var(--muted);margin:3px 0 9px;line-height:1.3}
+.as-ill-sev{font-family:var(--mono);font-size:8.5px;letter-spacing:.06em;text-transform:uppercase;padding:3px 7px;border-radius:2px;display:inline-block;margin-bottom:10px}
+.as-ill.ams .as-ill-sev{background:#FFE6CC;color:var(--orange)}
+.as-ill.hace .as-ill-sev,.as-ill.hape .as-ill-sev{background:#FFE5DF;color:var(--accent)}
+.as-ill-sig{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.as-ill ul{list-style:none;display:flex;flex-direction:column;gap:6px;margin-bottom:11px}
+.as-ill li{display:flex;gap:8px;font-size:12.5px;line-height:1.45;color:var(--ink-2)}
+.as-ill li::before{content:'•';color:var(--muted);flex-shrink:0}
+.as-ill-act{font-size:12.5px;line-height:1.5;color:var(--ink-2);padding-top:10px;border-top:1px solid var(--rule)}
+.as-ill-act b{color:var(--ink)}
+
+/* medications */
+.as-filters{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.as-meds{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+@media(max-width:680px){.as-meds{grid-template-columns:1fr}}
+.as-med{border:1.5px solid var(--rule);border-radius:var(--r);padding:13px 14px;display:flex;flex-direction:column}
+.as-med-top{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.as-med-nm{font-family:var(--serif);font-size:16px;font-weight:600;letter-spacing:-.01em;line-height:1.2}
+.as-med-brand{font-size:12px;color:var(--muted);font-style:italic}
+.as-med-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.as-tag{font-family:var(--mono);font-size:8.5px;letter-spacing:.05em;text-transform:uppercase;padding:3px 7px;border-radius:2px;border:1px solid var(--rule);color:var(--muted)}
+.as-tag.rx{background:#FFE5DF;color:var(--accent);border-color:rgba(255,77,46,.3)}
+.as-tag.otc{background:#E3F4E4;color:var(--green);border-color:rgba(46,125,50,.3)}
+.as-tag.nat{background:#E1F1F3;color:var(--teal);border-color:rgba(0,131,143,.3)}
+.as-tag.pv{background:var(--paper-2)}
+.as-med-rows{margin-top:10px;display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:12.5px;line-height:1.45}
+.as-med-rows dt{font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding-top:2px}
+.as-med-rows dd{color:var(--ink-2);margin:0}
+.as-med-rows dd b{color:var(--ink)}
+.as-med-note{font-size:12px;color:var(--muted);line-height:1.5;margin-top:10px;padding-top:9px;border-top:1px solid var(--rule)}
+.as-med-note b{color:var(--ink)}
+
+.as-disclaimer{margin-top:24px;padding:13px 16px;border-radius:var(--r);background:var(--paper-2);border:1.5px solid var(--rule);font-size:12px;line-height:1.6;color:var(--muted)}
+.as-disclaimer b{color:var(--ink-2)}
+
+@media print{
+  #view-altitude .as-unit,#view-altitude .as-presets,#view-altitude .as-presets-lbl,
+  #view-altitude .as-opt:not(.sel),#view-altitude .as-filters,#view-altitude .as-calc-sub{display:none!important}
+  #view-altitude .as-med,#view-altitude .as-col,#view-altitude .as-ill,#view-altitude .as-accl-card{break-inside:avoid}
+}
+</style>
+<div id="view-altitude" class="view">
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="window.print()">🖨 Print</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">⛰</span>
-    <h2>Altitude Sickness Guide</h2>
-    <p style="margin-bottom:24px">Enter elevation → risk level, acclimatization timeline & prevention strategies.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-altitude"></div>
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>Altitude Sickness Guide</h1>
+    <p class="tool-sub">Heading high? Enter the elevation you'll sleep at — or pick a destination — and get your altitude-sickness risk, a safe acclimatization timeline, prevention strategies, the warning signs to watch for, and the golden rules for when to turn back and descend.</p>
+  </div>
+
+  <div class="tool-body">
+
+    <!-- ── ELEVATION INPUT ── -->
+    <div class="as-calc">
+      <div class="as-calc-hd">⛰ What's your sleeping altitude?</div>
+      <div class="as-calc-sub">Use the highest elevation you'll spend the night at — that's what drives the risk, not the highest point you pass through. Type it in or tap a destination.</div>
+      <div class="as-elev-row">
+        <input type="number" id="as-elev" inputmode="numeric" placeholder="e.g. 3400" oninput="asCalc()" min="0" step="50">
+        <div class="as-unit">
+          <button id="as-unit-m"  class="on" onclick="asSetUnit('m')">Meters</button>
+          <button id="as-unit-ft"          onclick="asSetUnit('ft')">Feet</button>
+        </div>
+      </div>
+      <div class="as-presets-lbl">Or pick a high-altitude destination</div>
+      <div class="as-presets" id="as-presets"></div>
+
+      <div class="as-factors">
+        <div class="as-factor">
+          <div class="as-q-text">Your history with altitude</div>
+          <div class="as-opts" id="as-q0"></div>
+        </div>
+        <div class="as-factor">
+          <div class="as-q-text">How fast you'll get up there</div>
+          <div class="as-opts" id="as-q1"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="as-result"><div class="as-empty">Enter an elevation above to see your risk level and a tailored plan.</div></div>
+
+    <!-- ── ACCLIMATIZATION TIMELINE ── -->
+    <div class="as-section">
+      <div class="as-sec-hdr">🗓 Acclimatization timeline</div>
+      <p class="as-sec-intro">Your body needs time to make more red blood cells and adjust to thinner air. There's no shortcut — the only reliable way to acclimatize is to <b>go up slowly</b> and give it days, not hours.</p>
+      <div class="as-accl-top" id="as-accl-top"></div>
+      <ul class="as-rules">
+        <li><b>The 500 m rule.</b> Above 3,000 m (10,000 ft), don't raise the altitude you sleep at by more than ~500 m (1,600 ft) per night.</li>
+        <li><b>Climb high, sleep low.</b> It's fine to hike higher during the day — just come back down to sleep. Day trips up don't count against the rule.</li>
+        <li><b>Rest days.</b> Build in a rest day every 1,000 m (3,300 ft) of ascent, or every 3–4 days, sleeping at the same altitude.</li>
+        <li><b>Take it easy on arrival.</b> Most AMS appears 6–24 hours after you arrive at a new altitude. Keep the first day or two gentle — no strenuous exertion.</li>
+        <li><b>Listen to your body.</b> If you feel off, don't go higher until symptoms clear. Acclimatization can't be rushed or willed.</li>
+      </ul>
+    </div>
+
+    <!-- ── PREVENT / DESCEND ── -->
+    <div class="as-section">
+      <div class="as-sec-hdr">🛡 Prevention &amp; the golden rules of descent</div>
+      <div class="as-cols">
+        <div class="as-col prevent">
+          <div class="as-col-hd">✅ Prevention</div>
+          <ul class="as-list prevent">
+            <li><b>Ascend gradually</b> and follow the 500 m sleeping-altitude rule above 3,000 m.</li>
+            <li><b>Climb high, sleep low</b> and build in rest days.</li>
+            <li><b>Hydrate well</b> — thin, dry air dehydrates you fast — but don't force huge volumes of water.</li>
+            <li><b>Skip alcohol &amp; sleeping pills</b> for the first 48 hours; both blunt your breathing.</li>
+            <li><b>Eat a high-carbohydrate diet</b> and keep activity light early on.</li>
+            <li><b>Consider acetazolamide (Diamox)</b> if you're prone to AMS or must ascend quickly — ask your doctor before the trip.</li>
+            <li><b>Never ascend with symptoms.</b> A nagging headache means stay put, not push on.</li>
+          </ul>
+        </div>
+        <div class="as-col descend">
+          <div class="as-col-hd">⬇️ When to descend</div>
+          <ul class="as-list descend">
+            <li>Feel unwell at altitude? <b>Assume it's altitude sickness</b> until proven otherwise — don't blame the food or a bad night's sleep.</li>
+            <li>With <b>any AMS symptoms, do not go higher.</b> Stay at the same altitude, rest, and hydrate until you fully recover.</li>
+            <li>If symptoms <b>worsen or don't improve</b> with rest, descend — even 300–1,000 m (1,000–3,300 ft) lower often brings fast relief.</li>
+            <li>At <b>any sign of HACE or HAPE</b> (see below), descend <b>immediately</b>, day or night. This is an emergency.</li>
+            <li><b>Never leave a sick person alone</b> and never let them descend alone. Descent is the single most effective treatment.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── THE THREE ILLNESSES ── -->
+    <div class="as-section">
+      <div class="as-sec-hdr">⚠️ Know the three altitude illnesses</div>
+      <p class="as-sec-intro">Altitude illness is a spectrum. Mild <b>AMS</b> is common and manageable; <b>HACE</b> and <b>HAPE</b> are rare but life-threatening and demand immediate descent.</p>
+      <div class="as-ills">
+        <div class="as-ill ams">
+          <div class="as-ill-abbr">AMS</div>
+          <div class="as-ill-name">Acute Mountain Sickness</div>
+          <span class="as-ill-sev">Common · Mild–moderate</span>
+          <div class="as-ill-sig">Warning signs</div>
+          <ul>
+            <li>Headache (the hallmark)</li>
+            <li>Nausea or loss of appetite</li>
+            <li>Fatigue &amp; weakness</li>
+            <li>Dizziness</li>
+            <li>Poor sleep</li>
+          </ul>
+          <div class="as-ill-act"><b>Feels like a hangover.</b> Stop ascending, rest, hydrate, treat the headache. It usually eases in 12–48 hours. If it worsens, descend.</div>
+        </div>
+        <div class="as-ill hace">
+          <div class="as-ill-abbr">HACE</div>
+          <div class="as-ill-name">High-Altitude Cerebral Edema</div>
+          <span class="as-ill-sev">Emergency · Brain</span>
+          <div class="as-ill-sig">Warning signs</div>
+          <ul>
+            <li>Confusion, odd behavior</li>
+            <li>Loss of coordination (can't walk a straight line)</li>
+            <li>Severe drowsiness</li>
+            <li>Hallucinations</li>
+            <li>Worsening AMS</li>
+          </ul>
+          <div class="as-ill-act"><b>Descend immediately.</b> Give oxygen and dexamethasone if available. Do not wait for morning — minutes matter.</div>
+        </div>
+        <div class="as-ill hape">
+          <div class="as-ill-abbr">HAPE</div>
+          <div class="as-ill-name">High-Altitude Pulmonary Edema</div>
+          <span class="as-ill-sev">Emergency · Lungs</span>
+          <div class="as-ill-sig">Warning signs</div>
+          <ul>
+            <li>Breathless at rest</li>
+            <li>Persistent cough, maybe frothy/pink</li>
+            <li>Chest tightness or congestion</li>
+            <li>Extreme fatigue</li>
+            <li>Blue-tinged lips or nails</li>
+          </ul>
+          <div class="as-ill-act"><b>Descend immediately.</b> Give oxygen and nifedipine if available. HAPE can develop without any headache — trust the breathing.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── MEDICATIONS ── -->
+    <div class="as-section">
+      <div class="as-sec-hdr">💊 Medications &amp; remedies</div>
+      <p class="as-sec-intro">Drugs help but never replace sensible ascent. Prevention meds work best started <b>before</b> you go up. Filter to compare your options.</p>
+      <div class="as-filters chip-grp" id="as-filters">
+        <span class="chip on" data-f="all"    onclick="asFilterMeds(this)">All</span>
+        <span class="chip"    data-f="otc"    onclick="asFilterMeds(this)">🟢 Over-the-counter</span>
+        <span class="chip"    data-f="rx"     onclick="asFilterMeds(this)">🔴 Prescription</span>
+        <span class="chip"    data-f="nat"    onclick="asFilterMeds(this)">🌿 Natural</span>
+        <span class="chip"    data-f="pv"     onclick="asFilterMeds(this)">🛡 Prevention</span>
+      </div>
+      <div class="as-meds" id="as-meds"></div>
+    </div>
+
+    <div class="as-disclaimer">
+      <b>⚕ General information, not medical advice.</b> Risk bands, timelines, doses and timings here are typical guidance — individual susceptibility varies enormously and altitude illness can be unpredictable. Always plan your ascent and any medication with a doctor or travel-medicine clinic before you go, especially if you are pregnant, have heart or lung conditions, sickle cell trait, a sulfa allergy, or take other medication. When in doubt, go down.
+    </div>
+
+  </div><!-- /tool-body -->
+
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    The single biggest risk factor is how fast you go up — far more than how fit you are. Fit young hikers get AMS all the time by charging ahead. If your itinerary flies or drives you straight to a high sleeping altitude (Cusco, La Paz, Lhasa, Leh), spend your first day doing almost nothing, and ask your doctor about starting acetazolamide the day before you arrive.
+  </div>
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('packing')">📝 Smart Packing List</button>
+      <button class="rel-btn" onclick="openTool('vaccination')">💉 Vaccination Requirements</button>
+      <button class="rel-btn" onclick="openTool('weather')">🌦 Weather Forecast</button>
+      <button class="rel-btn" onclick="openTool('uv-index')">☀️ UV Index &amp; Sun Safety</button>
     </div>
   </div>
 </div>
@@ -11541,7 +11849,7 @@ const TOOLS = [
   {id:'phrasebook',    nm:'Language Phrasebook',        ico:'💬', ph:'destination',on:false,live:false, ds:'Essential travel phrases in 25 languages with pronunciation.'},
   {id:'emergency',     nm:'Emergency Numbers',          ico:'🚨', ph:'destination',on:false,live:true,  ds:'Police, fire & ambulance for 150+ countries. Embassy finder & your insurance card, always offline.'},
   {id:'uv-index',      nm:'UV Index & Sun Safety',      ico:'☀️', ph:'destination',on:true, live:true,  ds:'Live UV index, SPF recommendations by skin type.'},
-  {id:'altitude',      nm:'Altitude Sickness Guide',    ico:'⛰', ph:'destination',on:false,live:false, ds:'Enter elevation → risk level + acclimatization timeline.'},
+  {id:'altitude',      nm:'Altitude Sickness Guide',    ico:'⛰', ph:'destination',on:false,live:true,  ds:'Enter elevation → risk level + acclimatization timeline.'},
   {id:'weather',       nm:'Weather Forecast',           ico:'🌦', ph:'destination',on:true, live:true,  ds:'5-day forecast via Open-Meteo. Free, no API key.'},
   {id:'tipping-guide', nm:'Tipping Culture Guide',      ico:'🍽', ph:'destination',on:false,live:true,  ds:'Country-by-country etiquette: expected / optional / offensive per venue.'},
   {id:'driving-rules', nm:'Driving & Road Rules',       ico:'🚦', ph:'destination',on:false,live:true,  ds:'Speed limits, BAC limits, toll systems & road sign reference.'},
@@ -12256,6 +12564,7 @@ function injectTripCtx(id) {
   if(id==='vaccination') vacInit();
   if(id==='weather')    wxInit();
   if(id==='uv-index')   uvInit();
+  if(id==='altitude')   asInit();
   if(id==='trip-recap') tcrInit();
   if(id==='customs-duty') cdcInit();
   if(id==='customs-decl') cdhInit();
@@ -33000,6 +33309,318 @@ function ssRenderMeds(filter) {
         <dt>Typical</dt><dd>${m.dose}</dd>
       </dl>
       <div class="ss-med-note">${m.note}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ═══════════════════ ALTITUDE SICKNESS GUIDE ═══════════════════ */
+const AS_KEY = 'triptools_altitude';
+
+// Famous high-altitude destinations (sleeping altitude, metres)
+const AS_PRESETS = [
+  { nm:'Denver, USA',          m:1609 },
+  { nm:'Mexico City',          m:2240 },
+  { nm:'Bogotá, Colombia',     m:2640 },
+  { nm:'Quito, Ecuador',       m:2850 },
+  { nm:'Cusco, Peru',          m:3399 },
+  { nm:'La Paz, Bolivia',      m:3640 },
+  { nm:'Lhasa, Tibet',         m:3656 },
+  { nm:'Leh, India',           m:3500 },
+  { nm:'Everest Base Camp',    m:5364 },
+  { nm:'Kilimanjaro summit',   m:5895 },
+];
+
+// Personal risk-factor questions. Scores nudge the altitude-derived band.
+const AS_Q = [
+  { opts:[
+      { t:'Fine before, or never been high', s:0 },
+      { t:'Mild symptoms once or twice',     s:0.5 },
+      { t:'I reliably get altitude sickness', s:1 } ] },
+  { opts:[
+      { t:'Slowly — staged over several days', s:-1 },
+      { t:'Over a day or two',                 s:0 },
+      { t:'Fast — straight up in under a day', s:1 } ] },
+];
+
+// Altitude zones (metres). Used for the reference scale + base risk band.
+const AS_ZONES = [
+  { z:0, max:1500, name:'Low altitude',      desc:'Sea level to ~1,500 m. Altitude illness essentially doesn’t occur.' },
+  { z:1, max:2500, name:'Moderate altitude', desc:'~1,500–2,500 m. AMS uncommon and usually mild if it appears.' },
+  { z:2, max:3500, name:'High altitude',     desc:'~2,500–3,500 m. AMS is common when ascending quickly.' },
+  { z:3, max:5500, name:'Very high altitude',desc:'~3,500–5,500 m. AMS frequent; HACE/HAPE become real risks.' },
+  { z:4, max:Infinity, name:'Extreme altitude', desc:'Above ~5,500 m. No lasting acclimatization — the body slowly deteriorates.' },
+];
+
+// Risk levels keyed 0..4
+const AS_RISK = {
+  0:{ cls:'l0', badge:'Minimal risk', label:'You’re below the danger zone',
+      blurb:'At this elevation altitude sickness is extremely unlikely — most people feel nothing at all. No special precautions are needed beyond the usual sensible travel habits.',
+      plan:[
+        '<b>No acclimatization needed.</b> Arrive and enjoy as normal.',
+        '<b>Stay hydrated</b> and go easy on alcohol the first night if you’re sensitive.',
+        '<b>Good to know the signs anyway</b> if you’ll be heading higher later in the trip.' ] },
+  1:{ cls:'l1', badge:'Low risk', label:'You should adjust easily',
+      blurb:'A handful of people feel mild, short-lived effects at this height, but serious altitude illness is uncommon. A little care on arrival is all most travelers need.',
+      plan:[
+        '<b>Take the first day gently.</b> Skip strenuous hikes until you’ve slept a night.',
+        '<b>Hydrate well</b> and limit alcohol for the first 24–48 hours.',
+        '<b>Know the AMS symptoms</b> below — a headache that won’t settle is the main one to watch.',
+        '<b>If you’ll climb higher,</b> follow the acclimatization timeline from here on.' ] },
+  2:{ cls:'l2', badge:'Moderate risk', label:'Plan a proper acclimatization',
+      blurb:'AMS is genuinely common at this altitude, especially if you ascend quickly. Most cases are mild and manageable — but a sensible ascent profile and watching the early signs makes a big difference.',
+      plan:[
+        '<b>Ascend gradually</b> and avoid flying or driving straight to your sleeping altitude where you can.',
+        '<b>Keep activity light</b> for the first day or two; let your body catch up.',
+        '<b>Hydrate, eat carbs, and skip alcohol</b> early on.',
+        '<b>Ask your doctor about acetazolamide</b> if you’re prone to AMS or your ascent is rapid.',
+        '<b>Don’t go higher with symptoms</b> — wait until any headache or nausea has fully cleared.' ] },
+  3:{ cls:'l3', badge:'High risk', label:'Be proactive and ascend slowly',
+      blurb:'At this altitude AMS is frequent and the dangerous forms — HACE and HAPE — become a real possibility. A disciplined, slow ascent and a low threshold for descending are essential.',
+      plan:[
+        '<b>Follow the 500 m rule</b> strictly: don’t raise your sleeping altitude by more than ~500 m a night above 3,000 m, with rest days built in.',
+        '<b>Talk to a travel-medicine clinic</b> before the trip about acetazolamide for prevention.',
+        '<b>Climb high, sleep low</b> and never push on through symptoms.',
+        '<b>Learn the HACE &amp; HAPE signs</b> below cold — and agree as a group to descend at the first sign.',
+        '<b>Carry a plan for descent</b> and never let a sick person be alone.' ] },
+  4:{ cls:'l4', badge:'Extreme altitude', label:'Expedition-grade planning required',
+      blurb:'Above ~5,500 m the body cannot truly acclimatize — it slowly deteriorates even in fit, experienced climbers. This is serious mountaineering territory that demands a staged ascent, experience, and proper support.',
+      plan:[
+        '<b>This is not a casual destination.</b> Reach it only after a long, staged acclimatization at lower camps.',
+        '<b>Go with experienced guides</b> and a medical/descent plan, ideally with oxygen available.',
+        '<b>Acetazolamide, dexamethasone and nifedipine</b> are commonly carried — arrange these with a doctor in advance.',
+        '<b>Limit time at the top.</b> Climb high, sleep as low as the route allows.',
+        '<b>Descend at the first hint of HACE or HAPE.</b> At this height there is no margin to wait.' ] },
+};
+
+const AS_MEDS = [
+  { nm:'Acetazolamide', brand:'Diamox', tags:['rx','pv'],
+    use:'Prevent &amp; treat AMS', timing:'Start 24 h before ascent', dose:'125 mg twice daily',
+    note:'The mainstay for prevention — it speeds up acclimatization rather than just masking symptoms. Common, harmless side effects: tingling fingers/toes, more urination, and flat-tasting fizzy drinks. Avoid with a sulfa allergy.' },
+  { nm:'Dexamethasone', brand:'Decadron', tags:['rx'],
+    use:'Treat AMS &amp; HACE', timing:'At onset of symptoms', dose:'Per doctor (e.g. 4 mg every 6 h)',
+    note:'A steroid that relieves symptoms but does <b>not</b> aid acclimatization — a rescue and emergency drug, especially for HACE, used alongside descent, not instead of it.' },
+  { nm:'Nifedipine', brand:'Adalat · Procardia', tags:['rx'],
+    use:'Prevent &amp; treat HAPE', timing:'For those prone to HAPE', dose:'Per doctor (slow-release)',
+    note:'Lowers pulmonary blood pressure. Mainly for people with a history of HAPE or treating it during descent. Can drop blood pressure — prescription and medical guidance required.' },
+  { nm:'Ibuprofen / Acetaminophen', brand:'Advil · Tylenol · Paracetamol', tags:['otc'],
+    use:'Altitude headache', timing:'As needed', dose:'Standard label dose',
+    note:'Effective for the headache of mild AMS. Treats the symptom only — if the headache keeps returning or other symptoms build, stop ascending and consider descent.' },
+  { nm:'Anti-nausea', brand:'Ondansetron · Promethazine', tags:['rx'],
+    use:'Nausea &amp; vomiting', timing:'As needed', dose:'Per doctor',
+    note:'Helps you keep fluids and food down while mild AMS settles. A comfort measure — it doesn’t treat the underlying altitude illness.' },
+  { nm:'Ginkgo biloba', brand:'Herbal extract', tags:['nat','pv'],
+    use:'Possible AMS prevention', timing:'Start days before', dose:'~120 mg twice daily',
+    note:'Drug-free and sometimes used as a supplement, but the evidence is mixed and inconsistent — don’t rely on it alone for a serious ascent.' },
+];
+
+let asUnit = 'm';      // 'm' or 'ft'
+let asAnswers = [0, 1]; // index into AS_Q[i].opts; defaults to "no history" + "over a day or two" (neutral)
+
+function asInit() {
+  asUnit = 'm';
+  asAnswers = [0, 1];
+  let savedElev = '';
+  try {
+    const saved = JSON.parse(localStorage.getItem(AS_KEY) || 'null');
+    if (saved) {
+      if (saved.unit === 'm' || saved.unit === 'ft') asUnit = saved.unit;
+      if (Array.isArray(saved.answers)) saved.answers.slice(0,2).forEach((a,i)=>{ if(typeof a==='number' && AS_Q[i] && AS_Q[i].opts[a]) asAnswers[i]=a; });
+      if (saved.val != null && saved.val !== '') savedElev = saved.val;
+    }
+  } catch(_) {}
+  document.getElementById('as-unit-m').classList.toggle('on', asUnit==='m');
+  document.getElementById('as-unit-ft').classList.toggle('on', asUnit==='ft');
+  const inp = document.getElementById('as-elev');
+  inp.value = savedElev;
+  inp.placeholder = asUnit==='m' ? 'e.g. 3400' : 'e.g. 11200';
+  asRenderPresets();
+  asRenderQuestions();
+  asRenderMeds('all');
+  asCalc();
+}
+
+function asRenderPresets() {
+  document.getElementById('as-presets').innerHTML = AS_PRESETS.map(p => {
+    const ft = Math.round(p.m / 0.3048 / 10) * 10;
+    return `<button type="button" class="as-preset" onclick="asUsePreset(${p.m})"><b>${p.nm}</b><span>${p.m.toLocaleString()} m · ${ft.toLocaleString()} ft</span></button>`;
+  }).join('');
+}
+
+function asRenderQuestions() {
+  AS_Q.forEach((Q, qi) => {
+    const wrap = document.getElementById('as-q'+qi);
+    if (!wrap) return;
+    wrap.innerHTML = Q.opts.map((o, oi) =>
+      `<button type="button" class="as-opt ${asAnswers[qi]===oi?'sel':''}" onclick="asPick(${qi},${oi})">${o.t}</button>`
+    ).join('');
+  });
+}
+
+function asPick(qi, oi) {
+  asAnswers[qi] = oi;
+  const wrap = document.getElementById('as-q'+qi);
+  wrap.querySelectorAll('.as-opt').forEach((b, idx) => b.classList.toggle('sel', idx===oi));
+  asCalc();
+}
+
+function asSetUnit(u) {
+  if (u === asUnit) return;
+  const inp = document.getElementById('as-elev');
+  const v = parseFloat(inp.value);
+  if (!isNaN(v)) {
+    // convert displayed number between units
+    inp.value = u==='ft' ? Math.round(v / 0.3048) : Math.round(v * 0.3048);
+  }
+  asUnit = u;
+  document.getElementById('as-unit-m').classList.toggle('on', u==='m');
+  document.getElementById('as-unit-ft').classList.toggle('on', u==='ft');
+  inp.placeholder = u==='m' ? 'e.g. 3400' : 'e.g. 11200';
+  asCalc();
+}
+
+function asUsePreset(metres) {
+  const inp = document.getElementById('as-elev');
+  inp.value = asUnit==='ft' ? Math.round(metres / 0.3048) : metres;
+  asCalc();
+}
+
+function asElevMetres() {
+  const v = parseFloat(document.getElementById('as-elev').value);
+  if (isNaN(v) || v < 0) return null;
+  return asUnit==='ft' ? v * 0.3048 : v;
+}
+
+function asSave() {
+  try {
+    localStorage.setItem(AS_KEY, JSON.stringify({
+      val: document.getElementById('as-elev').value,
+      unit: asUnit,
+      answers: asAnswers
+    }));
+  } catch(_) {}
+}
+
+function asZoneFor(m) {
+  return AS_ZONES.find(z => m < z.max) || AS_ZONES[AS_ZONES.length-1];
+}
+
+function asCalc() {
+  asSave();
+  asRenderAcclTimeline();
+  const m = asElevMetres();
+  const result = document.getElementById('as-result');
+  if (m === null) {
+    result.innerHTML = '<div class="as-empty">Enter an elevation above to see your risk level and a tailored plan.</div>';
+    return;
+  }
+  const zone = asZoneFor(m);
+  // base band tracks the altitude zone; factors nudge it (but altitude dominates)
+  let level;
+  if (zone.z === 0) {
+    level = 0; // below ~1500 m altitude illness essentially doesn't occur
+  } else if (zone.z === 4) {
+    level = 4; // extreme altitude is always extreme
+  } else {
+    // factors nudge the band within 1..3; level 4 is reserved for the extreme zone
+    const mod = asAnswers.reduce((sum, oi, qi) => sum + AS_Q[qi].opts[oi].s, 0);
+    level = Math.round(zone.z + mod);
+    level = Math.max(1, Math.min(3, level));
+  }
+  const R = AS_RISK[level];
+  const ft = Math.round(m / 0.3048);
+  const plan = R.plan.map(p => `<li>${p}</li>`).join('');
+  const scale = AS_ZONES.map(z => {
+    const lo = AS_ZONES[z.z-1] ? AS_ZONES[z.z-1].max : 0;
+    const range = z.max === Infinity ? `${lo.toLocaleString()} m +` : `${lo.toLocaleString()}–${z.max.toLocaleString()} m`;
+    const here = z === zone;
+    return `<div class="as-scale-row z${z.z} ${here?'here':''}">
+      <span class="as-scale-alt">${range}</span>
+      <span class="as-scale-band"><b>${z.name}</b>${here?'<span class="as-here-tag">You</span>':''} — ${z.desc}</span>
+    </div>`;
+  }).join('');
+  result.innerHTML = `
+    <div class="as-risk ${R.cls}">
+      <div class="as-risk-top">
+        <span class="as-risk-badge">${R.badge}</span>
+        <span class="as-risk-label">${R.label}</span>
+        <span class="as-risk-zone">${zone.name}<b>${Math.round(m).toLocaleString()} m / ${ft.toLocaleString()} ft</b></span>
+      </div>
+      <div class="as-risk-blurb">${R.blurb}</div>
+      <div class="as-plan-hd">Your plan</div>
+      <ul class="as-plan">${plan}</ul>
+    </div>
+    <div class="as-scale">${scale}</div>`;
+}
+
+function asRenderAcclTimeline() {
+  const top = document.getElementById('as-accl-top');
+  if (!top) return;
+  const m = asElevMetres();
+  let nightsVal, nightsSub, restVal, restSub, easeVal, easeSub;
+  if (m === null || m < 2500) {
+    nightsVal = 'Not needed';
+    nightsSub = 'Below ~2,500 m most people need no staged acclimatization.';
+    restVal = '0 rest days';
+    restSub = 'No altitude rest days required at this elevation.';
+    easeVal = 'Day 1';
+    easeSub = 'Take your first day a little easy if you’re sensitive, then carry on.';
+  } else {
+    // nights to spend ascending above 3,000 m under the 500 m/night rule
+    const above = Math.max(0, m - 3000);
+    const nights = above > 0 ? Math.ceil(above / 500) : 0;
+    const rest = above > 0 ? Math.floor(above / 1000) : 0;
+    const extra = nights + rest;
+    nightsVal = extra > 0 ? `~${extra} extra day${extra===1?'':'s'}` : '1–2 days';
+    nightsSub = above > 0
+      ? `Budget around ${extra} extra day${extra===1?'':'s'} ascending above 3,000 m at ~500 m of sleeping altitude per night.`
+      : 'A day or two taking it easy on arrival is usually enough here.';
+    restVal = rest > 0 ? `${rest} rest day${rest===1?'':'s'}` : 'Optional';
+    restSub = rest > 0
+      ? `Plan a rest day roughly every 1,000 m of ascent, sleeping at the same height.`
+      : 'A single rest day is a sensible buffer if your schedule allows.';
+    easeVal = 'First 24–48 h';
+    easeSub = 'Keep arrival days gentle — most AMS shows up 6–24 hours after reaching a new altitude.';
+  }
+  top.innerHTML = `
+    <div class="as-accl-card">
+      <div class="as-accl-lbl">⏳ Time to budget</div>
+      <div class="as-accl-val">${nightsVal}</div>
+      <div class="as-accl-sub">${nightsSub}</div>
+    </div>
+    <div class="as-accl-card">
+      <div class="as-accl-lbl">🛌 Rest days</div>
+      <div class="as-accl-val">${restVal}</div>
+      <div class="as-accl-sub">${restSub}</div>
+    </div>
+    <div class="as-accl-card">
+      <div class="as-accl-lbl">⚠️ Watch window</div>
+      <div class="as-accl-val">${easeVal}</div>
+      <div class="as-accl-sub">${easeSub}</div>
+    </div>`;
+}
+
+function asFilterMeds(el) {
+  document.querySelectorAll('#as-filters .chip').forEach(c => c.classList.toggle('on', c === el));
+  asRenderMeds(el.dataset.f);
+}
+
+function asRenderMeds(filter) {
+  const tagLbl = { otc:'OTC', rx:'Rx', nat:'Natural', pv:'Prevention' };
+  const tagCls = { otc:'otc', rx:'rx', nat:'nat', pv:'pv' };
+  const list = AS_MEDS.filter(m => filter === 'all' || m.tags.includes(filter));
+  const meds = document.getElementById('as-meds');
+  if (!meds) return;
+  meds.innerHTML = list.map(m => {
+    const tags = m.tags.map(t => `<span class="as-tag ${tagCls[t]}">${tagLbl[t]}</span>`).join('');
+    return `<div class="as-med">
+      <div class="as-med-top"><span class="as-med-nm">${m.nm}</span><span class="as-med-brand">${m.brand}</span></div>
+      <div class="as-med-tags">${tags}</div>
+      <dl class="as-med-rows">
+        <dt>Use</dt><dd><b>${m.use}</b></dd>
+        <dt>Timing</dt><dd>${m.timing}</dd>
+        <dt>Typical</dt><dd>${m.dose}</dd>
+      </dl>
+      <div class="as-med-note">${m.note}</div>
     </div>`;
   }).join('');
 }
