@@ -7022,16 +7022,144 @@ body.no-scroll { overflow: hidden; }
     </div>
   </div>
 </div>
-<div id="view-placeholder-cost-living" class="view">
-  <nav class="tool-topbar">
+<style>
+/* ── COST OF LIVING COMPARISON ── */
+.col-input-cur,.col-input-suffix{position:relative;display:flex;align-items:center}
+.col-input-cur input,.col-input-suffix input{width:100%}
+.col-cur-prefix{position:absolute;left:12px;font-family:var(--mono);font-size:14px;color:var(--muted);pointer-events:none;font-weight:600}
+.col-input-cur input{padding-left:34px}
+.col-suffix{position:absolute;right:12px;font-family:var(--mono);font-size:12px;color:var(--muted);pointer-events:none}
+.col-input-suffix input{padding-right:46px}
+.col-opt{font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);font-size:11px}
+.col-city-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:600px){.col-city-grid{grid-template-columns:1fr}}
+.col-rate-note{font-family:var(--sans);font-size:12px;color:var(--muted);line-height:1.5;margin-top:8px}
+.col-rate-note.warn{color:var(--orange)}
+/* results */
+.col-results{margin-top:26px}
+.col-verdict{border:2px solid var(--ink);border-radius:var(--r);padding:16px 18px;margin-bottom:18px;background:var(--paper);font-family:var(--sans);font-size:14.5px;line-height:1.6;color:var(--ink-2)}
+.col-verdict strong{color:var(--ink);font-weight:700}
+.col-verdict .col-v-head{font-family:var(--serif);font-size:17px;font-weight:600;color:var(--ink);margin-bottom:6px;display:block}
+.col-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin-bottom:18px}
+.col-card{border:1.5px solid var(--ink);border-radius:var(--r);padding:16px;background:var(--paper);display:flex;flex-direction:column}
+.col-card.t-comfortable{border-color:var(--green,#2E7D32);box-shadow:0 0 0 1px var(--green,#2E7D32) inset}
+.col-card.t-mid{border-color:var(--blue,#1565C0);box-shadow:0 0 0 1px var(--blue,#1565C0) inset}
+.col-card.t-budget{border-color:var(--ink)}
+.col-card.t-under{border-color:var(--orange);box-shadow:0 0 0 1px var(--orange) inset}
+.col-card-top{display:flex;align-items:flex-start;gap:9px;margin-bottom:10px}
+.col-card-flag{font-size:26px;line-height:1}
+.col-card-name{font-family:var(--serif);font-size:17px;font-weight:600;color:var(--ink);line-height:1.2}
+.col-card-meta{font-family:var(--sans);font-size:11px;color:var(--muted);margin-top:2px}
+.col-tag{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;align-self:flex-start;margin-bottom:10px}
+.col-card.t-comfortable .col-tag{background:rgba(46,125,50,.14);color:var(--green,#2E7D32)}
+.col-card.t-mid .col-tag{background:rgba(21,101,192,.14);color:var(--blue,#1565C0)}
+.col-card.t-budget .col-tag{background:var(--paper-2);color:var(--ink-2)}
+.col-card.t-under .col-tag{background:rgba(230,81,0,.14);color:var(--orange)}
+.col-spare{font-family:var(--sans);font-size:13px;color:var(--ink-2);line-height:1.5;margin-bottom:14px}
+.col-spare .amt{font-family:var(--mono);font-weight:700;font-size:15px}
+.col-spare.pos .amt{color:var(--green,#2E7D32)}
+.col-spare.neg .amt{color:var(--orange)}
+/* tier rows */
+.col-tiers{border-top:1px solid var(--rule);padding-top:12px;margin-bottom:12px}
+.col-tier-row{display:flex;align-items:center;justify-content:space-between;gap:10px;font-family:var(--mono);font-size:12.5px;color:var(--muted);padding:4px 0}
+.col-tier-row .col-tier-lbl{display:flex;align-items:center;gap:7px;font-family:var(--sans);font-size:13px}
+.col-tier-row .col-tier-ico{font-size:13px;width:15px;text-align:center}
+.col-tier-row.met{color:var(--ink-2)}
+.col-tier-row.match{color:var(--ink);font-weight:700}
+.col-tier-row.match .col-tier-lbl{font-weight:700}
+.col-tier-row .col-tier-val{white-space:nowrap}
+/* breakdown */
+.col-break{border-top:1px solid var(--rule);padding-top:10px;margin-top:auto}
+.col-break-h{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+.col-break .row{display:flex;align-items:center;justify-content:space-between;gap:10px;font-family:var(--sans);font-size:12.5px;color:var(--ink-2);line-height:1.9}
+.col-break .row .k{display:flex;align-items:center;gap:7px}
+.col-break .row .v{font-family:var(--mono);white-space:nowrap}
+.col-break .row.total{border-top:1px solid var(--rule);margin-top:5px;padding-top:6px;font-weight:700;color:var(--ink)}
+.col-break .row.trip{color:var(--muted);font-size:11.5px}
+.col-hint{font-family:var(--sans);font-size:13px;color:var(--ink-2);line-height:1.55;border-left:3px solid var(--yellow,#FFD23F);padding:10px 14px;background:rgba(255,210,63,.08);border-radius:0 var(--r) var(--r) 0;margin-bottom:16px}
+.col-actions{display:flex;align-items:center;gap:16px;margin-top:4px;flex-wrap:wrap}
+.col-copy-btn{padding:11px 20px;border:1.5px solid var(--ink);border-radius:var(--r);background:var(--ink);color:var(--paper);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer}
+.col-copy-btn:hover{background:var(--accent);border-color:var(--accent)}
+.col-empty{margin-top:20px;padding:24px;text-align:center;color:var(--muted);font-family:var(--sans);font-size:14px;font-style:italic;border:1.5px dashed var(--rule);border-radius:var(--r)}
+.col-print-header{display:none}
+@media print{
+  .col-actions,.col-empty{display:none!important}
+  .col-print-header{display:flex!important;justify-content:space-between;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#666;padding:0 0 12px;border-bottom:1px solid #ccc;margin-bottom:16px}
+  .col-card,.col-verdict{break-inside:avoid}
+}
+</style>
+<div id="view-cost-living" class="view">
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="window.print()">🖨 Print</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">🌐</span>
-    <h2>Cost of Living Comparison</h2>
-    <p style="margin-bottom:24px">How far will $100/day go in Bangkok vs. Paris vs. Tokyo? Three budget tiers.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-cost-living"></div>
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>Cost of Living Comparison</h1>
+    <p class="tool-sub">See how far your daily budget really stretches. Set a daily spend, pick up to three cities, and compare what it buys — <strong>budget</strong>, <strong>mid-range</strong>, or <strong>comfortable</strong> — across lodging, food, local transport, and fun.</p>
+  </div>
+
+  <div class="tool-body">
+
+    <!-- ── BUDGET ── -->
+    <div class="sec-lbl">Your daily budget</div>
+    <div class="frow">
+      <div class="fg">
+        <label for="col-budget">Amount per day</label>
+        <div class="col-input-cur">
+          <span class="col-cur-prefix" id="col-budget-sym">$</span>
+          <input type="number" id="col-budget" placeholder="100" min="0" step="any" inputmode="decimal" oninput="colRender()">
+        </div>
+      </div>
+      <div class="fg">
+        <label for="col-cur">Shown in</label>
+        <select id="col-cur" onchange="colOnCur()"></select>
+      </div>
+    </div>
+    <div class="fg">
+      <label for="col-days">Trip length <span class="col-opt">(optional — adds a trip total)</span></label>
+      <div class="col-input-suffix">
+        <input type="number" id="col-days" placeholder="1" min="1" max="365" step="1" inputmode="numeric" oninput="colRender()">
+        <span class="col-suffix">days</span>
+      </div>
+    </div>
+    <div class="col-rate-note" id="col-rate-note"></div>
+
+    <!-- ── CITIES ── -->
+    <div class="sec-lbl" style="margin-top:6px">Compare cities <span class="col-opt">— pick up to three</span></div>
+    <div class="col-city-grid">
+      <div class="fg"><label for="col-city0">City 1</label><select id="col-city0" onchange="colRender()"></select></div>
+      <div class="fg"><label for="col-city1">City 2</label><select id="col-city1" onchange="colRender()"></select></div>
+      <div class="fg"><label for="col-city2">City 3</label><select id="col-city2" onchange="colRender()"></select></div>
+    </div>
+
+    <!-- ── RESULTS ── -->
+    <div class="col-results" id="col-results" style="display:none">
+      <div class="col-print-header"><strong>TripTools — Cost of Living Comparison</strong><span id="col-print-date"></span></div>
+      <div class="col-verdict" id="col-verdict"></div>
+      <div class="col-cards" id="col-cards"></div>
+      <div class="col-hint" id="col-hint"></div>
+      <div class="col-actions">
+        <button class="col-copy-btn" id="col-copy-btn" onclick="colCopy()">📋 Copy summary</button>
+        <button class="btn-ghost" onclick="colReset()" style="color:var(--accent);font-size:13px;background:none;border:none;cursor:pointer">↺ Reset</button>
+      </div>
+    </div>
+    <div class="col-empty" id="col-empty">Enter a daily budget and pick at least one city to see how far it goes.</div>
+
+  </div><!-- /tool-body -->
+
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    Accommodation is the biggest lever between tiers — in most cities a dorm or guesthouse versus a 4-star hotel can swing your daily cost more than food, transport, and fun combined. If a city pushes your budget down a tier, trimming lodging (or sharing a room) usually recovers the most ground, while eating where locals eat keeps food costs flat across destinations.
+  </div>
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('currency')">💱 Currency Converter</button>
+      <button class="rel-btn" onclick="openTool('budget-plan')">💰 Budget Planner</button>
+      <button class="rel-btn" onclick="openTool('expense-track')">📊 Expense Tracker</button>
+      <button class="rel-btn" onclick="openTool('tip-calc')">🤝 Tip Calculator</button>
     </div>
   </div>
 </div>
@@ -13462,7 +13590,7 @@ const TOOLS = [
   {id:'expense-track', nm:'Daily Expense Tracker',      ico:'📊', ph:'money',     on:false, live:true,  ds:'Log expenses by category. Auto-converts to home currency. Running total vs. daily budget.'},
   {id:'bill-split',    nm:'Bill Splitter',              ico:'➗', ph:'money',     on:false, live:true,  ds:'Split any bill evenly or item-by-item. Names, per-person extras, tip & tax shared fairly.'},
   {id:'atm-fee',       nm:'ATM Fee Estimator',          ico:'🏧', ph:'money',     on:false, live:true,  ds:'True cost of foreign ATM withdrawals including DCC.'},
-  {id:'cost-living',   nm:'Cost of Living Comparison',  ico:'🌐', ph:'money',     on:false, live:false, ds:'How far will $100/day go in Bangkok vs. Paris vs. Tokyo?'},
+  {id:'cost-living',   nm:'Cost of Living Comparison',  ico:'🌐', ph:'money',     on:false, live:true,  ds:'How far will $100/day go in Bangkok vs. Paris vs. Tokyo? Budget, mid-range & comfortable tiers.'},
   {id:'vat-refund',    nm:'VAT & Tax Refund Guide',     ico:'🧾', ph:'money',     on:false, live:false, ds:'Country-by-country guide to claiming VAT refunds as a tourist.'},
   {id:'cruise-grat',   nm:'Cruise Gratuity Calculator', ico:'🚢', ph:'money',     on:false, live:true,  ds:'Daily gratuity per person by cruise line and cabin type.'},
   {id:'timezone',      nm:'Time Zone Converter',        ico:'🕐', ph:'destination',on:false,live:true,  ds:'Multi-city live clocks + meeting planner with DST awareness.'},
@@ -14182,6 +14310,7 @@ function injectTripCtx(id) {
   if(id==='expense-track') etInit();
   if(id==='bill-split') bsInit();
   if(id==='atm-fee')    afInit();
+  if(id==='cost-living') colInit();
   if(id==='expense-report') erInit();
   if(id==='baggage')    bfcInit();
   if(id==='carry-on')   cosInit();
@@ -32739,6 +32868,422 @@ function afReset(){
   document.getElementById('af-dcc-ftf').checked = !!afData.dccFtf;
   document.getElementById('af-bank').value = afData.bank;
   afSave(); afRender();
+}
+
+/* ══════════════════════════════════════════════════════
+   COST OF LIVING COMPARISON
+   How far a daily budget stretches across cities, in three
+   tiers (budget / mid-range / comfortable). All prices are
+   typical daily USD costs, last verified May 2026. Display
+   currency is converted from the Currency Converter's live
+   cache when available, otherwise from bundled offline rates.
+   ══════════════════════════════════════════════════════ */
+
+/* Display currencies (symbol + name). */
+const COL_CUR = [
+  {c:'USD',s:'$',  n:'US Dollar'},        {c:'EUR',s:'€',  n:'Euro'},
+  {c:'GBP',s:'£',  n:'British Pound'},     {c:'JPY',s:'¥',  n:'Japanese Yen'},
+  {c:'CAD',s:'CA$',n:'Canadian Dollar'},   {c:'AUD',s:'A$', n:'Australian Dollar'},
+  {c:'CHF',s:'Fr', n:'Swiss Franc'},       {c:'CNY',s:'¥',  n:'Chinese Yuan'},
+  {c:'INR',s:'₹',  n:'Indian Rupee'},      {c:'MXN',s:'MX$',n:'Mexican Peso'},
+  {c:'BRL',s:'R$', n:'Brazilian Real'},    {c:'KRW',s:'₩',  n:'South Korean Won'},
+  {c:'THB',s:'฿',  n:'Thai Baht'},         {c:'SGD',s:'S$', n:'Singapore Dollar'},
+  {c:'NZD',s:'NZ$',n:'New Zealand Dollar'},{c:'ZAR',s:'R',  n:'South African Rand'},
+  {c:'AED',s:'د.إ',n:'UAE Dirham'},        {c:'HKD',s:'HK$',n:'Hong Kong Dollar'},
+  {c:'TWD',s:'NT$',n:'Taiwan Dollar'},     {c:'SEK',s:'kr', n:'Swedish Krona'},
+  {c:'NOK',s:'kr', n:'Norwegian Krone'},   {c:'DKK',s:'kr', n:'Danish Krone'},
+  {c:'PLN',s:'zł', n:'Polish Zloty'},      {c:'TRY',s:'₺',  n:'Turkish Lira'},
+  {c:'IDR',s:'Rp', n:'Indonesian Rupiah'}, {c:'PHP',s:'₱',  n:'Philippine Peso'},
+  {c:'VND',s:'₫',  n:'Vietnamese Dong'},   {c:'ARS',s:'AR$',n:'Argentine Peso'},
+];
+const COL_NO_DEC = ['JPY','KRW','VND','IDR','TWD','ARS','HUF','CLP','ISK'];
+/* Approximate offline fallback rates — units of currency per 1 USD (≈ May 2026). */
+const COL_FALLBACK = {
+  USD:1, EUR:0.92, GBP:0.79, JPY:150, CAD:1.36, AUD:1.52, CHF:0.88, CNY:7.2,
+  INR:84, MXN:18, BRL:5.1, KRW:1370, THB:35, SGD:1.34, NZD:1.65, ZAR:18.5,
+  AED:3.67, HKD:7.8, TWD:32, SEK:10.5, NOK:10.8, DKK:6.9, PLN:3.95, TRY:32,
+  IDR:15800, PHP:57, VND:25000, ARS:900,
+};
+
+/* City dataset — typical USD/day per category, per tier [budget, mid-range, comfortable].
+   acc = lodging/night · food = all meals · trans = local transport · fun = a drink + an attraction. */
+const COL_CITIES = [
+  // ── Asia ──
+  {id:'bangkok',  n:'Bangkok',      flag:'🇹🇭', region:'Asia', cur:'THB', acc:[12,40,90],  food:[8,20,45], trans:[3,8,20],  fun:[6,18,40]},
+  {id:'hanoi',    n:'Hanoi',        flag:'🇻🇳', region:'Asia', cur:'VND', acc:[10,32,75],  food:[6,16,38], trans:[3,7,18],  fun:[5,15,34]},
+  {id:'bali',     n:'Bali (Ubud)',  flag:'🇮🇩', region:'Asia', cur:'IDR', acc:[12,40,100], food:[7,18,42], trans:[4,10,22], fun:[6,18,42]},
+  {id:'kl',       n:'Kuala Lumpur', flag:'🇲🇾', region:'Asia', cur:'MYR', acc:[14,42,95],  food:[7,18,40], trans:[3,9,20],  fun:[6,16,38]},
+  {id:'delhi',    n:'Delhi',        flag:'🇮🇳', region:'Asia', cur:'INR', acc:[10,35,85],  food:[5,15,35], trans:[3,8,18],  fun:[5,14,32]},
+  {id:'manila',   n:'Manila',       flag:'🇵🇭', region:'Asia', cur:'PHP', acc:[14,42,95],  food:[7,18,40], trans:[4,10,22], fun:[6,16,36]},
+  {id:'tokyo',    n:'Tokyo',        flag:'🇯🇵', region:'Asia', cur:'JPY', acc:[35,95,200], food:[18,40,85],trans:[8,16,35], fun:[12,30,65]},
+  {id:'kyoto',    n:'Kyoto',        flag:'🇯🇵', region:'Asia', cur:'JPY', acc:[32,88,185], food:[16,36,78],trans:[7,15,32], fun:[11,28,60]},
+  {id:'seoul',    n:'Seoul',        flag:'🇰🇷', region:'Asia', cur:'KRW', acc:[28,80,175], food:[14,34,72],trans:[6,14,30], fun:[10,26,58]},
+  {id:'hongkong', n:'Hong Kong',    flag:'🇭🇰', region:'Asia', cur:'HKD', acc:[40,105,230],food:[16,38,82],trans:[6,14,30], fun:[12,30,66]},
+  {id:'singapore',n:'Singapore',    flag:'🇸🇬', region:'Asia', cur:'SGD', acc:[45,110,240],food:[14,36,80],trans:[6,14,30], fun:[12,30,68]},
+  {id:'taipei',   n:'Taipei',       flag:'🇹🇼', region:'Asia', cur:'TWD', acc:[22,65,150], food:[10,26,58],trans:[5,12,26], fun:[8,22,50]},
+  {id:'shanghai', n:'Shanghai',     flag:'🇨🇳', region:'Asia', cur:'CNY', acc:[26,75,165], food:[11,28,62],trans:[5,12,26], fun:[9,24,54]},
+  // ── Europe ──
+  {id:'paris',    n:'Paris',        flag:'🇫🇷', region:'Europe', cur:'EUR', acc:[45,120,260],food:[20,45,95],trans:[8,16,35], fun:[15,35,75]},
+  {id:'london',   n:'London',       flag:'🇬🇧', region:'Europe', cur:'GBP', acc:[50,130,280],food:[22,48,100],trans:[10,20,42],fun:[16,38,80]},
+  {id:'rome',     n:'Rome',         flag:'🇮🇹', region:'Europe', cur:'EUR', acc:[38,100,220],food:[18,40,85],trans:[7,15,32], fun:[13,32,70]},
+  {id:'barcelona',n:'Barcelona',    flag:'🇪🇸', region:'Europe', cur:'EUR', acc:[36,98,215], food:[17,38,82],trans:[7,15,32], fun:[13,32,70]},
+  {id:'amsterdam',n:'Amsterdam',    flag:'🇳🇱', region:'Europe', cur:'EUR', acc:[48,125,270],food:[20,44,92],trans:[8,17,36], fun:[15,35,76]},
+  {id:'berlin',   n:'Berlin',       flag:'🇩🇪', region:'Europe', cur:'EUR', acc:[34,92,200], food:[16,36,78],trans:[8,16,34], fun:[13,30,66]},
+  {id:'lisbon',   n:'Lisbon',       flag:'🇵🇹', region:'Europe', cur:'EUR', acc:[30,82,180], food:[14,32,70],trans:[6,13,28], fun:[11,27,60]},
+  {id:'prague',   n:'Prague',       flag:'🇨🇿', region:'Europe', cur:'CZK', acc:[24,68,150], food:[12,28,62],trans:[5,11,24], fun:[9,23,52]},
+  {id:'vienna',   n:'Vienna',       flag:'🇦🇹', region:'Europe', cur:'EUR', acc:[38,100,218],food:[17,38,82],trans:[7,15,32], fun:[13,32,70]},
+  {id:'athens',   n:'Athens',       flag:'🇬🇷', region:'Europe', cur:'EUR', acc:[28,78,170], food:[13,30,66],trans:[5,12,26], fun:[10,25,56]},
+  {id:'istanbul', n:'Istanbul',     flag:'🇹🇷', region:'Europe', cur:'TRY', acc:[20,58,135], food:[9,24,54], trans:[4,10,22], fun:[7,20,46]},
+  {id:'reykjavik',n:'Reykjavik',    flag:'🇮🇸', region:'Europe', cur:'ISK', acc:[55,140,300],food:[26,55,115],trans:[8,18,38],fun:[18,42,90]},
+  {id:'zurich',   n:'Zurich',       flag:'🇨🇭', region:'Europe', cur:'CHF', acc:[60,150,320],food:[28,60,125],trans:[9,19,40],fun:[20,46,98]},
+  // ── North America ──
+  {id:'nyc',      n:'New York',     flag:'🇺🇸', region:'North America', cur:'USD', acc:[55,140,300],food:[24,52,110],trans:[8,16,34],fun:[18,42,90]},
+  {id:'sf',       n:'San Francisco',flag:'🇺🇸', region:'North America', cur:'USD', acc:[58,145,310],food:[24,52,110],trans:[8,17,36],fun:[18,42,90]},
+  {id:'la',       n:'Los Angeles',  flag:'🇺🇸', region:'North America', cur:'USD', acc:[50,130,280],food:[22,48,102],trans:[10,20,42],fun:[17,40,86]},
+  {id:'toronto',  n:'Toronto',      flag:'🇨🇦', region:'North America', cur:'CAD', acc:[42,112,242],food:[19,42,90],trans:[8,16,34],fun:[14,34,74]},
+  {id:'vancouver',n:'Vancouver',    flag:'🇨🇦', region:'North America', cur:'CAD', acc:[44,116,250],food:[19,42,90],trans:[8,16,34],fun:[14,34,74]},
+  // ── Latin America ──
+  {id:'mexicocity',n:'Mexico City', flag:'🇲🇽', region:'Latin America', cur:'MXN', acc:[22,62,140],food:[10,26,58],trans:[4,10,22],fun:[8,22,50]},
+  {id:'buenosaires',n:'Buenos Aires',flag:'🇦🇷',region:'Latin America', cur:'ARS', acc:[18,52,120],food:[9,22,50],trans:[3,8,18],fun:[7,18,42]},
+  {id:'rio',      n:'Rio de Janeiro',flag:'🇧🇷',region:'Latin America', cur:'BRL', acc:[22,62,140],food:[10,25,56],trans:[4,10,22],fun:[8,21,48]},
+  {id:'lima',     n:'Lima',         flag:'🇵🇪', region:'Latin America', cur:'PEN', acc:[16,48,110],food:[8,20,46],trans:[3,8,18],fun:[6,17,40]},
+  // ── Oceania ──
+  {id:'sydney',   n:'Sydney',       flag:'🇦🇺', region:'Oceania', cur:'AUD', acc:[48,125,268],food:[22,46,98],trans:[8,17,36],fun:[16,38,82]},
+  {id:'auckland', n:'Auckland',     flag:'🇳🇿', region:'Oceania', cur:'NZD', acc:[40,108,235],food:[19,42,90],trans:[7,15,32],fun:[14,34,74]},
+  // ── Middle East & Africa ──
+  {id:'dubai',    n:'Dubai',        flag:'🇦🇪', region:'Middle East & Africa', cur:'AED', acc:[40,108,235],food:[16,40,86],trans:[6,14,30],fun:[14,34,76]},
+  {id:'cairo',    n:'Cairo',        flag:'🇪🇬', region:'Middle East & Africa', cur:'EGP', acc:[14,42,98],food:[7,18,40],trans:[3,8,18],fun:[6,16,38]},
+  {id:'capetown', n:'Cape Town',    flag:'🇿🇦', region:'Middle East & Africa', cur:'ZAR', acc:[20,58,132],food:[10,25,56],trans:[4,11,24],fun:[8,21,48]},
+  {id:'marrakech',n:'Marrakech',    flag:'🇲🇦', region:'Middle East & Africa', cur:'MAD', acc:[16,48,110],food:[8,20,46],trans:[3,9,20],fun:[7,18,42]},
+];
+const COL_REGIONS = ['Asia','Europe','North America','Latin America','Oceania','Middle East & Africa'];
+const COL_CATS = [
+  {k:'acc',   ico:'🛏', n:'Stay'},
+  {k:'food',  ico:'🍽', n:'Food'},
+  {k:'trans', ico:'🚆', n:'Transit'},
+  {k:'fun',   ico:'🎟', n:'Drinks & fun'},
+];
+const COL_TIER_META = [
+  {key:'budget',      label:'Budget travel',     ico:'•'},
+  {key:'mid',         label:'Mid-range comfort',  ico:'✦'},
+  {key:'comfortable', label:'Comfortable & more', ico:'💎'},
+];
+
+let colData = null;
+
+function colKey(){ const trip = getActiveTrip(); return 'tt_col_' + (trip ? trip.id : 'default'); }
+function colCurMeta(code){ return COL_CUR.find(x => x.c === code) || {c:code, s:code+' ', n:code}; }
+function colSym(code){ return colCurMeta(code).s; }
+function colNum(v){ const n = parseFloat(v); return isFinite(n) ? n : 0; }
+function colCity(id){ return COL_CITIES.find(c => c.id === id) || null; }
+function colEsc(s){ return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function colFmt(n, code){
+  n = (typeof n === 'number' && isFinite(n)) ? n : 0;
+  const neg = n < 0; n = Math.abs(n);
+  const dec = COL_NO_DEC.includes(code) ? 0 : (n >= 1000 ? 0 : 2);
+  const body = n.toLocaleString('en-US', {minimumFractionDigits:dec, maximumFractionDigits:dec});
+  return (neg ? '−' : '') + colSym(code) + body;
+}
+
+/* Units of `code` per 1 USD. Prefers the Currency Converter cache, else bundled rates. */
+function colRate(code){
+  if (code === 'USD') return {rate:1, live:true};
+  let cache = null;
+  try { cache = JSON.parse(localStorage.getItem('tt_fx_cache') || 'null'); } catch(_){}
+  const rates = cache && cache.data && cache.data.rates;
+  if (rates && isFinite(rates[code]) && rates[code] > 0) return {rate:rates[code], live:true};
+  if (isFinite(COL_FALLBACK[code]) && COL_FALLBACK[code] > 0) return {rate:COL_FALLBACK[code], live:false};
+  return {rate:1, live:false};
+}
+
+/* USD/day totals for a city's three tiers. */
+function colTierTotals(city){
+  const t = [0,0,0];
+  COL_CATS.forEach(cat => { for (let i=0;i<3;i++) t[i] += city[cat.k][i]; });
+  return {budget:t[0], mid:t[1], comf:t[2]};
+}
+/* Which tier a daily budget (USD) affords, plus surplus/shortfall (USD). */
+function colTierFor(budgetUSD, tot){
+  if (budgetUSD >= tot.comf) return {tier:'comfortable', idx:2, spare:budgetUSD - tot.comf};
+  if (budgetUSD >= tot.mid)  return {tier:'mid',         idx:1, spare:budgetUSD - tot.mid};
+  if (budgetUSD >= tot.budget) return {tier:'budget',    idx:0, spare:budgetUSD - tot.budget};
+  return {tier:'under', idx:0, spare:budgetUSD - tot.budget}; // negative
+}
+function colTierRank(tier){ return {comfortable:3, mid:2, budget:1, under:0}[tier]; }
+
+function colDefault(){
+  const trip = getActiveTrip();
+  let cur = 'USD';
+  if (trip && trip.homeCurrency && colCurMeta(trip.homeCurrency).c === trip.homeCurrency) cur = trip.homeCurrency;
+  return { budget:'100', cur:cur, days:'', cities:['bangkok','paris','tokyo'] };
+}
+function colLoad(){
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(colKey()) || 'null'); } catch(e){}
+  colData = (saved && typeof saved === 'object') ? Object.assign(colDefault(), saved) : colDefault();
+  if (!Array.isArray(colData.cities) || colData.cities.length !== 3) colData.cities = colDefault().cities;
+}
+function colSave(){ try { localStorage.setItem(colKey(), JSON.stringify(colData)); } catch(e){} }
+
+function colCityOptions(selected){
+  let html = '<option value="">— none —</option>';
+  COL_REGIONS.forEach(region => {
+    const inRegion = COL_CITIES.filter(c => c.region === region);
+    if (!inRegion.length) return;
+    html += `<optgroup label="${colEsc(region)}">`;
+    inRegion.forEach(c => {
+      const sel = c.id === selected ? ' selected' : '';
+      html += `<option value="${c.id}"${sel}>${c.flag} ${colEsc(c.n)}</option>`;
+    });
+    html += '</optgroup>';
+  });
+  return html;
+}
+
+function colInit(){
+  colLoad();
+  const curSel = document.getElementById('col-cur');
+  curSel.innerHTML = COL_CUR.map(x => `<option value="${x.c}">${x.c} ${x.s} · ${colEsc(x.n)}</option>`).join('');
+  curSel.value = colData.cur;
+  for (let i=0;i<3;i++){
+    const sel = document.getElementById('col-city'+i);
+    sel.innerHTML = colCityOptions(colData.cities[i] || '');
+    sel.value = colData.cities[i] || '';
+  }
+  document.getElementById('col-budget').value = colData.budget;
+  document.getElementById('col-days').value = colData.days;
+  document.getElementById('col-budget-sym').textContent = colSym(colData.cur);
+  colRender();
+}
+
+function colOnCur(){
+  colData.cur = document.getElementById('col-cur').value;
+  document.getElementById('col-budget-sym').textContent = colSym(colData.cur);
+  colSave(); colRender();
+}
+
+function colRender(){
+  if (!colData) return;
+  // Read state
+  colData.budget = document.getElementById('col-budget').value;
+  colData.days   = document.getElementById('col-days').value;
+  for (let i=0;i<3;i++) colData.cities[i] = document.getElementById('col-city'+i).value;
+  document.getElementById('col-budget-sym').textContent = colSym(colData.cur);
+  colSave();
+
+  const cur = colData.cur;
+  const {rate, live} = colRate(cur);
+  const budgetDisp = colNum(colData.budget);
+  const budgetUSD  = budgetDisp / rate;
+  const daysRaw    = Math.floor(colNum(colData.days));
+  const days       = daysRaw >= 2 ? daysRaw : 1;
+  const showTrip   = daysRaw >= 2;
+
+  // Unique, valid cities in slot order
+  const seen = {};
+  const cities = colData.cities
+    .map(id => colCity(id))
+    .filter(c => c && !seen[c.id] && (seen[c.id] = true));
+
+  const results = document.getElementById('col-results');
+  const empty   = document.getElementById('col-empty');
+  if (!(budgetDisp > 0) || cities.length === 0){
+    results.style.display = 'none';
+    empty.style.display = 'block';
+    empty.textContent = cities.length === 0
+      ? 'Pick at least one city to compare.'
+      : 'Enter a daily budget to see how far it goes.';
+    return;
+  }
+  empty.style.display = 'none';
+  results.style.display = 'block';
+
+  // Rate note
+  const note = document.getElementById('col-rate-note');
+  note.classList.remove('warn');
+  if (cur === 'USD'){
+    note.textContent = 'Typical daily prices, last verified May 2026.';
+  } else if (live){
+    note.textContent = `Converted at live rates cached from the Currency Converter. Prices last verified May 2026.`;
+  } else {
+    note.classList.add('warn');
+    note.textContent = `Converted at approximate offline rates — open the Currency Converter while online for live rates. Prices last verified May 2026.`;
+  }
+
+  // Build per-city results
+  const computed = cities.map(city => {
+    const tot = colTierTotals(city);
+    const fit = colTierFor(budgetUSD, tot);
+    return {city, tot, fit};
+  });
+
+  // Cards
+  const dispBudget = colFmt(budgetDisp, cur);
+  let cardsHtml = '';
+  computed.forEach(({city, tot, fit}) => {
+    const tm = COL_TIER_META[fit.idx];
+    const cls = 't-' + fit.tier;
+    const totDisp = {budget:tot.budget*rate, mid:tot.mid*rate, comf:tot.comf*rate};
+    const tierTotArr = [totDisp.budget, totDisp.mid, totDisp.comf];
+
+    // Tag
+    let tagIco, tagLbl;
+    if (fit.tier === 'under'){ tagIco='⚠️'; tagLbl='Over your budget'; }
+    else { tagIco = tm.ico; tagLbl = tm.label; }
+
+    // Spare/short line
+    const spareDisp = Math.abs(fit.spare) * rate;
+    let spareCls, spareHtml;
+    if (fit.tier === 'comfortable'){
+      spareCls = 'pos';
+      spareHtml = `Covers a <strong>comfortable</strong> day with <span class="amt">+${colFmt(spareDisp,cur)}</span>/day to spare.`;
+    } else if (fit.tier === 'mid'){
+      spareCls = 'pos';
+      spareHtml = `Covers a <strong>mid-range</strong> day, <span class="amt">+${colFmt(spareDisp,cur)}</span>/day toward comfortable.`;
+    } else if (fit.tier === 'budget'){
+      spareCls = 'pos';
+      spareHtml = `Covers <strong>budget</strong> travel, <span class="amt">+${colFmt(spareDisp,cur)}</span>/day toward mid-range.`;
+    } else {
+      spareCls = 'neg';
+      spareHtml = `<span class="amt">${colFmt(spareDisp,cur)}</span>/day short of even a budget day here.`;
+    }
+
+    // Tier rows
+    let tiersHtml = '';
+    COL_TIER_META.forEach((meta, i) => {
+      const met = budgetUSD >= [tot.budget,tot.mid,tot.comf][i];
+      const isMatch = (fit.tier !== 'under') && (i === fit.idx);
+      const rowCls = isMatch ? 'match' : (met ? 'met' : '');
+      const ico = met ? '✓' : '🔒';
+      tiersHtml += `<div class="col-tier-row ${rowCls}">
+        <span class="col-tier-lbl"><span class="col-tier-ico">${ico}</span>${meta.label}</span>
+        <span class="col-tier-val">${colFmt(tierTotArr[i], cur)}/day</span>
+      </div>`;
+    });
+
+    // Category breakdown for the affordable tier (cheapest if under budget)
+    let breakHtml = '';
+    COL_CATS.forEach(cat => {
+      const v = city[cat.k][fit.idx] * rate;
+      breakHtml += `<div class="row"><span class="k">${cat.ico} ${cat.n}</span><span class="v">${colFmt(v,cur)}</span></div>`;
+    });
+    const tierTotalDisp = tierTotArr[fit.idx];
+    breakHtml += `<div class="row total"><span class="k">Daily total</span><span class="v">${colFmt(tierTotalDisp,cur)}</span></div>`;
+    if (showTrip){
+      breakHtml += `<div class="row trip"><span class="k">× ${days} days</span><span class="v">${colFmt(tierTotalDisp*days,cur)}</span></div>`;
+    }
+
+    const breakHead = fit.tier === 'under'
+      ? 'Cheapest (budget) day here'
+      : tm.label + ' — daily breakdown';
+
+    cardsHtml += `<div class="col-card ${cls}">
+      <div class="col-card-top">
+        <span class="col-card-flag">${city.flag}</span>
+        <div>
+          <div class="col-card-name">${colEsc(city.n)}</div>
+          <div class="col-card-meta">${colEsc(city.region)} · local: ${colEsc(city.cur)}</div>
+        </div>
+      </div>
+      <span class="col-tag">${tagIco} ${tagLbl}</span>
+      <div class="col-spare ${spareCls}">${spareHtml}</div>
+      <div class="col-tiers">${tiersHtml}</div>
+      <div class="col-break">
+        <div class="col-break-h">${breakHead}</div>
+        ${breakHtml}
+      </div>
+    </div>`;
+  });
+  document.getElementById('col-cards').innerHTML = cardsHtml;
+
+  // Verdict summary
+  const ranked = computed.slice().sort((a,b) =>
+    (colTierRank(b.fit.tier) - colTierRank(a.fit.tier)) || (b.fit.spare - a.fit.spare));
+  const tierWord = {comfortable:'comfortable', mid:'mid-range', budget:'budget', under:'below budget'};
+  let verdictHtml = `<span class="col-v-head">Your ${dispBudget}/day ${cities.length>1?('across '+cities.length+' cities'):''}</span>`;
+  if (computed.length === 1){
+    const o = computed[0];
+    verdictHtml += `In <strong>${colEsc(o.city.n)}</strong> that buys a <strong>${tierWord[o.fit.tier]}</strong> day` +
+      (o.fit.tier==='under'
+        ? ` — you'd need <strong>${colFmt(Math.abs(o.fit.spare)*rate,cur)}</strong> more per day to reach budget travel.`
+        : (o.fit.spare*rate >= 0.5 ? `, with <strong>${colFmt(o.fit.spare*rate,cur)}</strong> to spare.` : `.`));
+  } else {
+    const best = ranked[0], worst = ranked[ranked.length-1];
+    const bestExtra = best.fit.tier!=='under' && best.fit.spare*rate >= 0.5
+      ? ` (${colFmt(best.fit.spare*rate,cur)}/day spare)` : '';
+    verdictHtml += `Stretches furthest in <strong>${colEsc(best.city.n)}</strong> — a <strong>${tierWord[best.fit.tier]}</strong> day${bestExtra}` +
+      ` — and is tightest in <strong>${colEsc(worst.city.n)}</strong>, where it covers <strong>${tierWord[worst.fit.tier]}</strong>` +
+      (worst.fit.tier==='under' ? ` only (short by ${colFmt(Math.abs(worst.fit.spare)*rate,cur)}/day).` : `.`);
+  }
+  document.getElementById('col-verdict').innerHTML = verdictHtml;
+
+  // Hint
+  const anyUnder = computed.some(c => c.fit.tier === 'under');
+  const allComf  = computed.every(c => c.fit.tier === 'comfortable');
+  let hint;
+  if (anyUnder){
+    hint = `Some cities run over your daily budget. Lodging is the biggest swing between tiers — switching to a guesthouse or sharing a room usually recovers the most, and eating where locals eat keeps food costs low.`;
+  } else if (allComf){
+    hint = `Your budget clears a comfortable day everywhere selected — you have room to upgrade hotels, add a tour, or simply bank the surplus.`;
+  } else {
+    hint = `Figures are typical per-person daily costs and exclude flights. Accommodation assumes one room; couples sharing effectively halve the lodging line.`;
+  }
+  document.getElementById('col-hint').textContent = hint;
+
+  // Print date
+  const pd = document.getElementById('col-print-date');
+  if (pd) pd.textContent = new Date().toLocaleDateString();
+}
+
+function colCopy(){
+  if (!colData) return;
+  const cur = colData.cur;
+  const {rate} = colRate(cur);
+  const budgetDisp = colNum(colData.budget);
+  const budgetUSD  = budgetDisp / rate;
+  const daysRaw    = Math.floor(colNum(colData.days));
+  const showTrip   = daysRaw >= 2;
+  const seen = {};
+  const cities = colData.cities.map(id => colCity(id)).filter(c => c && !seen[c.id] && (seen[c.id]=true));
+  if (!(budgetDisp > 0) || !cities.length) return;
+  const tierWord = {comfortable:'Comfortable', mid:'Mid-range', budget:'Budget', under:'Over budget'};
+
+  let lines = [`TripTools — Cost of Living Comparison`, `Daily budget: ${colFmt(budgetDisp,cur)}`, ``];
+  cities.forEach(city => {
+    const tot = colTierTotals(city);
+    const fit = colTierFor(budgetUSD, tot);
+    const tierTotal = [tot.budget,tot.mid,tot.comf][fit.idx] * rate;
+    lines.push(`${city.n} — ${tierWord[fit.tier]} (day ≈ ${colFmt(tierTotal,cur)})`);
+    if (fit.tier === 'under') lines.push(`  short by ${colFmt(Math.abs(fit.spare)*rate,cur)}/day vs a budget day`);
+    else if (fit.spare*rate >= 0.5) lines.push(`  +${colFmt(fit.spare*rate,cur)}/day to spare`);
+    if (showTrip) lines.push(`  × ${daysRaw} days ≈ ${colFmt(tierTotal*daysRaw,cur)}`);
+  });
+  lines.push(``, `Prices last verified May 2026 · per person, excludes flights.`);
+  const text = lines.join('\n');
+
+  const btn = document.getElementById('col-copy-btn');
+  const done = () => { const o = btn.textContent; btn.textContent = '✓ Copied'; setTimeout(()=>{ btn.textContent = o; }, 1600); };
+  if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(done).catch(()=>colCopyFallback(text, done));
+  } else colCopyFallback(text, done);
+}
+function colCopyFallback(text, cb){
+  const ta = document.createElement('textarea');
+  ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); cb && cb(); } catch(e){}
+  document.body.removeChild(ta);
+}
+function colReset(){
+  if (!confirm('Reset to the default budget and cities? Your display currency is kept.')) return;
+  const cur = colData.cur;
+  colData = Object.assign(colDefault(), {cur});
+  document.getElementById('col-budget').value = colData.budget;
+  document.getElementById('col-days').value = colData.days;
+  for (let i=0;i<3;i++) document.getElementById('col-city'+i).value = colData.cities[i] || '';
+  document.getElementById('col-budget-sym').textContent = colSym(cur);
+  colSave(); colRender();
 }
 
 /* ══════════════════════════════════════════════════════
