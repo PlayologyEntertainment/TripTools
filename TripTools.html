@@ -9516,16 +9516,99 @@ body.no-scroll { overflow: hidden; }
     </div>
   </div>
 </div>
-<div id="view-placeholder-border-cross" class="view">
-  <nav class="tool-topbar">
+<style>
+/* ── BORDER CROSSING GUIDE ── */
+.bcg-results{margin-top:24px}
+.bcg-overview{border:2px solid var(--ink);border-radius:var(--r);padding:16px 18px;margin-bottom:16px;background:var(--paper);display:flex;align-items:center;gap:14px}
+.bcg-route-flags{font-size:26px;line-height:1;white-space:nowrap}
+.bcg-route-ttl{font-family:var(--serif);font-size:19px;font-weight:600;color:var(--ink);line-height:1.25}
+.bcg-route-sub{font-family:var(--sans);font-size:12px;color:var(--muted);margin-top:3px}
+.bcg-block{border:1.5px solid var(--rule);border-radius:var(--r);padding:16px 18px;margin-bottom:16px;background:var(--paper)}
+.bcg-block h4{font-family:var(--sans);font-size:14px;font-weight:700;color:var(--ink);margin:0 0 14px;display:flex;align-items:center;gap:8px}
+/* documents */
+.bcg-doc{padding:0 0 12px;border-bottom:1px solid var(--rule);margin-bottom:12px}
+.bcg-doc:last-child{border-bottom:none;padding-bottom:0;margin-bottom:0}
+.bcg-doc .who{font-family:var(--sans);font-size:13px;font-weight:700;color:var(--ink);margin-bottom:3px}
+.bcg-doc .need{font-family:var(--sans);font-size:13px;color:var(--ink-2);line-height:1.55}
+/* duty-free rows */
+.bcg-dl{display:grid;grid-template-columns:auto 1fr;gap:6px 16px}
+.bcg-dl .k{font-family:var(--sans);font-size:12.5px;font-weight:700;color:var(--ink);white-space:nowrap}
+.bcg-dl .v{font-family:var(--sans);font-size:12.5px;color:var(--ink-2);line-height:1.55}
+@media(max-width:520px){.bcg-dl{grid-template-columns:1fr}.bcg-dl .v{margin-bottom:8px}}
+/* trusted programs */
+.bcg-prog-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+.bcg-prog{border:1.5px solid var(--rule);border-radius:var(--r);padding:13px 14px;background:var(--paper-2)}
+.bcg-prog .nm{font-family:var(--serif);font-size:15px;font-weight:600;color:var(--ink)}
+.bcg-prog .fee{font-family:var(--mono);font-size:12px;color:var(--accent);margin:3px 0 7px}
+.bcg-prog .for{font-family:var(--sans);font-size:12.5px;color:var(--ink-2);line-height:1.5}
+/* waits */
+.bcg-wait-sum{font-family:var(--sans);font-size:13.5px;color:var(--ink-2);line-height:1.6;margin-bottom:12px}
+.bcg-wait-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.bcg-wait-stat{border:1.5px solid var(--rule);border-radius:var(--r);padding:10px 13px;background:var(--paper-2)}
+.bcg-wait-stat .k{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px}
+.bcg-wait-stat.best .k{color:var(--green,#2E7D32)}
+.bcg-wait-stat.worst .k{color:var(--orange)}
+.bcg-wait-stat .v{font-family:var(--sans);font-size:13px;color:var(--ink);line-height:1.45}
+.bcg-cross{border-top:1px solid var(--rule);padding-top:12px;margin-top:4px}
+.bcg-cross-h{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.bcg-cross-row{display:grid;grid-template-columns:1fr auto;gap:10px;padding:7px 0;border-top:1px dotted var(--rule)}
+.bcg-cross-row:first-of-type{border-top:none}
+.bcg-cross-nm{font-family:var(--sans);font-size:13px;font-weight:600;color:var(--ink)}
+.bcg-cross-loc{font-family:var(--sans);font-size:11.5px;color:var(--muted);margin-top:1px}
+.bcg-cross-wait{font-family:var(--sans);font-size:11.5px;color:var(--ink-2);text-align:right;max-width:150px}
+.bcg-tips{list-style:none;margin:14px 0 0;padding:0}
+.bcg-tips li{position:relative;padding:0 0 9px 24px;font-family:var(--sans);font-size:13px;line-height:1.5;color:var(--ink-2)}
+.bcg-tips li:last-child{padding-bottom:0}
+.bcg-tips li::before{content:'✓';position:absolute;left:0;top:0;color:var(--accent);font-weight:700}
+.bcg-disclaim{font-family:var(--sans);font-size:12px;color:var(--ink-2);line-height:1.55;border-left:3px solid var(--yellow,#FFD23F);padding:10px 14px;background:rgba(255,210,63,.08);border-radius:0 var(--r) var(--r) 0;margin-bottom:16px}
+.bcg-actions{display:flex;align-items:center;gap:16px;margin-top:4px;flex-wrap:wrap}
+.bcg-copy-btn{padding:11px 20px;border:1.5px solid var(--ink);border-radius:var(--r);background:var(--ink);color:var(--paper);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer}
+.bcg-copy-btn:hover{background:var(--accent);border-color:var(--accent)}
+.bcg-print-header{display:none}
+@media print{
+  .bcg-actions{display:none!important}
+  .bcg-print-header{display:flex!important;justify-content:space-between;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#666;padding:0 0 12px;border-bottom:1px solid #ccc;margin-bottom:16px}
+  .bcg-block,.bcg-overview,.bcg-prog,.bcg-cross-row{break-inside:avoid}
+}
+</style>
+<div id="view-border-cross" class="view">
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="window.print()">🖨 Print</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">🛂</span>
-    <h2>Border Crossing Guide</h2>
-    <p style="margin-bottom:24px">US/Canada, US/Mexico & major land borders. Documents, duty-free & wait times.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-border-cross"></div>
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>Border Crossing Guide</h1>
+    <p class="tool-sub">What you need to cross a land border smoothly — required documents, duty-free and prohibited items, trusted-traveler programs like NEXUS and SENTRI, and typical wait times. Pick your border and direction to see the essentials.</p>
+  </div>
+
+  <div class="tool-body">
+    <div class="fg">
+      <label for="bcg-route">Which border are you crossing?</label>
+      <select id="bcg-route" onchange="bcgOnRoute()"></select>
+    </div>
+    <div class="bcg-results" id="bcg-results">
+      <div class="bcg-print-header"><strong>TripTools — Border Crossing Guide</strong><span id="bcg-print-date"></span></div>
+      <div id="bcg-body"></div>
+      <div class="bcg-disclaim" id="bcg-disclaim"></div>
+      <div class="bcg-actions">
+        <button class="bcg-copy-btn" id="bcg-copy-btn" onclick="bcgCopy()">📋 Copy summary</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    The fastest border is a boring one: have every passenger's documents out and ready, turn off music, take off sunglasses, declare everything (especially food and cash), and answer questions briefly and honestly. If you cross the same border often, a trusted-traveler card like NEXUS or SENTRI pays for itself fast — and it usually bundles Global Entry and TSA PreCheck too.
+  </div>
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('customs-decl')">📦 Customs Declaration</button>
+      <button class="rel-btn" onclick="openTool('customs-duty')">🛃 Customs Duty Calculator</button>
+      <button class="rel-btn" onclick="openTool('passport')">📕 Passport Checker</button>
+      <button class="rel-btn" onclick="openTool('intl-driving')">🚗 Int'l Driving Guide</button>
     </div>
   </div>
 </div>
@@ -13887,7 +13970,7 @@ const TOOLS = [
   {id:'fuel-cost',     nm:'Fuel Cost Calculator',       ico:'⛽', ph:'road',       on:false,live:true,  ds:'Distance + MPG + fuel price = total cost. Compare two vehicles.'},
   {id:'rest-stop',     nm:'Rest Stop Planner',          ico:'⏸', ph:'road',       on:false,live:true,  ds:'Recommended break schedule. Adjusts for kids, pets & elderly.'},
   {id:'playlist-time', nm:'Road Trip Playlist Timer',   ico:'🎵', ph:'road',       on:false,live:false, ds:'Enter drive hours → how many albums/podcasts to download.'},
-  {id:'border-cross',  nm:'Border Crossing Guide',      ico:'🛂', ph:'road',       on:false,live:false, ds:'US/Canada, US/Mexico & major land borders. Documents & wait times.'},
+  {id:'border-cross',  nm:'Border Crossing Guide',      ico:'🛂', ph:'road',       on:true, live:true,  ds:'US/Canada, US/Mexico & major land borders. Documents, duty-free & wait times.'},
   {id:'car-kit',       nm:'Car Emergency Kit Checklist',ico:'🚨', ph:'road',       on:false,live:true,  ds:'What to carry for road trip safety. Customizable by season & route.'},
   {id:'toll-est',      nm:'Toll Cost Estimator',        ico:'💲', ph:'road',       on:false,live:true,  ds:'Major US toll roads. Estimated total cost city-to-city.'},
   {id:'shore-exc',     nm:'Shore Excursion Planner',    ico:'⚓', ph:'cruise',     on:false,live:true,  ds:'Per-port budget & time planner. Never miss ship departure.'},
@@ -14625,6 +14708,7 @@ function injectTripCtx(id) {
   if(id==='flight-delay') fdcInit();
   if(id==='health-check') pthInit();
   if(id==='per-diem')     pdcInit();
+  if(id==='border-cross') bcgInit();
 }
 
 /* ── HUB RENDER ── */
@@ -34592,6 +34676,345 @@ function lpSay(id){
     window.speechSynthesis.cancel();
     window.speechSynthesis.speak(u);
   } catch(e){}
+}
+
+/* ══════════════════════════════════════════════════════
+   BORDER CROSSING GUIDE
+   Directed land-border routes (North America in depth, plus
+   lighter coverage of major world borders). Each route gives
+   document rules, duty-free / prohibited items, applicable
+   trusted-traveler programs, and typical wait-time guidance.
+   Regulatory data — verify before travel, last verified May 2026.
+   ══════════════════════════════════════════════════════ */
+
+const BCG_PROGRAMS = {
+  'global-entry': {nm:'Global Entry', fee:'$120 / 5 years', for:'Expedited U.S. entry (mainly by air); includes TSA PreCheck. For U.S. citizens, residents & some nationalities.'},
+  'nexus':        {nm:'NEXUS',        fee:'$120 / 5 years', for:'Fast U.S.–Canada crossings by land, air & marine. Bundles Global Entry & TSA PreCheck — the best value for frequent U.S.–Canada travel.'},
+  'sentri':       {nm:'SENTRI',       fee:'≈ $122 / 5 years', for:'Dedicated fast lanes entering the U.S. from Mexico by land. Includes Global Entry benefits.'},
+  'fast':         {nm:'FAST',         fee:'$50 / 5 years', for:'Commercial truck drivers — expedited U.S.–Canada & U.S.–Mexico commercial lanes.'},
+};
+
+const BCG_NA_USCA = [
+  {nm:'Peace Arch / Pacific Hwy', loc:'Blaine, WA ↔ Surrey, BC', wait:'30–90 min on weekends'},
+  {nm:'Rainbow / Lewiston-Queenston', loc:'Niagara, NY ↔ ON', wait:'Moderate; midday peaks'},
+  {nm:'Ambassador Bridge / Detroit-Windsor Tunnel', loc:'Detroit, MI ↔ Windsor, ON', wait:'Busy commuter crossing'},
+  {nm:'Blue Water Bridge', loc:'Port Huron, MI ↔ Sarnia, ON', wait:'Usually moderate'},
+  {nm:'Lacolle / Champlain', loc:'I-87 NY ↔ QC', wait:'Peaks summer weekends'},
+];
+const BCG_NA_USMX = [
+  {nm:'San Ysidro', loc:'San Diego ↔ Tijuana', wait:'World’s busiest crossing'},
+  {nm:'Otay Mesa', loc:'San Diego ↔ Tijuana', wait:'Trucks & SENTRI; alternative to San Ysidro'},
+  {nm:'Nogales', loc:'Arizona ↔ Sonora', wait:'Moderate'},
+  {nm:'El Paso (3 bridges)', loc:'Texas ↔ Ciudad Juárez', wait:'Midday peaks'},
+  {nm:'Laredo', loc:'Texas ↔ Nuevo Laredo', wait:'Major commercial corridor'},
+];
+
+const BCG_ROUTES = [
+  {id:'us-ca', region:'North America', flags:'🇺🇸 → 🇨🇦', title:'Entering Canada from the United States', sub:'Land & sea crossings into Canada',
+    programs:['nexus','fast'],
+    docs:[
+      {who:'U.S. citizens (land/sea)', need:'Passport, U.S. Passport Card, Enhanced Driver’s Licence (EDL), or NEXUS card. A passport book is recommended and required for air travel.'},
+      {who:'U.S. permanent residents', need:'Green Card plus a passport from your country of citizenship; an eTA (air) or visa may also be required.'},
+      {who:'Other nationalities', need:'Passport, plus an eTA for air arrivals or a visa depending on nationality (land arrivals don’t need an eTA).'},
+      {who:'Children', need:'Canadian/U.S. citizen children under 16 may use a birth certificate by land/sea. Carry a consent letter for a minor travelling without both parents.'},
+    ],
+    dutyFree:[
+      {k:'Alcohol (18/19+)', v:'1.5 L wine, or 1.14 L spirits, or 24 × 355 ml beer — duty-free only after a 48-hour absence.'},
+      {k:'Tobacco', v:'200 cigarettes, 50 cigars, 200 g tobacco (extra duty may apply unless Canadian-stamped).'},
+      {k:'Goods', v:'No exemption under 24 h; CAD $200 after 24 h (no alcohol/tobacco); CAD $800 after 48 h+.'},
+      {k:'Cash', v:'Declare CAD $10,000 or more (any currency equivalent).'},
+    ],
+    prohibited:[
+      'Cannabis — illegal to take across the border either way, even between legal jurisdictions.',
+      'Most fresh fruit, vegetables, plants, meat & dairy (CFIA) — declare all food.',
+      'Firearms & weapons must be declared and meet Canadian rules; many are prohibited or restricted.',
+      'Radar detectors are illegal in several provinces.',
+    ],
+    waits:{sum:'Busiest on summer weekends, Friday/Sunday afternoons and holiday Mondays.', best:'Early morning on weekdays.', worst:'Weekend afternoons & holidays.',
+      tips:['Have passports out and windows down; turn off music.','Know what you’re bringing and declare everything.','Use a NEXUS lane if you have a card.','Check CBSA Border Wait Times before you go.']},
+    crossings:BCG_NA_USCA},
+
+  {id:'ca-us', region:'North America', flags:'🇨🇦 → 🇺🇸', title:'Entering the United States from Canada', sub:'Land & sea crossings into the U.S.',
+    programs:['nexus','global-entry','fast'],
+    docs:[
+      {who:'U.S. & Canadian citizens (land/sea)', need:'A WHTI-compliant document: passport, U.S./Canadian Passport Card, Enhanced Driver’s Licence, NEXUS, FAST or other Trusted Traveler card.'},
+      {who:'Children under 16 (U.S./Canada)', need:'May present a birth certificate (original or copy) when arriving by land or sea.'},
+      {who:'Visa Waiver Program travelers', need:'Passport; arriving by land you complete Form I-94W and pay a fee at the port (ESTA covers air/sea). Verify your nationality’s rules.'},
+      {who:'Other nationalities', need:'Valid passport plus the appropriate U.S. visa.'},
+    ],
+    dutyFree:[
+      {k:'Alcohol (21+)', v:'1 litre duty-free; more may be allowed on payment of duty.'},
+      {k:'Tobacco', v:'200 cigarettes and 100 cigars (non-Cuban).'},
+      {k:'Goods', v:'U.S. residents: $800 personal exemption. Visitors: up to $100 in gifts.'},
+      {k:'Cash', v:'Declare US $10,000 or more.'},
+    ],
+    prohibited:[
+      'Cannabis — federally illegal to bring into the U.S. even from Canada or a legal-weed state; can mean a lifetime ban.',
+      'Most fresh produce, plants, meats & eggs (USDA/CBP) — declare all food.',
+      'Cuban cigars (limited exceptions), counterfeit goods, certain knives/weapons.',
+    ],
+    waits:{sum:'Heaviest southbound on Sunday/holiday evenings and summer weekends.', best:'Early weekday mornings.', worst:'Sunday afternoons/evenings & holidays.',
+      tips:['Declare everything — penalties for false declarations are steep.','NEXUS / Global Entry lanes save the most time.','Keep documents ready; remove sunglasses and hats.','Check CBP Border Wait Times (cbp.gov) before leaving.']},
+    crossings:BCG_NA_USCA},
+
+  {id:'us-mx', region:'North America', flags:'🇺🇸 → 🇲🇽', title:'Entering Mexico from the United States', sub:'Land crossings into Mexico',
+    programs:['sentri','fast'],
+    docs:[
+      {who:'All visitors', need:'Valid passport (a passport book is recommended; a U.S. Passport Card works by land/sea for U.S. citizens but not for air).'},
+      {who:'Tourist card (FMM)', need:'Staying over 7 days or travelling beyond the ~20–30 km border zone requires an FMM permit (online or at the crossing). Keep the stamped portion to surrender on exit.'},
+      {who:'Driving', need:'Beyond the border zone (outside Baja California and Sonora’s free zone) you need a Temporary Vehicle Import Permit (TIP) and Mexican auto insurance — U.S. policies aren’t valid in Mexico.'},
+      {who:'Children', need:'Carry passports; a notarized consent letter is advised for minors travelling without both parents.'},
+    ],
+    dutyFree:[
+      {k:'Goods', v:'Personal exemption ≈ US $300 per person by land (≈ US $500 by air); higher around some holidays.'},
+      {k:'Alcohol (18+)', v:'Up to 3 L of spirits and 6 L of wine.'},
+      {k:'Tobacco', v:'Up to 200 cigarettes and limited cigars.'},
+      {k:'Cash', v:'Declare US $10,000 or more (any currency).'},
+    ],
+    prohibited:[
+      'Firearms & ammunition — bringing them into Mexico is a serious crime with prison time, even a single round.',
+      'Drones and certain medications (carry your prescription); large quantities of new merchandise.',
+      'Fresh produce, plants and some foods are restricted.',
+    ],
+    waits:{sum:'Southbound into Mexico is usually much quicker than the northbound return.', best:'Weekday mornings.', worst:'Holiday weekends.',
+      tips:['The long waits are usually U.S.-bound — plan your return for off-peak.','Buy Mexican auto insurance before crossing.','Sort out your FMM and TIP if going beyond the border zone.','Carry pesos and small change for tolls.']},
+    crossings:BCG_NA_USMX},
+
+  {id:'mx-us', region:'North America', flags:'🇲🇽 → 🇺🇸', title:'Entering the United States from Mexico', sub:'Land crossings into the U.S.',
+    programs:['sentri','global-entry','fast'],
+    docs:[
+      {who:'U.S. citizens (land/sea)', need:'Passport, Passport Card, Enhanced Driver’s Licence, SENTRI, Global Entry or NEXUS card.'},
+      {who:'Mexican citizens', need:'Passport plus a U.S. visa, or a Border Crossing Card (B1/B2 “laser visa”) for short visits within the border zone.'},
+      {who:'Children under 16 (U.S.)', need:'May present a birth certificate by land or sea.'},
+      {who:'Other nationalities', need:'Valid passport plus the appropriate U.S. visa (verify whether ESTA covers your land entry).'},
+    ],
+    dutyFree:[
+      {k:'Alcohol (21+)', v:'1 litre duty-free.'},
+      {k:'Tobacco', v:'200 cigarettes and 100 cigars.'},
+      {k:'Goods', v:'U.S. residents: $800 exemption. Visitors: $100 gift exemption.'},
+      {k:'Cash', v:'Declare US $10,000 or more.'},
+    ],
+    prohibited:[
+      'Cannabis and most drugs — federally illegal, with serious consequences.',
+      'Fresh produce, plants, meats and many foods (USDA/CBP) — declare all food.',
+      'Cuban products, counterfeit goods, and medications without a prescription.',
+    ],
+    waits:{sum:'Northbound waits are notoriously long, especially at San Ysidro — often 1–2+ hours.', best:'Pre-dawn weekday mornings.', worst:'Weekend & holiday afternoons/evenings.',
+      tips:['SENTRI lanes can cut hours to minutes — worth it if you cross often.','Have documents ready; declare everything, including food.','Check CBP Border Wait Times for lane-by-lane estimates.','Crossing on foot can beat driving at some ports.']},
+    crossings:BCG_NA_USMX},
+
+  {id:'enter-schengen', region:'Europe', flags:'🌍 → 🇪🇺', title:'Entering the Schengen Area from outside', sub:'External EU/Schengen border',
+    programs:[],
+    docs:[
+      {who:'Visa-exempt visitors (US, UK, Canada, etc.)', need:'Passport valid at least 3 months beyond departure and issued within the last 10 years. ETIAS pre-authorisation is expected to become required (planned 2026 — check before travel).'},
+      {who:'Other nationalities', need:'Passport plus a Schengen visa.'},
+      {who:'Stay limit', need:'90 days within any 180-day period for short stays; get your passport stamped to prove your entry date.'},
+    ],
+    dutyFree:[
+      {k:'Alcohol (17+)', v:'1 L spirits (or 2 L fortified wine) + 4 L still wine + 16 L beer.'},
+      {k:'Tobacco', v:'200 cigarettes or 250 g tobacco.'},
+      {k:'Goods', v:'Up to €430 (air/sea) or €300 (land) of other goods.'},
+      {k:'Cash', v:'Declare €10,000 or more.'},
+    ],
+    prohibited:[
+      'Meat, milk and products containing them from most non-EU countries are banned.',
+      'Counterfeit goods, protected species (CITES) and weapons.',
+    ],
+    waits:{sum:'Expect passport-control queues at major airports and ferry ports.', best:'Use EU/EEA e-gates if eligible.', worst:'Peak summer arrivals.',
+      tips:['Have your onward/return ticket and accommodation details ready.','Make sure you get an entry stamp (it proves your 90/180 start date).']},
+    crossings:null},
+
+  {id:'schengen-internal', region:'Europe', flags:'🇪🇺 ↔ 🇪🇺', title:'Crossing between Schengen countries', sub:'Internal Schengen borders',
+    programs:[],
+    docs:[
+      {who:'All travelers', need:'No routine passport checks at internal Schengen borders, but always carry your passport or national ID — controls can be reintroduced temporarily and police may spot-check.'},
+      {who:'Non-EU visitors', need:'Time anywhere in the Schengen Area counts toward the 90-days-in-180 limit.'},
+    ],
+    dutyFree:[
+      {k:'Within the EU', v:'No duty-free limits between EU countries for personal use, though “indicative” guideline amounts exist for alcohol & tobacco.'},
+    ],
+    prohibited:[
+      'Even with open borders, drug, weapon and protected-species rules still apply.',
+    ],
+    waits:{sum:'Usually no stop at all on motorways and trains between Schengen states.', best:'—', worst:'Occasional temporary checks during major events or security alerts.',
+      tips:['Keep ID handy even if you expect no check.','Watch the 90/180 Schengen clock if you’re a non-EU visitor.']},
+    crossings:null},
+
+  {id:'uk-eu', region:'Europe', flags:'🇬🇧 → 🇪🇺', title:'Entering the EU from the United Kingdom', sub:'Eurotunnel, ferry & air',
+    programs:[],
+    docs:[
+      {who:'UK citizens & visitors', need:'Passport valid 3 months beyond departure and issued within the last 10 years. The 90-days-in-180 limit applies. ETIAS expected (planned 2026).'},
+      {who:'Eurotunnel / ferry note', need:'On the Eurotunnel and some ferries, French border police check passports in the UK (juxtaposed controls) before you board.'},
+    ],
+    dutyFree:[
+      {k:'Alcohol (17+)', v:'1 L spirits + 4 L wine + 16 L beer.'},
+      {k:'Tobacco', v:'200 cigarettes or 250 g tobacco.'},
+      {k:'Goods', v:'Up to €430 (air/sea) or €300 (land) of goods.'},
+      {k:'Cash', v:'Declare €10,000 or more.'},
+    ],
+    prohibited:[
+      'You can no longer bring meat, milk or most animal products from the UK into the EU.',
+      'Counterfeit goods, weapons and protected species.',
+    ],
+    waits:{sum:'Get your passport stamped on entry for the 90/180 rule.', best:'Use the non-EU lane.', worst:'Summer Eurotunnel/Dover queues.',
+      tips:['Build in extra time at Dover/Folkestone in peak season.','Keep proof of accommodation and return travel.']},
+    crossings:null},
+
+  {id:'eu-uk', region:'Europe', flags:'🇪🇺 → 🇬🇧', title:'Entering the United Kingdom from the EU', sub:'Air, ferry & rail',
+    programs:[],
+    docs:[
+      {who:'EU/EEA & most visitors', need:'A valid passport — EU national ID cards are no longer accepted for most travelers since Brexit. Many nationalities can use the eGates.'},
+      {who:'ETA', need:'An Electronic Travel Authorisation (ETA) is now required for many visa-exempt visitors — check whether your nationality needs one before travel.'},
+    ],
+    dutyFree:[
+      {k:'Alcohol', v:'42 L beer + 18 L still wine + 4 L spirits (or 9 L sparkling/fortified).'},
+      {k:'Tobacco', v:'200 cigarettes (or 250 g tobacco, or 50 cigars).'},
+      {k:'Goods', v:'Up to £390 of other goods.'},
+      {k:'Cash', v:'Declare £10,000 or more when entering Great Britain.'},
+    ],
+    prohibited:[
+      'Meat & dairy restrictions apply when entering Great Britain from the EU.',
+      'Offensive weapons, certain knives and endangered species.',
+    ],
+    waits:{sum:'eGates at major airports speed entry for eligible passports.', best:'Use eGates if you qualify.', worst:'Peak arrivals at Heathrow/Gatwick.',
+      tips:['Check whether you need a UK ETA before you fly.']},
+    crossings:null},
+
+  {id:'generic', region:'General', flags:'🛂', title:'Any international land border', sub:'General crossing tips anywhere',
+    programs:[],
+    docs:[
+      {who:'Always carry', need:'A passport valid 6+ months with blank pages; check visa requirements for your nationality in advance.'},
+      {who:'Vehicles', need:'Carry registration, an International Driving Permit where required, and valid insurance for the destination country.'},
+    ],
+    dutyFree:[
+      {k:'General', v:'Most countries set personal allowances for alcohol, tobacco and goods value, and require declaring cash around the US $10,000 equivalent.'},
+    ],
+    prohibited:[
+      'Drugs, weapons, undeclared large cash, counterfeit goods, and many foods/plants/animal products.',
+      'Some countries restrict drones, satellite phones, medicines and political/religious materials.',
+    ],
+    waits:{sum:'Land borders are busiest on weekends, holidays and market days.', best:'Cross early on a weekday.', worst:'Holidays & weekend evenings.',
+      tips:['Cross in daylight where possible.','Keep documents organized and accessible.','Be honest and declare everything; smuggling penalties are severe.','Keep small local currency for fees and tolls.']},
+    crossings:null},
+];
+const BCG_REGIONS = ['North America','Europe','General'];
+const BCG_KEY = 'tt_bcg_route';
+
+function bcgEsc(s){ return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function bcgRoute(id){ return BCG_ROUTES.find(r => r.id === id) || null; }
+
+function bcgDefault(){
+  try {
+    const trip = (typeof getActiveTrip === 'function') ? getActiveTrip() : null;
+    if (trip && trip.destination){
+      const d = trip.destination.toLowerCase();
+      if (d.includes('canada')) return 'us-ca';
+      if (d.includes('mexico')) return 'us-mx';
+    }
+  } catch(_){}
+  return 'ca-us';
+}
+function bcgInit(){
+  const sel = document.getElementById('bcg-route');
+  if (!sel) return;
+  let html = '';
+  BCG_REGIONS.forEach(region => {
+    const inR = BCG_ROUTES.filter(r => r.region === region);
+    if (!inR.length) return;
+    html += `<optgroup label="${bcgEsc(region)}">` +
+      inR.map(r => `<option value="${r.id}">${r.flags}  ${bcgEsc(r.title)}</option>`).join('') + '</optgroup>';
+  });
+  sel.innerHTML = html;
+  let id = null;
+  try { id = localStorage.getItem(BCG_KEY); } catch(_){}
+  if (!id || !bcgRoute(id)) id = bcgDefault();
+  sel.value = id;
+  bcgRender();
+}
+function bcgOnRoute(){
+  try { localStorage.setItem(BCG_KEY, document.getElementById('bcg-route').value); } catch(_){}
+  bcgRender();
+}
+
+function bcgRender(){
+  const r = bcgRoute(document.getElementById('bcg-route').value) || BCG_ROUTES[0];
+
+  let html = `<div class="bcg-overview">
+    <span class="bcg-route-flags">${r.flags}</span>
+    <div><div class="bcg-route-ttl">${bcgEsc(r.title)}</div><div class="bcg-route-sub">${bcgEsc(r.sub)}</div></div>
+  </div>`;
+
+  // Documents
+  html += `<div class="bcg-block"><h4>📄 Documents you need</h4>` +
+    r.docs.map(d => `<div class="bcg-doc"><div class="who">${bcgEsc(d.who)}</div><div class="need">${bcgEsc(d.need)}</div></div>`).join('') +
+    `</div>`;
+
+  // Duty-free
+  html += `<div class="bcg-block"><h4>🧳 Duty-free allowances</h4><div class="bcg-dl">` +
+    r.dutyFree.map(x => `<div class="k">${bcgEsc(x.k)}</div><div class="v">${bcgEsc(x.v)}</div>`).join('') +
+    `</div></div>`;
+  // Prohibited
+  html += `<div class="bcg-block"><h4>🚫 Restricted &amp; prohibited</h4><ul class="bcg-tips" style="margin-top:0">` +
+    r.prohibited.map(p => `<li style="padding-left:24px">${bcgEsc(p)}</li>`).join('') +
+    `</ul></div>`;
+
+  // Trusted programs
+  if (r.programs && r.programs.length){
+    html += `<div class="bcg-block"><h4>⚡ Trusted-traveler programs</h4><div class="bcg-prog-grid">` +
+      r.programs.map(pid => { const p = BCG_PROGRAMS[pid]; return p ? `<div class="bcg-prog"><div class="nm">${bcgEsc(p.nm)}</div><div class="fee">${bcgEsc(p.fee)}</div><div class="for">${bcgEsc(p.for)}</div></div>` : ''; }).join('') +
+      `</div></div>`;
+  }
+
+  // Waits & checklist
+  let waitHtml = `<div class="bcg-block"><h4>⏱ Wait times &amp; tips</h4>
+    <div class="bcg-wait-sum">${bcgEsc(r.waits.sum)}</div>
+    <div class="bcg-wait-stats">
+      <div class="bcg-wait-stat best"><div class="k">Best time</div><div class="v">${bcgEsc(r.waits.best)}</div></div>
+      <div class="bcg-wait-stat worst"><div class="k">Worst time</div><div class="v">${bcgEsc(r.waits.worst)}</div></div>
+    </div>
+    <ul class="bcg-tips">${r.waits.tips.map(t => `<li>${bcgEsc(t)}</li>`).join('')}</ul>`;
+  if (r.crossings && r.crossings.length){
+    waitHtml += `<div class="bcg-cross"><div class="bcg-cross-h">Major crossings — typical waits</div>` +
+      r.crossings.map(c => `<div class="bcg-cross-row"><div><div class="bcg-cross-nm">${bcgEsc(c.nm)}</div><div class="bcg-cross-loc">${bcgEsc(c.loc)}</div></div><div class="bcg-cross-wait">${bcgEsc(c.wait)}</div></div>`).join('') +
+      `</div>`;
+  }
+  waitHtml += `</div>`;
+  html += waitHtml;
+
+  document.getElementById('bcg-body').innerHTML = html;
+  document.getElementById('bcg-disclaim').textContent = 'Border rules, allowances and trusted-traveler fees change frequently — verify with official sources (CBP, CBSA, INM, etc.) before you travel. Wait times are typical estimates, not live. Last verified May 2026.';
+  const pd = document.getElementById('bcg-print-date'); if (pd) pd.textContent = new Date().toLocaleDateString();
+}
+
+function bcgCopy(){
+  const r = bcgRoute(document.getElementById('bcg-route').value); if (!r) return;
+  let lines = ['TripTools — Border Crossing Guide', r.title, ''];
+  lines.push('DOCUMENTS:');
+  r.docs.forEach(d => lines.push(`• ${d.who}: ${d.need}`));
+  lines.push('', 'DUTY-FREE:');
+  r.dutyFree.forEach(x => lines.push(`• ${x.k}: ${x.v}`));
+  lines.push('', 'RESTRICTED/PROHIBITED:');
+  r.prohibited.forEach(p => lines.push(`• ${p}`));
+  if (r.programs && r.programs.length){
+    lines.push('', 'TRUSTED PROGRAMS:');
+    r.programs.forEach(pid => { const p = BCG_PROGRAMS[pid]; if (p) lines.push(`• ${p.nm} (${p.fee}) — ${p.for}`); });
+  }
+  lines.push('', `WAITS: ${r.waits.sum} Best: ${r.waits.best} Worst: ${r.waits.worst}`);
+  r.waits.tips.forEach(t => lines.push(`• ${t}`));
+  lines.push('', 'Verify with official sources before travel. Last verified May 2026.');
+  const text = lines.join('\n');
+  const btn = document.getElementById('bcg-copy-btn');
+  const done = () => { const o = btn.textContent; btn.textContent = '✓ Copied'; setTimeout(()=>{ btn.textContent = o; }, 1600); };
+  if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(done).catch(()=>bcgCopyFallback(text, done));
+  } else bcgCopyFallback(text, done);
+}
+function bcgCopyFallback(text, cb){
+  const ta = document.createElement('textarea');
+  ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); cb && cb(); } catch(e){}
+  document.body.removeChild(ta);
 }
 
 /* ══════════════════════════════════════════════════════
