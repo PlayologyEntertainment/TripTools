@@ -5983,17 +5983,103 @@ body.no-scroll { overflow: hidden; }
     </div>
   </div>
 </div>
-<div id="view-placeholder-no-pack" class="view">
-  <nav class="tool-topbar">
+<style>
+/* ── WHAT NOT TO PACK ── */
+.np-ctx-switch{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.np-ctx-btn{flex:1;min-width:140px;padding:11px 12px;border:1.5px solid var(--ink);border-radius:var(--r);background:var(--paper);cursor:pointer;text-align:left;transition:background .12s,color .12s;min-height:54px;display:flex;align-items:center;gap:10px}
+.np-ctx-btn:hover{background:var(--paper-2)}
+.np-ctx-btn.active{background:var(--ink);color:var(--paper)}
+.np-ctx-ico{font-size:22px;line-height:1;flex-shrink:0}
+.np-ctx-txt{display:flex;flex-direction:column;gap:1px;min-width:0}
+.np-ctx-name{font-family:var(--serif);font-size:15px;font-weight:600;letter-spacing:-.01em;line-height:1.1}
+.np-ctx-sub{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;opacity:.7;line-height:1.2}
+.np-search-input{width:100%;padding:12px 14px;border:1.5px solid var(--ink);border-radius:var(--r);font-size:15px;font-family:var(--sans);background:var(--paper);color:var(--ink);box-sizing:border-box;outline:none;min-height:46px}
+.np-search-input:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(255,77,46,.15)}
+.np-search-hint{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:6px;margin-bottom:12px}
+.np-cat-pills{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 4px}
+.np-cat-pill{padding:7px 12px;border:1.5px solid var(--ink);border-radius:999px;background:var(--paper);font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);cursor:pointer;transition:background .12s,color .12s;min-height:32px;display:inline-flex;align-items:center}
+.np-cat-pill:hover{background:var(--paper-2)}
+.np-cat-pill.active{background:var(--ink);color:var(--paper)}
+.np-count{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:14px 0 8px}
+.np-results{display:flex;flex-direction:column;gap:8px}
+.np-card{border:1.5px solid var(--ink);border-radius:var(--r);background:var(--paper);overflow:hidden;break-inside:avoid}
+.np-card-top{display:flex;align-items:flex-start;gap:12px;padding:13px 16px}
+.np-card-ico{font-size:26px;line-height:1;flex-shrink:0;width:32px;text-align:center}
+.np-card-main{flex:1;min-width:0}
+.np-card-name{font-family:var(--serif);font-size:18px;font-weight:600;letter-spacing:-.01em;line-height:1.2;color:var(--ink)}
+.np-card-cat{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:3px}
+.np-ctx-rows{border-top:1.5px solid var(--rule)}
+.np-ctx-row{display:flex;gap:12px;padding:11px 16px;border-top:1px solid var(--rule);align-items:flex-start}
+.np-ctx-row:first-child{border-top:none}
+.np-verdict{display:flex;align-items:center;gap:7px;flex-shrink:0;width:128px}
+.np-verdict-ico{font-size:17px;line-height:1;flex-shrink:0}
+.np-verdict-txt{display:flex;flex-direction:column;line-height:1.2}
+.np-verdict-ctx{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.np-verdict-val{font-weight:600;font-size:12.5px}
+.np-v-no   .np-verdict-val{color:var(--accent)}
+.np-v-cond .np-verdict-val{color:#B8860B}
+.np-ctx-note{flex:1;font-size:13px;color:var(--ink-2);line-height:1.5;min-width:0}
+.np-empty{padding:22px 18px;border:1.5px dashed var(--ink);border-radius:var(--r);color:var(--muted);text-align:center;font-size:14px;background:var(--paper-2)}
+.np-empty strong{display:block;font-family:var(--serif);font-size:17px;color:var(--ink);margin-bottom:4px;font-weight:600}
+.np-section{margin-top:30px}
+.np-section-hdr{display:flex;align-items:center;gap:10px;padding:0 0 10px;border-bottom:2px solid var(--ink);margin-bottom:16px}
+.np-section-num{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase}
+.np-section-hdr h3{font-family:var(--serif);font-size:22px;font-weight:600;letter-spacing:-.02em;margin:0;line-height:1.1}
+.np-ref-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
+.np-ref{border:1.5px solid var(--ink);border-radius:var(--r);background:var(--paper);padding:13px 15px;display:flex;gap:11px;align-items:flex-start;break-inside:avoid}
+.np-ref-ico{font-size:22px;line-height:1;flex-shrink:0;width:28px;text-align:center}
+.np-ref-body{flex:1;font-size:13px;color:var(--ink-2);line-height:1.5}
+.np-ref-body strong{display:block;font-family:var(--serif);font-size:15px;color:var(--ink);font-weight:600;margin-bottom:3px;letter-spacing:-.01em}
+.np-callout{border:1.5px solid var(--ink);border-left-width:5px;border-radius:var(--r);background:var(--paper-2);padding:14px 16px;margin-top:14px;font-size:13.5px;color:var(--ink-2);line-height:1.6}
+.np-callout strong{color:var(--ink);font-weight:600}
+.np-callout.np-ok{border-left-color:var(--green)}
+.np-callout.np-warn{border-left-color:var(--accent)}
+.np-xref{display:inline-flex;align-items:center;gap:6px;margin-top:4px;padding:8px 14px;border:1.5px solid var(--ink);border-radius:999px;background:var(--paper);font-family:var(--sans);font-weight:600;font-size:13px;color:var(--ink);cursor:pointer;transition:background .12s;min-height:40px}
+.np-xref:hover{background:var(--ink);color:var(--paper)}
+@media print{
+  .np-ctx-switch,.np-search-input,.np-search-hint,.np-cat-pills,.np-xref{display:none !important}
+  .np-card,.np-ref,.np-callout{break-inside:avoid;border:1.5px solid #000 !important}
+}
+</style>
+<div id="view-no-pack" class="view">
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="window.print()">🖨 Print</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">🚫</span>
-    <h2>What NOT to Pack</h2>
-    <p style="margin-bottom:24px">TSA, customs & cruise-line prohibited items. Fully searchable reference guide.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-no-pack"></div>
+
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>What NOT to Pack</h1>
+    <p class="tool-sub">Items that get confiscated, fined, or turned away — searchable across air travel, customs &amp; cruise ships. Know before you pack.</p>
+  </div>
+
+  <div class="tool-body">
+
+    <!-- ── CONTEXT SWITCHER ── -->
+    <div class="fg">
+      <label>Where are you headed?</label>
+      <div class="np-ctx-switch" id="np-ctx-switch"></div>
     </div>
+
+    <!-- ── SEARCH ── -->
+    <div class="fg">
+      <input type="search" id="np-q" class="np-search-input" placeholder="🔍 Search any item — vape, fruit, power bank, iron…" autocomplete="off">
+      <div class="np-search-hint">Type an item or browse a category below</div>
+      <div class="np-cat-pills" id="np-cats"></div>
+    </div>
+
+    <div class="np-count" id="np-count"></div>
+    <div id="np-results" class="np-results"></div>
+
+    <!-- ── CONTEXT REFERENCE ── -->
+    <div id="np-ref"></div>
+
+    <div class="np-callout np-warn">
+      <strong>When in doubt, leave it out — or declare it.</strong> Rules change and vary by airline, country &amp; cruise line. This is offline general guidance, not legal advice. For aviation carry-on vs. checked detail, use the TSA &amp; Security Guide. For import allowances, check the destination's official customs site before you fly.
+      <br><span class="np-xref" onclick="showHub();setTimeout(()=>openTool('tsa-guide'),50)">🔒 Open TSA &amp; Security Guide →</span>
+    </div>
+
   </div>
 </div>
 <div id="view-currency" class="view">
@@ -13370,7 +13456,7 @@ const TOOLS = [
   {id:'luggage-wt',    nm:'Luggage Weight Calculator',  ico:'⚖️', ph:'packing',   on:false, live:true,  ds:'Virtual baggage scale. Add items & see remaining allowance.'},
   {id:'wardrobe',      nm:'Weather-Based Wardrobe',     ico:'🌤', ph:'packing',   on:true,  live:true,  ds:'14-day forecast → packing suggestions per condition.'},
   {id:'power-plug',    nm:'Power Plug & Adapter Guide', ico:'🔌', ph:'packing',   on:false, live:true,  ds:'Home + destination = plug types needed, voltage & converter advice.'},
-  {id:'no-pack',       nm:'What NOT to Pack',           ico:'🚫', ph:'packing',   on:false, live:false, ds:'TSA, customs & cruise prohibited items. Searchable guide.'},
+  {id:'no-pack',       nm:'What NOT to Pack',           ico:'🚫', ph:'packing',   on:false, live:true,  ds:'TSA, customs & cruise prohibited items. Searchable guide.'},
   {id:'currency',      nm:'Currency Converter',         ico:'💱', ph:'money',     on:true,  live:true,  ds:'Live rates for 150+ currencies. Cached for offline use.'},
   {id:'tip-calc',      nm:'Tip Calculator by Country',  ico:'🤝', ph:'money',     on:false, live:true,  ds:'Local tipping culture + standard % by venue. Exact tip calculator.'},
   {id:'expense-track', nm:'Daily Expense Tracker',      ico:'📊', ph:'money',     on:false, live:true,  ds:'Log expenses by category. Auto-converts to home currency. Running total vs. daily budget.'},
@@ -14113,6 +14199,7 @@ function injectTripCtx(id) {
   if(id==='toll-est')   teInit();
   if(id==='road-planner') rpInit();
   if(id==='tsa-guide')  tsaInit();
+  if(id==='no-pack')    npInit();
   if(id==='vaccination') vacInit();
   if(id==='ff-tracker') ffInit();
   if(id==='weather')    wxInit();
@@ -34905,6 +34992,468 @@ function tsaCard(it) {
     </div>
     <div class="tsa-card-notes">${it.note}</div>
   </div>`;
+}
+
+/* ══════════════════════════════════════════════
+   WHAT NOT TO PACK  (no-pack)
+   A banned/restricted-items reference across three travel contexts:
+   air travel, customs/import, and cruise ships. Complements the TSA
+   & Security Guide (which covers full allowed/checked/prohibited detail).
+   verdict codes per context:  'no' = don't pack  ·  'cond' = restricted
+   ══════════════════════════════════════════════ */
+
+const NP_CTX = [
+  {id:'all',    name:'Everything', sub:'All contexts',     ico:'🚫'},
+  {id:'air',    name:'Air Travel', sub:'Flights & airports',ico:'✈️'},
+  {id:'cust',   name:'Customs',    sub:'Crossing borders',  ico:'🛃'},
+  {id:'cruise', name:'Cruise Ship',sub:'Rules onboard',     ico:'🚢'},
+];
+
+const NP_CATS = [
+  {id:'all',       lbl:'All',              ico:'🔎'},
+  {id:'food',      lbl:'Food & Plants',    ico:'🍎'},
+  {id:'batteries', lbl:'Batteries & Power',ico:'🔋'},
+  {id:'flammable', lbl:'Flammable & Hazmat',ico:'🔥'},
+  {id:'weapons',   lbl:'Weapons & Sharp',  ico:'🔪'},
+  {id:'appliance', lbl:'Appliances',       ico:'🔌'},
+  {id:'liquids',   lbl:'Liquids & Aerosols',ico:'💧'},
+  {id:'wildlife',  lbl:'Animal & Wildlife',ico:'🐘'},
+  {id:'drugs',     lbl:'Drugs & Meds',     ico:'💊'},
+  {id:'goods',     lbl:'Restricted Goods', ico:'💵'},
+  {id:'misc',      lbl:'Other',            ico:'📦'},
+];
+
+/* Each item lists only the contexts where it is a concern.
+   v[ctx] = verdict, note[ctx] = context-specific guidance. */
+const NP_ITEMS = [
+  // ── FLAMMABLE & HAZMAT ──
+  {n:'Fireworks & sparklers', ico:'🎆', cat:'flammable', tags:'firecracker pyrotechnic rocket',
+    v:{air:'no', cruise:'no', cust:'cond'},
+    note:{air:'Banned in carry-on and checked bags. No exceptions, including sparklers and party poppers.',
+          cruise:'Prohibited on every major cruise line — confiscated at the terminal scanner.',
+          cust:'Import restricted or licensed in many countries. Never carry across a border casually.'}},
+  {n:'Lighter fluid & fuel', ico:'⛽', cat:'flammable', tags:'gasoline petrol kerosene naphtha zippo',
+    v:{air:'no', cruise:'no'},
+    note:{air:'Flammable liquids are forbidden in both bags. A refillable lighter must be empty.',
+          cruise:'Lighter fluid, gasoline and any flammable fuel are prohibited onboard.'}},
+  {n:'Camping / butane gas canister', ico:'🔥', cat:'flammable', tags:'propane stove fuel isobutane cartridge',
+    v:{air:'no', cruise:'no'},
+    note:{air:'Compressed flammable gas cartridges are banned from both bags — buy fuel at your destination.',
+          cruise:'Not allowed onboard. Camp stoves and fuel canisters are confiscated.'}},
+  {n:'Strike-anywhere matches', ico:'🔥', cat:'flammable', tags:'match firestarter',
+    v:{air:'no', cruise:'no'},
+    note:{air:'Strike-anywhere matches are banned. One book of safety matches may be carried on your person only.',
+          cruise:'Prohibited. Some lines also ban regular lighters in cabins.'}},
+  {n:'Flares & signal devices', ico:'🧨', cat:'flammable', tags:'flare distress road',
+    v:{air:'no', cruise:'no'},
+    note:{air:'Marine/road flares and other signal devices with explosive or flammable content are prohibited.',
+          cruise:'Personal flares are not permitted onboard.'}},
+  {n:'Bear spray', ico:'🐻', cat:'flammable', tags:'bear deterrent capsaicin',
+    v:{air:'no', cruise:'no', cust:'cond'},
+    note:{air:'Bear spray exceeds the size and concentration limits — banned from both carry-on and checked.',
+          cruise:'Prohibited onboard.',
+          cust:'Restricted or illegal to import in several countries.'}},
+  {n:'Pepper spray / mace', ico:'🌶️', cat:'flammable', tags:'self defense oc spray',
+    v:{air:'cond', cruise:'no', cust:'cond'},
+    note:{air:'Checked bag only — one container up to 4 oz with a safety cap. Never in carry-on.',
+          cruise:'Self-defense sprays are prohibited onboard.',
+          cust:'Illegal to import into many countries (UK, much of EU, Japan, Australia).'}},
+  {n:'Spray paint & aerosol propellants', ico:'🎨', cat:'flammable', tags:'paint aerosol flammable',
+    v:{air:'no', cruise:'no'},
+    note:{air:'Flammable aerosols like spray paint are prohibited; only personal-care aerosols are allowed in limited amounts.',
+          cruise:'Not permitted onboard.'}},
+  {n:'Bleach & pool chemicals', ico:'🧪', cat:'flammable', tags:'chlorine oxidizer corrosive',
+    v:{air:'no', cruise:'no'},
+    note:{air:'Strong oxidizers and corrosives are forbidden in both bags.',
+          cruise:'Hazardous chemicals are prohibited onboard.'}},
+
+  // ── BATTERIES & POWER ──
+  {n:'Power bank / portable charger', ico:'🔋', cat:'batteries', tags:'battery charger lithium portable',
+    v:{air:'cond', cruise:'cond'},
+    note:{air:'Carry-on ONLY — never in checked bags. Under 100 Wh is fine; 100–160 Wh needs airline approval.',
+          cruise:'Generally allowed but keep it in your cabin; a few lines restrict them. Never leave charging unattended.'}},
+  {n:'Spare lithium batteries', ico:'🔋', cat:'batteries', tags:'aa lithium spare loose cell',
+    v:{air:'cond', cruise:'cond'},
+    note:{air:'Spare lithium batteries fly in carry-on only, terminals taped or in original packaging.',
+          cruise:'Allowed in your cabin; protect terminals to avoid short circuits.'}},
+  {n:'E-cigarette / vape', ico:'💨', cat:'batteries', tags:'vape juul nicotine pod vaping electronic cigarette',
+    v:{air:'cond', cust:'no', cruise:'cond'},
+    note:{air:'Carry-on or on your person only — never in checked baggage. Do not charge or use in flight.',
+          cust:'Banned outright in Thailand, Singapore, India and others — possession alone can mean fines or jail.',
+          cruise:'Allowed onboard but only used in designated areas; charging may be restricted in cabins.'}},
+  {n:'Hoverboard / self-balancing scooter', ico:'🛹', cat:'batteries', tags:'hoverboard segway scooter lithium',
+    v:{air:'cond', cruise:'no'},
+    note:{air:'Most airlines ban them entirely due to the large lithium battery. Check your carrier first.',
+          cruise:'Prohibited on every major cruise line — fire risk.'}},
+  {n:'Recalled or damaged battery', ico:'⚠️', cat:'batteries', tags:'note 7 swollen recall damaged',
+    v:{air:'no'},
+    note:{air:'Devices under safety recall (e.g. certain phones) and any swollen or damaged battery are banned from both bags.'}},
+  {n:'Wet / spillable battery', ico:'🔋', cat:'batteries', tags:'car lead acid wet cell',
+    v:{air:'no'},
+    note:{air:'Spillable lead-acid and other wet batteries are prohibited in passenger baggage.'}},
+
+  // ── APPLIANCES (mostly a cruise-ship issue) ──
+  {n:'Clothing iron', ico:'👔', cat:'appliance', tags:'iron press flat',
+    v:{cruise:'no'},
+    note:{cruise:'Banned in cabins fleet-wide — a leading cause of onboard fires. Use the ship laundry/valet instead.'}},
+  {n:'Garment steamer', ico:'💨', cat:'appliance', tags:'steamer wrinkle clothes',
+    v:{cruise:'no'},
+    note:{cruise:'Prohibited like irons. Hang wrinkled clothes in a steamy bathroom instead.'}},
+  {n:'Travel kettle / hot plate', ico:'☕', cat:'appliance', tags:'kettle hotplate boiler heater immersion',
+    v:{cruise:'no'},
+    note:{cruise:'Any open-heating-element appliance is prohibited. Most cabins have no kettle — use room service.'}},
+  {n:'Coffee maker / immersion heater', ico:'☕', cat:'appliance', tags:'coffee maker keurig heater',
+    v:{cruise:'no'},
+    note:{cruise:'Heating appliances are not allowed in staterooms.'}},
+  {n:'Candles & incense', ico:'🕯️', cat:'appliance', tags:'candle incense open flame wax',
+    v:{cruise:'no'},
+    note:{cruise:'Any open flame is banned onboard. Battery LED candles are fine.'}},
+  {n:'Surge-protected power strip', ico:'🔌', cat:'appliance', tags:'power strip surge protector extension',
+    v:{cruise:'no'},
+    note:{cruise:'Surge protectors are banned (incompatible with ship grounding). Bring a non-surge strip or USB hub instead.'}},
+  {n:'Extension cord', ico:'🔌', cat:'appliance', tags:'extension cord cable',
+    v:{cruise:'cond'},
+    note:{cruise:'Restricted on many lines, and only non-surge types if allowed. Check your line before packing.'}},
+  {n:'Electric / heating blanket', ico:'🔥', cat:'appliance', tags:'heated blanket pad heating',
+    v:{cruise:'cond'},
+    note:{cruise:'Heating elements are restricted or banned onboard — confirm with your cruise line.'}},
+
+  // ── WEAPONS & SHARP ──
+  {n:'Firearms', ico:'🔫', cat:'weapons', tags:'gun pistol rifle handgun',
+    v:{air:'cond', cruise:'no', cust:'cond'},
+    note:{air:'Checked bag only — unloaded, in a locked hard case, and declared to the airline at check-in.',
+          cruise:'Firearms are strictly prohibited onboard, even if legally owned.',
+          cust:'Import is licensed or banned almost everywhere. Never cross a border with a gun undeclared.'}},
+  {n:'Ammunition', ico:'🔫', cat:'weapons', tags:'bullets rounds ammo cartridges',
+    v:{air:'cond', cruise:'no', cust:'cond'},
+    note:{air:'Checked only, securely boxed, within airline weight limits. Never in carry-on.',
+          cruise:'Prohibited onboard.',
+          cust:'Tightly controlled or banned in most countries.'}},
+  {n:'Knives & blades', ico:'🔪', cat:'weapons', tags:'knife blade pocketknife dagger',
+    v:{air:'cond', cruise:'no'},
+    note:{air:'Any blade goes in checked baggage — even small pocketknives are banned from carry-on.',
+          cruise:'Knives, daggers and dive knives are confiscated at the terminal on most lines.'}},
+  {n:'Multi-tool with blade', ico:'🛠️', cat:'weapons', tags:'leatherman swiss army multitool',
+    v:{air:'cond', cruise:'cond'},
+    note:{air:'If it has a blade, it must go in checked baggage.',
+          cruise:'Bladed multi-tools are usually confiscated; a blade-free tool may be allowed.'}},
+  {n:'Scissors (large)', ico:'✂️', cat:'weapons', tags:'scissors shears',
+    v:{air:'cond', cruise:'cond'},
+    note:{air:'Carry-on allowed only if the blade is under 4 in / 10 cm from the pivot — otherwise check it.',
+          cruise:'Large scissors may be held; small personal grooming scissors are typically fine.'}},
+  {n:'Self-defense baton / taser', ico:'⚡', cat:'weapons', tags:'taser stun gun baton nightstick',
+    v:{air:'cond', cruise:'no', cust:'no'},
+    note:{air:'Stun guns and batons are checked-bag only, and only where legal at both ends.',
+          cruise:'Prohibited onboard.',
+          cust:'Illegal to import in many countries — possession can be a serious offense.'}},
+  {n:'Brass knuckles', ico:'👊', cat:'weapons', tags:'knuckle duster',
+    v:{air:'cond', cruise:'no', cust:'no'},
+    note:{air:'Checked baggage only, and banned in some jurisdictions.',
+          cruise:'Prohibited onboard.',
+          cust:'Illegal in many countries — do not carry across borders.'}},
+  {n:'Realistic replica / toy gun', ico:'🔫', cat:'weapons', tags:'replica toy bb airsoft pellet',
+    v:{air:'cond', cruise:'no'},
+    note:{air:'Replicas, BB and airsoft guns must be checked — they look real on the X-ray.',
+          cruise:'Realistic replicas are prohibited onboard.'}},
+  {n:'Martial arts & archery gear', ico:'🥋', cat:'weapons', tags:'nunchucks throwing stars bow arrow martial',
+    v:{air:'cond', cruise:'no'},
+    note:{air:'Nunchucks, throwing stars, bows and similar go in checked baggage only.',
+          cruise:'Prohibited onboard.'}},
+  {n:'Sword / machete', ico:'⚔️', cat:'weapons', tags:'sword machete axe blade large',
+    v:{air:'cond', cruise:'no', cust:'cond'},
+    note:{air:'Large blades are checked-baggage only.',
+          cruise:'Prohibited onboard.',
+          cust:'May require a permit or be banned to import in some countries.'}},
+
+  // ── FOOD & PLANTS ──
+  {n:'Fresh fruit', ico:'🍎', cat:'food', tags:'fruit apple banana produce agricultural',
+    v:{cust:'no', cruise:'cond'},
+    note:{cust:'Commonly banned from import (especially Australia, NZ, US). Eat or bin it before the border.',
+          cruise:'Do not take fruit ashore at ports — agricultural rules apply at each stop.'}},
+  {n:'Fresh vegetables', ico:'🥕', cat:'food', tags:'vegetables produce agricultural',
+    v:{cust:'no'},
+    note:{cust:'Restricted or prohibited in most countries to protect agriculture. Declare any plant matter.'}},
+  {n:'Meat & meat products', ico:'🥩', cat:'food', tags:'meat jerky sausage pork beef ham',
+    v:{cust:'no'},
+    note:{cust:'Banned into the EU, US, Australia and many others — includes dried, cured and canned meat.'}},
+  {n:'Dairy & cheese', ico:'🧀', cat:'food', tags:'milk cheese dairy butter',
+    v:{cust:'cond'},
+    note:{cust:'Restricted into the US, Australia and elsewhere. Always declare it; soft/unpasteurized is most often refused.'}},
+  {n:'Seeds, plants & cuttings', ico:'🌱', cat:'food', tags:'seeds plant cutting bulb flower',
+    v:{cust:'no'},
+    note:{cust:'Live plants and seeds are heavily restricted — most need a phytosanitary certificate or are banned outright.'}},
+  {n:'Soil & dirt on gear', ico:'🥾', cat:'food', tags:'soil dirt mud hiking boots camping',
+    v:{cust:'no'},
+    note:{cust:'Australia and New Zealand fine arrivals for muddy boots or dirty camping gear. Clean everything before you fly.'}},
+  {n:'Honey', ico:'🍯', cat:'food', tags:'honey bee product',
+    v:{cust:'cond'},
+    note:{cust:'Banned into Australia and NZ; restricted elsewhere as a bee-product biosecurity risk.'}},
+  {n:'Eggs & egg products', ico:'🥚', cat:'food', tags:'egg poultry',
+    v:{cust:'no'},
+    note:{cust:'Prohibited into many countries over avian-disease risk.'}},
+  {n:"Kinder Surprise eggs", ico:'🍫', cat:'food', tags:'kinder surprise chocolate toy candy',
+    v:{cust:'no'},
+    note:{cust:'Banned in the United States — the embedded toy violates a food-safety law. Fines apply at the border.'}},
+  {n:'Chewing gum', ico:'🍬', cat:'food', tags:'gum bubblegum',
+    v:{cust:'cond'},
+    note:{cust:'Sale and import are restricted in Singapore (medicinal gum aside). Carry only personal amounts elsewhere.'}},
+
+  // ── LIQUIDS & ALCOHOL ──
+  {n:'Liquids over 3.4 oz / 100 ml', ico:'💧', cat:'liquids', tags:'liquid shampoo water bottle gel 100ml',
+    v:{air:'cond'},
+    note:{air:'Carry-on liquids, gels and pastes must be 3.4 oz / 100 ml or less in a single quart bag. Pack larger sizes in checked.'}},
+  {n:'Alcohol (your own bottles)', ico:'🍷', cat:'liquids', tags:'alcohol liquor wine beer booze byo',
+    v:{cruise:'cond', cust:'cond'},
+    note:{cruise:'Most lines forbid bringing your own liquor; many allow one bottle of wine per adult at embarkation only.',
+          cust:'Duty-free allowances are small (often ~1 L). Declare and pay duty on anything over the limit.'}},
+  {n:'Large aerosols', ico:'💨', cat:'liquids', tags:'aerosol hairspray spray',
+    v:{air:'cond'},
+    note:{air:'Personal-care aerosols are limited to 3.4 oz / 100 ml in carry-on; larger toiletry aerosols go in checked (capped, within limits).'}},
+
+  // ── ANIMAL & WILDLIFE ──
+  {n:'Ivory & elephant products', ico:'🐘', cat:'wildlife', tags:'ivory tusk elephant cites',
+    v:{cust:'no'},
+    note:{cust:'Banned globally under CITES. Seizure plus heavy fines — never buy ivory souvenirs abroad.'}},
+  {n:'Coral & certain seashells', ico:'🐚', cat:'wildlife', tags:'coral shell giant clam cites',
+    v:{cust:'cond'},
+    note:{cust:'Many corals and shells are CITES-protected and confiscated. When unsure, leave it on the beach.'}},
+  {n:'Tortoiseshell & turtle products', ico:'🐢', cat:'wildlife', tags:'tortoiseshell turtle sea',
+    v:{cust:'no'},
+    note:{cust:'Sea-turtle products are banned worldwide under CITES.'}},
+  {n:'Exotic leather & fur', ico:'🐊', cat:'wildlife', tags:'snakeskin crocodile python fur reptile leather',
+    v:{cust:'cond'},
+    note:{cust:'Reptile, big-cat and other exotic skins/furs often need CITES permits or are prohibited.'}},
+  {n:'Live animals & plants', ico:'🦎', cat:'wildlife', tags:'animal pet plant live insect',
+    v:{cust:'no'},
+    note:{cust:'Bringing live animals or plants across borders requires permits, quarantine or is banned. Never smuggle wildlife.'}},
+
+  // ── DRUGS & MEDICATION ──
+  {n:'Cannabis, CBD & marijuana', ico:'🌿', cat:'drugs', tags:'cannabis marijuana weed cbd thc edibles hemp',
+    v:{air:'no', cust:'no', cruise:'no'},
+    note:{air:'Federally illegal in the US — prohibited on flights even between two legal states. CBD is a grey area; safest to leave it.',
+          cust:'Illegal to import into most countries, with severe penalties in some. Legality at home does not transfer.',
+          cruise:'Banned on every major line, including CBD and medical marijuana, even where legal onshore.'}},
+  {n:'Restricted prescription meds', ico:'💊', cat:'drugs', tags:'adderall codeine tramadol pseudoephedrine prescription controlled',
+    v:{cust:'cond'},
+    note:{cust:'Some everyday meds are banned abroad — Adderall in Japan, codeine/tramadol in the UAE, pseudoephedrine in Japan. Carry a doctor letter and check the destination embassy.'}},
+  {n:'Illegal narcotics', ico:'🚫', cat:'drugs', tags:'drugs narcotics cocaine heroin',
+    v:{air:'no', cust:'no', cruise:'no'},
+    note:{air:'Prohibited.',
+          cust:'Severe penalties worldwide, up to and including the death penalty in some countries.',
+          cruise:'Strictly prohibited onboard.'}},
+
+  // ── RESTRICTED GOODS ──
+  {n:'Cash over $10,000', ico:'💵', cat:'goods', tags:'cash currency money 10000 monetary',
+    v:{cust:'cond'},
+    note:{cust:'You may carry it, but you MUST declare cash and equivalents over US$10,000 (or local equivalent). Failure to declare means seizure.'}},
+  {n:'Counterfeit goods', ico:'👜', cat:'goods', tags:'counterfeit fake knockoff replica brand',
+    v:{cust:'no'},
+    note:{cust:'Fake designer bags, watches and pirated media can be seized and fined at customs. Even one item can be a problem.'}},
+  {n:'Cultural artifacts & antiquities', ico:'🏺', cat:'goods', tags:'antique artifact antiquity archaeological relic',
+    v:{cust:'cond'},
+    note:{cust:'Many countries (Egypt, Turkey, Italy, Greece, Mexico) ban the export of antiquities and old artifacts. Keep purchase receipts.'}},
+  {n:'Satellite phone / GPS unit', ico:'📡', cat:'goods', tags:'satellite phone gps tracker walkie',
+    v:{cust:'cond'},
+    note:{cust:'Banned or licensed in India, Myanmar, China, Cuba, North Korea and others. Check before you bring one.'}},
+  {n:'Drone', ico:'🚁', cat:'goods', tags:'drone quadcopter uav',
+    v:{air:'cond', cust:'cond', cruise:'no'},
+    note:{air:'Carry-on only — the lithium battery cannot go in checked baggage.',
+          cust:'Banned or requires a permit in many countries (Morocco, Cuba, Egypt, India and more). Confiscated at arrival.',
+          cruise:'Cannot be flown from the ship and is often held at guest services for the voyage.'}},
+  {n:'Pornographic or sensitive material', ico:'🚷', cat:'goods', tags:'pornography adult political religious literature',
+    v:{cust:'cond'},
+    note:{cust:'Banned into conservative jurisdictions (UAE, Maldives, Saudi Arabia). Some countries also restrict political or religious literature.'}},
+
+  // ── OTHER ──
+  {n:'Snow globe (large)', ico:'❄️', cat:'misc', tags:'snowglobe souvenir',
+    v:{air:'cond'},
+    note:{air:'Allowed in carry-on only if it is smaller than a tennis ball and fits in your quart bag — otherwise pack it in checked.'}},
+  {n:'Baseball bat & hard sporting gear', ico:'🏏', cat:'misc', tags:'bat club hockey stick sporting weapon',
+    v:{cruise:'no'},
+    note:{cruise:'Items usable as weapons (bats, clubs, dive spears) are typically held by security for the voyage.'}},
+];
+
+let npActiveCtx = 'all';
+let npActiveCat = 'all';
+
+function npInit() {
+  const trip = getActiveTrip();
+  const ctx  = document.getElementById('ctx-no-pack');
+  if (trip && ctx) {
+    ctx.textContent = `✈ Using context from: ${trip.name} — tap to edit ↗`;
+    ctx.classList.add('show');
+    ctx.onclick = () => showView('mytrip');
+  } else if (ctx) { ctx.classList.remove('show'); }
+
+  // Context switcher
+  document.getElementById('np-ctx-switch').innerHTML = NP_CTX.map(c =>
+    `<button class="np-ctx-btn${c.id===npActiveCtx?' active':''}" data-ctx="${c.id}" onclick="npSetCtx('${c.id}')">
+      <span class="np-ctx-ico">${c.ico}</span>
+      <span class="np-ctx-txt"><span class="np-ctx-name">${c.name}</span><span class="np-ctx-sub">${c.sub}</span></span>
+    </button>`).join('');
+
+  const q = document.getElementById('np-q');
+  q.value = '';
+  q.oninput = () => npRender();
+
+  npActiveCtx = 'all';
+  npActiveCat = 'all';
+  npRenderCats();
+  npRender();
+}
+
+function npSetCtx(id) {
+  npActiveCtx = id;
+  npActiveCat = 'all';
+  document.querySelectorAll('#np-ctx-switch .np-ctx-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.ctx === id));
+  npRenderCats();
+  npRender();
+}
+
+// Only show category pills that have at least one item in the active context.
+function npRenderCats() {
+  const cats = NP_CATS.filter(c => {
+    if (c.id === 'all') return true;
+    return NP_ITEMS.some(it => it.cat === c.id && (npActiveCtx === 'all' || it.v[npActiveCtx]));
+  });
+  document.getElementById('np-cats').innerHTML = cats.map(c =>
+    `<button class="np-cat-pill${c.id===npActiveCat?' active':''}" data-cat="${c.id}" onclick="npSetCat('${c.id}')">${c.ico} ${c.lbl}</button>`
+  ).join('');
+}
+
+function npSetCat(id) {
+  npActiveCat = id;
+  document.querySelectorAll('#np-cats .np-cat-pill').forEach(p =>
+    p.classList.toggle('active', p.dataset.cat === id));
+  npRender();
+}
+
+function npVerdict(v) {
+  if (v === 'no') return {ico:'🚫', txt:"Don't pack", cls:'np-v-no'};
+  return {ico:'⚠️', txt:'Restricted', cls:'np-v-cond'};
+}
+
+function npCtxRow(cid, v, note) {
+  const c = NP_CTX.find(x => x.id === cid);
+  const vd = npVerdict(v);
+  return `<div class="np-ctx-row ${vd.cls}">
+    <div class="np-verdict">
+      <span class="np-verdict-ico">${vd.ico}</span>
+      <span class="np-verdict-txt"><span class="np-verdict-ctx">${c.ico} ${c.name}</span><span class="np-verdict-val">${vd.txt}</span></span>
+    </div>
+    <div class="np-ctx-note">${note}</div>
+  </div>`;
+}
+
+function npCard(it) {
+  const catLabel = (NP_CATS.find(c => c.id === it.cat) || {}).lbl || it.cat;
+  let rows = '';
+  ['air','cust','cruise'].forEach(cid => {
+    if (npActiveCtx !== 'all' && npActiveCtx !== cid) return;
+    if (it.v[cid]) rows += npCtxRow(cid, it.v[cid], it.note[cid]);
+  });
+  return `<div class="np-card">
+    <div class="np-card-top">
+      <span class="np-card-ico">${it.ico}</span>
+      <div class="np-card-main">
+        <div class="np-card-name">${it.n}</div>
+        <div class="np-card-cat">${catLabel}</div>
+      </div>
+    </div>
+    <div class="np-ctx-rows">${rows}</div>
+  </div>`;
+}
+
+function npRender() {
+  const q = (document.getElementById('np-q').value || '').toLowerCase().trim();
+  const res = document.getElementById('np-results');
+  const cnt = document.getElementById('np-count');
+
+  let list = NP_ITEMS.filter(it => {
+    if (npActiveCtx !== 'all' && !it.v[npActiveCtx]) return false;
+    if (npActiveCat !== 'all' && it.cat !== npActiveCat) return false;
+    if (!q) return true;
+    const hay = (it.n + ' ' + (it.tags || '') + ' ' + it.cat).toLowerCase();
+    return hay.includes(q);
+  });
+
+  if (q) {
+    list.sort((a, b) => {
+      const ai = a.n.toLowerCase() === q ? 0 : (a.n.toLowerCase().startsWith(q) ? 1 : 2);
+      const bi = b.n.toLowerCase() === q ? 0 : (b.n.toLowerCase().startsWith(q) ? 1 : 2);
+      if (ai !== bi) return ai - bi;
+      return a.n.localeCompare(b.n);
+    });
+  } else {
+    list.sort((a, b) => a.n.localeCompare(b.n));
+  }
+
+  if (!list.length) {
+    cnt.textContent = '';
+    res.innerHTML = `<div class="np-empty"><strong>No matches for "${q.replace(/[<>]/g,'')}"</strong>Try a simpler keyword or a different context. When in doubt, don't pack it — or declare it.</div>`;
+    npRenderRef();
+    return;
+  }
+
+  const ctxName = npActiveCtx === 'all' ? 'all contexts' : NP_CTX.find(c => c.id === npActiveCtx).name.toLowerCase();
+  cnt.textContent = `${list.length} item${list.length===1?'':'s'} flagged · ${ctxName}`;
+  res.innerHTML = list.map(npCard).join('');
+  npRenderRef();
+}
+
+/* Context-specific reference content below the search results. */
+const NP_REF = {
+  air: {
+    num:'§ AIR', title:'Flying smart',
+    cards:[
+      {ico:'🔋', t:'Lithium stays with you', d:'Power banks, spare batteries, vapes and e-cigarettes fly in the cabin only — never in checked bags.'},
+      {ico:'🔫', t:'Declare firearms & ammo', d:'Unloaded, locked in a hard case, in checked baggage, declared at check-in. Carry-on is never allowed.'},
+      {ico:'🔥', t:'No flammables, period', d:'Fuel, fireworks, bear spray, camp gas and strike-anywhere matches are banned from both bags.'},
+      {ico:'🌿', t:'Cannabis is federally illegal', d:'Prohibited on US flights even between two legal states. Leave CBD oils behind if unsure.'},
+    ],
+    callout:{cls:'np-ok', html:'<strong>Good to know:</strong> solid stick deodorant, powder, snacks, medication and an empty water bottle all fly fine. For the full carry-on vs. checked breakdown on any item, use the TSA &amp; Security Guide.'}
+  },
+  cust: {
+    num:'§ CUSTOMS', title:'Crossing borders',
+    cards:[
+      {ico:'🍎', t:'The agricultural ban', d:'Fresh fruit, vegetables, meat, dairy, eggs, seeds and soil are restricted or banned into most countries. Always declare food.'},
+      {ico:'💵', t:'The $10,000 cash rule', d:'Carrying over US$10,000 (or local equivalent) in cash or equivalents? You must declare it — or risk seizure.'},
+      {ico:'🐘', t:'Wildlife & CITES', d:'Ivory, coral, tortoiseshell and exotic skins are protected and confiscated. Skip the wildlife souvenirs.'},
+      {ico:'🌍', t:'Country surprises', d:'Vapes (Thailand), gum (Singapore), Adderall (Japan), Kinder eggs (US), drones (Morocco). Check the destination first.'},
+    ],
+    callout:{cls:'np-warn', html:'<strong>Declare, don\'t hide.</strong> Honest declaration usually means a quick inspection. A concealed banned item means fines, confiscation, and sometimes a travel record. When unsure, tick the "yes" box and ask.'}
+  },
+  cruise: {
+    num:'§ CRUISE', title:'Onboard rules',
+    cards:[
+      {ico:'👔', t:'No irons or steamers', d:'The number-one banned item — a top cause of cabin fires. Use the ship\'s laundry or a steamy bathroom.'},
+      {ico:'🕯️', t:'No open flames', d:'Candles, incense and any heating element are prohibited. LED candles are fine.'},
+      {ico:'🍷', t:'Limited alcohol', d:'Most lines forbid bringing your own liquor; many allow one bottle of wine per adult at embarkation.'},
+      {ico:'🔌', t:'No surge protectors', d:'Surge-protected strips are banned. Bring a non-surge strip or a USB hub instead.'},
+    ],
+    callout:{cls:'np-ok', html:'<strong>Pack freely here:</strong> cruises have no 3-1-1 liquid limit, so full-size toiletries, sunscreen and shampoo are all welcome. Hoverboards, drones and weapons are the things to leave home.'}
+  },
+};
+
+function npRenderRef() {
+  const host = document.getElementById('np-ref');
+  let blocks;
+  if (npActiveCtx === 'all') {
+    blocks = ['air','cust','cruise'];
+  } else {
+    blocks = [npActiveCtx];
+  }
+  host.innerHTML = blocks.map(id => {
+    const r = NP_REF[id];
+    return `<div class="np-section">
+      <div class="np-section-hdr"><span class="np-section-num">${r.num}</span><h3>${r.title}</h3></div>
+      <div class="np-ref-grid">
+        ${r.cards.map(c => `<div class="np-ref"><span class="np-ref-ico">${c.ico}</span><div class="np-ref-body"><strong>${c.t}</strong>${c.d}</div></div>`).join('')}
+      </div>
+      <div class="np-callout ${r.callout.cls}">${r.callout.html}</div>
+    </div>`;
+  }).join('');
 }
 
 /* ══════════════════════════════════════════════
