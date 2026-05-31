@@ -4575,19 +4575,213 @@ body.no-scroll { overflow: hidden; }
     </div>
   </div>
 </div>
-<div id="view-placeholder-ff-tracker" class="view">
-  <nav class="tool-topbar">
+<div id="view-ff-tracker" class="view">
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <div style="display:flex;gap:8px">
+      <button class="print-btn" onclick="ffExportCSV()">⬇ Export CSV</button>
+      <button class="print-btn" onclick="ffPrint()">🖨 Print</button>
+    </div>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">🏆</span>
-    <h2>Frequent Flyer Tracker</h2>
-    <p style="margin-bottom:24px">Log miles/points across programs. Track expiry dates & estimate redemption value.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <!-- Print header (hidden on screen) -->
+  <div class="ff-print-header" id="ff-print-hdr">
+    <span>Frequent Flyer &amp; Loyalty Balances</span>
+    <span id="ff-ph-date"></span>
+  </div>
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>Frequent Flyer Tracker</h1>
+    <p class="tool-sub">Log miles &amp; points across every loyalty program, estimate what they're worth, and never let a balance expire.</p>
+  </div>
+  <div class="tool-body">
+
+    <!-- Summary stats -->
+    <div class="tj-stats ff-stats" id="ff-stats" style="display:none" aria-live="polite">
+      <div class="tj-stat"><b id="ff-stat-value">—</b>Est. Value (USD)</div>
+      <div class="tj-stat"><b id="ff-stat-programs">0</b>Programs</div>
+      <div class="tj-stat"><b id="ff-stat-points">0</b>Points &amp; Miles</div>
+      <div class="tj-stat"><b id="ff-stat-expiring">0</b>Expiring ≤6mo</div>
+    </div>
+
+    <!-- Expiry alerts -->
+    <div id="ff-alerts" class="ff-alerts" style="display:none" aria-live="polite"></div>
+
+    <!-- Add a balance -->
+    <div class="ff-sec">Add a Loyalty Balance</div>
+    <div class="ff-add">
+      <div class="ff-add-grid">
+        <div class="ff-fg ff-fg-prog">
+          <label for="ff-new-prog">Program</label>
+          <select id="ff-new-prog" onchange="ffOnProgChange()"></select>
+        </div>
+        <div class="ff-fg ff-fg-bal">
+          <label for="ff-new-balance">Balance</label>
+          <input type="number" id="ff-new-balance" min="0" step="1" inputmode="numeric" placeholder="0" onkeydown="if(event.key==='Enter')ffAdd()">
+        </div>
+        <div class="ff-fg ff-fg-act">
+          <label for="ff-new-activity">Last activity <span class="ff-opt">(for expiry)</span></label>
+          <input type="date" id="ff-new-activity">
+        </div>
+      </div>
+      <!-- Custom program fields (shown only when "Custom" selected) -->
+      <div class="ff-custom" id="ff-custom" style="display:none">
+        <div class="ff-fg">
+          <label for="ff-new-name">Program name</label>
+          <input type="text" id="ff-new-name" placeholder="e.g. Frontier Miles" autocomplete="off">
+        </div>
+        <div class="ff-fg ff-fg-type">
+          <label for="ff-new-type">Type</label>
+          <select id="ff-new-type">
+            <option value="air">Airline</option>
+            <option value="hotel">Hotel</option>
+            <option value="bank">Bank / Transferable</option>
+            <option value="rail">Rail</option>
+          </select>
+        </div>
+        <div class="ff-fg ff-fg-unit">
+          <label for="ff-new-unit">Unit</label>
+          <input type="text" id="ff-new-unit" placeholder="miles / points" autocomplete="off">
+        </div>
+        <div class="ff-fg ff-fg-cpp">
+          <label for="ff-new-cpp">Value <span class="ff-opt">(¢ each)</span></label>
+          <input type="number" id="ff-new-cpp" min="0" step="0.01" inputmode="decimal" placeholder="1.3">
+        </div>
+      </div>
+      <div class="ff-add-actions">
+        <span class="ff-add-hint" id="ff-add-hint"></span>
+        <button class="btn btn-p btn-sm" onclick="ffAdd()">+ Add Balance</button>
+      </div>
+    </div>
+
+    <!-- Sort control -->
+    <div class="ff-toolbar" id="ff-sortbar" style="display:none">
+      <label for="ff-sort">Sort</label>
+      <select id="ff-sort" onchange="ffSetSort(this.value)">
+        <option value="expiry">Soonest to expire</option>
+        <option value="value">Highest value</option>
+        <option value="balance">Largest balance</option>
+        <option value="name">Program name</option>
+      </select>
+    </div>
+
+    <!-- Balances list -->
+    <div id="ff-list" class="ff-list"></div>
+
+    <!-- Disclaimer -->
+    <p class="ff-disclaimer" id="ff-disclaimer" style="display:none">
+      Redemption values are rough averages for typical economy/standard redemptions and vary widely by how you book. Expiry policies are summarized for guidance only. <strong>Verify balances, valuations and expiry rules directly with each program.</strong> <span class="ff-verified">Reference data last verified May 2026.</span>
+    </p>
+
+  </div><!-- /tool-body -->
+
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    Most airline and hotel points expire after a period of <em>inactivity</em>, not on a fixed date — and any qualifying earn or redemption usually resets the clock. A tiny activity (a dining-program purchase, a points-shopping click, or buying a single point) can extend an entire balance. Enter your last activity date so this tool can warn you before a balance lapses.
+  </div>
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('lounge-guide')">🛋 Airport Lounge Guide</button>
+      <button class="rel-btn" onclick="openTool('flight-est')">✈️ Flight Cost Estimator</button>
+      <button class="rel-btn" onclick="openTool('budget-plan')">💰 Travel Budget Planner</button>
     </div>
   </div>
 </div>
+
+<style>
+/* ══════════════════════════════════════════════════════
+   FREQUENT FLYER TRACKER  (id: ff-tracker)
+   ══════════════════════════════════════════════════════ */
+#view-ff-tracker .ff-stats { margin-bottom:16px; }
+
+.ff-alerts { border:1.5px solid var(--accent); border-left-width:4px; border-radius:var(--r); background:rgba(255,77,46,.07); padding:13px 16px; margin-bottom:22px; }
+.ff-alerts-hdr { font-family:var(--mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--accent); font-weight:600; display:flex; align-items:center; gap:8px; margin-bottom:9px; }
+.ff-alert-row { display:flex; align-items:baseline; gap:10px; font-size:13.5px; color:var(--ink-2); line-height:1.5; padding:3px 0; flex-wrap:wrap; }
+.ff-alert-row b { color:var(--ink); font-family:var(--serif); }
+.ff-alert-when { font-family:var(--mono); font-size:11px; letter-spacing:.04em; margin-left:auto; white-space:nowrap; padding-left:8px; }
+.ff-alert-when.crit { color:var(--accent); font-weight:600; }
+.ff-alert-when.warn { color:#b8860b; }
+
+.ff-sec { font-family:var(--mono); font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin:6px 0 10px; }
+.ff-add { background:var(--paper-2); border:1.5px solid var(--ink); border-radius:var(--r); padding:16px; margin-bottom:22px; }
+.ff-add-grid { display:grid; grid-template-columns:1.6fr 1fr 1fr; gap:14px; align-items:end; }
+.ff-custom { display:grid; grid-template-columns:1.6fr 1fr 1fr 1fr; gap:14px; align-items:end; margin-top:14px; padding-top:14px; border-top:1px dashed var(--rule); }
+@media(max-width:640px){ .ff-add-grid, .ff-custom { grid-template-columns:1fr 1fr; } .ff-fg-prog, .ff-custom .ff-fg:first-child { grid-column:1 / -1; } }
+.ff-fg { display:flex; flex-direction:column; gap:5px; min-width:0; }
+.ff-fg label { font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); }
+.ff-fg .ff-opt { text-transform:none; letter-spacing:0; opacity:.8; }
+.ff-fg input, .ff-fg select { background:var(--paper); border:1.5px solid var(--ink); color:var(--ink); font-family:var(--sans); font-size:14px; padding:9px 10px; border-radius:var(--r); outline:none; min-height:42px; box-sizing:border-box; width:100%; }
+.ff-fg input:focus, .ff-fg select:focus { border-color:var(--accent); }
+.ff-fg select { appearance:none; cursor:pointer; }
+.ff-add-actions { display:flex; align-items:center; justify-content:flex-end; gap:14px; margin-top:14px; }
+.ff-add-hint { font-size:12.5px; color:var(--muted); margin-right:auto; line-height:1.4; }
+.ff-add-hint b { color:var(--ink-2); font-family:var(--serif); }
+
+.ff-toolbar { display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+.ff-toolbar label { font-family:var(--mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); }
+.ff-toolbar select { background:var(--paper); border:1.5px solid var(--ink); color:var(--ink); font-family:var(--sans); font-size:13px; padding:7px 10px; border-radius:var(--r); outline:none; cursor:pointer; min-height:38px; }
+.ff-toolbar select:focus { border-color:var(--accent); }
+
+.ff-list { display:flex; flex-direction:column; gap:14px; margin-bottom:22px; }
+.ff-card { border:1.5px solid var(--ink); border-radius:var(--r); background:var(--paper); overflow:hidden; }
+.ff-card.exp-expired { border-color:var(--accent); }
+.ff-card-top { display:flex; align-items:center; gap:10px; padding:11px 14px; background:var(--paper-2); border-bottom:1.5px solid var(--rule); }
+.ff-type-chip { font-family:var(--mono); font-size:9.5px; letter-spacing:.08em; text-transform:uppercase; font-weight:600; padding:3px 7px; border-radius:3px; flex-shrink:0; border:1px solid; }
+.ff-t-air   { color:var(--blue);   border-color:var(--blue);   background:rgba(21,101,192,.08); }
+.ff-t-hotel { color:var(--purple); border-color:var(--purple); background:rgba(106,27,154,.08); }
+.ff-t-bank  { color:var(--green);  border-color:var(--green);  background:rgba(46,125,50,.08); }
+.ff-t-rail  { color:var(--orange); border-color:var(--orange); background:rgba(230,81,0,.08); }
+.ff-card-name { font-family:var(--serif); font-weight:600; font-size:16.5px; color:var(--ink); letter-spacing:-.01em; line-height:1.2; min-width:0; word-break:break-word; }
+.ff-del { margin-left:auto; background:none; border:1px solid var(--rule); border-radius:3px; color:var(--muted); cursor:pointer; width:30px; height:30px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:13px; transition:color .12s, border-color .12s; }
+.ff-del:hover { color:var(--accent); border-color:var(--accent); }
+
+.ff-card-grid { display:grid; grid-template-columns:1.2fr 1fr 1.2fr; gap:0; }
+@media(max-width:560px){ .ff-card-grid { grid-template-columns:1fr; } .ff-card-grid > * { border-right:none !important; border-bottom:1px solid var(--rule); } }
+.ff-cell { padding:12px 14px; border-right:1px solid var(--rule); display:flex; flex-direction:column; gap:5px; justify-content:center; }
+.ff-cell:last-child { border-right:none; }
+.ff-cell-lbl { font-family:var(--mono); font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); }
+.ff-bal-input { display:flex; align-items:baseline; gap:6px; }
+.ff-bal-input input { width:100%; max-width:140px; border:1px solid transparent; background:var(--paper-2); font-family:var(--mono); font-size:16px; color:var(--ink); padding:6px 8px; border-radius:3px; outline:none; box-sizing:border-box; }
+.ff-bal-input input:focus { background:var(--paper); border-color:var(--accent); }
+.ff-bal-unit { font-family:var(--mono); font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); flex-shrink:0; }
+.ff-val-num { font-family:var(--serif); font-weight:700; font-size:21px; color:var(--ink); line-height:1; letter-spacing:-.01em; }
+.ff-val-sub { font-family:var(--mono); font-size:10px; letter-spacing:.04em; color:var(--muted); }
+.ff-exp-badge { font-family:var(--sans); font-weight:600; font-size:14px; line-height:1.25; display:flex; align-items:center; gap:6px; }
+.ff-exp-badge .dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; background:var(--muted); }
+.ff-exp-ok    .ff-exp-badge { color:var(--green); } .ff-exp-ok    .dot { background:var(--green); }
+.ff-exp-warn  .ff-exp-badge { color:#b8860b; }      .ff-exp-warn  .dot { background:var(--yellow); }
+.ff-exp-crit  .ff-exp-badge,
+.ff-exp-expired .ff-exp-badge { color:var(--accent); } .ff-exp-crit .dot, .ff-exp-expired .dot { background:var(--accent); }
+.ff-exp-none  .ff-exp-badge { color:var(--ink-2); }  .ff-exp-none  .dot { background:var(--ink-2); }
+.ff-exp-unknown .ff-exp-badge { color:var(--muted); font-weight:500; }
+.ff-exp-note { font-family:var(--mono); font-size:10px; letter-spacing:.03em; color:var(--muted); }
+
+.ff-card-dates { display:grid; grid-template-columns:1fr 1fr; gap:14px; padding:12px 14px; border-top:1px solid var(--rule); background:var(--paper-2); }
+@media(max-width:560px){ .ff-card-dates { grid-template-columns:1fr; } }
+.ff-card-dates .ff-fg label { font-size:9.5px; }
+.ff-card-dates input { background:var(--paper); }
+
+.ff-empty { text-align:center; padding:42px 24px; border:1.5px dashed var(--rule); border-radius:var(--r); }
+.ff-empty span { font-size:42px; display:block; margin-bottom:12px; }
+.ff-empty h3 { font-family:var(--serif); font-weight:600; font-size:20px; margin:0 0 8px; color:var(--ink); }
+.ff-empty p { color:var(--muted); margin:0 auto; max-width:420px; font-size:14px; line-height:1.55; }
+
+.ff-disclaimer { font-size:12px; color:var(--muted); line-height:1.55; border-top:1px solid var(--rule); padding-top:14px; margin:0; }
+.ff-disclaimer strong { color:var(--ink-2); }
+.ff-verified { font-family:var(--mono); font-size:10.5px; letter-spacing:.04em; display:block; margin-top:6px; }
+
+.ff-print-header { display:none; }
+@media print {
+  #view-ff-tracker .tool-bar, #view-ff-tracker .pro-tip, #view-ff-tracker .related,
+  #view-ff-tracker .ff-sec, #view-ff-tracker .ff-add, #view-ff-tracker .ff-toolbar,
+  #view-ff-tracker .ff-del { display:none !important; }
+  #view-ff-tracker .ff-print-header { display:flex !important; justify-content:space-between; font-family:monospace; font-size:11px; color:#666; border-bottom:1px solid #ccc; padding-bottom:8px; margin-bottom:18px; }
+  body { background:#fff !important; background-image:none !important; }
+  #view-ff-tracker .ff-card, #view-ff-tracker .ff-cell, #view-ff-tracker .ff-card-dates { border-color:#ccc !important; break-inside:avoid; }
+  #view-ff-tracker .ff-card-top { background:#f5f5f5 !important; }
+  #view-ff-tracker .ff-bal-input input, #view-ff-tracker .ff-card-dates input { border:none !important; background:transparent !important; }
+}
+</style>
 <style>
 /* ── VACCINATION REQUIREMENTS ── */
 .vac-section{margin-top:28px}
@@ -13007,7 +13201,7 @@ const TOOLS = [
   {id:'intl-driving',  nm:'International Driving Guide',ico:'🚗', ph:'docs',      on:false, live:true,  ds:'Do you need an International Driving Permit? Licence-aware IDP, driving side & sign guide for 90+ countries.'},
   {id:'flight-delay',  nm:'Flight Delay Compensation',  ico:'⚖️', ph:'docs',      on:false, live:true,  ds:'Your rights for delays, cancellations & bumping — EU261, UK261, US DOT, Canada APPR. With complaint-letter generator.'},
   {id:'customs-decl',  nm:'Customs Declaration Helper', ico:'📦', ph:'docs',      on:false, live:true,  ds:"What you can & can't bring in. Duty-free allowances, prohibited items & a declare-or-not self-check."},
-  {id:'ff-tracker',    nm:'Frequent Flyer Tracker',     ico:'🏆', ph:'docs',      on:false, live:false, ds:'Log miles/points across programs. Track expiry & redemption value.'},
+  {id:'ff-tracker',    nm:'Frequent Flyer Tracker',     ico:'🏆', ph:'docs',      on:false, live:true,  ds:'Log miles/points across programs. Track expiry & redemption value.'},
   {id:'vaccination',   nm:'Vaccination Requirements',   ico:'💉', ph:'docs',      on:false, live:true,  ds:'Required & recommended vaccines for 120+ destinations. Malaria risk zones, Yellow Fever certificate guide & personal record.'},
   {id:'tsa-guide',     nm:'TSA & Security Guide',       ico:'🔒', ph:'docs',      on:false, live:true,  ds:'Search any item for carry-on / checked / prohibited status.'},
   {id:'packing',       nm:'Smart Packing List',         ico:'📝', ph:'packing',   on:false, live:true,  ds:'Generate a list by trip type, duration & climate. Check off as you go.'},
@@ -13749,6 +13943,7 @@ function injectTripCtx(id) {
   if(id==='road-planner') rpInit();
   if(id==='tsa-guide')  tsaInit();
   if(id==='vaccination') vacInit();
+  if(id==='ff-tracker') ffInit();
   if(id==='weather')    wxInit();
   if(id==='uv-index')   uvInit();
   if(id==='altitude')   asInit();
@@ -22523,6 +22718,407 @@ function svRender() {
 }
 
 function svPrint() { window.print(); }
+
+/* ════════════════════════════════════════════════════════════
+   FREQUENT FLYER TRACKER  (ff*)
+   Log miles & points across programs, estimate redemption value,
+   and warn on expiring balances. Account-level — one global store.
+   Reference data (cents-per-point valuations & inactivity-expiry
+   windows) last verified May 2026. Estimates only; verify with
+   each program.
+   ════════════════════════════════════════════════════════════ */
+
+/* key      program name                        type   unit       cpp = cents per point (USD), typical std redemption
+   exp = months of INACTIVITY before points expire (null = no expiry) */
+const FF_PROGRAMS = [
+  /* ── Airlines ── */
+  { key:'united',         name:'United MileagePlus',            type:'air',  unit:'miles',  cpp:1.3,  exp:null },
+  { key:'delta',          name:'Delta SkyMiles',                type:'air',  unit:'miles',  cpp:1.2,  exp:null },
+  { key:'aa',             name:'American AAdvantage',           type:'air',  unit:'miles',  cpp:1.5,  exp:24   },
+  { key:'southwest',      name:'Southwest Rapid Rewards',       type:'air',  unit:'points', cpp:1.35, exp:null },
+  { key:'jetblue',        name:'JetBlue TrueBlue',              type:'air',  unit:'points', cpp:1.3,  exp:null },
+  { key:'alaska',         name:'Alaska Mileage Plan',           type:'air',  unit:'miles',  cpp:1.45, exp:24   },
+  { key:'aeroplan',       name:'Air Canada Aeroplan',           type:'air',  unit:'points', cpp:1.5,  exp:18   },
+  { key:'ba',             name:'British Airways Club (Avios)',  type:'air',  unit:'Avios',  cpp:1.4,  exp:36   },
+  { key:'iberia',         name:'Iberia Plus (Avios)',           type:'air',  unit:'Avios',  cpp:1.4,  exp:36   },
+  { key:'flyingblue',     name:'Air France-KLM Flying Blue',    type:'air',  unit:'miles',  cpp:1.3,  exp:24   },
+  { key:'milesmore',      name:'Lufthansa Miles & More',        type:'air',  unit:'miles',  cpp:1.2,  exp:36   },
+  { key:'krisflyer',      name:'Singapore KrisFlyer',           type:'air',  unit:'miles',  cpp:1.3,  exp:36   },
+  { key:'asiamiles',      name:'Cathay Asia Miles',             type:'air',  unit:'miles',  cpp:1.3,  exp:36   },
+  { key:'ana',            name:'ANA Mileage Club',              type:'air',  unit:'miles',  cpp:1.4,  exp:36   },
+  { key:'jal',            name:'JAL Mileage Bank',              type:'air',  unit:'miles',  cpp:1.3,  exp:36   },
+  { key:'qantas',         name:'Qantas Frequent Flyer',         type:'air',  unit:'points', cpp:1.35, exp:18   },
+  { key:'velocity',       name:'Virgin Australia Velocity',     type:'air',  unit:'points', cpp:1.0,  exp:24   },
+  { key:'virginatlantic', name:'Virgin Atlantic Flying Club',   type:'air',  unit:'points', cpp:1.35, exp:36   },
+  { key:'skywards',       name:'Emirates Skywards',             type:'air',  unit:'miles',  cpp:1.2,  exp:36   },
+  { key:'etihad',         name:'Etihad Guest',                  type:'air',  unit:'miles',  cpp:1.1,  exp:18   },
+  { key:'lifemiles',      name:'Avianca LifeMiles',             type:'air',  unit:'miles',  cpp:1.4,  exp:12   },
+  /* ── Hotels ── */
+  { key:'marriott',       name:'Marriott Bonvoy',               type:'hotel',unit:'points', cpp:0.8,  exp:24   },
+  { key:'hilton',         name:'Hilton Honors',                 type:'hotel',unit:'points', cpp:0.5,  exp:12   },
+  { key:'hyatt',          name:'World of Hyatt',                type:'hotel',unit:'points', cpp:1.7,  exp:24   },
+  { key:'ihg',            name:'IHG One Rewards',               type:'hotel',unit:'points', cpp:0.5,  exp:12   },
+  { key:'wyndham',        name:'Wyndham Rewards',               type:'hotel',unit:'points', cpp:0.9,  exp:18   },
+  { key:'choice',         name:'Choice Privileges',             type:'hotel',unit:'points', cpp:0.6,  exp:18   },
+  { key:'accor',          name:'Accor Live Limitless (ALL)',    type:'hotel',unit:'points', cpp:2.2,  exp:12   },
+  /* ── Bank / Transferable points ── */
+  { key:'amex',           name:'Amex Membership Rewards',       type:'bank', unit:'points', cpp:2.0,  exp:null },
+  { key:'chase',          name:'Chase Ultimate Rewards',        type:'bank', unit:'points', cpp:2.05, exp:null },
+  { key:'citi',           name:'Citi ThankYou Points',          type:'bank', unit:'points', cpp:1.8,  exp:null },
+  { key:'capitalone',     name:'Capital One Miles',             type:'bank', unit:'miles',  cpp:1.85, exp:null },
+  { key:'bilt',           name:'Bilt Rewards',                  type:'bank', unit:'points', cpp:2.05, exp:null },
+  { key:'wellsfargo',     name:'Wells Fargo Rewards',           type:'bank', unit:'points', cpp:1.5,  exp:null },
+  /* ── Rail ── */
+  { key:'amtrak',         name:'Amtrak Guest Rewards',          type:'rail', unit:'points', cpp:2.5,  exp:24   },
+];
+const FF_TYPE_LABEL = { air:'Airline', hotel:'Hotel', bank:'Bank Points', rail:'Rail' };
+const FF_GROUPS = [
+  { type:'air',   label:'✈️ Airlines' },
+  { type:'hotel', label:'🏨 Hotels' },
+  { type:'bank',  label:'💳 Bank / Transferable Points' },
+  { type:'rail',  label:'🚆 Rail' },
+];
+const FF_KEY = 'tt_ff_tracker';
+let ffData = null;
+
+function ffProg(key) { return FF_PROGRAMS.find(p => p.key === key) || null; }
+
+/* Effective program info for an entry (bundled program OR custom values) */
+function ffInfo(e) {
+  const p = ffProg(e.progKey);
+  if (p) return { name:p.name, type:p.type, unit:p.unit, cpp:p.cpp, exp:p.exp };
+  return {
+    name: e.name || 'Custom program',
+    type: e.type || 'air',
+    unit: e.unit || 'points',
+    cpp:  (e.cpp === '' || e.cpp == null) ? null : (parseFloat(e.cpp) || 0),
+    exp:  null,
+  };
+}
+
+function ffEsc(s) {
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function ffNum(n) { return (parseFloat(n)||0).toLocaleString('en-US'); }
+function ffMoney(n) { return '$' + Math.round(parseFloat(n)||0).toLocaleString('en-US'); }
+function ffCpp(c) { return (c == null) ? '—' : (Math.round(c*100)/100) + '¢'; }
+function ffTodayISO() { const d=new Date(); return d.toISOString().slice(0,10); }
+
+function ffLoad() {
+  let d = null;
+  try { const raw = localStorage.getItem(FF_KEY); if (raw) d = JSON.parse(raw); } catch(_) {}
+  if (!d || typeof d !== 'object') d = {};
+  if (!Array.isArray(d.entries)) d.entries = [];
+  d.entries = d.entries.map(e => ({
+    id:          e.id || ('ff_' + Date.now() + '_' + Math.random().toString(36).slice(2,6)),
+    progKey:     e.progKey || '',
+    name:        e.name || '',
+    type:        e.type || '',
+    unit:        e.unit || '',
+    cpp:         (e.cpp === '' || e.cpp == null) ? '' : e.cpp,
+    balance:     (e.balance === '' || e.balance == null) ? '' : e.balance,
+    lastActivity:e.lastActivity || '',
+    expiry:      e.expiry || '',   // manual override (ISO date)
+  }));
+  if (!d.sortBy) d.sortBy = 'expiry';
+  ffData = d;
+}
+function ffSave() {
+  if (!ffData) return;
+  try { localStorage.setItem(FF_KEY, JSON.stringify(ffData)); } catch(_) {}
+}
+
+/* Estimated USD value of a balance */
+function ffValue(e) {
+  const info = ffInfo(e);
+  const bal = parseFloat(e.balance) || 0;
+  if (!info.cpp) return 0;
+  return bal * info.cpp / 100;
+}
+
+/* Resolve expiry → { status, date, days, label, note }
+   status: 'override-or-policy date' bucketed into expired/crit/warn/ok/none/unknown */
+function ffExpiry(e) {
+  const info = ffInfo(e);
+  const today = new Date(); today.setHours(0,0,0,0);
+  let date = null, source = null;
+  if (e.expiry) { date = new Date(e.expiry + 'T00:00:00'); source = 'set'; }
+  else if (info.exp != null && e.lastActivity) {
+    date = new Date(e.lastActivity + 'T00:00:00');
+    date.setMonth(date.getMonth() + info.exp);
+    source = 'policy';
+  }
+  if (!date || isNaN(date)) {
+    if (info.exp === null && !e.expiry && info.cpp !== null && ffProg(e.progKey)) {
+      return { status:'none', label:'No expiry', note:'Points don’t expire' };
+    }
+    if (info.exp != null && !e.lastActivity) {
+      return { status:'unknown', label:'Add last activity', note:'Expires '+info.exp+' mo after activity' };
+    }
+    return { status:'unknown', label:'No expiry set', note:'' };
+  }
+  const days = Math.round((date - today) / 864e5);
+  const ds = date.toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' });
+  const srcNote = source === 'policy' ? ('Est. '+info.exp+' mo inactivity rule') : 'Manually set';
+  if (days < 0)        return { status:'expired', date, days, label:'Expired '+ds, note:srcNote };
+  if (days <= 90)      return { status:'crit',    date, days, label:ffDays(days)+' left', note:'Expires '+ds };
+  if (days <= 180)     return { status:'warn',    date, days, label:ffDays(days)+' left', note:'Expires '+ds };
+  return { status:'ok', date, days, label:'Expires '+ds, note:srcNote };
+}
+function ffDays(d) {
+  if (d <= 0) return 'Today';
+  if (d < 60) return d + (d===1?' day':' days');
+  return Math.round(d/30) + ' mo';
+}
+
+function ffInit() {
+  // Build program dropdown once (grouped)
+  const sel = document.getElementById('ff-new-prog');
+  if (sel && !sel.options.length) {
+    let html = '<option value="">— Select a program —</option>';
+    FF_GROUPS.forEach(g => {
+      const opts = FF_PROGRAMS.filter(p => p.type === g.type)
+        .sort((a,b) => a.name.localeCompare(b.name))
+        .map(p => `<option value="${p.key}">${ffEsc(p.name)}</option>`).join('');
+      html += `<optgroup label="${g.label}">${opts}</optgroup>`;
+    });
+    html += '<optgroup label="Other"><option value="__custom__">➕ Custom program…</option></optgroup>';
+    sel.innerHTML = html;
+  }
+  ffLoad();
+  const sortSel = document.getElementById('ff-sort');
+  if (sortSel) sortSel.value = ffData.sortBy;
+  ffOnProgChange();
+  ffRender();
+}
+
+function ffOnProgChange() {
+  const key = document.getElementById('ff-new-prog').value;
+  const custom = document.getElementById('ff-custom');
+  const hint = document.getElementById('ff-add-hint');
+  custom.style.display = key === '__custom__' ? '' : 'none';
+  const p = ffProg(key);
+  if (p) {
+    const expTxt = p.exp == null ? 'no expiry' : ('expires ~'+p.exp+' mo after activity');
+    hint.innerHTML = `Valued at <b>${ffCpp(p.cpp)}</b> / ${ffEsc(p.unit)} · ${expTxt}`;
+  } else if (key === '__custom__') {
+    hint.textContent = 'Enter the program details below.';
+  } else {
+    hint.textContent = '';
+  }
+}
+
+function ffSetSort(v) { ffData.sortBy = v; ffSave(); ffRender(); }
+
+function ffAdd() {
+  if (!ffData) return;
+  const key = document.getElementById('ff-new-prog').value;
+  const balEl = document.getElementById('ff-new-balance');
+  const actEl = document.getElementById('ff-new-activity');
+  const hint = document.getElementById('ff-add-hint');
+  if (!key) { document.getElementById('ff-new-prog').focus(); return; }
+
+  const entry = {
+    id: 'ff_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
+    progKey: key === '__custom__' ? '' : key,
+    name:'', type:'', unit:'', cpp:'',
+    balance: balEl.value === '' ? '' : (parseFloat(balEl.value) || 0),
+    lastActivity: actEl.value || '',
+    expiry: '',
+  };
+
+  if (key === '__custom__') {
+    const name = document.getElementById('ff-new-name').value.trim();
+    if (!name) { document.getElementById('ff-new-name').focus(); return; }
+    entry.name = name;
+    entry.type = document.getElementById('ff-new-type').value || 'air';
+    entry.unit = document.getElementById('ff-new-unit').value.trim() || 'points';
+    const cpp = document.getElementById('ff-new-cpp').value;
+    entry.cpp = cpp === '' ? '' : (parseFloat(cpp) || 0);
+  }
+
+  ffData.entries.push(entry);
+  ffSave();
+
+  // reset add form
+  document.getElementById('ff-new-prog').value = '';
+  balEl.value = ''; actEl.value = '';
+  document.getElementById('ff-new-name').value = '';
+  document.getElementById('ff-new-unit').value = '';
+  document.getElementById('ff-new-cpp').value = '';
+  ffOnProgChange();
+  ffRender();
+  balEl.blur();
+}
+
+function ffEdit(id, field, value) {
+  const e = ffData.entries.find(x => x.id === id);
+  if (!e) return;
+  if (field === 'balance') e.balance = value === '' ? '' : (parseFloat(value) || 0);
+  else e[field] = value; // lastActivity / expiry (date strings)
+  ffSave();
+  ffRender();
+}
+function ffDelete(id) {
+  ffData.entries = ffData.entries.filter(x => x.id !== id);
+  ffSave();
+  ffRender();
+}
+
+function ffSortedEntries() {
+  const arr = ffData.entries.slice();
+  const by = ffData.sortBy;
+  const expRank = { expired:0, crit:1, warn:2, unknown:3, ok:4, none:5 };
+  arr.sort((a,b) => {
+    if (by === 'value')   return ffValue(b) - ffValue(a);
+    if (by === 'balance') return (parseFloat(b.balance)||0) - (parseFloat(a.balance)||0);
+    if (by === 'name')    return ffInfo(a).name.localeCompare(ffInfo(b).name);
+    // expiry (default): soonest meaningful expiry first
+    const ea = ffExpiry(a), eb = ffExpiry(b);
+    const ra = expRank[ea.status], rb = expRank[eb.status];
+    if (ra !== rb) return ra - rb;
+    if (ea.days != null && eb.days != null) return ea.days - eb.days;
+    return 0;
+  });
+  return arr;
+}
+
+function ffRender() {
+  if (!ffData) return;
+  const entries = ffData.entries;
+
+  // ── Stats ──
+  const statsEl = document.getElementById('ff-stats');
+  let totalVal = 0, totalPts = 0, expiringSoon = 0;
+  entries.forEach(e => {
+    totalVal += ffValue(e);
+    totalPts += parseFloat(e.balance) || 0;
+    const ex = ffExpiry(e);
+    if (ex.status === 'crit' || ex.status === 'warn' || ex.status === 'expired') expiringSoon++;
+  });
+  if (entries.length) {
+    statsEl.style.display = '';
+    document.getElementById('ff-stat-value').textContent    = ffMoney(totalVal);
+    document.getElementById('ff-stat-programs').textContent = entries.length;
+    document.getElementById('ff-stat-points').textContent   = ffNum(totalPts);
+    document.getElementById('ff-stat-expiring').textContent = expiringSoon;
+  } else {
+    statsEl.style.display = 'none';
+  }
+
+  // ── Alerts ──
+  const alertsEl = document.getElementById('ff-alerts');
+  const atRisk = entries
+    .map(e => ({ e, ex: ffExpiry(e) }))
+    .filter(o => o.ex.status === 'expired' || o.ex.status === 'crit' || o.ex.status === 'warn')
+    .sort((a,b) => (a.ex.days==null?9e9:a.ex.days) - (b.ex.days==null?9e9:b.ex.days));
+  if (atRisk.length) {
+    let rows = atRisk.map(o => {
+      const info = ffInfo(o.e);
+      const cls = o.ex.status === 'warn' ? 'warn' : 'crit';
+      const whenTxt = o.ex.status === 'expired' ? 'Expired' : o.ex.label;
+      return `<div class="ff-alert-row"><b>${ffEsc(info.name)}</b> — ${ffNum(o.e.balance)} ${ffEsc(info.unit)} <span class="ff-alert-when ${cls}">${whenTxt}</span></div>`;
+    }).join('');
+    alertsEl.innerHTML = `<div class="ff-alerts-hdr">⏰ Action needed — ${atRisk.length} balance${atRisk.length>1?'s':''} expiring or expired</div>${rows}<div class="ff-alert-row" style="color:var(--muted);font-size:12.5px;margin-top:6px">Any qualifying earn or redemption usually resets the expiry clock.</div>`;
+    alertsEl.style.display = '';
+  } else {
+    alertsEl.style.display = 'none';
+  }
+
+  // ── List ──
+  const listEl = document.getElementById('ff-list');
+  const sortBar = document.getElementById('ff-sortbar');
+  const disc = document.getElementById('ff-disclaimer');
+  if (!entries.length) {
+    sortBar.style.display = 'none';
+    disc.style.display = 'none';
+    listEl.innerHTML = `<div class="ff-empty"><span>🏆</span><h3>No balances tracked yet</h3><p>Pick a program above, enter your current balance, and add the date of your last activity so the tracker can warn you before any points expire. Estimated values update automatically.</p></div>`;
+    return;
+  }
+  sortBar.style.display = '';
+  disc.style.display = '';
+
+  let html = '';
+  ffSortedEntries().forEach(e => {
+    const info = ffInfo(e);
+    const ex = ffExpiry(e);
+    const val = ffValue(e);
+    const balVal = (e.balance === '' || e.balance == null) ? '' : e.balance;
+    const valDisplay = info.cpp ? ffMoney(val) : '—';
+    const valSub = info.cpp ? `@ ${ffCpp(info.cpp)} / ${ffEsc(info.unit)}` : 'Set a value';
+    html += `<div class="ff-card ff-exp-${ex.status}">
+      <div class="ff-card-top">
+        <span class="ff-type-chip ff-t-${info.type}">${FF_TYPE_LABEL[info.type]||'Program'}</span>
+        <span class="ff-card-name">${ffEsc(info.name)}</span>
+        <button class="ff-del" title="Remove" aria-label="Remove ${ffEsc(info.name)}" onclick="ffDelete('${e.id}')">✕</button>
+      </div>
+      <div class="ff-card-grid">
+        <div class="ff-cell">
+          <span class="ff-cell-lbl">Balance</span>
+          <div class="ff-bal-input">
+            <input type="number" min="0" step="1" inputmode="numeric" value="${balVal}" placeholder="0" aria-label="Balance for ${ffEsc(info.name)}" onchange="ffEdit('${e.id}','balance',this.value)">
+            <span class="ff-bal-unit">${ffEsc(info.unit)}</span>
+          </div>
+        </div>
+        <div class="ff-cell">
+          <span class="ff-cell-lbl">Est. Value</span>
+          <span class="ff-val-num">${valDisplay}</span>
+          <span class="ff-val-sub">${valSub}</span>
+        </div>
+        <div class="ff-cell">
+          <span class="ff-cell-lbl">Expiry</span>
+          <span class="ff-exp-badge"><span class="dot"></span>${ffEsc(ex.label)}</span>
+          ${ex.note ? `<span class="ff-exp-note">${ffEsc(ex.note)}</span>` : ''}
+        </div>
+      </div>
+      <div class="ff-card-dates">
+        <div class="ff-fg">
+          <label>Last activity</label>
+          <input type="date" value="${e.lastActivity||''}" max="${ffTodayISO()}" onchange="ffEdit('${e.id}','lastActivity',this.value)">
+        </div>
+        <div class="ff-fg">
+          <label>Expiry override <span class="ff-opt">(optional)</span></label>
+          <input type="date" value="${e.expiry||''}" onchange="ffEdit('${e.id}','expiry',this.value)">
+        </div>
+      </div>
+    </div>`;
+  });
+  listEl.innerHTML = html;
+}
+
+function ffExportCSV() {
+  if (!ffData || !ffData.entries.length) return;
+  let csv = 'Frequent Flyer & Loyalty Balances\n';
+  csv += 'Generated,' + new Date().toISOString() + '\n\n';
+  csv += 'Program,Type,Balance,Unit,Value/pt (cents),Est. Value (USD),Last Activity,Expires,Status\n';
+  let totalVal = 0;
+  ffSortedEntries().forEach(e => {
+    const info = ffInfo(e);
+    const ex = ffExpiry(e);
+    const val = ffValue(e); totalVal += val;
+    const expDate = ex.date ? ex.date.toISOString().slice(0,10) : (ex.status==='none' ? 'No expiry' : '');
+    const fields = [
+      info.name, FF_TYPE_LABEL[info.type]||info.type,
+      (parseFloat(e.balance)||0), info.unit,
+      (info.cpp==null?'':info.cpp), (info.cpp==null?'':Math.round(val)),
+      e.lastActivity||'', expDate, ex.status,
+    ].map(f => `"${String(f).replace(/"/g,'""')}"`);
+    csv += fields.join(',') + '\n';
+  });
+  csv += `\n"GRAND TOTAL",,,,,"${Math.round(totalVal)}"\n`;
+  csv += '\nValuations & expiry windows are estimates last verified May 2026. Verify with each program.\n';
+
+  const blob = new Blob([csv], { type:'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `frequent-flyer-balances-${ffTodayISO()}.csv`; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function ffPrint() {
+  document.getElementById('ff-ph-date').textContent = 'Printed ' + new Date().toLocaleDateString();
+  window.print();
+}
 
 /* ════════════════════════════════════════════════════════════
    THEME PARK BUDGET CALCULATOR
