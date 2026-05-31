@@ -12031,16 +12031,222 @@ input:checked + .pb-toggle-box::after { transform:translateX(16px);background:#f
   #view-souvenir .sv-idea, #view-souvenir .sv-cost { border:none !important; background:transparent !important; }
 }
 </style>
-<div id="view-placeholder-health-check" class="view">
-  <nav class="tool-topbar">
+<style>
+/* ── POST-TRIP HEALTH CHECKLIST ── */
+#view-health-check .pth-section{margin-top:26px}
+#view-health-check .pth-sec-hdr{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+#view-health-check .pth-sec-intro{font-size:13px;color:var(--ink-2);line-height:1.55;margin:-4px 0 14px}
+
+/* trip recap inputs */
+.pth-recap{border:1.5px solid var(--ink);border-radius:var(--r);background:var(--paper-2);padding:16px 18px}
+.pth-recap-row{display:grid;grid-template-columns:1.6fr 1fr;gap:14px}
+@media(max-width:560px){.pth-recap-row{grid-template-columns:1fr}}
+.pth-recap label{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.pth-recap input{width:100%;background:var(--paper);border:1.5px solid var(--ink);border-radius:var(--r);color:var(--ink);font-family:var(--sans);font-size:15px;padding:10px 12px}
+.pth-recap input:focus{outline:none;border-color:var(--accent)}
+.pth-since{font-size:12.5px;color:var(--muted);margin-top:10px;line-height:1.5}
+.pth-since b{color:var(--ink)}
+
+/* checklist items */
+.pth-checks{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media(max-width:680px){.pth-checks{grid-template-columns:1fr}}
+.pth-item{display:flex;gap:11px;align-items:flex-start;border:1.5px solid var(--rule);border-radius:var(--r);background:var(--paper);padding:11px 13px;cursor:pointer;transition:border-color .12s,background .12s}
+.pth-item:hover{border-color:var(--ink)}
+.pth-item.checked{background:var(--paper-2);border-color:var(--ink)}
+.pth-item.urgent.checked{border-color:var(--accent);background:#FFF1ED}
+.pth-item input{position:absolute;opacity:0;width:0;height:0}
+.pth-box{flex-shrink:0;width:19px;height:19px;border:1.5px solid var(--muted);border-radius:4px;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--paper);transition:background .12s,border-color .12s}
+.pth-item.checked .pth-box{background:var(--ink);border-color:var(--ink)}
+.pth-item.urgent.checked .pth-box{background:var(--accent);border-color:var(--accent)}
+.pth-item.checked .pth-box::after{content:'✓'}
+.pth-ico{flex-shrink:0;font-size:17px;line-height:1.2}
+.pth-body{font-size:13px;line-height:1.4;color:var(--ink)}
+.pth-body small{display:block;color:var(--muted);font-size:11.5px;line-height:1.45;margin-top:3px}
+.pth-urg-tag{font-family:var(--mono);font-size:8px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-left:6px}
+
+/* verdict */
+#pth-verdict{margin-top:18px}
+.pth-verdict{border:1.5px solid var(--ink);border-left-width:5px;border-radius:var(--r);background:var(--paper);padding:16px 18px}
+.pth-verdict.green{border-left-color:var(--green)}
+.pth-verdict.amber{border-left-color:var(--orange)}
+.pth-verdict.red{border-left-color:var(--accent)}
+.pth-verdict-top{display:flex;align-items:center;gap:12px}
+.pth-verdict-ico{font-size:24px;line-height:1}
+.pth-verdict-title{font-family:var(--serif);font-size:20px;font-weight:700;letter-spacing:-.02em}
+.pth-verdict.green .pth-verdict-title{color:var(--green)}
+.pth-verdict.amber .pth-verdict-title{color:var(--orange)}
+.pth-verdict.red .pth-verdict-title{color:var(--accent)}
+.pth-verdict-body{font-size:13.5px;line-height:1.6;color:var(--ink-2);margin-top:11px}
+.pth-verdict-body b{color:var(--ink)}
+.pth-flags{list-style:none;margin:11px 0 0;display:flex;flex-direction:column;gap:7px}
+.pth-flags li{display:flex;gap:9px;font-size:13px;line-height:1.5;color:var(--ink-2)}
+.pth-flags li::before{content:'⚑';color:var(--accent);flex-shrink:0}
+.pth-flags li b{color:var(--ink)}
+
+/* doctor summary */
+.pth-summary{border:1.5px solid var(--ink);border-radius:var(--r);background:var(--paper-2);padding:16px 18px}
+.pth-summary-hd{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.pth-summary-hd h4{font-family:var(--serif);font-size:17px;font-weight:600;letter-spacing:-.01em}
+.pth-copy-ok{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--green);opacity:0;transition:opacity .2s}
+.pth-copy-ok.show{opacity:1}
+.pth-sum-rows{display:grid;grid-template-columns:auto 1fr;gap:7px 14px;font-size:13px;line-height:1.5}
+.pth-sum-rows dt{font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding-top:3px}
+.pth-sum-rows dd{margin:0;color:var(--ink)}
+.pth-sum-tell{margin-top:13px;padding-top:12px;border-top:1px solid var(--rule);font-size:12.5px;line-height:1.55;color:var(--ink-2)}
+.pth-sum-tell b{color:var(--ink)}
+
+/* illness cards */
+.pth-ills{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+@media(max-width:680px){.pth-ills{grid-template-columns:1fr}}
+.pth-ill{border:1.5px solid var(--rule);border-radius:var(--r);padding:14px 15px;border-top:4px solid var(--rule)}
+.pth-ill.emergency{border-top-color:var(--accent)}
+.pth-ill.serious{border-top-color:var(--orange)}
+.pth-ill.common{border-top-color:var(--teal)}
+.pth-ill-top{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.pth-ill-nm{font-family:var(--serif);font-size:16px;font-weight:600;letter-spacing:-.01em;line-height:1.2}
+.pth-ill-sev{font-family:var(--mono);font-size:8.5px;letter-spacing:.06em;text-transform:uppercase;padding:3px 7px;border-radius:2px;flex-shrink:0}
+.pth-ill.emergency .pth-ill-sev{background:#FFE5DF;color:var(--accent)}
+.pth-ill.serious .pth-ill-sev{background:#FFE6CC;color:var(--orange)}
+.pth-ill.common .pth-ill-sev{background:#E1F1F3;color:var(--teal)}
+.pth-ill-tag{font-size:12px;color:var(--muted);margin:3px 0 9px;line-height:1.3}
+.pth-ill-inc{font-family:var(--mono);font-size:10px;letter-spacing:.04em;color:var(--ink-2);margin-bottom:9px}
+.pth-ill-inc b{color:var(--ink)}
+.pth-ill ul{list-style:none;display:flex;flex-direction:column;gap:5px;margin-bottom:11px}
+.pth-ill li{display:flex;gap:8px;font-size:12.5px;line-height:1.45;color:var(--ink-2)}
+.pth-ill li::before{content:'•';color:var(--muted);flex-shrink:0}
+.pth-ill-act{font-size:12.5px;line-height:1.5;color:var(--ink-2);padding-top:10px;border-top:1px solid var(--rule)}
+.pth-ill-act b{color:var(--ink)}
+
+/* monitoring */
+.pth-monitor{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media(max-width:600px){.pth-monitor{grid-template-columns:1fr}}
+.pth-mon-card{border:1.5px solid var(--rule);border-radius:var(--r);padding:11px 13px;border-left:4px solid var(--blue)}
+.pth-mon-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.pth-mon-val{font-weight:600;font-size:15px;line-height:1.25;color:var(--ink);margin-top:3px}
+.pth-mon-sub{font-size:11.5px;color:var(--muted);line-height:1.4;margin-top:3px}
+
+.pth-actions{margin-top:16px;display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+.pth-disclaimer{margin-top:24px;padding:13px 16px;border-radius:var(--r);background:var(--paper-2);border:1.5px solid var(--rule);font-size:12px;line-height:1.6;color:var(--muted)}
+.pth-disclaimer b{color:var(--ink-2)}
+
+@media print{
+  #view-health-check .tool-bar,#view-health-check .ctx-banner,#view-health-check .pro-tip,
+  #view-health-check .related,#view-health-check .pth-actions{display:none!important}
+  #view-health-check .pth-item:not(.checked){display:none!important}
+  #view-health-check .pth-ill,#view-health-check .pth-mon-card,#view-health-check .pth-summary{break-inside:avoid}
+}
+</style>
+<div id="view-health-check" class="view">
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="window.print()">🖨 Print</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">🏥</span>
-    <h2>Post-Trip Health Checklist</h2>
-    <p style="margin-bottom:24px">Symptom awareness for common post-travel illnesses. When to see a doctor.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-health-check"></div>
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>Post-Trip Health Checklist</h1>
+    <p class="tool-sub">Some travel illnesses show up days — or even months — after you're home. Tick any symptoms and exposures from your trip, and this tells you whether to see a doctor, how long to keep watching, and builds a summary you can hand your doctor so they test for the right things.</p>
+  </div>
+
+  <div class="tool-body">
+
+    <!-- ── TRIP RECAP ── -->
+    <div class="pth-recap">
+      <div class="pth-recap-row">
+        <div>
+          <label for="pth-dest">Where did you travel?</label>
+          <input type="text" id="pth-dest" placeholder="e.g. Kenya, Thailand" oninput="pthOnInput()">
+        </div>
+        <div>
+          <label for="pth-ret">When did you return?</label>
+          <input type="date" id="pth-ret" oninput="pthOnInput()">
+        </div>
+      </div>
+      <div class="pth-since" id="pth-since"></div>
+    </div>
+
+    <!-- ── SYMPTOMS ── -->
+    <div class="pth-section">
+      <div class="pth-sec-hdr">🩺 Any symptoms since you got back?</div>
+      <p class="pth-sec-intro">Tick everything you've noticed, even if it seems minor. Items marked <b style="color:var(--accent)">urgent</b> mean you should seek care quickly.</p>
+      <div class="pth-checks" id="pth-symptoms"></div>
+    </div>
+
+    <!-- ── EXPOSURES ── -->
+    <div class="pth-section">
+      <div class="pth-sec-hdr">🌍 What were you exposed to?</div>
+      <p class="pth-sec-intro">These don't mean you're ill — but they tell your doctor which infections to consider and test for.</p>
+      <div class="pth-checks" id="pth-exposures"></div>
+    </div>
+
+    <!-- ── VERDICT ── -->
+    <div id="pth-verdict"></div>
+
+    <!-- ── DOCTOR SUMMARY ── -->
+    <div class="pth-section">
+      <div class="pth-sec-hdr">📋 What to tell your doctor</div>
+      <p class="pth-sec-intro">Bring this with you. Telling a clinician you've traveled recently changes which illnesses they look for — many travel infections are missed otherwise.</p>
+      <div class="pth-summary">
+        <div class="pth-summary-hd">
+          <h4>Your travel-health summary</h4>
+          <span class="pth-copy-ok" id="pth-copy-ok">✓ Copied</span>
+        </div>
+        <dl class="pth-sum-rows" id="pth-sum-rows"></dl>
+        <div class="pth-sum-tell"><b>Say this:</b> "I traveled recently and have these symptoms — please consider travel-related illnesses." Mention every country, rural stops, and anything you're unsure about.</div>
+      </div>
+      <div class="pth-actions">
+        <button class="btn btn-s" onclick="pthReset()">↺ Reset</button>
+        <button class="btn btn-p" onclick="pthCopySummary()">📋 Copy summary</button>
+      </div>
+    </div>
+
+    <!-- ── COMMON ILLNESSES ── -->
+    <div class="pth-section">
+      <div class="pth-sec-hdr">📖 Common post-travel illnesses</div>
+      <p class="pth-sec-intro">A quick reference — not a diagnosis. The headline rule: <b>a fever after travel to the tropics is a medical emergency until malaria is ruled out.</b></p>
+      <div class="pth-ills" id="pth-ills"></div>
+    </div>
+
+    <!-- ── MONITORING ── -->
+    <div class="pth-section">
+      <div class="pth-sec-hdr">🗓 How long to keep watching</div>
+      <p class="pth-sec-intro">Feeling fine now is reassuring but not the all-clear — keep an eye out, especially for fever.</p>
+      <div class="pth-monitor">
+        <div class="pth-mon-card">
+          <div class="pth-mon-lbl">⏱ Most illnesses</div>
+          <div class="pth-mon-val">First 1–2 weeks</div>
+          <div class="pth-mon-sub">Diarrhea, dengue and most infections appear soon after you return.</div>
+        </div>
+        <div class="pth-mon-card">
+          <div class="pth-mon-lbl">🌡️ Watch for fever</div>
+          <div class="pth-mon-val">Up to 3 months</div>
+          <div class="pth-mon-sub">Any unexplained fever in this window — see a doctor and mention your travel.</div>
+        </div>
+        <div class="pth-mon-card">
+          <div class="pth-mon-lbl">🦟 Malaria can hide</div>
+          <div class="pth-mon-val">Up to 1 year</div>
+          <div class="pth-mon-sub">Rarely, malaria surfaces months later. Keep your destinations in mind all year.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pth-disclaimer">
+      <b>⚕ General information, not medical advice.</b> This checklist can't diagnose anything and doesn't replace a clinician. If you feel seriously unwell — high or persistent fever, trouble breathing, confusion, severe pain, or after an animal bite abroad — seek medical care now and tell them where you traveled. When in doubt, get checked.
+    </div>
+
+  </div><!-- /tool-body -->
+
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    The single most important thing you can do is <em>volunteer your travel history</em> — many doctors won't think to ask. A fever that looks like ordinary flu can be malaria or typhoid, and the right test only gets ordered if your doctor knows you were abroad. Keep your list of countries, dates, and any rural or freshwater stops handy for up to a year.
+  </div>
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('vaccination')">💉 Vaccination Requirements</button>
+      <button class="rel-btn" onclick="openTool('emergency')">🚨 Emergency Numbers</button>
+      <button class="rel-btn" onclick="openTool('trip-journal')">📔 Trip Journal</button>
+      <button class="rel-btn" onclick="openTool('altitude')">⛰ Altitude Sickness Guide</button>
     </div>
   </div>
 </div>
@@ -12276,7 +12482,7 @@ const TOOLS = [
   {id:'customs-duty',  nm:'Customs Duty Calculator',    ico:'🛃', ph:'home',       on:false,live:true,  ds:'Estimate US customs duties on goods purchased abroad.'},
   {id:'trip-recap',    nm:'Trip Cost Recap',            ico:'📊', ph:'home',       on:false,live:true,  ds:'Actual vs. budgeted expenses. Visual summary by category.'},
   {id:'souvenir',      nm:'Souvenir & Gift Tracker',    ico:'🎁', ph:'home',       on:false,live:true,  ds:'Gift list with person, idea, cost & purchased checkbox.'},
-  {id:'health-check',  nm:'Post-Trip Health Checklist', ico:'🏥', ph:'home',       on:false,live:false, ds:'Symptom awareness for common post-travel illnesses.'},
+  {id:'health-check',  nm:'Post-Trip Health Checklist', ico:'🏥', ph:'home',       on:false,live:true,  ds:'Symptom awareness for common post-travel illnesses.'},
   {id:'trip-journal',  nm:'Trip Journal',               ico:'📔', ph:'home',       on:false,live:true,  ds:'Day-by-day journal. Star ratings, mood emoji, highlights.'},
   {id:'review-draft',  nm:'Review Drafter',             ico:'✍️', ph:'home',       on:false,live:false, ds:'Guided form → publish-ready hotel & airline review draft.'},
 ];
@@ -12972,6 +13178,7 @@ function injectTripCtx(id) {
   if(id==='customs-duty') cdcInit();
   if(id==='customs-decl') cdhInit();
   if(id==='flight-delay') fdcInit();
+  if(id==='health-check') pthInit();
 }
 
 /* ── HUB RENDER ── */
@@ -35204,6 +35411,257 @@ function cdhRenderVerdict(){
         <ul>${items}</ul>
         Declaring voluntarily means duty or inspection at worst. Failing to declare risks seizure, fines, and — for drugs, weapons or large undeclared cash — criminal charges.</div>
     </div>`;
+}
+
+/* ════════════════════════════════════════════════════════════
+   POST-TRIP HEALTH CHECKLIST
+   Offline symptom & exposure checker for returning travelers.
+   Flags urgency, builds a doctor-ready summary (prefilled from the
+   active trip), and lists common post-travel illnesses. Guidance only.
+   ════════════════════════════════════════════════════════════ */
+const PTH_KEY = 'tt_post_trip_health_v1';
+
+// Symptoms. `urgent` items drive a red "seek care promptly" verdict.
+// `s` = short label used in the doctor summary. `reason` = why it's urgent.
+const PTH_SYMPTOMS = [
+  { id:'fever',    ico:'🌡️', t:'Fever, chills, or night sweats', d:'The #1 red flag after tropical travel — could be malaria, which can be fatal.', s:'fever/chills', urgent:true,  reason:'<b>Fever after travel</b> to a malaria area is an emergency — get a blood test the same day.' },
+  { id:'diarrhea', ico:'💩', t:'Diarrhea — especially if >2 weeks or bloody', d:'Persistent or bloody diarrhea points to a parasite or bacterial infection.', s:'diarrhea', urgent:false },
+  { id:'vomit',    ico:'🤢', t:'Persistent nausea or vomiting', d:"Especially if you can't keep fluids down.", s:'nausea/vomiting', urgent:false },
+  { id:'jaundice', ico:'🟡', t:'Yellowing skin or eyes (jaundice)', d:'Can signal hepatitis or another liver problem.', s:'jaundice', urgent:true, reason:'<b>Jaundice</b> (yellow skin/eyes) needs prompt evaluation — it can mean hepatitis.' },
+  { id:'breath',   ico:'😮‍💨', t:'Cough or difficulty breathing', d:'Could be a respiratory infection — or, with leg swelling, a blood clot.', s:'cough/breathlessness', urgent:false },
+  { id:'skin',     ico:'🩹', t:"Rash or a sore that won't heal", d:'Several tropical infections first show on the skin.', s:'rash/skin lesion', urgent:false },
+  { id:'animal',   ico:'🐕', t:'Animal bite, scratch, or lick on broken skin abroad', d:'Rabies is almost always fatal once symptoms begin — but preventable if treated fast.', s:'animal bite/scratch abroad', urgent:true, reason:'<b>Any animal bite or scratch abroad</b> needs urgent rabies post-exposure shots — do not wait.' },
+  { id:'clot',     ico:'🦵', t:'Leg pain/swelling or chest pain after a long flight', d:'Possible deep-vein clot (DVT) or pulmonary embolism.', s:'leg swelling / chest pain', urgent:true, reason:'<b>Leg swelling or chest pain after a long flight</b> can be a blood clot — seek urgent care.' },
+  { id:'neuro',    ico:'🧠', t:'Confusion, severe headache, or stiff neck', d:'Could indicate a serious infection affecting the brain.', s:'confusion/severe headache', urgent:true, reason:'<b>Confusion, severe headache or a stiff neck</b> is a medical emergency — go now.' },
+  { id:'fatigue',  ico:'😴', t:'Lingering fatigue or just not feeling right', d:"Don't dismiss vague but persistent symptoms after travel.", s:'persistent fatigue', urgent:false },
+  { id:'genito',   ico:'🚻', t:'Urinary or genital symptoms', d:'Possible STI or urinary infection — confidential testing is available.', s:'urinary/genital symptoms', urgent:false },
+];
+
+const PTH_EXPOSURES = [
+  { id:'mosquito',      ico:'🦟', t:'Lots of mosquito or insect bites', s:'many insect bites' },
+  { id:'freshwater',    ico:'💧', t:'Swam or waded in fresh water (lakes, rivers)', s:'freshwater contact' },
+  { id:'animals',       ico:'🐕', t:'Close contact with animals', s:'animal contact' },
+  { id:'food',          ico:'🍢', t:'Street food, untreated water, or unpasteurized dairy', s:'risky food/water' },
+  { id:'noprophylaxis', ico:'💊', t:'Missed or skipped malaria pills', s:'incomplete malaria prophylaxis' },
+  { id:'medical',       ico:'🏥', t:'Medical/dental care, tattoo, or piercing abroad', s:'medical/dental care or tattoo abroad' },
+  { id:'unvaxxed',      ico:'💉', t:'Not up to date on recommended travel vaccines', s:'incomplete travel vaccines' },
+  { id:'sexual',        ico:'❤️', t:'New sexual partner(s)', s:'new sexual partner(s)' },
+  { id:'rural',         ico:'⛰️', t:'Rural areas, farms, caves, or extended hiking', s:'rural/wilderness exposure' },
+];
+
+const PTH_ILLNESSES = [
+  { n:'Malaria', tag:'Mosquito-borne parasite', sev:'emergency', sevLbl:'Emergency', inc:'7 days – 1 year',
+    sig:['Fever, chills, sweats','Headache &amp; body aches','Symptoms may come in waves'],
+    act:'<b>Any fever after a malaria area is an emergency.</b> Seek care the same day and mention your trip — a quick blood test rules it in or out.' },
+  { n:'Traveler’s diarrhea &amp; gut parasites', tag:'Food/water — e.g. Giardia', sev:'common', sevLbl:'Common', inc:'Days – several weeks',
+    sig:['Loose, frequent stools','Cramps, bloating, gas','Sometimes a low fever'],
+    act:'Most clears on its own. See a doctor if it lasts <b>more than 2 weeks</b>, is bloody, or comes with high fever — stool tests find parasites.' },
+  { n:'Dengue, Zika &amp; chikungunya', tag:'Mosquito-borne viruses', sev:'serious', sevLbl:'Serious', inc:'3 – 14 days',
+    sig:['Sudden high fever','Severe joint/muscle pain','Rash; pain behind the eyes'],
+    act:'Get checked — dengue can worsen suddenly. Avoid aspirin/ibuprofen until dengue is excluded. Pregnant travelers need urgent Zika advice.' },
+  { n:'Typhoid fever', tag:'Contaminated food/water', sev:'serious', sevLbl:'Serious', inc:'1 – 3 weeks',
+    sig:['Rising, sustained fever','Headache, weakness','Stomach pain, poor appetite'],
+    act:'Needs antibiotics. See a doctor for a fever that climbs and persists after travel to South Asia, Africa or Latin America.' },
+  { n:'Hepatitis A', tag:'Contaminated food/water', sev:'serious', sevLbl:'Serious', inc:'2 – 6 weeks',
+    sig:['Fatigue, nausea','Yellow skin/eyes (jaundice)','Dark urine, pale stools'],
+    act:'See a doctor for jaundice or lasting fatigue. Usually resolves with rest, but it spreads easily — get advice.' },
+  { n:'Rabies', tag:'Animal bite / scratch', sev:'emergency', sevLbl:'Emergency', inc:'Weeks – months (variable)',
+    sig:['Follows an animal exposure','Tingling at the wound','Later: fever, confusion'],
+    act:'<b>Do not wait for symptoms — by then it is almost always fatal.</b> Any bite, scratch or lick on broken skin abroad needs urgent post-exposure shots.' },
+  { n:'Schistosomiasis', tag:'Freshwater parasite', sev:'serious', sevLbl:'Serious', inc:'Weeks – months',
+    sig:['Followed a freshwater swim','Itchy rash ("swimmer’s itch")','Later fever, gut/urinary issues'],
+    act:'If you swam in fresh water in Africa or other risk areas, ask about a blood test even if you feel fine.' },
+  { n:'Respiratory infections', tag:'Flu, COVID-19, TB', sev:'common', sevLbl:'Common', inc:'Days – weeks (TB longer)',
+    sig:['Cough, sore throat, fever','Shortness of breath','A cough lasting weeks'],
+    act:'Test for flu/COVID. A cough beyond 2–3 weeks — especially with night sweats or weight loss — needs evaluation for TB.' },
+];
+
+let pthState = { dest:'', ret:'', symptoms:{}, exposures:{} };
+
+function pthInit() {
+  pthState = { dest:'', ret:'', symptoms:{}, exposures:{} };
+  try {
+    const saved = JSON.parse(localStorage.getItem(PTH_KEY) || 'null');
+    if (saved) {
+      pthState.dest = saved.dest || '';
+      pthState.ret  = saved.ret  || '';
+      pthState.symptoms  = saved.symptoms  || {};
+      pthState.exposures = saved.exposures || {};
+    }
+  } catch(_) {}
+  // Prefill from the active trip when the user hasn't entered anything yet
+  const trip = getActiveTrip();
+  if (trip) {
+    if (!pthState.dest && trip.destination) pthState.dest = trip.destination;
+    if (!pthState.ret  && trip.returnDate)  pthState.ret  = trip.returnDate;
+  }
+  document.getElementById('pth-dest').value = pthState.dest;
+  document.getElementById('pth-ret').value  = pthState.ret;
+  pthRenderChecks();
+  pthRefresh();
+}
+
+function pthRenderChecks() {
+  const sym = document.getElementById('pth-symptoms');
+  sym.innerHTML = PTH_SYMPTOMS.map(it => pthItemHtml('symptoms', it, it.urgent)).join('');
+  const exp = document.getElementById('pth-exposures');
+  exp.innerHTML = PTH_EXPOSURES.map(it => pthItemHtml('exposures', it, false)).join('');
+}
+
+function pthItemHtml(group, it, urgent) {
+  const on = !!pthState[group][it.id];
+  const tag = urgent ? '<span class="pth-urg-tag">urgent</span>' : '';
+  return `<label class="pth-item${urgent?' urgent':''}${on?' checked':''}">
+    <input type="checkbox" ${on?'checked':''} onchange="pthToggle('${group}','${it.id}',this.checked)">
+    <span class="pth-box"></span>
+    <span class="pth-ico">${it.ico}</span>
+    <span class="pth-body">${it.t}${tag}${it.d?`<small>${it.d}</small>`:''}</span>
+  </label>`;
+}
+
+function pthToggle(group, id, on) {
+  if (on) pthState[group][id] = true; else delete pthState[group][id];
+  pthSave();
+  pthRenderChecks();
+  pthRefresh();
+}
+
+function pthOnInput() {
+  pthState.dest = document.getElementById('pth-dest').value;
+  pthState.ret  = document.getElementById('pth-ret').value;
+  pthSave();
+  pthRefresh();
+}
+
+function pthSave() {
+  try { localStorage.setItem(PTH_KEY, JSON.stringify(pthState)); } catch(_) {}
+}
+
+function pthReset() {
+  pthState = { dest:'', ret:'', symptoms:{}, exposures:{} };
+  pthSave();
+  document.getElementById('pth-dest').value = '';
+  document.getElementById('pth-ret').value  = '';
+  pthRenderChecks();
+  pthRefresh();
+}
+
+function pthDaysSince() {
+  if (!pthState.ret) return null;
+  const ret = new Date(pthState.ret + 'T00:00:00');
+  if (isNaN(ret)) return null;
+  const diff = Math.floor((Date.now() - ret.getTime()) / 864e5);
+  return diff;
+}
+
+function pthRefresh() {
+  // days-since line under the recap
+  const since = document.getElementById('pth-since');
+  const days = pthDaysSince();
+  if (days === null) {
+    since.innerHTML = 'Add your return date to see how long to keep monitoring.';
+  } else if (days < 0) {
+    since.innerHTML = "That date is in the future — double-check it.";
+  } else {
+    let extra;
+    if (days <= 14) extra = "You're in the window when most travel illnesses appear — stay alert.";
+    else if (days <= 90) extra = "Still watch for any unexplained fever and mention your travel to a doctor.";
+    else if (days <= 365) extra = "Most risks have passed, but malaria can rarely surface this late — keep your destinations in mind.";
+    else extra = "You're now beyond the usual window for travel-related illness.";
+    since.innerHTML = `<b>${days} day${days===1?'':'s'}</b> since you returned. ${extra}`;
+  }
+  pthRenderVerdict();
+  pthRenderSummary();
+  pthRenderIllnesses();
+}
+
+function pthRenderVerdict() {
+  const wrap = document.getElementById('pth-verdict');
+  const urgent = PTH_SYMPTOMS.filter(s => s.urgent && pthState.symptoms[s.id]);
+  const anySym = Object.keys(pthState.symptoms).length > 0;
+  let cls, ico, title, body;
+  if (urgent.length) {
+    cls = 'red'; ico = '🚑'; title = 'See a doctor promptly';
+    const flags = urgent.map(s => `<li>${s.reason}</li>`).join('');
+    body = `<div class="pth-verdict-body">You've flagged ${urgent.length} symptom${urgent.length>1?'s':''} that shouldn't wait. Seek medical care now — urgent care or emergency if severe — and tell them you've traveled recently.<ul class="pth-flags">${flags}</ul></div>`;
+  } else if (anySym) {
+    cls = 'amber'; ico = '🟠'; title = 'Worth getting checked';
+    body = `<div class="pth-verdict-body">Your symptoms aren't immediate red flags, but you should <b>book a doctor's appointment</b> rather than wait it out — and go sooner if anything worsens, or if a fever develops. Bring the summary below and mention every place you visited.</div>`;
+  } else {
+    cls = 'green'; ico = '🟢'; title = 'No red-flag symptoms — keep monitoring';
+    body = `<div class="pth-verdict-body">You haven't reported any symptoms — good sign. Keep watching anyway: <b>any unexplained fever</b> in the months after travel deserves a doctor's visit, and you should mention where you've been. Save the summary below just in case.</div>`;
+  }
+  wrap.innerHTML = `<div class="pth-verdict ${cls}">
+    <div class="pth-verdict-top"><span class="pth-verdict-ico">${ico}</span><span class="pth-verdict-title">${title}</span></div>
+    ${body}
+  </div>`;
+}
+
+function pthSelectedLabels(group, defs) {
+  return defs.filter(it => pthState[group][it.id]).map(it => it.s);
+}
+
+function pthRenderSummary() {
+  const rows = document.getElementById('pth-sum-rows');
+  const sym = pthSelectedLabels('symptoms', PTH_SYMPTOMS);
+  const exp = pthSelectedLabels('exposures', PTH_EXPOSURES);
+  const days = pthDaysSince();
+  const dest = pthState.dest.trim();
+  const retTxt = pthState.ret
+    ? `${pthState.ret}${days!==null && days>=0 ? ` (${days} day${days===1?'':'s'} ago)` : ''}`
+    : '—';
+  rows.innerHTML = `
+    <dt>Travel</dt><dd>${dest ? pthEsc(dest) : '—'}</dd>
+    <dt>Returned</dt><dd>${retTxt}</dd>
+    <dt>Symptoms</dt><dd>${sym.length ? pthEsc(sym.join(', ')) : 'None reported'}</dd>
+    <dt>Exposures</dt><dd>${exp.length ? pthEsc(exp.join(', ')) : 'None noted'}</dd>`;
+}
+
+function pthRenderIllnesses() {
+  document.getElementById('pth-ills').innerHTML = PTH_ILLNESSES.map(d => `
+    <div class="pth-ill ${d.sev}">
+      <div class="pth-ill-top"><span class="pth-ill-nm">${d.n}</span><span class="pth-ill-sev">${d.sevLbl}</span></div>
+      <div class="pth-ill-tag">${d.tag}</div>
+      <div class="pth-ill-inc">Appears: <b>${d.inc}</b></div>
+      <ul>${d.sig.map(s=>`<li>${s}</li>`).join('')}</ul>
+      <div class="pth-ill-act">${d.act}</div>
+    </div>`).join('');
+}
+
+function pthCopySummary() {
+  const sym = pthSelectedLabels('symptoms', PTH_SYMPTOMS);
+  const exp = pthSelectedLabels('exposures', PTH_EXPOSURES);
+  const days = pthDaysSince();
+  const L = [];
+  L.push('POST-TRAVEL HEALTH SUMMARY');
+  L.push('');
+  L.push('Recent travel:  ' + (pthState.dest.trim() || '—'));
+  L.push('Returned home:  ' + (pthState.ret ? pthState.ret + (days!==null && days>=0 ? ` (${days} day${days===1?'':'s'} ago)` : '') : '—'));
+  L.push('Symptoms:       ' + (sym.length ? sym.join(', ') : 'none reported'));
+  L.push('Exposures:      ' + (exp.length ? exp.join(', ') : 'none noted'));
+  L.push('');
+  L.push('Note to clinician: I traveled recently — please consider');
+  L.push('travel-related illnesses when assessing these symptoms.');
+  const text = L.join('\n');
+  const showOk = () => {
+    const ok = document.getElementById('pth-copy-ok');
+    ok.classList.add('show'); setTimeout(() => ok.classList.remove('show'), 1600);
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(showOk).catch(() => { pthCopyFallback(text); showOk(); });
+  } else { pthCopyFallback(text); showOk(); }
+}
+
+function pthCopyFallback(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); } catch(_) {}
+  document.body.removeChild(ta);
+}
+
+function pthEsc(s) {
+  return String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
 }
 
 /* ════════════════════════════════════════════════════════════
