@@ -7639,16 +7639,132 @@ body.no-scroll { overflow: hidden; }
   </div>
 
 </div>
-<div id="view-placeholder-jet-lag" class="view">
-  <nav class="tool-topbar">
+<style>
+/* ── JET LAG CALCULATOR ── */
+.jl-results{margin-top:24px}
+/* summary headline */
+.jl-summary{border:2px solid var(--ink);border-radius:var(--r);padding:18px;margin-bottom:16px;background:var(--paper)}
+.jl-summary.none{border-color:var(--green,#2E7D32);background:rgba(46,125,50,.06)}
+.jl-summary.sev-mild{border-color:var(--green,#2E7D32)}
+.jl-summary.sev-moderate{border-color:var(--yellow,#FFD23F)}
+.jl-summary.sev-significant{border-color:var(--orange)}
+.jl-summary.sev-severe{border-color:var(--accent)}
+.jl-sum-top{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+.jl-sum-dir{font-size:30px;line-height:1}
+.jl-sum-headline{font-family:var(--serif);font-size:20px;font-weight:600;color:var(--ink);line-height:1.25}
+.jl-sum-sub{font-family:var(--sans);font-size:13px;color:var(--muted);margin-top:2px}
+.jl-sum-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media(max-width:560px){.jl-sum-grid{grid-template-columns:1fr}}
+.jl-sum-stat{border:1.5px solid var(--rule);border-radius:var(--r);padding:11px 13px;background:var(--paper-2)}
+.jl-sum-stat .v{font-family:var(--mono);font-size:19px;font-weight:700;color:var(--ink);line-height:1.1}
+.jl-sum-stat .k{font-family:var(--sans);font-size:11px;color:var(--muted);margin-top:4px;line-height:1.3}
+.jl-chip{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;padding:4px 10px;border-radius:20px}
+.jl-chip.mild{background:rgba(46,125,50,.16);color:var(--green,#2E7D32)}
+.jl-chip.moderate{background:rgba(255,210,63,.25);color:#8a6d00}
+.jl-chip.significant{background:rgba(230,81,0,.16);color:var(--orange)}
+.jl-chip.severe{background:rgba(255,77,46,.16);color:var(--accent)}
+/* blocks */
+.jl-block{border:1.5px solid var(--rule);border-radius:var(--r);padding:16px 18px;margin-bottom:16px;background:var(--paper)}
+.jl-block h4{font-family:var(--sans);font-size:14px;font-weight:700;color:var(--ink);margin:0 0 4px;display:flex;align-items:center;gap:8px}
+.jl-block .jl-block-sub{font-family:var(--sans);font-size:12.5px;color:var(--muted);margin:0 0 14px;line-height:1.5}
+.jl-short{border:2px solid var(--orange);border-left-width:5px;border-radius:var(--r);background:rgba(230,81,0,.06);padding:16px 18px;margin-bottom:16px}
+.jl-short h4{font-family:var(--sans);font-size:14px;font-weight:700;color:var(--orange);margin:0 0 8px;display:flex;align-items:center;gap:8px}
+.jl-short p{font-family:var(--sans);font-size:13.5px;line-height:1.6;color:var(--ink-2);margin:0 0 8px}
+.jl-short p:last-child{margin-bottom:0}
+.jl-short strong{color:var(--ink)}
+/* day schedule */
+.jl-days{display:flex;flex-direction:column;gap:0}
+.jl-day{display:grid;grid-template-columns:96px 1fr;gap:14px;padding:11px 0;border-top:1px solid var(--rule)}
+.jl-day:first-child{border-top:none}
+.jl-day-when{font-family:var(--mono);font-size:12px;color:var(--ink)}
+.jl-day-when .d2{display:block;color:var(--muted);font-size:11px;margin-top:2px}
+.jl-day-body{font-family:var(--sans);font-size:13px;color:var(--ink-2);line-height:1.5}
+.jl-day-sleep{font-weight:600;color:var(--ink)}
+.jl-day-light{margin-top:3px}
+/* tip lists */
+.jl-tips{list-style:none;margin:0;padding:0}
+.jl-tips li{position:relative;padding:0 0 10px 26px;font-family:var(--sans);font-size:13.5px;line-height:1.55;color:var(--ink-2)}
+.jl-tips li:last-child{padding-bottom:0}
+.jl-tips li .ic{position:absolute;left:0;top:0}
+.jl-tips li strong{color:var(--ink)}
+.jl-disclaim{font-family:var(--sans);font-size:12px;color:var(--ink-2);line-height:1.55;border-left:3px solid var(--yellow,#FFD23F);padding:10px 14px;background:rgba(255,210,63,.08);border-radius:0 var(--r) var(--r) 0;margin-bottom:16px}
+.jl-actions{display:flex;align-items:center;gap:16px;margin-top:4px;flex-wrap:wrap}
+.jl-copy-btn{padding:11px 20px;border:1.5px solid var(--ink);border-radius:var(--r);background:var(--ink);color:var(--paper);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer}
+.jl-copy-btn:hover{background:var(--accent);border-color:var(--accent)}
+.jl-empty{margin-top:20px;padding:24px;text-align:center;color:var(--muted);font-family:var(--sans);font-size:14px;font-style:italic;border:1.5px dashed var(--rule);border-radius:var(--r)}
+.jl-print-header{display:none}
+@media print{
+  .jl-actions,.jl-empty{display:none!important}
+  .jl-print-header{display:flex!important;justify-content:space-between;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#666;padding:0 0 12px;border-bottom:1px solid #ccc;margin-bottom:16px}
+  .jl-summary,.jl-block,.jl-short,.jl-day{break-inside:avoid}
+}
+</style>
+<div id="view-jet-lag" class="view">
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="window.print()">🖨 Print</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">😴</span>
-    <h2>Jet Lag Calculator</h2>
-    <p style="margin-bottom:24px">Departure + destination = pre-travel adjustment & post-arrival recovery plan.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-jet-lag"></div>
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>Jet Lag Calculator</h1>
+    <p class="tool-sub">Crossing time zones throws off your body clock. Tell us where you're flying from and to, and you'll get a personalised plan — how to pre-shift your sleep before you fly, what to do on the plane, and a day-by-day light, sleep and melatonin schedule to recover fast when you land.</p>
+  </div>
+
+  <div class="tool-body">
+
+    <!-- ── ROUTE ── -->
+    <div class="sec-lbl">Your flight</div>
+    <div class="frow">
+      <div class="fg">
+        <label for="jl-from">Flying from</label>
+        <select id="jl-from" onchange="jlRender()"></select>
+      </div>
+      <div class="fg">
+        <label for="jl-to">Flying to</label>
+        <select id="jl-to" onchange="jlRender()"></select>
+      </div>
+    </div>
+    <div class="frow">
+      <div class="fg">
+        <label for="jl-depart">Departure date</label>
+        <input type="date" id="jl-depart" onchange="jlRender()">
+      </div>
+      <div class="fg">
+        <label for="jl-nights">Nights at destination <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);font-size:11px">(optional)</span></label>
+        <input type="number" id="jl-nights" min="1" max="365" step="1" placeholder="—" inputmode="numeric" oninput="jlRender()">
+      </div>
+    </div>
+    <div class="fg">
+      <label for="jl-bed">Your usual bedtime <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);font-size:11px">(at home)</span></label>
+      <input type="time" id="jl-bed" value="23:00" onchange="jlRender()" style="max-width:200px">
+    </div>
+
+    <!-- ── RESULTS ── -->
+    <div class="jl-results" id="jl-results" style="display:none">
+      <div class="jl-print-header"><strong>TripTools — Jet Lag Calculator</strong><span id="jl-print-date"></span></div>
+      <div id="jl-body"></div>
+      <div class="jl-disclaim" id="jl-disclaim"></div>
+      <div class="jl-actions">
+        <button class="jl-copy-btn" id="jl-copy-btn" onclick="jlCopy()">📋 Copy plan</button>
+        <button class="btn-ghost" onclick="jlReset()" style="color:var(--accent);font-size:13px;background:none;border:none;cursor:pointer">↺ Reset</button>
+      </div>
+    </div>
+    <div class="jl-empty" id="jl-empty">Pick where you're flying from and to for a personalised jet-lag plan.</div>
+
+  </div><!-- /tool-body -->
+
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    Light is your most powerful tool — far stronger than melatonin. Flying east (clock forward) is harder than flying west, because it's easier for your body to stay up late than to fall asleep early. The single biggest win: the moment you board, set your watch to destination time and start living on it — sleep when it's night there, stay awake when it's day.
+  </div>
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('timezone')">🕐 Time Zone Converter</button>
+      <button class="rel-btn" onclick="openTool('weather')">🌦 Weather Forecast</button>
+      <button class="rel-btn" onclick="openTool('trip-duration')">🗓 Trip Duration</button>
+      <button class="rel-btn" onclick="openTool('packing')">📝 Packing List</button>
     </div>
   </div>
 </div>
@@ -13692,7 +13808,7 @@ const TOOLS = [
   {id:'vat-refund',    nm:'VAT & Tax Refund Guide',     ico:'🧾', ph:'money',     on:false, live:true,  ds:'Country-by-country guide to claiming VAT refunds as a tourist. Thresholds, rates, net-refund estimator & process steps.'},
   {id:'cruise-grat',   nm:'Cruise Gratuity Calculator', ico:'🚢', ph:'money',     on:false, live:true,  ds:'Daily gratuity per person by cruise line and cabin type.'},
   {id:'timezone',      nm:'Time Zone Converter',        ico:'🕐', ph:'destination',on:false,live:true,  ds:'Multi-city live clocks + meeting planner with DST awareness.'},
-  {id:'jet-lag',       nm:'Jet Lag Calculator',         ico:'😴', ph:'destination',on:false,live:false, ds:'Pre-travel adjustment schedule + post-arrival recovery plan.'},
+  {id:'jet-lag',       nm:'Jet Lag Calculator',         ico:'😴', ph:'destination',on:false,live:true,  ds:'Pre-travel adjustment schedule + post-arrival recovery plan.'},
   {id:'unit-conv',     nm:'Universal Unit Converter',   ico:'📏', ph:'destination',on:false,live:true,  ds:'Temp, distance, weight, volume, speed — all traveler conversions.'},
   {id:'phrasebook',    nm:'Language Phrasebook',        ico:'💬', ph:'destination',on:false,live:false, ds:'Essential travel phrases in 25 languages with pronunciation.'},
   {id:'emergency',     nm:'Emergency Numbers',          ico:'🚨', ph:'destination',on:false,live:true,  ds:'Police, fire & ambulance for 150+ countries. Embassy finder & your insurance card, always offline.'},
@@ -14410,6 +14526,7 @@ function injectTripCtx(id) {
   if(id==='atm-fee')    afInit();
   if(id==='cost-living') colInit();
   if(id==='vat-refund') vrInit();
+  if(id==='jet-lag')    jlInit();
   if(id==='expense-report') erInit();
   if(id==='baggage')    bfcInit();
   if(id==='carry-on')   cosInit();
@@ -33721,6 +33838,342 @@ function vrReset(){
   document.getElementById('vr-country').value = '';
   document.getElementById('vr-amt').value = '';
   vrSave(); vrRender();
+}
+
+/* ══════════════════════════════════════════════════════
+   JET LAG CALCULATOR
+   Reuses the global TZ_CITIES dataset + tzOffsetMinutes()
+   from the Time Zone Converter for DST-aware zone math.
+   Builds a pre-flight sleep-shift schedule, in-flight tips
+   and a day-by-day post-arrival light/sleep/melatonin plan.
+   Wellness guidance only — shown with a medical disclaimer.
+   ══════════════════════════════════════════════════════ */
+
+let jlData = null;
+
+function jlKey(){ const trip = getActiveTrip(); return 'tt_jetlag_' + (trip ? trip.id : 'default'); }
+function jlPad2(n){ return (n<10?'0':'') + n; }
+function jlEsc(s){ return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+/* Format a (possibly fractional, possibly out-of-range) hour as a 12-hour clock. */
+function jlClock(h){
+  h = ((h % 24) + 24) % 24;
+  let hh = Math.floor(h);
+  let mm = Math.round((h - hh) * 60);
+  if (mm === 60){ mm = 0; hh = (hh + 1) % 24; }
+  const ap = hh < 12 ? 'AM' : 'PM';
+  let h12 = hh % 12; if (h12 === 0) h12 = 12;
+  return h12 + ':' + jlPad2(mm) + ' ' + ap;
+}
+function jlAddDays(date, n){ const d = new Date(date.getTime()); d.setDate(d.getDate() + n); return d; }
+function jlFmtDate(date){ return date.toLocaleDateString(undefined, {weekday:'short', month:'short', day:'numeric'}); }
+function jlParseBed(){
+  const v = (document.getElementById('jl-bed').value || '23:00').split(':');
+  const h = parseInt(v[0],10), m = parseInt(v[1],10);
+  return (isFinite(h)?h:23) + (isFinite(m)?m:0)/60;
+}
+/* A reference instant (local noon) for the departure date, for DST-correct offsets. */
+function jlDepartInstant(){
+  const v = document.getElementById('jl-depart').value;
+  if (v){
+    const p = v.split('-');
+    return new Date(Date.UTC(+p[0], +p[1]-1, +p[2], 12, 0, 0));
+  }
+  const n = new Date();
+  return new Date(Date.UTC(n.getFullYear(), n.getMonth(), n.getDate(), 12, 0, 0));
+}
+function jlDepartDateLocal(){
+  const v = document.getElementById('jl-depart').value;
+  if (v){ const p = v.split('-'); return new Date(+p[0], +p[1]-1, +p[2], 12, 0, 0); }
+  return null;
+}
+
+function jlDefault(){
+  // Origin: best-effort from the device's own time zone; Destination: from the active trip.
+  let from = 0, to = -1;
+  try {
+    const localTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const i = TZ_CITIES.findIndex(c => c.tz === localTz);
+    if (i >= 0) from = i;
+  } catch(_){}
+  const trip = getActiveTrip();
+  if (trip && trip.destination){
+    const dest = trip.destination.toLowerCase();
+    const i = TZ_CITIES.findIndex(c => dest.includes(c.city.toLowerCase()) || dest.includes(c.country.toLowerCase()));
+    if (i >= 0) to = i;
+  }
+  if (to < 0) to = TZ_CITIES.findIndex(c => c.city === 'Tokyo');
+  if (to === from) to = (from + 1) % TZ_CITIES.length;
+  let depart = '', nights = '';
+  if (trip){
+    if (trip.departDate) depart = trip.departDate;
+    if (trip.departDate && trip.returnDate){
+      const d = Math.round((new Date(trip.returnDate) - new Date(trip.departDate)) / 864e5);
+      if (d > 0) nights = String(d);
+    }
+  }
+  return { from, to, depart, nights, bed:'23:00' };
+}
+function jlLoad(){
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(jlKey()) || 'null'); } catch(e){}
+  jlData = (saved && typeof saved === 'object') ? Object.assign(jlDefault(), saved) : jlDefault();
+}
+function jlSave(){
+  if (!jlData) return;
+  jlData.from   = parseInt(document.getElementById('jl-from').value,10) || 0;
+  jlData.to     = parseInt(document.getElementById('jl-to').value,10) || 0;
+  jlData.depart = document.getElementById('jl-depart').value;
+  jlData.nights = document.getElementById('jl-nights').value;
+  jlData.bed    = document.getElementById('jl-bed').value;
+  try { localStorage.setItem(jlKey(), JSON.stringify(jlData)); } catch(e){}
+}
+
+function jlCityLabel(c){ return `${c.flag} ${c.city}, ${c.country}`; }
+function jlInit(){
+  jlLoad();
+  const opts = TZ_CITIES.map((c,i) => `<option value="${i}">${jlEsc(jlCityLabel(c))}</option>`).join('');
+  const fromSel = document.getElementById('jl-from'), toSel = document.getElementById('jl-to');
+  fromSel.innerHTML = opts; toSel.innerHTML = opts;
+  fromSel.value = jlData.from; toSel.value = jlData.to;
+  document.getElementById('jl-depart').value = jlData.depart || '';
+  document.getElementById('jl-nights').value = jlData.nights || '';
+  document.getElementById('jl-bed').value = jlData.bed || '23:00';
+  jlRender();
+}
+
+/* Core derivation: zones crossed, direction, severity, recovery, schedules. */
+function jlCompute(){
+  const from = TZ_CITIES[parseInt(document.getElementById('jl-from').value,10)] || TZ_CITIES[0];
+  const to   = TZ_CITIES[parseInt(document.getElementById('jl-to').value,10)]   || TZ_CITIES[0];
+  const inst = jlDepartInstant();
+  const offFrom = tzOffsetMinutes(inst, from.tz);
+  const offTo   = tzOffsetMinutes(inst, to.tz);
+  let rawDiff = (offTo - offFrom) / 60;                 // destination clock vs origin, hours
+  // Normalise to the effective circadian shift in [-12, 12].
+  let diff = ((rawDiff + 12) % 24 + 24) % 24 - 12;
+  if (diff === -12) diff = 12;                          // prefer the +12 representation label-wise
+  const zones = Math.round(Math.abs(diff));
+  const east = diff > 0;                                // destination ahead → advance → eastward
+  return { from, to, rawDiff, diff, zones, east };
+}
+
+function jlSeverity(zones){
+  if (zones <= 0) return {key:'none',  label:'No jet lag'};
+  if (zones <= 2) return {key:'mild',  label:'Mild'};
+  if (zones <= 5) return {key:'moderate', label:'Moderate'};
+  if (zones <= 8) return {key:'significant', label:'Significant'};
+  return {key:'severe', label:'Severe'};
+}
+function jlRecoveryDays(zones, east){
+  if (zones <= 0) return 0;
+  const d = east ? zones * 1.0 : zones * 0.67;          // east ~1 day/zone, west ~2/3 day/zone
+  return Math.max(1, Math.min(12, Math.round(d)));
+}
+
+function jlRender(){
+  if (!jlData) return;
+  jlSave();
+  const results = document.getElementById('jl-results');
+  const empty = document.getElementById('jl-empty');
+  const c = jlCompute();
+  const body = document.getElementById('jl-body');
+  const disclaim = document.getElementById('jl-disclaim');
+
+  empty.style.display = 'none';
+  results.style.display = 'block';
+
+  const bed = jlParseBed();
+  const wake = bed + 8;
+  const sev = jlSeverity(c.zones);
+  const recov = jlRecoveryDays(c.zones, c.east);
+  const dirWord = c.east ? 'east' : 'west';
+  const dirArrow = c.east ? '➡️' : '⬅️';
+  const nights = Math.floor(jlNum(document.getElementById('jl-nights').value));
+  const departLocal = jlDepartDateLocal();
+
+  // ── No meaningful shift ──
+  if (c.zones <= 0){
+    body.innerHTML = `<div class="jl-summary none">
+      <div class="jl-sum-top">
+        <span class="jl-sum-dir">😎</span>
+        <div>
+          <div class="jl-sum-headline">No jet lag expected</div>
+          <div class="jl-sum-sub">${jlEsc(c.from.city)} and ${jlEsc(c.to.city)} are effectively in the same time zone.</div>
+        </div>
+      </div>
+      <p style="font-family:var(--sans);font-size:13.5px;color:var(--ink-2);line-height:1.6;margin:0">You shouldn't need to adjust your body clock. Still, long flights are tiring — stay hydrated, move around the cabin, and get outside into daylight when you arrive to feel your best.</p>
+    </div>`;
+    disclaim.textContent = 'General wellness guidance, not medical advice.';
+    const pd = document.getElementById('jl-print-date'); if (pd) pd.textContent = new Date().toLocaleDateString();
+    return;
+  }
+
+  // ── Summary ──
+  const hoursLabel = (Math.abs(c.diff) % 1 === 0 ? Math.abs(c.diff) : Math.abs(c.diff).toFixed(1));
+  const absRaw = Math.abs(c.rawDiff);
+  const wrapNote = absRaw > 12
+    ? ` ${jlEsc(c.to.city)}'s clock is actually ${absRaw % 1 === 0 ? absRaw : absRaw.toFixed(1)}h ${c.rawDiff > 0 ? 'ahead' : 'behind'}, but your body re-syncs the shorter way — a ${c.zones}h ${dirWord} shift.`
+    : '';
+  let html = `<div class="jl-summary sev-${sev.key}">
+    <div class="jl-sum-top">
+      <span class="jl-sum-dir">${dirArrow}</span>
+      <div>
+        <div class="jl-sum-headline">${jlEsc(c.from.city)} → ${jlEsc(c.to.city)}: ${hoursLabel} hours ${dirWord}</div>
+        <div class="jl-sum-sub">Flying ${dirWord} ${c.east?'(clock forward — the harder direction)':'(clock back — the easier direction)'}. Destination reads ${jlClock(bed + c.diff)} when it's your ${jlClock(bed)} bedtime back home.${wrapNote}</div>
+      </div>
+    </div>
+    <div class="jl-sum-grid">
+      <div class="jl-sum-stat"><div class="v">${c.zones}</div><div class="k">Time zones crossed</div></div>
+      <div class="jl-sum-stat"><div class="v">~${recov} day${recov!==1?'s':''}</div><div class="k">Est. full recovery</div></div>
+      <div class="jl-sum-stat"><div class="v"><span class="jl-chip ${sev.key}">${sev.label}</span></div><div class="k">Expected severity</div></div>
+    </div>
+  </div>`;
+
+  // ── Short-trip detection ──
+  const shortTrip = nights > 0 && nights <= 2 && c.zones >= 3;
+  if (shortTrip){
+    html += `<div class="jl-short">
+      <h4>⚡ Short trip — consider not fully adjusting</h4>
+      <p>You're only at the destination for <strong>${nights} night${nights!==1?'s':''}</strong>, but it would take about <strong>${recov} days</strong> to adjust. Fully flipping your clock and then flipping back can leave you wrecked at both ends.</p>
+      <p>Instead, <strong>stay close to home time</strong>: schedule important activities for hours that overlap your normal waking time, keep meals roughly on home schedule, use bright light and caffeine strategically to stay alert, and accept being off-cycle for the visit. Skip the pre-flight shift below.</p>
+    </div>`;
+  }
+
+  // ── Pre-flight shift schedule ──
+  const preDays = Math.min(c.zones, 4);
+  if (!shortTrip && preDays >= 1){
+    const lightPre = c.east
+      ? '☀️ bright light right after waking; dim the lights in the evening'
+      : '🌙 bright light in the evening; keep mornings dim';
+    let rows = '';
+    for (let k = 1; k <= preDays; k++){
+      const daysBefore = preDays - k + 1;
+      const shift = c.east ? -k : k;                     // east → earlier, west → later
+      const b = bed + shift, w = wake + shift;
+      const dateStr = departLocal ? jlFmtDate(jlAddDays(departLocal, -daysBefore)) : '';
+      rows += `<div class="jl-day">
+        <div class="jl-day-when">${daysBefore} day${daysBefore!==1?'s':''} before${dateStr?`<span class="d2">${jlEsc(dateStr)}</span>`:''}</div>
+        <div class="jl-day-body"><span class="jl-day-sleep">Sleep ${jlClock(b)} – ${jlClock(w)}</span> <span style="color:var(--muted)">(${c.east?'earlier':'later'} by ${k}h)</span><div class="jl-day-light">${lightPre}</div></div>
+      </div>`;
+    }
+    html += `<div class="jl-block">
+      <h4>🛏 Before you fly — pre-shift your clock</h4>
+      <p class="jl-block-sub">Shift your sleep ${c.east?'<strong>earlier</strong>':'<strong>later</strong>'} by an hour a night for the ${preDays} nights before departure. Even a partial head start cuts recovery time.</p>
+      <div class="jl-days">${rows}</div>
+    </div>`;
+  }
+
+  // ── In-flight ──
+  const destBoardClock = jlClock(bed + c.diff); // not used directly; keep generic tips
+  html += `<div class="jl-block">
+    <h4>✈️ On the plane</h4>
+    <ul class="jl-tips">
+      <li><span class="ic">⌚</span><strong>Set your watch to ${jlEsc(c.to.city)} time the moment you board</strong> and start thinking in destination time.</li>
+      <li><span class="ic">${c.east?'😴':'☕'}</span>${c.east
+        ? 'Flying east usually means a night flight — <strong>sleep as much as you can</strong>. Use an eye mask and earplugs, and try to sleep when it’s night at your destination.'
+        : 'Flying west, <strong>try to stay awake</strong> until it’s night at your destination, then sleep. A short nap is fine but don’t sleep the whole way.'}</li>
+      <li><span class="ic">💧</span><strong>Hydrate</strong> — drink water regularly and go easy on alcohol and caffeine, which both worsen jet lag and disrupt sleep.</li>
+      <li><span class="ic">🚶</span>Get up and <strong>move every couple of hours</strong> to keep circulation going and reduce stiffness and clot risk.</li>
+      <li><span class="ic">🍽</span>Try to <strong>eat on destination meal times</strong> rather than whenever food is served.</li>
+    </ul>
+  </div>`;
+
+  // ── Post-arrival recovery ──
+  if (!shortTrip){
+    const showDays = Math.min(recov, 6);
+    const initialBodyBed = bed + c.diff;                 // destination-local time your body wants to sleep on arrival
+    let rows = '';
+    for (let i = 1; i <= showDays; i++){
+      // Converge target bedtime from the body's preferred time toward local bedtime.
+      const step = c.east ? -1 : 1.5;                    // hours shifted per day toward local
+      let target = initialBodyBed + step * (i - 1);
+      // Clamp so we don't overshoot local bedtime (`bed`), accounting for direction.
+      if (c.east && target < bed) target = bed;
+      if (!c.east && target > bed) target = bed;
+      const tw = target + 8;
+      const dateStr = departLocal ? jlFmtDate(jlAddDays(departLocal, i)) : '';
+      let light;
+      if (c.east){
+        light = (c.zones >= 9 && i <= 2)
+          ? '🚫 Avoid bright light early morning; ☀️ seek it in the afternoon (large eastward shifts can flip the wrong way at first).'
+          : '☀️ Seek bright light for 1–2h after waking; 🚫 avoid bright screens/light late evening.';
+      } else {
+        light = '☀️ Seek bright light in the late afternoon/evening; 🚫 avoid bright light right after dawn; push to stay up until bedtime.';
+      }
+      rows += `<div class="jl-day">
+        <div class="jl-day-when">Day ${i}${dateStr?`<span class="d2">${jlEsc(dateStr)}</span>`:''}</div>
+        <div class="jl-day-body"><span class="jl-day-sleep">Aim to sleep ${jlClock(target)} – ${jlClock(tw)} local</span><div class="jl-day-light">${light}</div></div>
+      </div>`;
+    }
+    const tail = recov > showDays ? `<p class="jl-block-sub" style="margin:12px 0 0">Keep nudging your bedtime ${c.east?'earlier':'later'} by ${c.east?'an hour':'1–2 hours'} a day until you’re on local time — full recovery takes about ${recov} days.</p>` : '';
+    html += `<div class="jl-block">
+      <h4>🌅 After you land — recovery plan</h4>
+      <p class="jl-block-sub">Live on local time immediately. Each day, move your sleep toward the local clock and use light as your main lever.</p>
+      <div class="jl-days">${rows}</div>${tail}
+    </div>`;
+  }
+
+  // ── Light / melatonin / caffeine reference ──
+  const melat = c.east
+    ? 'A low dose (0.5–3&nbsp;mg) about <strong>1–2 hours before your target destination bedtime</strong> for the first few nights can help you fall asleep earlier.'
+    : 'Usually <strong>not needed</strong> flying west. If you keep waking too early, a very small dose during that early-morning waking is sometimes used.';
+  html += `<div class="jl-block">
+    <h4>💡 Light, melatonin &amp; caffeine</h4>
+    <ul class="jl-tips">
+      <li><span class="ic">☀️</span><strong>Light is the strongest lever.</strong> ${c.east ? 'Get morning daylight and avoid bright light late at night to shift earlier.' : 'Get late-day/evening light and avoid bright early-morning light to shift later.'} Outdoor daylight beats indoor light by far.</li>
+      <li><span class="ic">💊</span><strong>Melatonin:</strong> ${melat}</li>
+      <li><span class="ic">☕</span><strong>Caffeine:</strong> use it in the destination morning to stay alert, but stop <strong>6–8 hours before</strong> your target bedtime so it doesn’t block sleep.</li>
+      <li><span class="ic">😴</span><strong>Naps:</strong> if you must nap, keep it to <strong>20–30 minutes</strong> and not within a few hours of bedtime.</li>
+    </ul>
+  </div>`;
+
+  body.innerHTML = html;
+  disclaim.innerHTML = 'This is general wellness guidance, not medical advice. Light therapy and melatonin can interact with medications and health conditions — check with a doctor first, especially if you’re pregnant, taking medication, or managing a health condition.';
+  const pd = document.getElementById('jl-print-date'); if (pd) pd.textContent = new Date().toLocaleDateString();
+}
+function jlNum(v){ const n = parseFloat(v); return isFinite(n) ? n : 0; }
+
+function jlCopy(){
+  const c = jlCompute();
+  const bed = jlParseBed();
+  const sev = jlSeverity(c.zones);
+  const recov = jlRecoveryDays(c.zones, c.east);
+  let lines = [`TripTools — Jet Lag Calculator`, `${c.from.city} → ${c.to.city}`];
+  if (c.zones <= 0){
+    lines.push(`Same effective time zone — no jet lag expected.`);
+  } else {
+    const hoursLabel = (Math.abs(c.diff) % 1 === 0 ? Math.abs(c.diff) : Math.abs(c.diff).toFixed(1));
+    lines.push(`${hoursLabel}h ${c.east?'east':'west'} · ${c.zones} time zones · severity ${sev.label} · ~${recov} days to recover`);
+    const preDays = Math.min(c.zones, 4);
+    lines.push(``, `Before you fly: shift sleep ${c.east?'earlier':'later'} 1h/night for ${preDays} nights.`);
+    lines.push(`On the plane: set watch to ${c.to.city} time; ${c.east?'sleep when dark there':'stay awake until night there'}; hydrate; limit alcohol/caffeine.`);
+    lines.push(`After landing: live on local time; ${c.east?'morning daylight, dim evenings':'evening light, dim mornings'}; melatonin ${c.east?'1–2h before bed for a few nights':'usually not needed'}; caffeine only in the morning.`);
+  }
+  lines.push(``, `General wellness guidance, not medical advice.`);
+  const text = lines.join('\n');
+  const btn = document.getElementById('jl-copy-btn');
+  const done = () => { const o = btn.textContent; btn.textContent = '✓ Copied'; setTimeout(()=>{ btn.textContent = o; }, 1600); };
+  if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(done).catch(()=>jlCopyFallback(text, done));
+  } else jlCopyFallback(text, done);
+}
+function jlCopyFallback(text, cb){
+  const ta = document.createElement('textarea');
+  ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); cb && cb(); } catch(e){}
+  document.body.removeChild(ta);
+}
+function jlReset(){
+  if (!confirm('Reset the jet lag calculator?')) return;
+  jlData = jlDefault();
+  document.getElementById('jl-from').value = jlData.from;
+  document.getElementById('jl-to').value = jlData.to;
+  document.getElementById('jl-depart').value = jlData.depart || '';
+  document.getElementById('jl-nights').value = jlData.nights || '';
+  document.getElementById('jl-bed').value = jlData.bed || '23:00';
+  jlSave(); jlRender();
 }
 
 /* ══════════════════════════════════════════════════════
