@@ -5692,19 +5692,179 @@ body.no-scroll { overflow: hidden; }
   .lwc-row-wt input{border:none!important;padding:0!important}
 }
 </style>
-<div id="view-placeholder-wardrobe" class="view">
-  <nav class="tool-topbar">
+<div id="view-wardrobe" class="view">
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="window.print()">🖨 Print</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">🌤</span>
-    <h2>Weather-Based Wardrobe</h2>
-    <p style="margin-bottom:24px">14-day forecast → packing suggestions per weather condition via Open-Meteo.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-wardrobe"></div>
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-on" id="wb-conn-bdg">🌐 Live Forecast</div>
+    <h1>Weather-Based Wardrobe</h1>
+    <p class="tool-sub">A 14-day forecast via Open-Meteo, turned into what to actually pack — a trip-wide wardrobe plus a day-by-day outfit plan.</p>
+  </div>
+
+  <div class="tool-body">
+
+    <!-- ── DESTINATION SEARCH ── -->
+    <div class="fg" style="margin-bottom:12px">
+      <label for="wb-q">Destination</label>
+      <div class="wb-search-row">
+        <input type="text" id="wb-q" placeholder="e.g. Reykjavík, or Bali, Indonesia" autocomplete="off" autocapitalize="words">
+        <button class="btn btn-p" id="wb-go-btn" onclick="wbSearch()">Plan Wardrobe →</button>
+      </div>
+      <button class="btn btn-s btn-sm wb-geo-btn" id="wb-geo-btn" onclick="wbGeoLocate()">📍 Use my location</button>
+    </div>
+
+    <!-- ── UNIT TOGGLE + STATUS ── -->
+    <div class="wb-meta-row">
+      <div class="chip-grp" style="margin:0">
+        <span class="chip wb-unit-chip on" data-wb-unit="F" onclick="wbSetUnit(this)">°F</span>
+        <span class="chip wb-unit-chip"    data-wb-unit="C" onclick="wbSetUnit(this)">°C</span>
+      </div>
+      <span class="wb-status" id="wb-status"></span>
+    </div>
+
+    <!-- ── RESULTS ── -->
+    <div id="wb-result" style="display:none">
+      <div class="wx-loc" id="wb-loc"></div>
+
+      <!-- Trip-wide wardrobe overview -->
+      <div class="sec-lbl">Your trip wardrobe</div>
+      <div class="wb-summary" id="wb-summary"></div>
+
+      <!-- Aggregated packing suggestions -->
+      <div class="wb-pack-card" id="wb-pack-card">
+        <div class="wb-pack-hdr">
+          <span class="wb-pack-title">🧳 What to pack</span>
+          <button class="btn btn-p btn-sm" id="wb-send-btn" onclick="wbSendToPacking()">Send to Packing List →</button>
+        </div>
+        <div class="wb-pack-items" id="wb-pack-items"></div>
+        <div class="wb-pack-note" id="wb-pack-note"></div>
+      </div>
+
+      <!-- Day-by-day -->
+      <div class="sec-lbl">Day-by-day plan</div>
+      <div class="wb-days" id="wb-days"></div>
+
+      <div class="wx-offline-notice" id="wb-offline-notice" style="display:none"></div>
+    </div>
+
+    <!-- ── EMPTY STATE ── -->
+    <div id="wb-empty" class="wx-empty">
+      <span style="font-size:54px;display:block">🌤</span>
+      <p style="margin-top:14px">Enter a destination to turn its forecast into a packing plan.</p>
+      <p style="font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:10px">Open-Meteo · 14-day forecast · no API key · 3-hour cache</p>
+    </div>
+
+  </div><!-- /tool-body -->
+
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    Pack for the <em>range</em>, not the average. A destination that swings from a 45°F morning to a 70°F afternoon needs layers you can shed, not one heavy coat. Three thin layers beat one thick one — and a packable rain shell weighs nothing until the day you need it.
+  </div>
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('packing')">🎒 Smart Packing List</button>
+      <button class="rel-btn" onclick="openTool('weather')">🌦 Weather Forecast</button>
+      <button class="rel-btn" onclick="openTool('uv-index')">☀️ UV Index &amp; Sun Safety</button>
+      <button class="rel-btn" onclick="openTool('best-time')">📅 Best Time to Visit</button>
     </div>
   </div>
+
+  <!-- Print-only header -->
+  <div class="wb-print-header">
+    <strong>TripTools — Weather-Based Wardrobe</strong>
+    <span id="wb-print-date"></span>
+  </div>
 </div>
+<style>
+/* ── WEATHER-BASED WARDROBE ── */
+.wb-search-row { display:flex; gap:8px; align-items:stretch; }
+.wb-search-row input {
+  flex:1; min-width:0; background:var(--paper-2); border:1.5px solid var(--ink); color:var(--ink);
+  font-family:var(--sans); font-size:15px; padding:10px 12px; border-radius:var(--r);
+  outline:none; transition:border-color .15s; min-height:44px;
+}
+.wb-search-row input:focus { border-color:var(--accent); }
+.wb-search-row input::placeholder { color:var(--muted); }
+.wb-search-row .btn { flex-shrink:0; white-space:nowrap; }
+@media(max-width:520px){ .wb-search-row { flex-direction:column; } }
+.wb-geo-btn { margin-top:8px; }
+
+.wb-meta-row { display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:18px; }
+.wb-unit-chip { min-width:42px; text-align:center; }
+.wb-status { flex:1; min-height:18px; font-family:var(--mono); font-size:11px; letter-spacing:.04em; color:var(--muted); display:flex; align-items:center; gap:6px; }
+.wb-status-err { color:#8B0000; }
+.wb-status-ok  { color:var(--green); }
+.wb-status-loading { color:var(--blue); }
+.wb-status-cached  { color:var(--ink-2); }
+
+/* Trip-wide summary */
+.wb-summary {
+  border:2px solid var(--ink); border-radius:var(--r);
+  background:linear-gradient(135deg, var(--paper) 0%, var(--paper-2) 100%);
+  padding:18px 20px; margin-bottom:16px;
+}
+.wb-sum-top { display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+.wb-sum-emoji { font-size:48px; line-height:1; flex-shrink:0; }
+.wb-sum-range { font-family:var(--serif); font-weight:600; font-size:34px; letter-spacing:-.02em; line-height:1; color:var(--ink); }
+.wb-sum-range span { font-size:18px; font-weight:500; color:var(--muted); margin-left:2px; }
+.wb-sum-band { font-family:var(--serif); font-size:17px; color:var(--ink-2); margin-top:4px; line-height:1.25; }
+.wb-sum-line { font-size:14px; line-height:1.55; color:var(--ink-2); margin-top:14px; padding-top:14px; border-top:1px solid var(--rule); }
+.wb-sum-line b { color:var(--ink); }
+.wb-sum-flags { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+.wb-flag-chip { display:inline-flex; align-items:center; gap:6px; font-family:var(--mono); font-size:10px; letter-spacing:.06em; text-transform:uppercase; padding:5px 10px; border-radius:2px; border:1px solid var(--rule); background:var(--paper); color:var(--ink-2); }
+.wb-flag-chip b { color:var(--ink); font-weight:700; }
+.wb-flag-chip.rain  { border-color:rgba(33,118,210,.4); background:rgba(33,118,210,.08); }
+.wb-flag-chip.sun   { border-color:rgba(255,210,63,.5); background:#FFF6CC; color:#9E7A00; }
+.wb-flag-chip.wind  { border-color:var(--rule); }
+.wb-flag-chip.snow  { border-color:rgba(33,118,210,.4); background:rgba(33,118,210,.08); }
+
+/* Packing suggestion card */
+.wb-pack-card { border:1.5px solid var(--ink); border-radius:var(--r); background:var(--paper); margin-bottom:8px; overflow:hidden; }
+.wb-pack-hdr { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; padding:12px 16px; background:var(--paper-2); border-bottom:1.5px solid var(--ink); }
+.wb-pack-title { font-family:var(--serif); font-size:18px; font-weight:600; letter-spacing:-.01em; }
+.wb-pack-items { display:flex; flex-wrap:wrap; gap:8px; padding:16px; }
+.wb-pack-item { display:inline-flex; align-items:center; gap:6px; font-size:13px; line-height:1.3; padding:7px 11px; border:1px solid var(--rule); border-radius:var(--r); background:var(--paper-2); color:var(--ink); }
+.wb-pack-item .wb-pack-ico { font-size:13px; }
+.wb-pack-note { padding:0 16px 14px; font-family:var(--mono); font-size:10px; letter-spacing:.06em; color:var(--muted); }
+.wb-pack-note.ok { color:var(--green); }
+
+/* Day-by-day cards */
+.wb-days { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
+@media(max-width:760px){ .wb-days { grid-template-columns:1fr; } }
+.wb-day { border:1.5px solid var(--ink); border-radius:var(--r); background:var(--paper); padding:13px 15px; display:flex; gap:14px; align-items:flex-start; }
+.wb-day-l { flex-shrink:0; text-align:center; width:60px; }
+.wb-day-name { font-family:var(--serif); font-weight:600; font-size:15px; color:var(--ink); line-height:1.1; }
+.wb-day-sub { font-family:var(--mono); font-size:9px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin-top:2px; }
+.wb-day-icon { font-size:34px; line-height:1; margin-top:8px; }
+.wb-day-r { flex:1; min-width:0; }
+.wb-day-top { display:flex; align-items:baseline; justify-content:space-between; gap:8px; flex-wrap:wrap; }
+.wb-day-temps { display:flex; gap:7px; align-items:baseline; }
+.wb-hi { font-family:var(--serif); font-weight:600; font-size:20px; color:var(--ink); }
+.wb-lo { font-family:var(--serif); font-weight:500; font-size:15px; color:var(--muted); }
+.wb-day-band { font-family:var(--mono); font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-2); display:inline-flex; align-items:center; gap:4px; }
+.wb-day-outfit { font-size:13px; line-height:1.45; color:var(--ink-2); margin-top:8px; }
+.wb-day-outfit b { color:var(--ink); }
+.wb-day-badges { display:flex; flex-wrap:wrap; gap:6px; margin-top:9px; }
+.wb-badge { font-family:var(--mono); font-size:9px; letter-spacing:.04em; padding:3px 7px; border-radius:2px; border:1px solid var(--rule); color:var(--ink-2); background:var(--paper-2); }
+.wb-badge.rain { border-color:rgba(33,118,210,.4); color:var(--blue); }
+.wb-badge.sun  { border-color:rgba(255,210,63,.5); color:#9E7A00; background:#FFF6CC; }
+.wb-badge.wind { border-color:var(--rule); }
+
+.wb-print-header { display:none; }
+@media print {
+  #view-wardrobe .tool-bar, #view-wardrobe .ctx-banner, #view-wardrobe .pro-tip,
+  #view-wardrobe .related, #view-wardrobe .wb-search-row, #view-wardrobe .wb-geo-btn,
+  #view-wardrobe .wb-meta-row, #view-wardrobe .wx-empty, #view-wardrobe #wb-send-btn { display:none !important; }
+  #view-wardrobe .wb-summary, #view-wardrobe .wb-pack-card, #view-wardrobe .wb-day,
+  #view-wardrobe .wx-loc { background:#fff !important; border-color:#000 !important; }
+  #view-wardrobe .wb-days { grid-template-columns:repeat(2,1fr) !important; }
+  .wb-print-header { display:flex; justify-content:space-between; font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:#666; padding:0 0 12px; border-bottom:1px solid #ccc; margin:16px 24px; }
+}
+</style>
 <style>
 .pp-search-wrap{position:relative}
 .pp-search-input{width:100%;padding:10px 12px;border:1.5px solid var(--ink);border-radius:var(--r);font-size:14px;font-family:var(--sans);background:var(--paper);color:var(--ink);box-sizing:border-box;outline:none;min-height:44px}
@@ -13208,7 +13368,7 @@ const TOOLS = [
   {id:'baggage',       nm:'Baggage Fee Calculator',     ico:'💸', ph:'packing',   on:false, live:true,  ds:'Carry-on & checked bag fees for 35 major airlines.'},
   {id:'carry-on',      nm:'Carry-On Size Checker',      ico:'📐', ph:'packing',   on:false, live:true,  ds:'Enter dimensions + airline → fits / borderline / too large.'},
   {id:'luggage-wt',    nm:'Luggage Weight Calculator',  ico:'⚖️', ph:'packing',   on:false, live:true,  ds:'Virtual baggage scale. Add items & see remaining allowance.'},
-  {id:'wardrobe',      nm:'Weather-Based Wardrobe',     ico:'🌤', ph:'packing',   on:true,  live:false, ds:'14-day forecast → packing suggestions per condition.'},
+  {id:'wardrobe',      nm:'Weather-Based Wardrobe',     ico:'🌤', ph:'packing',   on:true,  live:true,  ds:'14-day forecast → packing suggestions per condition.'},
   {id:'power-plug',    nm:'Power Plug & Adapter Guide', ico:'🔌', ph:'packing',   on:false, live:true,  ds:'Home + destination = plug types needed, voltage & converter advice.'},
   {id:'no-pack',       nm:'What NOT to Pack',           ico:'🚫', ph:'packing',   on:false, live:false, ds:'TSA, customs & cruise prohibited items. Searchable guide.'},
   {id:'currency',      nm:'Currency Converter',         ico:'💱', ph:'money',     on:true,  live:true,  ds:'Live rates for 150+ currencies. Cached for offline use.'},
@@ -13321,6 +13481,14 @@ function generateList() {
     const clothCat = Object.keys(catMap).find(k=>k.toLowerCase().includes('clothing')||k.toLowerCase().includes('warm')||k.toLowerCase().includes('cold')||k.toLowerCase().includes('layer'));
     if (clothCat) catMap[clothCat].push('Laundry bag (plan to do laundry on longer trip)');
   }
+
+  // Merge forecast-driven items handed over by the Weather-Based Wardrobe tool.
+  try {
+    const wb = JSON.parse(localStorage.getItem('tt_wardrobe_items_'+getActiveTripId())||'[]');
+    if (Array.isArray(wb) && wb.length) {
+      catMap['🌤 Weather Wardrobe'] = wb.slice();
+    }
+  } catch(_){}
 
   plList = Object.entries(catMap).map(([cat,items])=>({cat,items}));
   const tid = getActiveTripId();
@@ -13891,6 +14059,9 @@ function injectTripCtx(id) {
       document.getElementById('pl-days').value=d;
     }
   } else if(ctx){ ctx.classList.remove('show'); }
+  // Arriving from the Weather-Based Wardrobe hand-off: build the list so the
+  // forecast-driven items show immediately.
+  if(id==='packing'&&wbPendingPacking){ wbPendingPacking=false; generateList(); }
   if(id==='doc-checklist') dcInit();
   if(id==='bucket-list') blInit();
   if(id==='trip-duration') tdInit();
@@ -13945,6 +14116,7 @@ function injectTripCtx(id) {
   if(id==='vaccination') vacInit();
   if(id==='ff-tracker') ffInit();
   if(id==='weather')    wxInit();
+  if(id==='wardrobe')   wbInit();
   if(id==='uv-index')   uvInit();
   if(id==='altitude')   asInit();
   if(id==='trip-recap') tcrInit();
@@ -35915,6 +36087,404 @@ function wxWriteCache(d) {
 function wxReadCache() {
   try {
     const raw = localStorage.getItem(WX_CACHE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw); // returned even if expired so we can offer offline fallback
+  } catch(_) { return null; }
+}
+
+/* ════════════════════════════════════════════════════════════
+   WEATHER-BASED WARDROBE  (id: wardrobe)
+   Pulls a 14-day Open-Meteo forecast (shares wxGeocode + WX_CODES
+   + country-flag helpers with the Weather tool) and turns it into
+   a trip-wide wardrobe plan, an aggregated packing list, and a
+   day-by-day outfit breakdown. Online tool with a 3-hour cache +
+   offline fallback. Can hand its suggestions to the Smart Packing
+   List via tt_wardrobe_items_{tripId}.
+   ════════════════════════════════════════════════════════════ */
+
+const WB_CACHE_KEY = 'tt_wb_cache';
+const WB_TTL_MS    = 3 * 60 * 60 * 1000; // 3 hours, per design doc §10
+const WB_DAYS      = 14;                  // 14-day forecast per design doc
+
+/* Temperature bands keyed on the day's feels-like high (°C).
+   `max` is the exclusive upper bound; the first band a value falls
+   under wins. `items` feed the aggregated packing list. */
+const WB_BANDS = [
+  { id:'frigid',   max:-5,       emoji:'🥶', label:'Frigid',
+    outfit:'Heavy insulated coat, thermal base layers, hat, gloves &amp; scarf',
+    items:['Insulated parka / heavy winter coat','Thermal base layers (top &amp; bottom)','Wool sweater or heavy fleece','Warm hat / beanie','Insulated gloves','Scarf or neck gaiter','Thick wool socks'] },
+  { id:'freezing', max:4,        emoji:'❄️', label:'Freezing',
+    outfit:'Warm coat over a sweater and base layer, plus hat &amp; gloves',
+    items:['Warm winter coat','Sweater or fleece','Thermal base layer','Warm hat','Gloves','Scarf','Wool socks'] },
+  { id:'cold',     max:10,       emoji:'🧥', label:'Cold',
+    outfit:'Insulated jacket or heavy sweater, long sleeves, long trousers',
+    items:['Insulated jacket','Sweater or hoodie','Long-sleeve shirts','Long trousers / jeans','Warm socks'] },
+  { id:'cool',     max:16,       emoji:'🍂', label:'Cool',
+    outfit:'Light jacket or sweater over a long-sleeve top, long trousers',
+    items:['Light jacket or cardigan','Long-sleeve tops','Sweater for layering','Trousers / jeans'] },
+  { id:'mild',     max:22,       emoji:'🌤', label:'Mild',
+    outfit:'Long- or short-sleeve top with a light layer for mornings',
+    items:['Mix of short- &amp; long-sleeve tops','Light cardigan or overshirt','Trousers or chinos'] },
+  { id:'warm',     max:28,       emoji:'👕', label:'Warm',
+    outfit:'T-shirts and shorts or light trousers, with a layer for AC',
+    items:['T-shirts / lightweight tops','Shorts or light trousers','Light cardigan (for AC / evenings)','Sandals'] },
+  { id:'hot',      max:Infinity, emoji:'🥵', label:'Hot',
+    outfit:'Lightweight, breathable clothing — sun hat and sandals',
+    items:['Lightweight breathable tops','Shorts / linen trousers','Sundress or linen shirt','Sandals'] },
+];
+const WB_SNOW_CODES = [71,73,75,77,85,86];
+
+let wbUnit    = 'F';     // shares the tt_wx_unit preference with the Weather tool
+let wbCurrent = null;    // { query, location, data, ts }
+let wbInited  = false;
+let wbPendingPacking = false; // set when handing items to the Smart Packing List
+
+function wbInit() {
+  // Temperature-unit preference is global (design doc §10.1) — share the Weather tool's key.
+  const savedUnit = localStorage.getItem(WX_UNIT_KEY);
+  if (savedUnit === 'C' || savedUnit === 'F') wbUnit = savedUnit;
+  wbApplyUnitChips();
+
+  const pd = document.getElementById('wb-print-date');
+  if (pd) pd.textContent = 'Printed ' + new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+
+  const input = document.getElementById('wb-q');
+  if (!wbInited) {
+    wbInited = true;
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); wbSearch(); }
+    });
+  }
+
+  const cached = wbReadCache();
+  const trip = getActiveTrip();
+
+  if (cached) {
+    wbCurrent = cached;
+    input.value = cached.query || '';
+    wbRender();
+    const age = Date.now() - cached.ts;
+    wbSetStatus('cached', age < WB_TTL_MS
+      ? `Cached forecast · ${wxAgo(cached.ts)}`
+      : `Cached forecast is stale (${wxAgo(cached.ts)}) — tap "Plan Wardrobe" to refresh.`);
+  } else if (trip && trip.destination) {
+    input.value = trip.destination;
+    wbSetStatus('idle', `Loaded "${trip.destination}" from your trip — tap "Plan Wardrobe" to fetch.`);
+  } else {
+    wbSetStatus('idle', '');
+  }
+}
+
+async function wbSearch() {
+  const q = document.getElementById('wb-q').value.trim();
+  if (!q) { wbSetStatus('err', '⚠ Enter a destination first.'); return; }
+  if (!navigator.onLine) { wbSetStatus('err', '✈️ Offline — connect to load a fresh forecast.'); return; }
+
+  const btn = document.getElementById('wb-go-btn');
+  btn.disabled = true; btn.style.opacity = '.6';
+  try {
+    wbSetStatus('loading', '🔄 Looking up location…');
+    const loc = await wxGeocode(q); // shared with Weather + UV tools
+    wbSetStatus('loading', `🔄 Fetching 14-day forecast for ${loc.name}…`);
+    const data = await wbFetchForecast(loc.lat, loc.lng);
+    wbCurrent = { query: q, location: loc, data, ts: Date.now() };
+    wbWriteCache(wbCurrent);
+    wbRender();
+    wbSetStatus('ok', `✓ Live forecast · updated ${wxAgo(wbCurrent.ts)}`);
+  } catch (err) {
+    wbSetStatus('err', '⚠ ' + (err.message || 'Could not fetch forecast.'));
+  } finally {
+    btn.disabled = false; btn.style.opacity = '';
+  }
+}
+
+function wbGeoLocate() {
+  if (!navigator.geolocation) { wbSetStatus('err', '⚠ Geolocation isn’t supported on this device — search by city.'); return; }
+  if (!navigator.onLine)      { wbSetStatus('err', '✈️ Offline — connect to use your location.'); return; }
+  wbSetStatus('loading', '📍 Getting your location…');
+  navigator.geolocation.getCurrentPosition(async (pos) => {
+    try {
+      const { latitude, longitude } = pos.coords;
+      wbSetStatus('loading', '🔄 Fetching 14-day forecast for your location…');
+      const data = await wbFetchForecast(latitude, longitude);
+      const loc = { name:'My location', country:'', admin:'', lat:latitude, lng:longitude, tz:data.timezone || 'local', flag:'📍' };
+      wbCurrent = { query:'', location:loc, data, ts:Date.now() };
+      wbWriteCache(wbCurrent);
+      document.getElementById('wb-q').value = '';
+      wbRender();
+      wbSetStatus('ok', `✓ Live forecast · your location · ${wxAgo(wbCurrent.ts)}`);
+    } catch (err) {
+      wbSetStatus('err', '⚠ ' + (err.message || 'Could not fetch forecast.'));
+    }
+  }, (err) => {
+    wbSetStatus('err', err && err.code === 1
+      ? '⚠ Location permission denied — search by city instead.'
+      : '⚠ Couldn’t get your location — search by city instead.');
+  }, { enableHighAccuracy:false, timeout:10000, maximumAge:600000 });
+}
+
+async function wbFetchForecast(lat, lng) {
+  // Always metric — convert on render for the unit toggle.
+  const params = new URLSearchParams({
+    latitude:  String(lat),
+    longitude: String(lng),
+    daily:     'weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,uv_index_max',
+    forecast_days:      String(WB_DAYS),
+    temperature_unit:   'celsius',
+    wind_speed_unit:    'kmh',
+    precipitation_unit: 'mm',
+    timezone:           'auto'
+  });
+  const res = await fetch(`${WX_API_URL}?${params}`);
+  if (!res.ok) throw new Error(`Forecast unavailable (HTTP ${res.status}).`);
+  return await res.json();
+}
+
+/* ── Unit toggle (shared global preference) ── */
+function wbSetUnit(el) {
+  wbUnit = el.dataset.wbUnit;
+  try { localStorage.setItem(WX_UNIT_KEY, wbUnit); } catch(_){}
+  wbApplyUnitChips();
+  if (wbCurrent) wbRender();
+}
+function wbApplyUnitChips() {
+  document.querySelectorAll('.wb-unit-chip').forEach(c => {
+    c.classList.toggle('on', c.dataset.wbUnit === wbUnit);
+  });
+}
+function wbTempStr(c) {
+  if (c == null || isNaN(c)) return '—';
+  return Math.round(wbUnit === 'F' ? c * 9/5 + 32 : c) + '°';
+}
+
+/* ── Classification ── */
+function wbBandFor(feelsHighC) {
+  const v = (feelsHighC == null || isNaN(feelsHighC)) ? 15 : feelsHighC;
+  return WB_BANDS.find(b => v < b.max) || WB_BANDS[WB_BANDS.length - 1];
+}
+
+/* Build the per-day plan + trip-wide aggregates from the daily arrays. */
+function wbBuildPlan(data) {
+  const d = data.daily || {};
+  const n = (d.time || []).length;
+  const days = [];
+  let minLow = Infinity, maxHigh = -Infinity;
+  let rainDays = 0, snowDays = 0, windDays = 0, sunDays = 0;
+  const bandSeen = new Set();
+
+  // Item accumulator preserves insertion order; tag with the warmth rank so
+  // the aggregated list reads coldest-gear → warm-gear → conditions.
+  const itemOrder = [];
+  const addItem = (label, rank, ico) => {
+    if (!itemOrder.some(i => i.label === label)) itemOrder.push({ label, rank, ico });
+  };
+
+  for (let i = 0; i < n; i++) {
+    const hiAct = d.temperature_2m_max ? d.temperature_2m_max[i] : null;
+    const loAct = d.temperature_2m_min ? d.temperature_2m_min[i] : null;
+    const hiFeel = d.apparent_temperature_max ? d.apparent_temperature_max[i] : hiAct;
+    const loFeel = d.apparent_temperature_min ? d.apparent_temperature_min[i] : loAct;
+    const code = d.weather_code ? d.weather_code[i] : null;
+    const pop  = d.precipitation_probability_max ? d.precipitation_probability_max[i] : null;
+    const psum = d.precipitation_sum ? d.precipitation_sum[i] : null;
+    const wind = d.wind_speed_10m_max ? d.wind_speed_10m_max[i] : null;
+    const uv   = d.uv_index_max ? d.uv_index_max[i] : null;
+
+    const band = wbBandFor(hiFeel);
+    bandSeen.add(band.id);
+    band.items.forEach(it => addItem(it, WB_BANDS.indexOf(band), '👕'));
+
+    const isRain = (pop != null && pop >= 40) || (psum != null && psum >= 2);
+    const isSnow = code != null && WB_SNOW_CODES.includes(code);
+    const isWind = wind != null && wind >= 35;
+    const isSun  = (uv != null && uv >= 6) || band.id === 'hot' || band.id === 'warm';
+    const swing  = (hiFeel != null && loFeel != null) ? (hiFeel - loFeel) >= 12 : false;
+
+    if (loAct != null && loAct < minLow)  minLow = loAct;
+    if (hiAct != null && hiAct > maxHigh) maxHigh = hiAct;
+    if (isRain) rainDays++;
+    if (isSnow) snowDays++;
+    if (isWind) windDays++;
+    if (isSun)  sunDays++;
+
+    if (isRain)  { addItem('Packable rain jacket / waterproof shell', 90, '🌧'); addItem('Compact travel umbrella', 91, '☂️'); }
+    if (isSnow)  { addItem('Waterproof insulated boots', 92, '🥾'); addItem('Waterproof gloves', 93, '🧤'); }
+    if (isWind)  { addItem('Windproof outer layer', 94, '💨'); }
+    if (isSun)   { addItem('Sunglasses', 95, '🕶'); addItem('Sun hat / cap', 96, '🧢'); addItem('Sunscreen SPF 30+', 97, '🧴'); addItem('Lip balm with SPF', 98, '💋'); }
+
+    days.push({
+      iso: d.time[i], idx: i, band, code,
+      hiFeel, loFeel, hiAct, loAct,
+      pop, psum, wind, uv,
+      isRain, isSnow, isWind, isSun, swing
+    });
+  }
+
+  // Always-useful basics for any trip.
+  addItem('Comfortable walking shoes', 50, '👟');
+  addItem('Underwear &amp; socks (1 per day + 2)', 51, '🧦');
+  addItem('Sleepwear', 52, '🛌');
+
+  const items = itemOrder.sort((a, b) => a.rank - b.rank);
+  return {
+    days, items,
+    minLow: minLow === Infinity ? null : minLow,
+    maxHigh: maxHigh === -Infinity ? null : maxHigh,
+    rainDays, snowDays, windDays, sunDays,
+    bandSeen
+  };
+}
+
+/* ── Render ── */
+function wbRender() {
+  if (!wbCurrent) return;
+  const { location, data, ts } = wbCurrent;
+  const plan = wbBuildPlan(data);
+
+  document.getElementById('wb-empty').style.display = 'none';
+  document.getElementById('wb-result').style.display = '';
+
+  // Location header (reuses the Weather tool's .wx-loc styling)
+  const locParts = [location.name, location.admin, location.country].filter(Boolean);
+  document.getElementById('wb-loc').innerHTML = `
+    <div class="wx-loc-name">
+      ${location.flag ? `<span class="wx-flag">${location.flag}</span>` : ''}
+      <span>${escapeHtml(locParts.join(', '))}</span>
+    </div>
+    <div class="wx-loc-sub">
+      ${location.lat.toFixed(2)}°, ${location.lng.toFixed(2)}° ·
+      ${escapeHtml(location.tz)} · ${plan.days.length}-day plan · Updated ${wxAgo(ts)}
+    </div>`;
+
+  // Trip-wide summary
+  const coldBand = wbBandFor(plan.minLow);
+  const warmBand = wbBandFor(plan.maxHigh);
+  const spread = (plan.maxHigh != null && plan.minLow != null) ? (plan.maxHigh - plan.minLow) : 0;
+  const sumEmoji = warmBand.emoji;
+  let bandLine, layerLine;
+  if (coldBand.id === warmBand.id) {
+    bandLine = `${warmBand.label} throughout`;
+  } else {
+    bandLine = `${coldBand.label} mornings → ${warmBand.label} afternoons`;
+  }
+  const spreadDeg = Math.round(wbUnit === 'F' ? spread * 9/5 : spread); // a delta: no +32 offset
+  if (spread >= 17 || (plan.bandSeen.has('cold') && (plan.bandSeen.has('warm') || plan.bandSeen.has('hot')))) {
+    layerLine = `<b>Pack versatile layers.</b> Temperatures swing about ${spreadDeg}°${wbUnit} across the forecast — bring pieces you can add and shed rather than one heavy item.`;
+  } else if (spread >= 9) {
+    layerLine = `<b>Bring a light layer.</b> Mornings and evenings run cooler than midday — a packable jacket or sweater covers the gap.`;
+  } else {
+    layerLine = `<b>Conditions are steady.</b> Temperatures hold a fairly narrow range, so you can pack light and consistent.`;
+  }
+
+  const flags = [];
+  if (plan.rainDays) flags.push(`<span class="wb-flag-chip rain">🌧 <b>${plan.rainDays}</b> rainy ${plan.rainDays===1?'day':'days'}</span>`);
+  if (plan.snowDays) flags.push(`<span class="wb-flag-chip snow">❄️ <b>${plan.snowDays}</b> snow ${plan.snowDays===1?'day':'days'}</span>`);
+  if (plan.sunDays)  flags.push(`<span class="wb-flag-chip sun">☀️ <b>${plan.sunDays}</b> high-sun ${plan.sunDays===1?'day':'days'}</span>`);
+  if (plan.windDays) flags.push(`<span class="wb-flag-chip wind">💨 <b>${plan.windDays}</b> windy ${plan.windDays===1?'day':'days'}</span>`);
+
+  document.getElementById('wb-summary').innerHTML = `
+    <div class="wb-sum-top">
+      <span class="wb-sum-emoji">${sumEmoji}</span>
+      <div>
+        <div class="wb-sum-range">${wbTempStr(plan.minLow)}<span> to </span>${wbTempStr(plan.maxHigh)}<span>${wbUnit}</span></div>
+        <div class="wb-sum-band">${escapeHtml(bandLine)}</div>
+      </div>
+    </div>
+    ${flags.length ? `<div class="wb-sum-flags">${flags.join('')}</div>` : ''}
+    <div class="wb-sum-line">${layerLine}</div>`;
+
+  // Aggregated packing suggestions
+  document.getElementById('wb-pack-items').innerHTML = plan.items.map(it =>
+    `<span class="wb-pack-item"><span class="wb-pack-ico">${it.ico}</span>${it.label}</span>`
+  ).join('');
+  const note = document.getElementById('wb-pack-note');
+  note.className = 'wb-pack-note';
+  note.textContent = `${plan.items.length} suggested items · tailored to the forecast above`;
+
+  // Day-by-day
+  document.getElementById('wb-days').innerHTML = plan.days.map(day => {
+    const lbl  = wxDayLabel(day.iso, day.idx);
+    const info = wxCodeInfo(day.code, 1);
+    const badges = [];
+    if (day.isRain) badges.push(`<span class="wb-badge rain">🌧 ${day.pop != null ? day.pop + '% rain' : 'rain'}</span>`);
+    if (day.isSnow) badges.push(`<span class="wb-badge rain">❄️ snow</span>`);
+    if (day.isSun)  badges.push(`<span class="wb-badge sun">☀️ ${day.uv != null ? 'UV ' + Math.round(day.uv) : 'high sun'}</span>`);
+    if (day.isWind) badges.push(`<span class="wb-badge wind">💨 wind</span>`);
+    if (day.swing)  badges.push(`<span class="wb-badge">🔀 big swing</span>`);
+
+    const extras = [];
+    if (day.isRain) extras.push('pack a rain shell &amp; umbrella');
+    if (day.isSnow) extras.push('waterproof boots for snow');
+    if (day.isWind) extras.push('add a windproof layer');
+    if (day.isSun)  extras.push('sun hat &amp; sunscreen');
+    if (day.swing)  extras.push('a layer for the cooler evening');
+    const extraStr = extras.length ? ` <b>·</b> ${extras.join(', ')}` : '';
+
+    return `
+      <div class="wb-day">
+        <div class="wb-day-l">
+          <div class="wb-day-name">${lbl.name}</div>
+          <div class="wb-day-sub">${lbl.sub}</div>
+          <div class="wb-day-icon">${info.icon}</div>
+        </div>
+        <div class="wb-day-r">
+          <div class="wb-day-top">
+            <span class="wb-day-temps"><span class="wb-hi">${wbTempStr(day.hiAct)}</span><span class="wb-lo">${wbTempStr(day.loAct)}</span></span>
+            <span class="wb-day-band">${day.band.emoji} ${day.band.label}</span>
+          </div>
+          <div class="wb-day-outfit"><b>Wear:</b> ${day.band.outfit}${extraStr}</div>
+          ${badges.length ? `<div class="wb-day-badges">${badges.join('')}</div>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+
+  // Offline / staleness notice + connectivity badge (mirrors the Weather tool)
+  const off = document.getElementById('wb-offline-notice');
+  const stale = Date.now() - ts > WB_TTL_MS;
+  if (!navigator.onLine) {
+    off.style.display = '';
+    off.innerHTML = `<span>✈️</span><div><strong>Showing cached forecast.</strong>Captured ${wxAgo(ts)} — connect to refresh.</div>`;
+  } else if (stale) {
+    off.style.display = '';
+    off.innerHTML = `<span>⏳</span><div><strong>Cached forecast is more than 3 hours old.</strong>Tap "Plan Wardrobe" to refresh.</div>`;
+  } else {
+    off.style.display = 'none';
+  }
+  const bdg = document.getElementById('wb-conn-bdg');
+  if (!navigator.onLine)   { bdg.className = 'conn-bdg bdg-off'; bdg.textContent = '✈️ Cached Forecast'; }
+  else if (stale)          { bdg.className = 'conn-bdg bdg-off'; bdg.textContent = '⚠ Refresh Needed'; }
+  else                     { bdg.className = 'conn-bdg bdg-on';  bdg.textContent = '🌐 Live Forecast'; }
+}
+
+/* ── Send aggregated items to the Smart Packing List ── */
+function wbSendToPacking() {
+  if (!wbCurrent) return;
+  const plan = wbBuildPlan(wbCurrent.data);
+  // Strip the HTML entities we used for display before persisting.
+  const items = plan.items.map(i => i.label.replace(/&amp;/g, '&'));
+  const tid = getActiveTripId();
+  try { localStorage.setItem('tt_wardrobe_items_' + tid, JSON.stringify(items)); } catch(_){}
+
+  const note = document.getElementById('wb-pack-note');
+  note.className = 'wb-pack-note ok';
+  note.textContent = `✓ ${items.length} items sent to your Smart Packing List — opening it now…`;
+  wbPendingPacking = true;
+  setTimeout(() => openTool('packing'), 650);
+}
+
+function wbSetStatus(kind, msg) {
+  const el = document.getElementById('wb-status');
+  if (!el) return;
+  el.className = 'wb-status' + (kind && kind !== 'idle' ? ' wb-status-' + kind : '');
+  el.textContent = msg || '';
+}
+
+function wbWriteCache(d) {
+  try { localStorage.setItem(WB_CACHE_KEY, JSON.stringify(d)); } catch(_){}
+}
+function wbReadCache() {
+  try {
+    const raw = localStorage.getItem(WB_CACHE_KEY);
     if (!raw) return null;
     return JSON.parse(raw); // returned even if expired so we can offer offline fallback
   } catch(_) { return null; }
