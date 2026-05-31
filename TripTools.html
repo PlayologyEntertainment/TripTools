@@ -10705,16 +10705,131 @@ input:checked + .pb-toggle-box::after { transform:translateX(16px);background:#f
     </div>
   </div>
 </div>
-<div id="view-placeholder-per-diem" class="view">
-  <nav class="tool-topbar">
+<style>
+/* ── PER DIEM CALCULATOR ── */
+#view-per-diem .pdc-inputs{border:1.5px solid var(--ink);border-radius:var(--r);background:var(--paper-2);padding:18px 18px 6px}
+#view-per-diem .pdc-rule{display:flex;align-items:flex-start;gap:10px;border:1.5px solid var(--rule);border-radius:var(--r);background:var(--paper);padding:11px 13px;cursor:pointer;margin-bottom:18px}
+#view-per-diem .pdc-rule:hover{border-color:var(--ink)}
+#view-per-diem .pdc-rule.on{border-color:var(--ink);background:var(--paper-2)}
+#view-per-diem .pdc-rule input{position:absolute;opacity:0;width:0;height:0}
+.pdc-rule-box{flex-shrink:0;width:19px;height:19px;border:1.5px solid var(--muted);border-radius:4px;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--paper)}
+#view-per-diem .pdc-rule.on .pdc-rule-box{background:var(--ink);border-color:var(--ink)}
+#view-per-diem .pdc-rule.on .pdc-rule-box::after{content:'✓'}
+.pdc-rule-body{font-size:13px;line-height:1.4;color:var(--ink)}
+.pdc-rule-body small{display:block;color:var(--muted);font-size:11.5px;line-height:1.45;margin-top:3px}
+
+/* result */
+#pdc-result{margin-top:22px}
+.pdc-empty{padding:20px;border:1.5px dashed var(--rule);border-radius:var(--r);text-align:center;font-size:13px;color:var(--muted);line-height:1.5}
+.pdc-rate-hdr{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;border-bottom:2px solid var(--ink);padding-bottom:12px;margin-bottom:16px}
+.pdc-rate-city{font-family:var(--serif);font-size:21px;font-weight:700;letter-spacing:-.02em;line-height:1.15}
+.pdc-rate-region{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:3px}
+.pdc-rate-daily{text-align:right;font-family:var(--mono);font-size:11px;color:var(--muted);line-height:1.6;white-space:nowrap}
+.pdc-rate-daily b{color:var(--ink);font-size:14px}
+
+.pdc-totals{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:18px}
+@media(max-width:560px){.pdc-totals{grid-template-columns:1fr}}
+.pdc-tcard{border:1.5px solid var(--ink);border-radius:var(--r);background:var(--paper);padding:14px 16px;position:relative;overflow:hidden}
+.pdc-tcard::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px}
+.pdc-tcard.lodging::before{background:var(--blue)}
+.pdc-tcard.mie::before{background:var(--teal)}
+.pdc-tcard.grand::before{background:var(--accent)}
+.pdc-tcard.grand{background:var(--paper-2)}
+.pdc-tlbl{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.pdc-tval{font-family:var(--serif);font-size:27px;font-weight:700;letter-spacing:-.02em;line-height:1.1;margin-top:5px}
+.pdc-tcard.grand .pdc-tval{color:var(--accent)}
+.pdc-tsub{font-size:11.5px;color:var(--muted);line-height:1.4;margin-top:4px}
+
+.pdc-bd-hd{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:18px 0 9px}
+.pdc-breakdown{list-style:none;border:1.5px solid var(--rule);border-radius:var(--r);overflow:hidden}
+.pdc-breakdown li{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:baseline;padding:10px 14px;border-top:1px solid var(--rule);font-size:13px;line-height:1.4}
+.pdc-breakdown li:first-child{border-top:none}
+.pdc-breakdown li .pdc-bd-lbl{color:var(--ink-2)}
+.pdc-breakdown li .pdc-bd-lbl b{color:var(--ink)}
+.pdc-breakdown li .pdc-bd-amt{font-family:var(--mono);font-size:13px;color:var(--ink);white-space:nowrap}
+.pdc-breakdown li small{display:block;color:var(--muted);font-size:11px;margin-top:2px}
+
+/* M&IE meal breakdown */
+.pdc-mie{margin-top:8px;border:1.5px solid var(--rule);border-radius:var(--r);overflow:hidden}
+.pdc-mie table{width:100%;border-collapse:collapse}
+.pdc-mie th,.pdc-mie td{padding:9px 12px;font-size:12.5px;text-align:right;border-top:1px solid var(--rule)}
+.pdc-mie th:first-child,.pdc-mie td:first-child{text-align:left}
+.pdc-mie thead th{border-top:none;font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;background:var(--paper-2)}
+.pdc-mie td{font-family:var(--mono);color:var(--ink-2)}
+.pdc-mie td:first-child{font-family:var(--sans);color:var(--ink)}
+.pdc-mie tr.total td{font-weight:700;color:var(--ink);border-top:1.5px solid var(--ink)}
+.pdc-intl-note{margin-top:8px;padding:11px 14px;border-radius:var(--r);background:var(--paper-2);border-left:3px solid var(--teal);font-size:12.5px;line-height:1.55;color:var(--ink-2)}
+.pdc-intl-note b{color:var(--ink)}
+
+.pdc-actions{margin-top:18px;display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;align-items:center}
+.pdc-copy-ok{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--green);opacity:0;transition:opacity .2s;margin-right:auto}
+.pdc-copy-ok.show{opacity:1}
+.pdc-src-note{margin-top:22px;padding:13px 16px;border-radius:var(--r);background:var(--paper-2);border:1.5px solid var(--rule);font-size:12px;line-height:1.6;color:var(--muted)}
+.pdc-src-note b{color:var(--ink-2)}
+
+@media print{
+  #view-per-diem .tool-bar,#view-per-diem .ctx-banner,#view-per-diem .pro-tip,
+  #view-per-diem .related,#view-per-diem .pdc-actions,#view-per-diem .pdc-rule{display:none!important}
+  #view-per-diem .pdc-tcard,#view-per-diem .pdc-mie,#view-per-diem .pdc-breakdown{break-inside:avoid}
+}
+</style>
+<div id="view-per-diem" class="view">
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="window.print()">🖨 Print</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">📋</span>
-    <h2>Per Diem Calculator</h2>
-    <p style="margin-bottom:24px">US GSA per diem rates by city. International rates via US State Dept.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-per-diem"></div>
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>Per Diem Calculator</h1>
+    <p class="tool-sub">Work out the federal per diem allowance for a business trip — lodging plus meals &amp; incidentals (M&amp;IE) — using US GSA rates for domestic cities and US State Department rates for international ones. Enter your destination and dates and it applies the 75% first/last travel-day rule and totals it all up.</p>
+  </div>
+
+  <div class="tool-body">
+
+    <div class="pdc-inputs">
+      <div class="fg">
+        <label for="pdc-city">Destination</label>
+        <select id="pdc-city" onchange="pdcCalc()"></select>
+      </div>
+      <div class="frow">
+        <div class="fg">
+          <label for="pdc-start">First day of travel</label>
+          <input type="date" id="pdc-start" onchange="pdcCalc()">
+        </div>
+        <div class="fg">
+          <label for="pdc-end">Last day of travel</label>
+          <input type="date" id="pdc-end" onchange="pdcCalc()">
+        </div>
+      </div>
+      <label class="pdc-rule on" id="pdc-rule-lbl">
+        <input type="checkbox" id="pdc-rule" checked onchange="pdcCalc()">
+        <span class="pdc-rule-box"></span>
+        <span class="pdc-rule-body">Apply the 75% rule on first &amp; last travel days
+          <small>Federal travelers receive only 75% of the daily M&amp;IE on departure and return days. Leave on unless your employer pays full M&amp;IE.</small>
+        </span>
+      </label>
+    </div>
+
+    <div id="pdc-result"><div class="pdc-empty">Pick a destination and your travel dates to see the per diem breakdown.</div></div>
+
+    <div class="pdc-src-note" id="pdc-src-note">
+      <b>About these rates.</b> Figures are representative cached estimates for reference and budgeting — domestic from the <b>US GSA</b>, international from the <b>US State Department</b>. Actual rates change each fiscal year and many cities vary by month/season. Alaska, Hawaii &amp; US territories use Department of Defense rates. <b>Always confirm the current official rate</b> (gsa.gov/perdiem or aoprals.state.gov) before filing an expense report.
+    </div>
+
+  </div><!-- /tool-body -->
+
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    Per diem is an <em>allowance</em>, not a reimbursement of receipts — under the standard method you keep the difference if you spend less than M&amp;IE (lodging usually still needs a receipt up to the cap). The 75% first/last-day rule catches many people out: a 3-day trip isn't 3 full days of meals, it's one full day plus two 75% travel days. Build to the allowance and you'll rarely be out of pocket.
+  </div>
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('expense-report')">🧾 Expense Report Builder</button>
+      <button class="rel-btn" onclick="openTool('expense-track')">📊 Daily Expense Tracker</button>
+      <button class="rel-btn" onclick="openTool('budget-plan')">💰 Budget Planner</button>
+      <button class="rel-btn" onclick="openTool('currency')">💱 Currency Converter</button>
     </div>
   </div>
 </div>
@@ -12474,7 +12589,7 @@ const TOOLS = [
   {id:'park-optimizer',nm:'Park Day Optimizer',         ico:'🗺', ph:'theme',      on:false,live:true,  ds:'Builds an hour-by-hour park day plan: arrival time, rope-drop order, skip-the-line strategy & crowd timing for Disney, Universal, SeaWorld & more.'},
   {id:'ride-height',   nm:'Ride Height Checker',        ico:'📏', ph:'theme',      on:false,live:true,  ds:'Height requirements across Disney, Universal, SeaWorld & more. Check who can ride what.'},
   {id:'park-dining',   nm:'Park Dining Strategy',       ico:'🍴', ph:'theme',      on:false,live:true,  ds:'When reservations open, which tables to book, the best value picks & dietary guidance across Disney, Universal & more.'},
-  {id:'per-diem',      nm:'Per Diem Calculator',        ico:'📋', ph:'business',   on:false,live:false, ds:'US GSA per diem rates by city. International via State Dept.'},
+  {id:'per-diem',      nm:'Per Diem Calculator',        ico:'📋', ph:'business',   on:false,live:true,  ds:'US GSA per diem rates by city. International via State Dept.'},
   {id:'expense-report',nm:'Expense Report Builder',     ico:'🧾', ph:'business',   on:false,live:true,  ds:'Log business expenses. Per diem vs. actual. Mileage, billable, receipts. Export CSV.'},
   {id:'meeting-tz',    nm:'Meeting Time Zone Planner',  ico:'🗓', ph:'business',   on:false,live:true,  ds:'Participants + cities + work hours → color-coded overlap grid and copy-paste invite text.'},
   {id:'lounge-guide',  nm:'Airport Lounge Guide',       ico:'🛋', ph:'business',   on:false,live:true,  ds:'Lounge access by credit card, status or paid entry at 50+ airports.'},
@@ -13179,6 +13294,7 @@ function injectTripCtx(id) {
   if(id==='customs-decl') cdhInit();
   if(id==='flight-delay') fdcInit();
   if(id==='health-check') pthInit();
+  if(id==='per-diem')     pdcInit();
 }
 
 /* ── HUB RENDER ── */
@@ -35663,6 +35779,325 @@ function pthCopyFallback(text) {
 function pthEsc(s) {
   return String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
 }
+
+/* ════════════════════════════════════════════════════════════
+   PER DIEM CALCULATOR
+   Offline GSA (domestic) + State Dept (international) per diem.
+   Curated rate set + standard fallback; full trip breakdown with the
+   75% first/last travel-day M&IE rule. Illustrative rates — guidance only.
+   ════════════════════════════════════════════════════════════ */
+const PDC_KEY = 'tt_per_diem_v1';
+
+// GSA M&IE breakdown by daily tier (FY2025). Incidentals always $5.
+const PDC_MIE_BREAKDOWN = {
+  68: { b:16, l:19, d:28, i:5 },
+  74: { b:18, l:20, d:31, i:5 },
+  80: { b:20, l:22, d:33, i:5 },
+  86: { b:22, l:23, d:36, i:5 },
+  92: { b:23, l:26, d:38, i:5 },
+};
+
+// Standard fallback (GSA standard CONUS rate)
+const PDC_STD = { city:'Standard rate — anywhere not listed', lodging:110, mie:68, intl:false };
+
+// Curated domestic GSA cities (representative rates; lodging varies by month).
+const PDC_US = [
+  { city:'New York City, NY',  lodging:300, mie:92 },
+  { city:'Washington, DC',     lodging:258, mie:92 },
+  { city:'San Francisco, CA',  lodging:270, mie:92 },
+  { city:'Boston, MA',         lodging:309, mie:92 },
+  { city:'Seattle, WA',        lodging:215, mie:92 },
+  { city:'San Jose, CA',       lodging:245, mie:92 },
+  { city:'Chicago, IL',        lodging:218, mie:86 },
+  { city:'Los Angeles, CA',    lodging:182, mie:86 },
+  { city:'San Diego, CA',      lodging:194, mie:86 },
+  { city:'Denver, CO',         lodging:199, mie:86 },
+  { city:'Miami, FL',          lodging:207, mie:86 },
+  { city:'Atlanta, GA',        lodging:174, mie:86 },
+  { city:'Austin, TX',         lodging:174, mie:86 },
+  { city:'Nashville, TN',      lodging:222, mie:86 },
+  { city:'Philadelphia, PA',   lodging:186, mie:86 },
+  { city:'Portland, OR',       lodging:179, mie:86 },
+  { city:'New Orleans, LA',    lodging:169, mie:86 },
+  { city:'Las Vegas, NV',      lodging:129, mie:80 },
+  { city:'Orlando, FL',        lodging:144, mie:80 },
+  { city:'Dallas, TX',         lodging:161, mie:80 },
+  { city:'Houston, TX',        lodging:134, mie:80 },
+  { city:'Phoenix, AZ',        lodging:148, mie:80 },
+  { city:'Minneapolis, MN',    lodging:165, mie:80 },
+  { city:'Honolulu, HI',       lodging:224, mie:92, dod:true },
+  { city:'Anchorage, AK',      lodging:198, mie:86, dod:true },
+];
+
+// Curated international State Dept cities (representative; vary by month).
+const PDC_INTL = [
+  { city:'London, UK',            lodging:250, mie:175 },
+  { city:'Paris, France',         lodging:270, mie:169 },
+  { city:'Geneva, Switzerland',   lodging:380, mie:180 },
+  { city:'Tokyo, Japan',          lodging:230, mie:165 },
+  { city:'Rome, Italy',           lodging:240, mie:159 },
+  { city:'Dublin, Ireland',       lodging:230, mie:160 },
+  { city:'Dubai, UAE',            lodging:250, mie:145 },
+  { city:'Singapore',             lodging:290, mie:130 },
+  { city:'Hong Kong',             lodging:270, mie:140 },
+  { city:'Sydney, Australia',     lodging:220, mie:140 },
+  { city:'Berlin, Germany',       lodging:210, mie:140 },
+  { city:'Frankfurt, Germany',    lodging:200, mie:120 },
+  { city:'Amsterdam, Netherlands',lodging:230, mie:110 },
+  { city:'Madrid, Spain',         lodging:190, mie:140 },
+  { city:'Seoul, South Korea',    lodging:230, mie:120 },
+  { city:'Beijing, China',        lodging:200, mie:120 },
+  { city:'Mumbai, India',         lodging:250, mie:105 },
+  { city:'Toronto, Canada',       lodging:195, mie:120 },
+  { city:'Mexico City, Mexico',   lodging:200, mie:110 },
+  { city:'São Paulo, Brazil',     lodging:200, mie:110 },
+  { city:'Buenos Aires, Argentina',lodging:180, mie:110 },
+  { city:'Bangkok, Thailand',     lodging:180, mie:90 },
+  { city:'Istanbul, Turkey',      lodging:160, mie:95 },
+  { city:'Cairo, Egypt',          lodging:180, mie:100 },
+  { city:'Cape Town, South Africa',lodging:160, mie:95 },
+];
+
+// Build a flat keyed map: '_std', 'us:<i>', 'intl:<i>'
+function pdcRateFor(key) {
+  if (key === '_std' || !key) return PDC_STD;
+  const [grp, iStr] = key.split(':');
+  const i = parseInt(iStr, 10);
+  if (grp === 'us'   && PDC_US[i])   return { ...PDC_US[i],   intl:false };
+  if (grp === 'intl' && PDC_INTL[i]) return { ...PDC_INTL[i], intl:true  };
+  return PDC_STD;
+}
+
+function pdcInit() {
+  // Build the dropdown
+  const sel = document.getElementById('pdc-city');
+  const usOpts   = PDC_US.map((r,i)   => `<option value="us:${i}">${r.city}${r.dod?' (DoD)':''}</option>`).join('');
+  const intlOpts = PDC_INTL.map((r,i) => `<option value="intl:${i}">${r.city}</option>`).join('');
+  sel.innerHTML =
+    `<option value="_std">Standard rate — US city not listed</option>` +
+    `<optgroup label="US cities (GSA)">${usOpts}</optgroup>` +
+    `<optgroup label="International (State Dept)">${intlOpts}</optgroup>`;
+
+  // Restore saved state, else prefill dates from the active trip
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(PDC_KEY) || 'null'); } catch(_) {}
+  const trip = getActiveTrip();
+  let city = '_std', start = '', end = '', rule = true;
+  if (saved) {
+    city  = saved.city  || '_std';
+    start = saved.start || '';
+    end   = saved.end   || '';
+    rule  = saved.rule !== false;
+  }
+  if (!saved && trip) {
+    if (trip.departDate) start = trip.departDate;
+    if (trip.returnDate) end   = trip.returnDate;
+    const match = pdcMatchCity(trip.destination);
+    if (match) city = match;
+  }
+  // Make sure the saved option still exists
+  if (!sel.querySelector(`option[value="${city}"]`)) city = '_std';
+  sel.value = city;
+  document.getElementById('pdc-start').value = start;
+  document.getElementById('pdc-end').value   = end;
+  const rChk = document.getElementById('pdc-rule');
+  rChk.checked = rule;
+  document.getElementById('pdc-rule-lbl').classList.toggle('on', rule);
+  pdcCalc();
+}
+
+// Loose match a free-text trip destination to a curated city
+function pdcMatchCity(dest) {
+  if (!dest) return null;
+  const d = dest.toLowerCase();
+  for (let i = 0; i < PDC_US.length; i++) {
+    const name = PDC_US[i].city.split(',')[0].toLowerCase();
+    if (d.includes(name)) return 'us:' + i;
+  }
+  for (let i = 0; i < PDC_INTL.length; i++) {
+    const name = PDC_INTL[i].city.split(',')[0].toLowerCase();
+    if (d.includes(name)) return 'intl:' + i;
+  }
+  return null;
+}
+
+function pdcSave() {
+  try {
+    localStorage.setItem(PDC_KEY, JSON.stringify({
+      city:  document.getElementById('pdc-city').value,
+      start: document.getElementById('pdc-start').value,
+      end:   document.getElementById('pdc-end').value,
+      rule:  document.getElementById('pdc-rule').checked,
+    }));
+  } catch(_) {}
+}
+
+function pdcMoney(n) {
+  return '$' + (Math.round(n * 100) / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function pdcCompute() {
+  const key   = document.getElementById('pdc-city').value;
+  const rate  = pdcRateFor(key);
+  const sVal  = document.getElementById('pdc-start').value;
+  const eVal  = document.getElementById('pdc-end').value;
+  const rule  = document.getElementById('pdc-rule').checked;
+  if (!sVal || !eVal) return null;
+  const s = new Date(sVal + 'T00:00:00'), e = new Date(eVal + 'T00:00:00');
+  if (isNaN(s) || isNaN(e)) return null;
+  const days = Math.floor((e - s) / 864e5) + 1;
+  if (days < 1) return { error:'Your last day is before your first day — check the dates.' };
+  const nights   = days - 1;
+  const travelDays = days >= 2 ? 2 : 1;
+  const fullDays   = Math.max(0, days - travelDays);
+  const mie75      = rule ? rate.mie * 0.75 : rate.mie;
+  const mieFull    = fullDays * rate.mie;
+  const mieTravel  = travelDays * mie75;
+  const mieTotal   = mieFull + mieTravel;
+  const lodgingTotal = nights * rate.lodging;
+  const grand = lodgingTotal + mieTotal;
+  return { rate, days, nights, fullDays, travelDays, mie75, mieFull, mieTravel, mieTotal, lodgingTotal, grand, rule };
+}
+
+function pdcCalc() {
+  pdcSave();
+  const out = document.getElementById('pdc-result');
+  const r = pdcCompute();
+  if (!r) {
+    out.innerHTML = '<div class="pdc-empty">Pick a destination and your travel dates to see the per diem breakdown.</div>';
+    return;
+  }
+  if (r.error) {
+    out.innerHTML = `<div class="pdc-empty">${r.error}</div>`;
+    return;
+  }
+  const rate = r.rate;
+  const region = rate.intl ? 'International · US State Dept' : (rate === PDC_STD ? 'US GSA · standard CONUS rate' : (rate.dod ? 'US · DoD (OCONUS)' : 'US GSA'));
+
+  // breakdown lines
+  let bd = '';
+  if (r.days === 1) {
+    bd += `<li><span class="pdc-bd-lbl"><b>Single travel day</b> — M&IE ${r.rule?'at 75%':'(full)'}<small>No overnight, so no lodging.</small></span><span class="pdc-bd-amt">${pdcMoney(r.mieTravel)}</span></li>`;
+  } else {
+    bd += `<li><span class="pdc-bd-lbl"><b>First day</b> — M&IE ${r.rule?'at 75%':'(full)'} + 1 night lodging</span><span class="pdc-bd-amt">${pdcMoney(r.mie75 + rate.lodging)}</span></li>`;
+    if (r.fullDays > 0) {
+      bd += `<li><span class="pdc-bd-lbl"><b>${r.fullDays} full day${r.fullDays>1?'s':''}</b> — 100% M&IE + lodging<small>${pdcMoney(rate.mie)} M&IE + ${pdcMoney(rate.lodging)} lodging per day</small></span><span class="pdc-bd-amt">${pdcMoney(r.fullDays * (rate.mie + rate.lodging))}</span></li>`;
+    }
+    bd += `<li><span class="pdc-bd-lbl"><b>Last day</b> — M&IE ${r.rule?'at 75%':'(full)'} (no lodging)</span><span class="pdc-bd-amt">${pdcMoney(r.mie75)}</span></li>`;
+  }
+
+  // M&IE meal breakdown (domestic GSA tiers only)
+  let mieBlock = '';
+  const mb = !rate.intl ? PDC_MIE_BREAKDOWN[rate.mie] : null;
+  if (mb) {
+    const f = v => pdcMoney(v).replace('.00','');
+    mieBlock = `
+      <div class="pdc-bd-hd">M&IE meal breakdown (per day)</div>
+      <div class="pdc-mie">
+        <table>
+          <thead><tr><th>Meal</th><th>Full day</th><th>Travel day (75%)</th></tr></thead>
+          <tbody>
+            <tr><td>Breakfast</td><td>${f(mb.b)}</td><td>${f(mb.b*0.75)}</td></tr>
+            <tr><td>Lunch</td><td>${f(mb.l)}</td><td>${f(mb.l*0.75)}</td></tr>
+            <tr><td>Dinner</td><td>${f(mb.d)}</td><td>${f(mb.d*0.75)}</td></tr>
+            <tr><td>Incidentals</td><td>${f(mb.i)}</td><td>${f(mb.i*0.75)}</td></tr>
+            <tr class="total"><td>Total M&IE</td><td>${f(rate.mie)}</td><td>${f(rate.mie*0.75)}</td></tr>
+          </tbody>
+        </table>
+      </div>`;
+  } else if (rate.intl) {
+    mieBlock = `<div class="pdc-intl-note"><b>International M&IE</b> of ${pdcMoney(rate.mie)}/day is set by the State Department and isn't split into the standard GSA meal tiers. The 75% travel-day reduction still applies (${pdcMoney(r.mie75)}/day).</div>`;
+  }
+
+  out.innerHTML = `
+    <div class="pdc-rate-hdr">
+      <div>
+        <div class="pdc-rate-city">${rate.city}</div>
+        <div class="pdc-rate-region">${region}</div>
+      </div>
+      <div class="pdc-rate-daily">Lodging <b>${pdcMoney(rate.lodging)}</b>/night<br>M&IE <b>${pdcMoney(rate.mie)}</b>/day</div>
+    </div>
+
+    <div class="pdc-totals">
+      <div class="pdc-tcard lodging">
+        <div class="pdc-tlbl">🛏 Lodging</div>
+        <div class="pdc-tval">${pdcMoney(r.lodgingTotal)}</div>
+        <div class="pdc-tsub">${r.nights} night${r.nights===1?'':'s'} × ${pdcMoney(rate.lodging)}</div>
+      </div>
+      <div class="pdc-tcard mie">
+        <div class="pdc-tlbl">🍽 Meals &amp; incidentals</div>
+        <div class="pdc-tval">${pdcMoney(r.mieTotal)}</div>
+        <div class="pdc-tsub">${r.fullDays} full + ${r.travelDays} travel day${r.travelDays===1?'':'s'}</div>
+      </div>
+      <div class="pdc-tcard grand">
+        <div class="pdc-tlbl">∑ Total per diem</div>
+        <div class="pdc-tval">${pdcMoney(r.grand)}</div>
+        <div class="pdc-tsub">${r.days} day${r.days===1?'':'s'} of travel</div>
+      </div>
+    </div>
+
+    <div class="pdc-bd-hd">Day-by-day</div>
+    <ul class="pdc-breakdown">${bd}</ul>
+
+    ${mieBlock}
+
+    <div class="pdc-actions">
+      <span class="pdc-copy-ok" id="pdc-copy-ok">✓ Copied</span>
+      <button class="btn btn-s" onclick="pdcReset()">↺ Reset</button>
+      <button class="btn btn-p" onclick="pdcCopy()">📋 Copy summary</button>
+    </div>`;
+}
+
+function pdcReset() {
+  document.getElementById('pdc-city').value = '_std';
+  document.getElementById('pdc-start').value = '';
+  document.getElementById('pdc-end').value = '';
+  document.getElementById('pdc-rule').checked = true;
+  document.getElementById('pdc-rule-lbl').classList.add('on');
+  pdcCalc();
+}
+
+function pdcCopy() {
+  const r = pdcCompute();
+  if (!r || r.error) return;
+  const rate = r.rate;
+  const L = [];
+  L.push('PER DIEM ESTIMATE');
+  L.push('');
+  L.push('Destination:  ' + rate.city);
+  L.push('Travel:       ' + document.getElementById('pdc-start').value + ' to ' + document.getElementById('pdc-end').value + `  (${r.days} day${r.days===1?'':'s'}, ${r.nights} night${r.nights===1?'':'s'})`);
+  L.push('Daily rates:  Lodging ' + pdcMoney(rate.lodging) + '/night, M&IE ' + pdcMoney(rate.mie) + '/day');
+  L.push('75% rule:     ' + (r.rule ? 'applied to first & last day' : 'not applied'));
+  L.push('');
+  L.push('Lodging:      ' + pdcMoney(r.lodgingTotal) + `  (${r.nights} × ${pdcMoney(rate.lodging)})`);
+  L.push('M&IE:         ' + pdcMoney(r.mieTotal) + `  (${r.fullDays} full + ${r.travelDays} travel day${r.travelDays===1?'':'s'})`);
+  L.push('TOTAL:        ' + pdcMoney(r.grand));
+  L.push('');
+  L.push('Illustrative estimate — verify the official GSA/State Dept rate before filing.');
+  const text = L.join('\n');
+  const showOk = () => {
+    const ok = document.getElementById('pdc-copy-ok');
+    if (ok) { ok.classList.add('show'); setTimeout(() => ok.classList.remove('show'), 1600); }
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(showOk).catch(() => { pdcCopyFallback(text); showOk(); });
+  } else { pdcCopyFallback(text); showOk(); }
+}
+
+function pdcCopyFallback(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); } catch(_) {}
+  document.body.removeChild(ta);
+}
+
+/* keep the rule checkbox label visual in sync */
+document.addEventListener('change', function(e){
+  if (e.target && e.target.id === 'pdc-rule') {
+    document.getElementById('pdc-rule-lbl').classList.toggle('on', e.target.checked);
+  }
+});
 
 /* ════════════════════════════════════════════════════════════
    FLIGHT DELAY COMPENSATION
