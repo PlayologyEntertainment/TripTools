@@ -7850,18 +7850,84 @@ body.no-scroll { overflow: hidden; }
     <span id="uc-print-date"></span>
   </div>
 </div>
-<div id="view-placeholder-phrasebook" class="view">
-  <nav class="tool-topbar">
+<style>
+/* ── LANGUAGE PHRASEBOOK ── */
+.lp-controls{display:flex;flex-direction:column;gap:12px;margin-bottom:8px}
+.lp-note{font-family:var(--sans);font-size:12.5px;color:var(--muted);line-height:1.55;margin:4px 0 8px}
+.lp-cat{margin-top:24px}
+.lp-cat:first-child{margin-top:8px}
+.lp-cat-h{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);font-weight:700;margin-bottom:12px;padding-bottom:6px;border-bottom:1.5px solid var(--ink);display:flex;align-items:center;gap:8px}
+.lp-phrase{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:start;border:1.5px solid var(--rule);border-radius:var(--r);padding:13px 15px;margin-bottom:10px;background:var(--paper)}
+.lp-phrase:hover{border-color:var(--ink)}
+.lp-en{font-family:var(--sans);font-size:12px;color:var(--muted);margin-bottom:5px}
+.lp-native{font-family:var(--serif);font-size:21px;font-weight:600;color:var(--ink);line-height:1.32;cursor:pointer;display:inline-block}
+.lp-native:hover{color:var(--accent)}
+.lp-pron{font-family:var(--sans);font-size:13px;font-style:italic;color:var(--ink-2);margin-top:4px}
+.lp-acts{display:flex;flex-direction:column;gap:6px;align-items:center}
+.lp-iconbtn{width:36px;height:36px;border:1.5px solid var(--rule);border-radius:var(--r);background:var(--paper-2);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;line-height:1;padding:0;color:var(--ink)}
+.lp-iconbtn:hover{border-color:var(--ink);background:var(--paper)}
+.lp-star.on{color:#E6A700;border-color:var(--yellow,#FFD23F);background:rgba(255,210,63,.14)}
+.lp-favs-h .lp-cat-h{border-color:var(--accent);color:var(--accent)}
+.lp-empty-search{font-family:var(--sans);font-size:14px;color:var(--muted);font-style:italic;text-align:center;padding:28px;border:1.5px dashed var(--rule);border-radius:var(--r);margin-top:16px}
+/* point-to-show modal */
+.lp-modal{display:none;position:fixed;inset:0;z-index:9999;background:var(--ink);color:var(--paper);flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;text-align:center;cursor:pointer}
+.lp-modal.show{display:flex}
+.lp-modal-en{font-family:var(--sans);font-size:15px;opacity:.65;margin-bottom:24px;max-width:90%}
+.lp-modal-native{font-family:var(--serif);font-size:clamp(34px,9vw,82px);font-weight:700;line-height:1.25;max-width:95%}
+.lp-modal-pron{font-family:var(--sans);font-size:clamp(15px,4vw,26px);font-style:italic;opacity:.8;margin-top:24px}
+.lp-modal-hint{position:absolute;bottom:30px;left:0;right:0;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;opacity:.55}
+@media print{
+  .lp-controls,.lp-acts,.lp-modal{display:none!important}
+  .lp-phrase{break-inside:avoid;border-color:#ccc}
+  .lp-native{color:#000}
+}
+</style>
+<div id="view-phrasebook" class="view">
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="window.print()">🖨 Print</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">💬</span>
-    <h2>Language Phrasebook</h2>
-    <p style="margin-bottom:24px">Essential travel phrases in 25 languages with pronunciation guides.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-phrasebook"></div>
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>Language Phrasebook</h1>
+    <p class="tool-sub">Essential travel phrases in 25 languages, each with the native script and a simple pronunciation guide — including dietary and allergy phrases. Tap 🔊 to hear it, tap a phrase to blow it up full-screen and show it to a local, and ⭐ the ones you use most.</p>
+  </div>
+
+  <div class="tool-body">
+    <div class="lp-controls">
+      <div class="fg" style="margin:0">
+        <label for="lp-lang">Language</label>
+        <select id="lp-lang" onchange="lpOnLang()"></select>
+      </div>
+      <div class="fg" style="margin:0">
+        <label for="lp-search">Search phrases</label>
+        <input type="text" id="lp-search" placeholder="e.g. thank you, water, allergic…" oninput="lpRender()" autocomplete="off">
+      </div>
+    </div>
+    <div class="lp-note" id="lp-note"></div>
+    <div id="lp-list"></div>
+  </div>
+
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    A few words of the local language go a long way — even a clumsy "hello" and "thank you" change how you're treated. When pronunciation fails, use the full-screen mode to <em>show</em> your phrase instead of saying it; it's especially handy for allergy and dietary needs, where being understood really matters. Star your allergy phrases before you fly so they're one tap away at the table.
+  </div>
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('emergency')">🚨 Emergency Numbers</button>
+      <button class="rel-btn" onclick="openTool('tipping-guide')">🍽 Tipping Culture</button>
+      <button class="rel-btn" onclick="openTool('currency')">💱 Currency Converter</button>
+      <button class="rel-btn" onclick="openTool('customs-decl')">📦 Customs Declaration</button>
     </div>
   </div>
+</div>
+<div class="lp-modal" id="lp-modal" onclick="lpCloseBig()">
+  <div class="lp-modal-en" id="lp-modal-en"></div>
+  <div class="lp-modal-native" id="lp-modal-native"></div>
+  <div class="lp-modal-pron" id="lp-modal-pron"></div>
+  <div class="lp-modal-hint">Tap anywhere to close</div>
 </div>
 <style>
 /* ── EMERGENCY NUMBERS ── */
@@ -13810,7 +13876,7 @@ const TOOLS = [
   {id:'timezone',      nm:'Time Zone Converter',        ico:'🕐', ph:'destination',on:false,live:true,  ds:'Multi-city live clocks + meeting planner with DST awareness.'},
   {id:'jet-lag',       nm:'Jet Lag Calculator',         ico:'😴', ph:'destination',on:false,live:true,  ds:'Pre-travel adjustment schedule + post-arrival recovery plan.'},
   {id:'unit-conv',     nm:'Universal Unit Converter',   ico:'📏', ph:'destination',on:false,live:true,  ds:'Temp, distance, weight, volume, speed — all traveler conversions.'},
-  {id:'phrasebook',    nm:'Language Phrasebook',        ico:'💬', ph:'destination',on:false,live:false, ds:'Essential travel phrases in 25 languages with pronunciation.'},
+  {id:'phrasebook',    nm:'Language Phrasebook',        ico:'💬', ph:'destination',on:false,live:true,  ds:'Essential travel phrases in 25 languages with pronunciation. Dietary & allergy phrases, tap-to-hear, point-to-show.'},
   {id:'emergency',     nm:'Emergency Numbers',          ico:'🚨', ph:'destination',on:false,live:true,  ds:'Police, fire & ambulance for 150+ countries. Embassy finder & your insurance card, always offline.'},
   {id:'uv-index',      nm:'UV Index & Sun Safety',      ico:'☀️', ph:'destination',on:true, live:true,  ds:'Live UV index, SPF recommendations by skin type.'},
   {id:'altitude',      nm:'Altitude Sickness Guide',    ico:'⛰', ph:'destination',on:false,live:true,  ds:'Enter elevation → risk level + acclimatization timeline.'},
@@ -14527,6 +14593,7 @@ function injectTripCtx(id) {
   if(id==='cost-living') colInit();
   if(id==='vat-refund') vrInit();
   if(id==='jet-lag')    jlInit();
+  if(id==='phrasebook') lpInit();
   if(id==='expense-report') erInit();
   if(id==='baggage')    bfcInit();
   if(id==='carry-on')   cosInit();
@@ -34174,6 +34241,357 @@ function jlReset(){
   document.getElementById('jl-nights').value = jlData.nights || '';
   document.getElementById('jl-bed').value = jlData.bed || '23:00';
   jlSave(); jlRender();
+}
+
+/* ══════════════════════════════════════════════════════
+   LANGUAGE PHRASEBOOK
+   25 languages × ~40 essential phrases, each with native
+   script + a simple pronunciation guide. Tap-to-hear uses
+   the browser SpeechSynthesis API (offline on most devices);
+   point-to-show enlarges the native script; phrases are
+   searchable and can be starred. Pronunciations are
+   approximate. Last verified May 2026.
+   ══════════════════════════════════════════════════════ */
+
+const LP_CATS = [
+  {id:'ess',  n:'Essentials & greetings'},
+  {id:'dir',  n:'Getting around'},
+  {id:'eat',  n:'Eating, dietary & allergies'},
+  {id:'help', n:'Emergencies, shopping & numbers'},
+];
+const LP_PHRASES = [
+  {id:'hello',     cat:'ess', en:'Hello'},
+  {id:'bye',       cat:'ess', en:'Goodbye'},
+  {id:'please',    cat:'ess', en:'Please'},
+  {id:'thanks',    cat:'ess', en:'Thank you'},
+  {id:'yes',       cat:'ess', en:'Yes'},
+  {id:'no',        cat:'ess', en:'No'},
+  {id:'sorry',     cat:'ess', en:'Excuse me / Sorry'},
+  {id:'speak_en',  cat:'ess', en:'Do you speak English?'},
+  {id:'no_under',  cat:'ess', en:"I don't understand"},
+  {id:'where',     cat:'dir', en:'Where is…?'},
+  {id:'toilet',    cat:'dir', en:'Where is the toilet?'},
+  {id:'taxi',      cat:'dir', en:'How much for a taxi to…?'},
+  {id:'station',   cat:'dir', en:'Train / bus station'},
+  {id:'airport',   cat:'dir', en:'Airport'},
+  {id:'left',      cat:'dir', en:'Left'},
+  {id:'right',     cat:'dir', en:'Right'},
+  {id:'straight',  cat:'dir', en:'Straight ahead'},
+  {id:'table',     cat:'eat', en:'A table for two, please'},
+  {id:'menu',      cat:'eat', en:'The menu, please'},
+  {id:'water',     cat:'eat', en:'Water, please'},
+  {id:'bill',      cat:'eat', en:'The bill, please'},
+  {id:'cheers',    cat:'eat', en:'Cheers!'},
+  {id:'veg',       cat:'eat', en:"I'm vegetarian"},
+  {id:'allergic',  cat:'eat', en:"I'm allergic to…"},
+  {id:'no_nuts',   cat:'eat', en:'No nuts'},
+  {id:'no_gluten', cat:'eat', en:'No gluten'},
+  {id:'no_dairy',  cat:'eat', en:'No dairy'},
+  {id:'help',      cat:'help', en:'Help!'},
+  {id:'doctor',    cat:'help', en:'Call a doctor!'},
+  {id:'police',    cat:'help', en:'Call the police!'},
+  {id:'hospital',  cat:'help', en:'Where is the hospital?'},
+  {id:'lost',      cat:'help', en:"I'm lost"},
+  {id:'howmuch',   cat:'help', en:'How much is it?'},
+  {id:'expensive', cat:'help', en:'Too expensive'},
+  {id:'card',      cat:'help', en:'Do you take card?'},
+  {id:'one',       cat:'help', en:'One'},
+  {id:'two',       cat:'help', en:'Two'},
+  {id:'three',     cat:'help', en:'Three'},
+  {id:'ten',       cat:'help', en:'Ten'},
+  {id:'hundred',   cat:'help', en:'Hundred'},
+];
+
+/* Each language: t[phraseId] = [native script, approx. pronunciation]. */
+const LP_LANGS = [
+  {code:'es', name:'Spanish', endo:'Español', flag:'🇪🇸', bcp:'es-ES', t:{
+    hello:["Hola","OH-lah"], bye:["Adiós","ah-DYOHS"], please:["Por favor","por fah-VOR"], thanks:["Gracias","GRAH-syahs"], yes:["Sí","see"], no:["No","noh"], sorry:["Perdón","pehr-DOHN"], speak_en:["¿Habla inglés?","AH-blah een-GLESS"], no_under:["No entiendo","noh en-TYEN-doh"],
+    where:["¿Dónde está…?","DOHN-deh es-TAH"], toilet:["¿Dónde está el baño?","DOHN-deh es-TAH el BAH-nyoh"], taxi:["¿Cuánto cuesta un taxi a…?","KWAN-toh KWES-tah oon TAHK-see ah"], station:["Estación de tren","es-tah-SYON deh tren"], airport:["Aeropuerto","ah-eh-roh-PWER-toh"], left:["Izquierda","ees-KYER-dah"], right:["Derecha","deh-REH-chah"], straight:["Todo recto","TOH-doh REK-toh"],
+    table:["Una mesa para dos, por favor","OO-nah MEH-sah PAH-rah dohs"], menu:["La carta, por favor","lah KAR-tah por fah-VOR"], water:["Agua, por favor","AH-gwah por fah-VOR"], bill:["La cuenta, por favor","lah KWEN-tah por fah-VOR"], cheers:["¡Salud!","sah-LOOD"], veg:["Soy vegetariano","soy beh-heh-tah-RYAH-noh"], allergic:["Soy alérgico a…","soy ah-LEHR-hee-koh ah"], no_nuts:["Sin frutos secos","seen FROO-tohs SEH-kohs"], no_gluten:["Sin gluten","seen GLOO-ten"], no_dairy:["Sin lácteos","seen LAHK-teh-ohs"],
+    help:["¡Ayuda!","ah-YOO-dah"], doctor:["¡Llame a un médico!","YAH-meh ah oon MEH-dee-koh"], police:["¡Llame a la policía!","YAH-meh ah lah poh-lee-SEE-ah"], hospital:["¿Dónde está el hospital?","DOHN-deh es-TAH el os-pee-TAHL"], lost:["Estoy perdido","es-TOY pehr-DEE-doh"], howmuch:["¿Cuánto cuesta?","KWAN-toh KWES-tah"], expensive:["Demasiado caro","deh-mah-SYAH-doh KAH-roh"], card:["¿Aceptan tarjeta?","ah-SEP-tahn tar-HEH-tah"], one:["Uno","OO-noh"], two:["Dos","dohs"], three:["Tres","trehs"], ten:["Diez","dyehs"], hundred:["Cien","syen"]
+  }},
+  {code:'fr', name:'French', endo:'Français', flag:'🇫🇷', bcp:'fr-FR', t:{
+    hello:["Bonjour","bohn-ZHOOR"], bye:["Au revoir","oh ruh-VWAR"], please:["S'il vous plaît","seel voo PLEH"], thanks:["Merci","mehr-SEE"], yes:["Oui","wee"], no:["Non","nohn"], sorry:["Pardon","par-DOHN"], speak_en:["Parlez-vous anglais ?","par-lay VOO ahn-GLEH"], no_under:["Je ne comprends pas","zhuh nuh kohm-PRAHN pah"],
+    where:["Où est… ?","oo eh"], toilet:["Où sont les toilettes ?","oo sohn lay twah-LET"], taxi:["Combien pour un taxi jusqu'à… ?","kohm-BYAN poor uhn tahk-SEE zhoos-KAH"], station:["Gare","gar"], airport:["Aéroport","ah-ay-roh-POR"], left:["Gauche","gohsh"], right:["Droite","drwaht"], straight:["Tout droit","too DRWAH"],
+    table:["Une table pour deux, s'il vous plaît","oon TAH-bluh poor duh"], menu:["Le menu, s'il vous plaît","luh muh-NEW"], water:["De l'eau, s'il vous plaît","duh LOH"], bill:["L'addition, s'il vous plaît","lah-dee-SYOHN"], cheers:["Santé !","sahn-TAY"], veg:["Je suis végétarien","zhuh swee vay-zhay-tah-RYAN"], allergic:["Je suis allergique à…","zhuh swee ah-lehr-ZHEEK ah"], no_nuts:["Sans noix","sahn NWAH"], no_gluten:["Sans gluten","sahn gloo-TEN"], no_dairy:["Sans produits laitiers","sahn proh-dwee lay-TYAY"],
+    help:["Au secours !","oh suh-KOOR"], doctor:["Appelez un médecin !","ah-play uhn mayd-SAN"], police:["Appelez la police !","ah-play lah poh-LEES"], hospital:["Où est l'hôpital ?","oo eh loh-pee-TAL"], lost:["Je suis perdu","zhuh swee pehr-DEW"], howmuch:["C'est combien ?","say kohm-BYAN"], expensive:["Trop cher","troh SHEHR"], card:["Vous prenez la carte ?","voo pruh-NAY lah KART"], one:["Un","uhn"], two:["Deux","duh"], three:["Trois","trwah"], ten:["Dix","dees"], hundred:["Cent","sahn"]
+  }},
+  {code:'de', name:'German', endo:'Deutsch', flag:'🇩🇪', bcp:'de-DE', t:{
+    hello:["Hallo","HAH-loh"], bye:["Auf Wiedersehen","owf VEE-der-zayn"], please:["Bitte","BIT-uh"], thanks:["Danke","DAHN-kuh"], yes:["Ja","yah"], no:["Nein","nyne"], sorry:["Entschuldigung","ent-SHOOL-dee-goong"], speak_en:["Sprechen Sie Englisch?","SHPREH-khen zee ENG-lish"], no_under:["Ich verstehe nicht","ikh fehr-SHTAY-uh nikht"],
+    where:["Wo ist…?","voh ist"], toilet:["Wo ist die Toilette?","voh ist dee twah-LET-uh"], taxi:["Was kostet ein Taxi nach…?","vahs KOS-tet ine TAHK-see nahkh"], station:["Bahnhof","BAHN-hohf"], airport:["Flughafen","FLOOK-hah-fen"], left:["Links","links"], right:["Rechts","rekhts"], straight:["Geradeaus","geh-RAH-deh-ows"],
+    table:["Einen Tisch für zwei, bitte","INE-en tish foor tsvy"], menu:["Die Speisekarte, bitte","dee SHPY-zeh-kar-teh"], water:["Wasser, bitte","VAH-ser"], bill:["Die Rechnung, bitte","dee REKH-noong"], cheers:["Prost!","prohst"], veg:["Ich bin Vegetarier","ikh bin veh-geh-TAH-ree-er"], allergic:["Ich bin allergisch gegen…","ikh bin ah-LEHR-gish GAY-gen"], no_nuts:["Keine Nüsse","KY-neh NUE-seh"], no_gluten:["Kein Gluten","kine GLOO-ten"], no_dairy:["Keine Milchprodukte","KY-neh MILKH-proh-dook-teh"],
+    help:["Hilfe!","HIL-feh"], doctor:["Rufen Sie einen Arzt!","ROO-fen zee INE-en artst"], police:["Rufen Sie die Polizei!","ROO-fen zee dee poh-lee-TSY"], hospital:["Wo ist das Krankenhaus?","voh ist dahs KRAHN-ken-hows"], lost:["Ich habe mich verlaufen","ikh HAH-beh mikh fehr-LOW-fen"], howmuch:["Was kostet das?","vahs KOS-tet dahs"], expensive:["Zu teuer","tsoo TOY-er"], card:["Nehmen Sie Karte?","NAY-men zee KAR-teh"], one:["Eins","ines"], two:["Zwei","tsvy"], three:["Drei","dry"], ten:["Zehn","tsayn"], hundred:["Hundert","HOON-dert"]
+  }},
+  {code:'it', name:'Italian', endo:'Italiano', flag:'🇮🇹', bcp:'it-IT', t:{
+    hello:["Ciao","chow"], bye:["Arrivederci","ah-ree-veh-DEHR-chee"], please:["Per favore","pehr fah-VOH-reh"], thanks:["Grazie","GRAH-tsyeh"], yes:["Sì","see"], no:["No","noh"], sorry:["Mi scusi","mee SKOO-zee"], speak_en:["Parla inglese?","PAR-lah een-GLEH-zeh"], no_under:["Non capisco","nohn kah-PEES-koh"],
+    where:["Dov'è…?","doh-VEH"], toilet:["Dov'è il bagno?","doh-VEH eel BAH-nyoh"], taxi:["Quanto costa un taxi per…?","KWAN-toh KOS-tah oon TAHK-see pehr"], station:["Stazione","stah-TSYOH-neh"], airport:["Aeroporto","ah-eh-roh-POR-toh"], left:["Sinistra","see-NEES-trah"], right:["Destra","DEHS-trah"], straight:["Sempre dritto","SEM-preh DREE-toh"],
+    table:["Un tavolo per due, per favore","oon TAH-voh-loh pehr DOO-eh"], menu:["Il menù, per favore","eel meh-NOO"], water:["Acqua, per favore","AH-kwah"], bill:["Il conto, per favore","eel KOHN-toh"], cheers:["Salute!","sah-LOO-teh"], veg:["Sono vegetariano","SOH-noh veh-jeh-tah-RYAH-noh"], allergic:["Sono allergico a…","SOH-noh ah-LEHR-jee-koh ah"], no_nuts:["Niente frutta secca","NYEN-teh FROO-tah SEH-kah"], no_gluten:["Senza glutine","SEN-tsah GLOO-tee-neh"], no_dairy:["Senza latticini","SEN-tsah lah-tee-CHEE-nee"],
+    help:["Aiuto!","ah-YOO-toh"], doctor:["Chiami un medico!","KYAH-mee oon MEH-dee-koh"], police:["Chiami la polizia!","KYAH-mee lah poh-lee-TSEE-ah"], hospital:["Dov'è l'ospedale?","doh-VEH loh-speh-DAH-leh"], lost:["Mi sono perso","mee SOH-noh PEHR-soh"], howmuch:["Quanto costa?","KWAN-toh KOS-tah"], expensive:["Troppo caro","TROH-poh KAH-roh"], card:["Accettate la carta?","ah-cheh-TAH-teh lah KAR-tah"], one:["Uno","OO-noh"], two:["Due","DOO-eh"], three:["Tre","treh"], ten:["Dieci","DYEH-chee"], hundred:["Cento","CHEN-toh"]
+  }},
+  {code:'pt', name:'Portuguese', endo:'Português', flag:'🇵🇹', bcp:'pt-PT', t:{
+    hello:["Olá","oh-LAH"], bye:["Adeus","ah-DEH-oosh"], please:["Por favor","poor fah-VOR"], thanks:["Obrigado","oh-bree-GAH-doo"], yes:["Sim","seeng"], no:["Não","now"], sorry:["Desculpe","desh-KOOL-peh"], speak_en:["Fala inglês?","FAH-lah eeng-GLESH"], no_under:["Não compreendo","now kohm-pree-EN-doo"],
+    where:["Onde fica…?","OHN-deh FEE-kah"], toilet:["Onde é a casa de banho?","OHN-deh eh ah KAH-zah deh BAH-nyoo"], taxi:["Quanto custa um táxi para…?","KWAN-too KOOSH-tah oom TAHK-see PAH-rah"], station:["Estação","shtah-SOW"], airport:["Aeroporto","ah-eh-roo-POR-too"], left:["Esquerda","esh-KEHR-dah"], right:["Direita","dee-RAY-tah"], straight:["Sempre em frente","SEM-preh ayng FREN-teh"],
+    table:["Uma mesa para dois, por favor","OO-mah MEH-zah PAH-rah doysh"], menu:["A ementa, por favor","ah eh-MEN-tah"], water:["Água, por favor","AH-gwah"], bill:["A conta, por favor","ah KOHN-tah"], cheers:["Saúde!","sah-OO-deh"], veg:["Sou vegetariano","soh veh-zheh-tah-RYAH-noo"], allergic:["Sou alérgico a…","soh ah-LEHR-zhee-koo ah"], no_nuts:["Sem frutos secos","sayng FROO-toosh SEH-koosh"], no_gluten:["Sem glúten","sayng GLOO-ten"], no_dairy:["Sem lacticínios","sayng lahk-tee-SEE-nyoosh"],
+    help:["Socorro!","soo-KOH-rroo"], doctor:["Chame um médico!","SHAH-meh oom MEH-dee-koo"], police:["Chame a polícia!","SHAH-meh ah poo-LEE-syah"], hospital:["Onde é o hospital?","OHN-deh eh oo osh-pee-TAHL"], lost:["Estou perdido","shtoh per-DEE-doo"], howmuch:["Quanto custa?","KWAN-too KOOSH-tah"], expensive:["Muito caro","MWEE-too KAH-roo"], card:["Aceitam cartão?","ah-SAY-tow kar-TOW"], one:["Um","oom"], two:["Dois","doysh"], three:["Três","tresh"], ten:["Dez","desh"], hundred:["Cem","sayng"]
+  }},
+  {code:'nl', name:'Dutch', endo:'Nederlands', flag:'🇳🇱', bcp:'nl-NL', t:{
+    hello:["Hallo","HAH-loh"], bye:["Tot ziens","tot ZEENS"], please:["Alstublieft","ahl-stoo-BLEEFT"], thanks:["Dank u","dahnk oo"], yes:["Ja","yah"], no:["Nee","nay"], sorry:["Sorry","SOR-ree"], speak_en:["Spreekt u Engels?","spraykt oo ENG-uls"], no_under:["Ik begrijp het niet","ik buh-GRYP hut neet"],
+    where:["Waar is…?","vahr is"], toilet:["Waar is het toilet?","vahr is hut twah-LET"], taxi:["Hoeveel kost een taxi naar…?","HOO-vayl kost un TAHK-see nahr"], station:["Station","stah-SYON"], airport:["Luchthaven","LUKHT-hah-vun"], left:["Links","links"], right:["Rechts","rekhts"], straight:["Rechtdoor","REKHT-dohr"],
+    table:["Een tafel voor twee, alstublieft","un TAH-ful vohr tvay"], menu:["Het menu, alstublieft","hut muh-NEW"], water:["Water, alstublieft","VAH-tur"], bill:["De rekening, alstublieft","duh RAY-kuh-ning"], cheers:["Proost!","prohst"], veg:["Ik ben vegetariër","ik ben vay-guh-TAH-ree-ur"], allergic:["Ik ben allergisch voor…","ik ben ah-LEHR-gees vohr"], no_nuts:["Geen noten","khayn NOH-tun"], no_gluten:["Geen gluten","khayn GLOO-tun"], no_dairy:["Geen zuivel","khayn ZOW-vul"],
+    help:["Help!","help"], doctor:["Bel een dokter!","bel un DOK-tur"], police:["Bel de politie!","bel duh poh-LEET-see"], hospital:["Waar is het ziekenhuis?","vahr is hut ZEE-kun-hows"], lost:["Ik ben verdwaald","ik ben vur-DVAHLD"], howmuch:["Hoeveel kost het?","HOO-vayl kost hut"], expensive:["Te duur","tuh DOOR"], card:["Kan ik met kaart betalen?","kahn ik met kahrt buh-TAH-lun"], one:["Een","ayn"], two:["Twee","tvay"], three:["Drie","dree"], ten:["Tien","teen"], hundred:["Honderd","HON-durt"]
+  }},
+  {code:'el', name:'Greek', endo:'Ελληνικά', flag:'🇬🇷', bcp:'el-GR', t:{
+    hello:["Γειά σου","YAH soo"], bye:["Αντίο","ah-DEE-oh"], please:["Παρακαλώ","pah-rah-kah-LOH"], thanks:["Ευχαριστώ","ef-khah-ree-STOH"], yes:["Ναι","neh"], no:["Όχι","OH-khee"], sorry:["Συγγνώμη","see-GHNOH-mee"], speak_en:["Μιλάτε αγγλικά;","mee-LAH-teh ahng-glee-KAH"], no_under:["Δεν καταλαβαίνω","then kah-tah-lah-VEH-noh"],
+    where:["Πού είναι…;","poo EE-neh"], toilet:["Πού είναι η τουαλέτα;","poo EE-neh ee too-ah-LEH-tah"], taxi:["Πόσο κάνει ένα ταξί για…;","POH-soh KAH-nee EH-nah tah-KSEE yah"], station:["Σταθμός","stath-MOHS"], airport:["Αεροδρόμιο","ah-eh-roh-DROH-mee-oh"], left:["Αριστερά","ah-ree-steh-RAH"], right:["Δεξιά","theh-ksee-AH"], straight:["Ευθεία","ef-THEE-ah"],
+    table:["Ένα τραπέζι για δύο, παρακαλώ","EH-nah trah-PEH-zee yah THEE-oh"], menu:["Τον κατάλογο, παρακαλώ","ton kah-TAH-loh-goh"], water:["Νερό, παρακαλώ","neh-ROH"], bill:["Τον λογαριασμό, παρακαλώ","ton loh-ghah-ryah-SMOH"], cheers:["Στην υγειά μας!","steen ee-YAH mas"], veg:["Είμαι χορτοφάγος","EE-meh khor-toh-FAH-ghos"], allergic:["Είμαι αλλεργικός σε…","EE-meh ah-lehr-yee-KOHS seh"], no_nuts:["Χωρίς ξηρούς καρπούς","khoh-REES ksee-ROOS kar-POOS"], no_gluten:["Χωρίς γλουτένη","khoh-REES gloo-TEH-nee"], no_dairy:["Χωρίς γαλακτοκομικά","khoh-REES ghah-lahk-toh-koh-mee-KAH"],
+    help:["Βοήθεια!","voh-EE-thee-ah"], doctor:["Καλέστε γιατρό!","kah-LEH-steh yah-TROH"], police:["Καλέστε την αστυνομία!","kah-LEH-steh teen ah-stee-noh-MEE-ah"], hospital:["Πού είναι το νοσοκομείο;","poo EE-neh toh noh-soh-koh-MEE-oh"], lost:["Έχω χαθεί","EH-khoh khah-THEE"], howmuch:["Πόσο κάνει;","POH-soh KAH-nee"], expensive:["Πολύ ακριβό","poh-LEE ah-kree-VOH"], card:["Δέχεστε κάρτα;","THEH-kheh-steh KAR-tah"], one:["Ένα","EH-nah"], two:["Δύο","THEE-oh"], three:["Τρία","TREE-ah"], ten:["Δέκα","THEH-kah"], hundred:["Εκατό","eh-kah-TOH"]
+  }},
+  {code:'ru', name:'Russian', endo:'Русский', flag:'🇷🇺', bcp:'ru-RU', t:{
+    hello:["Здравствуйте","ZDRAHST-vooy-tyeh"], bye:["До свидания","dah svee-DAH-nyah"], please:["Пожалуйста","pah-ZHAH-loo-stah"], thanks:["Спасибо","spah-SEE-bah"], yes:["Да","dah"], no:["Нет","nyet"], sorry:["Извините","eez-vee-NEE-tyeh"], speak_en:["Вы говорите по-английски?","vy gah-vah-REE-tyeh pah ahn-GLEE-skee"], no_under:["Я не понимаю","yah nyeh pah-nee-MAH-yoo"],
+    where:["Где…?","gdyeh"], toilet:["Где туалет?","gdyeh too-ah-LYET"], taxi:["Сколько стоит такси до…?","SKOHL-kah STOH-eet tahk-SEE dah"], station:["Вокзал","vahk-ZAHL"], airport:["Аэропорт","ah-eh-rah-PORT"], left:["Налево","nah-LYEH-vah"], right:["Направо","nah-PRAH-vah"], straight:["Прямо","PRYAH-mah"],
+    table:["Столик на двоих, пожалуйста","STOH-leek nah dvah-EEKH"], menu:["Меню, пожалуйста","myeh-NYOO"], water:["Воду, пожалуйста","VOH-doo"], bill:["Счёт, пожалуйста","shchyot"], cheers:["Будем здоровы!","BOO-dyem zdah-ROH-vy"], veg:["Я вегетарианец","yah vyeh-gyeh-tah-ree-AH-nyets"], allergic:["У меня аллергия на…","oo myeh-NYAH ah-lyehr-GEE-yah nah"], no_nuts:["Без орехов","byez ah-RYEH-khahf"], no_gluten:["Без глютена","byez glyoo-TYEH-nah"], no_dairy:["Без молочного","byez mah-LOHCH-nah-vah"],
+    help:["Помогите!","pah-mah-GEE-tyeh"], doctor:["Вызовите врача!","VY-zah-vee-tyeh vrah-CHAH"], police:["Вызовите полицию!","VY-zah-vee-tyeh pah-LEE-tsy-yoo"], hospital:["Где больница?","gdyeh bahl-NEE-tsah"], lost:["Я заблудился","yah zah-bloo-DEEL-sah"], howmuch:["Сколько стоит?","SKOHL-kah STOH-eet"], expensive:["Слишком дорого","SLEESH-kahm DOH-rah-gah"], card:["Вы принимаете карту?","vy pree-nee-MAH-yeh-tyeh KAR-too"], one:["Один","ah-DEEN"], two:["Два","dvah"], three:["Три","tree"], ten:["Десять","DYEH-syaht"], hundred:["Сто","stoh"]
+  }},
+  {code:'pl', name:'Polish', endo:'Polski', flag:'🇵🇱', bcp:'pl-PL', t:{
+    hello:["Cześć","cheshch"], bye:["Do widzenia","doh veed-ZEH-nyah"], please:["Proszę","PROH-sheh"], thanks:["Dziękuję","jen-KOO-yeh"], yes:["Tak","tahk"], no:["Nie","nyeh"], sorry:["Przepraszam","psheh-PRAH-shahm"], speak_en:["Czy mówisz po angielsku?","chy MOO-veesh poh ahn-GYEL-skoo"], no_under:["Nie rozumiem","nyeh roh-ZOO-myem"],
+    where:["Gdzie jest…?","gjeh yest"], toilet:["Gdzie jest toaleta?","gjeh yest toh-ah-LEH-tah"], taxi:["Ile kosztuje taksówka do…?","EE-leh kosh-TOO-yeh tahk-SOOF-kah doh"], station:["Dworzec","DVOH-zhets"], airport:["Lotnisko","lot-NEES-koh"], left:["Lewo","LEH-voh"], right:["Prawo","PRAH-voh"], straight:["Prosto","PROH-stoh"],
+    table:["Stolik dla dwojga, proszę","STOH-leek dlah DVOY-gah"], menu:["Poproszę menu","poh-PROH-sheh MEH-noo"], water:["Woda, proszę","VOH-dah"], bill:["Rachunek, proszę","rah-KHOO-nek"], cheers:["Na zdrowie!","nah ZDROH-vyeh"], veg:["Jestem wegetarianinem","YES-tem veh-geh-tah-ryah-NEE-nem"], allergic:["Mam alergię na…","mahm ah-LEHR-gyeh nah"], no_nuts:["Bez orzechów","bez oh-ZHEH-khoof"], no_gluten:["Bez glutenu","bez gloo-TEH-noo"], no_dairy:["Bez nabiału","bez nah-BYAH-woo"],
+    help:["Pomocy!","poh-MOH-tsy"], doctor:["Wezwij lekarza!","VEZ-veey leh-KAH-zhah"], police:["Wezwij policję!","VEZ-veey poh-LEETS-yeh"], hospital:["Gdzie jest szpital?","gjeh yest SHPEE-tahl"], lost:["Zgubiłem się","zgoo-BEE-wem sheh"], howmuch:["Ile to kosztuje?","EE-leh toh kosh-TOO-yeh"], expensive:["Za drogo","zah DROH-goh"], card:["Czy mogę zapłacić kartą?","chy MOH-geh zah-PWAH-cheech KAR-tom"], one:["Jeden","YEH-den"], two:["Dwa","dvah"], three:["Trzy","tzhy"], ten:["Dziesięć","JEH-shench"], hundred:["Sto","stoh"]
+  }},
+  {code:'cs', name:'Czech', endo:'Čeština', flag:'🇨🇿', bcp:'cs-CZ', t:{
+    hello:["Ahoj","AH-hoy"], bye:["Na shledanou","nah SKHLEH-dah-noh"], please:["Prosím","PROH-seem"], thanks:["Děkuji","DYEH-koo-yee"], yes:["Ano","AH-noh"], no:["Ne","neh"], sorry:["Promiňte","PROH-meeny-teh"], speak_en:["Mluvíte anglicky?","MLOO-vee-teh AHN-glits-kee"], no_under:["Nerozumím","NEH-roh-zoo-meem"],
+    where:["Kde je…?","gdeh yeh"], toilet:["Kde je záchod?","gdeh yeh ZAH-khot"], taxi:["Kolik stojí taxi do…?","KOH-leek STOH-yee TAHK-see doh"], station:["Nádraží","NAH-drah-zhee"], airport:["Letiště","LEH-tyish-tyeh"], left:["Vlevo","VLEH-voh"], right:["Vpravo","FPRAH-voh"], straight:["Rovně","ROHV-nyeh"],
+    table:["Stůl pro dva, prosím","stool proh dvah"], menu:["Jídelní lístek, prosím","YEE-del-nee LEES-tek"], water:["Vodu, prosím","VOH-doo"], bill:["Účet, prosím","OO-chet"], cheers:["Na zdraví!","nah ZDRAH-vee"], veg:["Jsem vegetarián","ysem VEH-geh-tah-ree-ahn"], allergic:["Mám alergii na…","mahm AH-lehr-gee nah"], no_nuts:["Bez ořechů","bez OH-zheh-khoo"], no_gluten:["Bez lepku","bez LEP-koo"], no_dairy:["Bez mléčných výrobků","bez MLEH-chnikh VEE-rob-koo"],
+    help:["Pomoc!","POH-mots"], doctor:["Zavolejte lékaře!","ZAH-voh-lay-teh LEH-kah-zheh"], police:["Zavolejte policii!","ZAH-voh-lay-teh POH-lee-tsee"], hospital:["Kde je nemocnice?","gdeh yeh NEH-mots-nee-tseh"], lost:["Ztratil jsem se","ZTRAH-teel ysem seh"], howmuch:["Kolik to stojí?","KOH-leek toh STOH-yee"], expensive:["Příliš drahé","PRZHEE-leesh DRAH-heh"], card:["Berete karty?","BEH-reh-teh KAR-tee"], one:["Jeden","YEH-den"], two:["Dva","dvah"], three:["Tři","tzhee"], ten:["Deset","DEH-set"], hundred:["Sto","stoh"]
+  }},
+  {code:'hu', name:'Hungarian', endo:'Magyar', flag:'🇭🇺', bcp:'hu-HU', t:{
+    hello:["Szia","SEE-yah"], bye:["Viszlát","VEES-laht"], please:["Kérem","KEH-rem"], thanks:["Köszönöm","KUH-suh-nuhm"], yes:["Igen","EE-gen"], no:["Nem","nem"], sorry:["Elnézést","EL-neh-zaysht"], speak_en:["Beszél angolul?","BEH-sayl AHN-goh-lool"], no_under:["Nem értem","nem AYR-tem"],
+    where:["Hol van…?","hohl vahn"], toilet:["Hol van a mosdó?","hohl vahn ah MOSH-doh"], taxi:["Mennyibe kerül egy taxi…?","MEN-nyee-beh KEH-rool edge TAHK-see"], station:["Pályaudvar","PAH-yah-ood-var"], airport:["Repülőtér","REH-poo-luh-tayr"], left:["Balra","BAHL-rah"], right:["Jobbra","YOHB-rah"], straight:["Egyenesen","EDGE-eh-neh-shen"],
+    table:["Egy asztalt két főre, kérem","edge AHS-tahlt kayt FUH-reh"], menu:["Az étlapot, kérem","ahz AYT-lah-poht"], water:["Vizet, kérem","VEE-zet"], bill:["A számlát, kérem","ah SAHM-laht"], cheers:["Egészségére!","EH-gays-shay-geh-reh"], veg:["Vegetáriánus vagyok","VEH-geh-tah-ree-ah-noosh VAH-dyohk"], allergic:["Allergiás vagyok a…-ra","AH-lehr-gee-ahsh VAH-dyohk"], no_nuts:["Dió nélkül","DEE-oh NAYL-kool"], no_gluten:["Glutén nélkül","GLOO-tayn NAYL-kool"], no_dairy:["Tejtermék nélkül","TAY-ter-mayk NAYL-kool"],
+    help:["Segítség!","SHEH-geet-shayg"], doctor:["Hívjon orvost!","HEEV-yohn OR-vohsht"], police:["Hívja a rendőrséget!","HEEV-yah ah REN-dur-shay-get"], hospital:["Hol van a kórház?","hohl vahn ah KOHR-hahz"], lost:["Eltévedtem","EL-tay-ved-tem"], howmuch:["Mennyibe kerül?","MEN-nyee-beh KEH-rool"], expensive:["Túl drága","tool DRAH-gah"], card:["Elfogadnak kártyát?","EL-foh-gahd-nahk KAHR-tyaht"], one:["Egy","edge"], two:["Kettő","KET-tuh"], three:["Három","HAH-rohm"], ten:["Tíz","teez"], hundred:["Száz","sahz"]
+  }},
+  {code:'sv', name:'Swedish', endo:'Svenska', flag:'🇸🇪', bcp:'sv-SE', t:{
+    hello:["Hej","hey"], bye:["Hej då","hey DOH"], please:["Tack","tahk"], thanks:["Tack","tahk"], yes:["Ja","yah"], no:["Nej","ney"], sorry:["Ursäkta","oor-SHEK-tah"], speak_en:["Talar du engelska?","TAH-lar doo ENG-el-skah"], no_under:["Jag förstår inte","yah fur-STOHR in-teh"],
+    where:["Var är…?","vahr air"], toilet:["Var är toaletten?","vahr air too-ah-LET-en"], taxi:["Vad kostar en taxi till…?","vahd KOS-tar en TAHK-see til"], station:["Station","stah-SHOON"], airport:["Flygplats","FLEEG-plats"], left:["Vänster","VEN-ster"], right:["Höger","HUH-ger"], straight:["Rakt fram","rahkt frahm"],
+    table:["Ett bord för två, tack","et boord fur tvoh"], menu:["Menyn, tack","meh-NEEN"], water:["Vatten, tack","VAH-ten"], bill:["Notan, tack","NOO-tan"], cheers:["Skål!","skohl"], veg:["Jag är vegetarian","yah air veh-geh-tah-ree-AHN"], allergic:["Jag är allergisk mot…","yah air ah-LEHR-gisk moot"], no_nuts:["Inga nötter","ING-ah NUH-ter"], no_gluten:["Utan gluten","OO-tan GLOO-ten"], no_dairy:["Inga mejeriprodukter","ING-ah MEH-yeh-ree-proh-dook-ter"],
+    help:["Hjälp!","yelp"], doctor:["Ring en läkare!","ring en LEH-kah-reh"], police:["Ring polisen!","ring poo-LEE-sen"], hospital:["Var är sjukhuset?","vahr air SHOOK-hoo-set"], lost:["Jag har gått vilse","yah hahr got VIL-seh"], howmuch:["Hur mycket kostar det?","hoor MUE-keh KOS-tar deh"], expensive:["För dyrt","fur deert"], card:["Tar ni kort?","tahr nee koort"], one:["Ett","et"], two:["Två","tvoh"], three:["Tre","treh"], ten:["Tio","TEE-oh"], hundred:["Hundra","HOON-drah"]
+  }},
+  {code:'tr', name:'Turkish', endo:'Türkçe', flag:'🇹🇷', bcp:'tr-TR', t:{
+    hello:["Merhaba","MEHR-hah-bah"], bye:["Hoşça kal","HOSH-chah kahl"], please:["Lütfen","LUET-fen"], thanks:["Teşekkürler","teh-shek-kuer-LEHR"], yes:["Evet","EH-vet"], no:["Hayır","HAH-yuhr"], sorry:["Affedersiniz","ahf-feh-DEHR-see-neez"], speak_en:["İngilizce biliyor musunuz?","een-gee-LEEZ-jeh bee-lee-yor moo-soo-nooz"], no_under:["Anlamıyorum","ahn-lah-MUH-yoh-room"],
+    where:["… nerede?","NEH-reh-deh"], toilet:["Tuvalet nerede?","too-vah-LET NEH-reh-deh"], taxi:["…'a taksi ne kadar?","tahk-SEE neh kah-DAR"], station:["İstasyon","ees-tahs-YON"], airport:["Havaalanı","hah-vah-ah-lah-NUH"], left:["Sol","sohl"], right:["Sağ","sah"], straight:["Düz","duez"],
+    table:["İki kişilik bir masa, lütfen","ee-KEE kee-shee-LEEK beer mah-SAH"], menu:["Menü, lütfen","meh-NUE"], water:["Su, lütfen","soo"], bill:["Hesap, lütfen","heh-SAHP"], cheers:["Şerefe!","sheh-reh-FEH"], veg:["Vejetaryenim","veh-zheh-tar-YEH-neem"], allergic:["…'a alerjim var","ah-lehr-ZHEEM vahr"], no_nuts:["Fındık yok","fuhn-DUHK yohk"], no_gluten:["Glutensiz","gloo-ten-SEEZ"], no_dairy:["Süt ürünü yok","suet ue-rue-NUE yohk"],
+    help:["İmdat!","eem-DAHT"], doctor:["Doktor çağırın!","dok-TOR chah-uh-RUHN"], police:["Polis çağırın!","poh-LEES chah-uh-RUHN"], hospital:["Hastane nerede?","hahs-tah-NEH NEH-reh-deh"], lost:["Kayboldum","kahy-bohl-DOOM"], howmuch:["Ne kadar?","neh kah-DAR"], expensive:["Çok pahalı","chohk pah-hah-LUH"], card:["Kart geçiyor mu?","kahrt geh-chee-YOR moo"], one:["Bir","beer"], two:["İki","ee-KEE"], three:["Üç","uech"], ten:["On","ohn"], hundred:["Yüz","yuez"]
+  }},
+  {code:'hr', name:'Croatian', endo:'Hrvatski', flag:'🇭🇷', bcp:'hr-HR', t:{
+    hello:["Bok","bohk"], bye:["Doviđenja","doh-vee-JEH-nyah"], please:["Molim","MOH-leem"], thanks:["Hvala","HVAH-lah"], yes:["Da","dah"], no:["Ne","neh"], sorry:["Oprostite","oh-PROH-stee-teh"], speak_en:["Govorite li engleski?","GOH-voh-ree-teh lee EN-gleh-skee"], no_under:["Ne razumijem","neh rah-ZOO-mee-yem"],
+    where:["Gdje je…?","gdyeh yeh"], toilet:["Gdje je zahod?","gdyeh yeh ZAH-hohd"], taxi:["Koliko košta taksi do…?","KOH-lee-koh KOSH-tah TAHK-see doh"], station:["Kolodvor","KOH-loh-dvor"], airport:["Zračna luka","ZRAHCH-nah LOO-kah"], left:["Lijevo","LYEH-voh"], right:["Desno","DEHS-noh"], straight:["Ravno","RAHV-noh"],
+    table:["Stol za dvoje, molim","stohl zah DVOH-yeh"], menu:["Jelovnik, molim","YEH-lohv-neek"], water:["Vodu, molim","VOH-doo"], bill:["Račun, molim","RAH-choon"], cheers:["Živjeli!","ZHEEV-yeh-lee"], veg:["Ja sam vegetarijanac","yah sahm veh-geh-tah-ree-YAH-nahts"], allergic:["Alergičan sam na…","ah-lehr-GEE-chahn sahm nah"], no_nuts:["Bez orašastih plodova","bez oh-rah-SHAH-steeh PLOH-doh-vah"], no_gluten:["Bez glutena","bez gloo-TEH-nah"], no_dairy:["Bez mliječnih proizvoda","bez MLYEH-chneeh proh-EEZ-voh-dah"],
+    help:["Upomoć!","OO-poh-mohch"], doctor:["Pozovite liječnika!","POH-zoh-vee-teh LYEHCH-nee-kah"], police:["Pozovite policiju!","POH-zoh-vee-teh poh-LEE-tsee-yoo"], hospital:["Gdje je bolnica?","gdyeh yeh BOHL-nee-tsah"], lost:["Izgubio sam se","eez-GOO-bee-oh sahm seh"], howmuch:["Koliko košta?","KOH-lee-koh KOSH-tah"], expensive:["Preskupo","preh-SKOO-poh"], card:["Primate li kartice?","PREE-mah-teh lee KAR-tee-tseh"], one:["Jedan","YEH-dahn"], two:["Dva","dvah"], three:["Tri","tree"], ten:["Deset","DEH-set"], hundred:["Sto","stoh"]
+  }},
+  {code:'ar', name:'Arabic', endo:'العربية', flag:'🇸🇦', bcp:'ar-SA', rtl:true, t:{
+    hello:["مرحبا","MAR-ha-ban"], bye:["مع السلامة","ma-as-sa-LAA-ma"], please:["من فضلك","min FAD-lak"], thanks:["شكرا","SHOOK-ran"], yes:["نعم","na-AAM"], no:["لا","laa"], sorry:["آسف","AA-sif"], speak_en:["هل تتكلم الإنجليزية؟","hal ta-ta-KAL-lam al-in-gi-LEE-zee-ya"], no_under:["لا أفهم","laa AF-ham"],
+    where:["أين…؟","AY-na"], toilet:["أين الحمام؟","AY-na al-ham-MAAM"], taxi:["كم سعر التاكسي إلى…؟","kam siar at-TAAK-see ee-laa"], station:["محطة القطار","ma-HAT-tat al-qi-TAAR"], airport:["مطار","ma-TAAR"], left:["يسار","ya-SAAR"], right:["يمين","ya-MEEN"], straight:["على طول","a-laa TOOL"],
+    table:["طاولة لشخصين، من فضلك","TAA-wi-la li-shakh-SAYN"], menu:["القائمة، من فضلك","al-QAA-ee-ma"], water:["ماء، من فضلك","maa"], bill:["الحساب، من فضلك","al-hi-SAAB"], cheers:["في صحتك!","fee SIH-ha-tak"], veg:["أنا نباتي","a-na na-BAA-tee"], allergic:["عندي حساسية من…","IN-dee ha-saa-SEE-ya min"], no_nuts:["بدون مكسرات","bi-DOON mu-kas-sa-RAAT"], no_gluten:["بدون غلوتين","bi-DOON gloo-TEEN"], no_dairy:["بدون منتجات الألبان","bi-DOON mun-ta-JAAT al-al-BAAN"],
+    help:["النجدة!","an-NAJ-da"], doctor:["اتصل بطبيب!","it-ta-SIL bi-ta-BEEB"], police:["اتصل بالشرطة!","it-ta-SIL bish-SHUR-ta"], hospital:["أين المستشفى؟","AY-na al-mus-TASH-fa"], lost:["أنا تائه","a-na TAA-eeh"], howmuch:["بكم هذا؟","bi-KAM HAA-za"], expensive:["غالي جدا","GHAA-lee JID-dan"], card:["هل تقبلون البطاقة؟","hal taq-ba-LOON al-bi-TAA-qa"], one:["واحد","WAA-hid"], two:["اثنان","ith-NAAN"], three:["ثلاثة","tha-LAA-tha"], ten:["عشرة","A-sha-ra"], hundred:["مئة","MI-a"]
+  }},
+  {code:'he', name:'Hebrew', endo:'עברית', flag:'🇮🇱', bcp:'he-IL', rtl:true, t:{
+    hello:["שלום","sha-LOM"], bye:["להתראות","le-hit-ra-OT"], please:["בבקשה","be-va-ka-SHA"], thanks:["תודה","to-DA"], yes:["כן","ken"], no:["לא","lo"], sorry:["סליחה","sli-KHA"], speak_en:["אתה מדבר אנגלית?","a-TA me-da-BER ang-LIT"], no_under:["אני לא מבין","a-NEE lo me-VEEN"],
+    where:["איפה…?","EY-fo"], toilet:["איפה השירותים?","EY-fo ha-shey-roo-TEEM"], taxi:["כמה עולה מונית ל…?","KA-ma o-LE mo-NEET le"], station:["תחנת רכבת","ta-kha-NAT ra-KE-vet"], airport:["שדה תעופה","sde-TE te-oo-FA"], left:["שמאלה","SMO-la"], right:["ימינה","ya-MEE-na"], straight:["ישר","ya-SHAR"],
+    table:["שולחן לשניים, בבקשה","shul-KHAN lish-NA-yeem"], menu:["תפריט, בבקשה","taf-REET"], water:["מים, בבקשה","MA-yeem"], bill:["חשבון, בבקשה","khesh-BON"], cheers:["לחיים!","le-kha-YEEM"], veg:["אני צמחוני","a-NEE tsim-kho-NEE"], allergic:["יש לי אלרגיה ל…","yesh lee a-LER-gya le"], no_nuts:["בלי אגוזים","bli e-go-ZEEM"], no_gluten:["בלי גלוטן","bli GLU-ten"], no_dairy:["בלי מוצרי חלב","bli mots-REY kha-LAV"],
+    help:["הצילו!","ha-TSEE-loo"], doctor:["תקראו לרופא!","tik-re-OO le-ro-FE"], police:["תקראו למשטרה!","tik-re-OO la-mish-ta-RA"], hospital:["איפה בית החולים?","EY-fo beyt ha-kho-LEEM"], lost:["הלכתי לאיבוד","ha-LAKH-tee le-ee-BOOD"], howmuch:["כמה זה עולה?","KA-ma ze o-LE"], expensive:["יקר מדי","ya-KAR mi-DAY"], card:["אפשר לשלם בכרטיס?","ef-SHAR le-sha-LEM be-kar-TEES"], one:["אחת","a-KHAT"], two:["שתיים","SHTA-yeem"], three:["שלוש","sha-LOSH"], ten:["עשר","E-ser"], hundred:["מאה","ME-a"]
+  }},
+  {code:'hi', name:'Hindi', endo:'हिन्दी', flag:'🇮🇳', bcp:'hi-IN', t:{
+    hello:["नमस्ते","na-mas-TE"], bye:["अलविदा","al-vi-DAA"], please:["कृपया","KRIP-yaa"], thanks:["धन्यवाद","DHAN-ya-vaad"], yes:["हाँ","haan"], no:["नहीं","na-HEEN"], sorry:["माफ़ कीजिए","maaf KEE-ji-e"], speak_en:["क्या आप अंग्रेज़ी बोलते हैं?","kyaa aap an-GREH-zee BOL-te hain"], no_under:["मुझे समझ नहीं आया","mu-JHE sa-MAJH na-HEEN aa-yaa"],
+    where:["…कहाँ है?","ka-HAAN hai"], toilet:["शौचालय कहाँ है?","shau-CHAA-lay ka-HAAN hai"], taxi:["…तक टैक्सी कितने की है?","tak TAIK-see KIT-ne kee hai"], station:["रेलवे स्टेशन","REL-ve STE-shan"], airport:["हवाई अड्डा","ha-VAA-ee AD-daa"], left:["बायाँ","BAA-yaan"], right:["दायाँ","DAA-yaan"], straight:["सीधे","SEE-dhe"],
+    table:["दो लोगों के लिए मेज़, कृपया","do lo-GON ke li-e mez"], menu:["मेन्यू, कृपया","MEN-yoo"], water:["पानी, कृपया","PAA-nee"], bill:["बिल, कृपया","bil"], cheers:["चियर्स!","chee-yers"], veg:["मैं शाकाहारी हूँ","main shaa-kaa-HAA-ree hoon"], allergic:["मुझे … से एलर्जी है","mu-JHE … se e-LER-jee hai"], no_nuts:["मेवे नहीं","ME-ve na-HEEN"], no_gluten:["ग्लूटेन नहीं","GLOO-ten na-HEEN"], no_dairy:["डेयरी नहीं","DE-ree na-HEEN"],
+    help:["बचाओ!","ba-CHAA-o"], doctor:["डॉक्टर को बुलाओ!","DOK-tar ko bu-LAA-o"], police:["पुलिस को बुलाओ!","pu-LIS ko bu-LAA-o"], hospital:["अस्पताल कहाँ है?","as-pa-TAAL ka-HAAN hai"], lost:["मैं खो गया हूँ","main kho ga-YAA hoon"], howmuch:["यह कितने का है?","yah KIT-ne kaa hai"], expensive:["बहुत महँगा","ba-HUT ma-HEN-gaa"], card:["क्या कार्ड चलेगा?","kyaa kaard cha-LE-gaa"], one:["एक","ek"], two:["दो","do"], three:["तीन","teen"], ten:["दस","das"], hundred:["सौ","sau"]
+  }},
+  {code:'th', name:'Thai', endo:'ไทย', flag:'🇹🇭', bcp:'th-TH', t:{
+    hello:["สวัสดี","sa-wat-DEE"], bye:["ลาก่อน","laa-GAWN"], please:["กรุณา","ga-ru-NAA"], thanks:["ขอบคุณ","kop-KOON"], yes:["ใช่","chai"], no:["ไม่","mai"], sorry:["ขอโทษ","kaw-TOHT"], speak_en:["คุณพูดภาษาอังกฤษได้ไหม","kun POOT paa-SAA ang-GRIT dai mai"], no_under:["ฉันไม่เข้าใจ","chan mai kao-JAI"],
+    where:["…อยู่ที่ไหน","yoo tee-NAI"], toilet:["ห้องน้ำอยู่ที่ไหน","hong-NAAM yoo tee-NAI"], taxi:["ไป…แท็กซี่เท่าไหร่","bpai … taek-SEE tao-RAI"], station:["สถานีรถไฟ","sa-taa-NEE rot-FAI"], airport:["สนามบิน","sa-naam-BIN"], left:["ซ้าย","saai"], right:["ขวา","kwaa"], straight:["ตรงไป","trong-bpai"],
+    table:["โต๊ะสำหรับสองคน","to sam-RAP song kon"], menu:["ขอเมนู","kaw meh-NOO"], water:["ขอน้ำ","kaw nam"], bill:["เก็บเงินด้วย","gep-NGERN duay"], cheers:["ไชโย","chai-YOH"], veg:["ฉันกินเจ","chan gin JAY"], allergic:["ฉันแพ้…","chan PAE"], no_nuts:["ไม่ใส่ถั่ว","mai sai TUA"], no_gluten:["ไม่มีกลูเตน","mai mee gloo-TEN"], no_dairy:["ไม่ใส่นม","mai sai NOM"],
+    help:["ช่วยด้วย","chuay-DUAY"], doctor:["เรียกหมอ","RIAK maw"], police:["เรียกตำรวจ","RIAK dtam-RUAT"], hospital:["โรงพยาบาลอยู่ที่ไหน","rohng-pa-yaa-BAAN yoo tee-NAI"], lost:["ฉันหลงทาง","chan long-TAANG"], howmuch:["เท่าไหร่","tao-RAI"], expensive:["แพงไป","paeng-bpai"], card:["รับบัตรไหม","rap BAT mai"], one:["หนึ่ง","neung"], two:["สอง","song"], three:["สาม","saam"], ten:["สิบ","sip"], hundred:["ร้อย","roy"]
+  }},
+  {code:'vi', name:'Vietnamese', endo:'Tiếng Việt', flag:'🇻🇳', bcp:'vi-VN', t:{
+    hello:["Xin chào","sin chow"], bye:["Tạm biệt","tahm byet"], please:["Làm ơn","lahm uhn"], thanks:["Cảm ơn","kahm uhn"], yes:["Vâng","vuhng"], no:["Không","khohng"], sorry:["Xin lỗi","sin loy"], speak_en:["Bạn có nói tiếng Anh không?","bahn kaw noy tyeng ahn khohng"], no_under:["Tôi không hiểu","toy khohng hyew"],
+    where:["…ở đâu?","uh dow"], toilet:["Nhà vệ sinh ở đâu?","nyah veh sing uh dow"], taxi:["Taxi đến… bao nhiêu tiền?","tahk-see den … bow nyew tyen"], station:["Ga tàu","gah tow"], airport:["Sân bay","suhn bay"], left:["Trái","chai"], right:["Phải","fai"], straight:["Đi thẳng","dee thahng"],
+    table:["Một bàn cho hai người","moht bahn chaw hai ngwoy"], menu:["Cho tôi thực đơn","chaw toy thuhk duhn"], water:["Cho tôi nước","chaw toy nuhk"], bill:["Tính tiền","ting tyen"], cheers:["Một hai ba, dô!","moht hai bah, yoh"], veg:["Tôi ăn chay","toy ahn chay"], allergic:["Tôi bị dị ứng với…","toy bee yee uhng voy"], no_nuts:["Không có hạt","khohng kaw haht"], no_gluten:["Không có gluten","khohng kaw gloo-ten"], no_dairy:["Không có sữa","khohng kaw suh-ah"],
+    help:["Cứu với!","kuw voy"], doctor:["Gọi bác sĩ!","goy bahk see"], police:["Gọi cảnh sát!","goy kahng saht"], hospital:["Bệnh viện ở đâu?","beng vyen uh dow"], lost:["Tôi bị lạc","toy bee lahk"], howmuch:["Bao nhiêu tiền?","bow nyew tyen"], expensive:["Đắt quá","daht kwah"], card:["Có nhận thẻ không?","kaw nyuhn the khohng"], one:["Một","moht"], two:["Hai","hai"], three:["Ba","bah"], ten:["Mười","muh-oy"], hundred:["Trăm","chahm"]
+  }},
+  {code:'id', name:'Indonesian', endo:'Bahasa Indonesia', flag:'🇮🇩', bcp:'id-ID', t:{
+    hello:["Halo","HAH-loh"], bye:["Selamat tinggal","seh-LAH-maht TING-gahl"], please:["Tolong","TOH-long"], thanks:["Terima kasih","teh-REE-mah KAH-see"], yes:["Ya","yah"], no:["Tidak","TEE-dahk"], sorry:["Maaf","mah-AHF"], speak_en:["Apakah Anda bisa bahasa Inggris?","AH-pah-kah AHN-dah BEE-sah bah-HAH-sah ING-grees"], no_under:["Saya tidak mengerti","SAH-yah TEE-dahk meng-EHR-tee"],
+    where:["Di mana…?","dee MAH-nah"], toilet:["Di mana toilet?","dee MAH-nah TOY-let"], taxi:["Berapa taksi ke…?","beh-RAH-pah TAHK-see keh"], station:["Stasiun","stah-SEE-oon"], airport:["Bandara","bahn-DAH-rah"], left:["Kiri","KEE-ree"], right:["Kanan","KAH-nahn"], straight:["Lurus","LOO-roos"],
+    table:["Meja untuk dua orang","MEH-jah OON-took DOO-ah OH-rahng"], menu:["Minta menu","MEEN-tah MEH-noo"], water:["Minta air","MEEN-tah AH-eer"], bill:["Minta bon","MEEN-tah bohn"], cheers:["Bersulang!","behr-SOO-lahng"], veg:["Saya vegetarian","SAH-yah veh-geh-TAH-ree-ahn"], allergic:["Saya alergi…","SAH-yah ah-LEHR-gee"], no_nuts:["Tanpa kacang","TAHN-pah KAH-chahng"], no_gluten:["Tanpa gluten","TAHN-pah GLOO-ten"], no_dairy:["Tanpa susu","TAHN-pah SOO-soo"],
+    help:["Tolong!","TOH-long"], doctor:["Panggil dokter!","PAHNG-geel DOK-tehr"], police:["Panggil polisi!","PAHNG-geel poh-LEE-see"], hospital:["Di mana rumah sakit?","dee MAH-nah ROO-mah SAH-keet"], lost:["Saya tersesat","SAH-yah tehr-seh-SAHT"], howmuch:["Berapa harganya?","beh-RAH-pah har-GAH-nyah"], expensive:["Terlalu mahal","tehr-LAH-loo mah-HAHL"], card:["Bisa pakai kartu?","BEE-sah PAH-kai KAR-too"], one:["Satu","SAH-too"], two:["Dua","DOO-ah"], three:["Tiga","TEE-gah"], ten:["Sepuluh","seh-POO-loo"], hundred:["Seratus","seh-RAH-toos"]
+  }},
+  {code:'zh', name:'Mandarin Chinese', endo:'中文', flag:'🇨🇳', bcp:'zh-CN', t:{
+    hello:["你好","nee-HOW"], bye:["再见","dzye-JYEN"], please:["请","cheeng"], thanks:["谢谢","SYEH-syeh"], yes:["是","shr"], no:["不是","boo-shr"], sorry:["对不起","dway-boo-CHEE"], speak_en:["你会说英文吗？","nee hway shwor eeng-wun mah"], no_under:["我不懂","waw boo-DUNG"],
+    where:["…在哪里？","dzai NAH-lee"], toilet:["洗手间在哪里？","shee-show-jyen dzai NAH-lee"], taxi:["到…打车多少钱？","dow … dah-chuh dwor-shaow chyen"], station:["火车站","hwor-chuh-JAHN"], airport:["机场","jee-CHAHNG"], left:["左","dzwor"], right:["右","yo"], straight:["直走","jr-DZOH"],
+    table:["两个人的桌子","lyang-guh-run duh JWOR-dz"], menu:["菜单","tsai-DAHN"], water:["水","shway"], bill:["买单","mai-DAHN"], cheers:["干杯！","gahn-BAY"], veg:["我吃素","waw chr-SOO"], allergic:["我对…过敏","waw dway … gwor-MEEN"], no_nuts:["不要坚果","boo-yaow jyen-GWOR"], no_gluten:["不要麸质","boo-yaow foo-JR"], no_dairy:["不要奶制品","boo-yaow nai-jr-PEEN"],
+    help:["救命！","jyo-MEENG"], doctor:["叫医生！","jyaow ee-SHUNG"], police:["叫警察！","jyaow jeeng-CHAH"], hospital:["医院在哪里？","ee-ywen dzai NAH-lee"], lost:["我迷路了","waw mee-LOO-luh"], howmuch:["多少钱？","dwor-shaow CHYEN"], expensive:["太贵了","tai-GWAY-luh"], card:["可以刷卡吗？","kuh-yee shwah-KAH mah"], one:["一","ee"], two:["二","ar"], three:["三","sahn"], ten:["十","shr"], hundred:["一百","ee-BAI"]
+  }},
+  {code:'ja', name:'Japanese', endo:'日本語', flag:'🇯🇵', bcp:'ja-JP', t:{
+    hello:["こんにちは","kon-NEE-chee-wah"], bye:["さようなら","sah-YOH-nah-rah"], please:["お願いします","oh-neh-GAH-ee-shee-mahs"], thanks:["ありがとう","ah-ree-GAH-toh"], yes:["はい","hai"], no:["いいえ","EE-eh"], sorry:["すみません","soo-mee-mah-SEN"], speak_en:["英語を話せますか？","EH-go oh hah-nah-seh-mahs-kah"], no_under:["わかりません","wah-kah-ree-mah-SEN"],
+    where:["…はどこですか？","wah DOH-koh dehs-kah"], toilet:["トイレはどこですか？","TOY-reh wah DOH-koh dehs-kah"], taxi:["…までタクシーでいくらですか？","mah-deh TAHK-shee deh EE-koo-rah dehs-kah"], station:["駅","EH-kee"], airport:["空港","KOO-koh"], left:["左","hee-DAH-ree"], right:["右","mee-GEE"], straight:["まっすぐ","mahs-SOO-goo"],
+    table:["二人用のテーブル","foo-tah-ree-yoh no TEH-boo-roo"], menu:["メニューをください","MEH-nyoo oh koo-dah-SAI"], water:["お水をください","oh-MEE-zoo oh koo-dah-SAI"], bill:["お会計をお願いします","oh-kai-KEH oh oh-neh-GAH-ee-shee-mahs"], cheers:["乾杯！","kahm-PAI"], veg:["私はベジタリアンです","wah-tah-shee wah beh-jee-tah-ree-ahn dehs"], allergic:["…にアレルギーがあります","nee ah-REH-roo-gee gah ah-ree-mahs"], no_nuts:["ナッツ抜きで","NAHT-tsoo noo-kee deh"], no_gluten:["グルテン抜きで","goo-roo-ten noo-kee deh"], no_dairy:["乳製品抜きで","nyoo-SEH-heen noo-kee deh"],
+    help:["助けて！","tah-soo-KEH-teh"], doctor:["医者を呼んで！","EE-shah oh yon-deh"], police:["警察を呼んで！","KEH-sah-tsoo oh yon-deh"], hospital:["病院はどこですか？","BYOH-een wah DOH-koh dehs-kah"], lost:["道に迷いました","mee-chee nee mah-yoy-mah-shtah"], howmuch:["いくらですか？","EE-koo-rah dehs-kah"], expensive:["高すぎます","tah-kah-soo-gee-mahs"], card:["カードは使えますか？","KAH-doh wah tsoo-kah-eh-mahs-kah"], one:["一","ee-CHEE"], two:["二","nee"], three:["三","sahn"], ten:["十","joo"], hundred:["百","hyah-koo"]
+  }},
+  {code:'ko', name:'Korean', endo:'한국어', flag:'🇰🇷', bcp:'ko-KR', t:{
+    hello:["안녕하세요","ahn-nyong-hah-SEH-yo"], bye:["안녕히 가세요","ahn-nyong-hee gah-SEH-yo"], please:["주세요","joo-SEH-yo"], thanks:["감사합니다","gahm-sah-HAHM-nee-dah"], yes:["네","neh"], no:["아니요","ah-NEE-yo"], sorry:["죄송합니다","jweh-song-HAHM-nee-dah"], speak_en:["영어 하세요?","yong-oh HAH-seh-yo"], no_under:["이해 못해요","ee-heh moht-HEH-yo"],
+    where:["…어디예요?","oh-dee-YEH-yo"], toilet:["화장실 어디예요?","hwah-jang-sil oh-dee-YEH-yo"], taxi:["…까지 택시 얼마예요?","kkah-jee taek-shee ol-mah-YEH-yo"], station:["기차역","gee-chah-YOK"], airport:["공항","gong-HAHNG"], left:["왼쪽","wehn-JJOK"], right:["오른쪽","oh-roon-JJOK"], straight:["직진","jik-JIN"],
+    table:["두 명 자리요","doo myong jah-REE-yo"], menu:["메뉴 주세요","MEH-nyoo joo-SEH-yo"], water:["물 주세요","mool joo-SEH-yo"], bill:["계산서 주세요","gyeh-sahn-soh joo-SEH-yo"], cheers:["건배!","gon-BEH"], veg:["저는 채식주의자예요","joh-noon cheh-shik-joo-ee-jah-YEH-yo"], allergic:["…알레르기 있어요","ah-leh-roo-gee EE-ssoh-yo"], no_nuts:["견과류 빼주세요","gyon-gwah-ryoo ppeh-joo-SEH-yo"], no_gluten:["글루텐 빼주세요","goo-loo-ten ppeh-joo-SEH-yo"], no_dairy:["유제품 빼주세요","yoo-jeh-poom ppeh-joo-SEH-yo"],
+    help:["도와주세요!","doh-wah-joo-SEH-yo"], doctor:["의사 불러주세요!","oo-ee-sah bool-loh-joo-SEH-yo"], police:["경찰 불러주세요!","gyong-chahl bool-loh-joo-SEH-yo"], hospital:["병원 어디예요?","byong-won oh-dee-YEH-yo"], lost:["길을 잃었어요","gee-roul ee-roh-SSOH-yo"], howmuch:["얼마예요?","ol-mah-YEH-yo"], expensive:["너무 비싸요","noh-moo bee-SSAH-yo"], card:["카드 되나요?","kah-doo dweh-NAH-yo"], one:["하나","HAH-nah"], two:["둘","dool"], three:["셋","set"], ten:["열","yol"], hundred:["백","bek"]
+  }},
+  {code:'sw', name:'Swahili', endo:'Kiswahili', flag:'🇰🇪', bcp:'sw-KE', t:{
+    hello:["Jambo","JAHM-boh"], bye:["Kwaheri","kwah-HEH-ree"], please:["Tafadhali","tah-fah-DHAH-lee"], thanks:["Asante","ah-SAHN-teh"], yes:["Ndiyo","n-DEE-yoh"], no:["Hapana","hah-PAH-nah"], sorry:["Samahani","sah-mah-HAH-nee"], speak_en:["Unazungumza Kiingereza?","oo-nah-zoon-GOOM-zah kee-een-geh-REH-zah"], no_under:["Sielewi","see-eh-LEH-wee"],
+    where:["…iko wapi?","EE-koh WAH-pee"], toilet:["Choo kiko wapi?","choh KEE-koh WAH-pee"], taxi:["Teksi mpaka… ni bei gani?","TEK-see m-PAH-kah … nee bay GAH-nee"], station:["Stesheni","steh-SHEH-nee"], airport:["Uwanja wa ndege","oo-WAHN-jah wah n-DEH-geh"], left:["Kushoto","koo-SHOH-toh"], right:["Kulia","koo-LEE-ah"], straight:["Moja kwa moja","MOH-jah kwah MOH-jah"],
+    table:["Meza ya watu wawili","MEH-zah yah WAH-too wah-WEE-lee"], menu:["Menyu, tafadhali","MEH-nyoo"], water:["Maji, tafadhali","MAH-jee"], bill:["Bili, tafadhali","BEE-lee"], cheers:["Maisha marefu!","mah-EE-shah mah-REH-foo"], veg:["Mimi ni mlaji wa mboga","MEE-mee nee m-LAH-jee wah m-BOH-gah"], allergic:["Nina mzio wa…","NEE-nah m-ZEE-oh wah"], no_nuts:["Hakuna karanga","hah-KOO-nah kah-RAHN-gah"], no_gluten:["Hakuna gluteni","hah-KOO-nah gloo-TEH-nee"], no_dairy:["Hakuna maziwa","hah-KOO-nah mah-ZEE-wah"],
+    help:["Saidia!","sah-ee-DEE-ah"], doctor:["Mwite daktari!","m-WEE-teh dahk-TAH-ree"], police:["Mwite polisi!","m-WEE-teh poh-LEE-see"], hospital:["Hospitali iko wapi?","hoh-spee-TAH-lee EE-koh WAH-pee"], lost:["Nimepotea","nee-meh-poh-TEH-ah"], howmuch:["Ni bei gani?","nee bay GAH-nee"], expensive:["Ghali sana","GHAH-lee SAH-nah"], card:["Mnakubali kadi?","m-nah-koo-BAH-lee KAH-dee"], one:["Moja","MOH-jah"], two:["Mbili","m-BEE-lee"], three:["Tatu","TAH-too"], ten:["Kumi","KOO-mee"], hundred:["Mia moja","MEE-ah MOH-jah"]
+  }},
+  {code:'fil', name:'Filipino', endo:'Filipino', flag:'🇵🇭', bcp:'fil-PH', t:{
+    hello:["Kumusta","koo-moos-TAH"], bye:["Paalam","pah-AH-lahm"], please:["Pakiusap","pah-kee-OO-sahp"], thanks:["Salamat","sah-LAH-maht"], yes:["Oo","OH-oh"], no:["Hindi","hin-DEE"], sorry:["Pasensya na","pah-SEN-shah nah"], speak_en:["Marunong ka ba ng Ingles?","mah-ROO-nong kah bah nahng een-GLES"], no_under:["Hindi ko maintindihan","hin-DEE koh mah-in-tin-dee-HAHN"],
+    where:["Nasaan ang…?","nah-sah-AHN ahng"], toilet:["Nasaan ang banyo?","nah-sah-AHN ahng BAHN-yoh"], taxi:["Magkano ang taxi papuntang…?","mahg-KAH-noh ahng TAHK-see pah-poon-TAHNG"], station:["Istasyon","ees-tahs-YON"], airport:["Paliparan","pah-lee-PAH-rahn"], left:["Kaliwa","kah-lee-WAH"], right:["Kanan","KAH-nahn"], straight:["Diretso","dee-RET-soh"],
+    table:["Mesa para sa dalawa","MEH-sah PAH-rah sah dah-lah-WAH"], menu:["Menu, pakiusap","MEH-noo"], water:["Tubig, pakiusap","TOO-big"], bill:["Bill, pakiusap","bil"], cheers:["Tagay!","tah-GAI"], veg:["Vegetarian ako","veh-jeh-TAH-ree-ahn ah-KOH"], allergic:["Allergic ako sa…","ah-LER-jik ah-KOH sah"], no_nuts:["Walang mani","WAH-lahng mah-NEE"], no_gluten:["Walang gluten","WAH-lahng GLOO-ten"], no_dairy:["Walang gatas","WAH-lahng GAH-tahs"],
+    help:["Saklolo!","sahk-LOH-loh"], doctor:["Tumawag ng doktor!","too-MAH-wahg nahng DOK-tor"], police:["Tumawag ng pulis!","too-MAH-wahg nahng poo-LEES"], hospital:["Nasaan ang ospital?","nah-sah-AHN ahng os-pee-TAHL"], lost:["Naliligaw ako","nah-lee-lee-GOW ah-KOH"], howmuch:["Magkano ito?","mahg-KAH-noh ee-TOH"], expensive:["Masyadong mahal","mah-SHAH-dong mah-HAHL"], card:["Tumatanggap ba kayo ng card?","too-mah-tahng-GAHP bah kah-YOH nahng kard"], one:["Isa","ee-SAH"], two:["Dalawa","dah-lah-WAH"], three:["Tatlo","taht-LOH"], ten:["Sampu","sahm-POO"], hundred:["Daan","dah-AHN"]
+  }},
+];
+
+const LP_FAV_KEY = 'tt_lp_favs';
+const LP_LANG_KEY = 'tt_lp_lang';
+let lpFavs = {};
+let lpLang = 'es';
+
+function lpEsc(s){ return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function lpGetLang(){ return LP_LANGS.find(l => l.code === lpLang) || LP_LANGS[0]; }
+function lpLoadFavs(){ try { lpFavs = JSON.parse(localStorage.getItem(LP_FAV_KEY) || '{}') || {}; } catch(_){ lpFavs = {}; } }
+function lpSaveFavs(){ try { localStorage.setItem(LP_FAV_KEY, JSON.stringify(lpFavs)); } catch(_){} }
+function lpFavKey(id){ return lpLang + ':' + id; }
+
+/* Map an active-trip destination string to a language code. */
+function lpLangForDest(dest){
+  const d = (dest || '').toLowerCase();
+  const map = [
+    ['mexico','es'],['spain','es'],['argentin','es'],['peru','es'],['chile','es'],['colombia','es'],['cuba','es'],['costa rica','es'],['madrid','es'],['barcelona','es'],
+    ['france','fr'],['paris','fr'],['nice','fr'],
+    ['germany','de'],['german','de'],['austria','de'],['vienna','de'],['switzerland','de'],['berlin','de'],['munich','de'],
+    ['ital','it'],['rome','it'],['milan','it'],['venice','it'],['florence','it'],
+    ['portug','pt'],['brazil','pt'],['lisbon','pt'],
+    ['netherland','nl'],['holland','nl'],['amsterdam','nl'],
+    ['greece','el'],['greek','el'],['athens','el'],['santorini','el'],
+    ['russia','ru'],['moscow','ru'],
+    ['poland','pl'],['warsaw','pl'],['krakow','pl'],
+    ['czech','cs'],['prague','cs'],
+    ['hungar','hu'],['budapest','hu'],
+    ['sweden','sv'],['stockholm','sv'],
+    ['turk','tr'],['istanbul','tr'],
+    ['croat','hr'],['dubrovnik','hr'],['zagreb','hr'],['split','hr'],
+    ['saudi','ar'],['egypt','ar'],['cairo','ar'],['dubai','ar'],['emirates','ar'],['uae','ar'],['morocc','ar'],['marrakech','ar'],['jordan','ar'],['qatar','ar'],
+    ['israel','he'],['jerusalem','he'],['tel aviv','he'],
+    ['india','hi'],['delhi','hi'],['mumbai','hi'],['jaipur','hi'],
+    ['thai','th'],['bangkok','th'],['phuket','th'],
+    ['vietnam','vi'],['hanoi','vi'],['saigon','vi'],
+    ['indonesia','id'],['bali','id'],['jakarta','id'],
+    ['china','zh'],['beijing','zh'],['shanghai','zh'],['taiwan','zh'],['taipei','zh'],['hong kong','zh'],
+    ['japan','ja'],['tokyo','ja'],['kyoto','ja'],['osaka','ja'],
+    ['korea','ko'],['seoul','ko'],
+    ['kenya','sw'],['tanzania','sw'],['zanzibar','sw'],
+    ['philippin','fil'],['manila','fil'],['cebu','fil'],
+  ];
+  for (const [k,v] of map){ if (d.includes(k)) return v; }
+  return null;
+}
+
+function lpInit(){
+  lpLoadFavs();
+  const sel = document.getElementById('lp-lang');
+  sel.innerHTML = LP_LANGS.map(l => `<option value="${l.code}">${l.flag} ${lpEsc(l.name)} — ${lpEsc(l.endo)}</option>`).join('');
+  let lang = null;
+  try { lang = localStorage.getItem(LP_LANG_KEY); } catch(_){}
+  if (!lang){ const trip = getActiveTrip(); if (trip && trip.destination) lang = lpLangForDest(trip.destination); }
+  if (!lang || !LP_LANGS.some(l => l.code === lang)) lang = 'es';
+  lpLang = lang; sel.value = lang;
+  document.getElementById('lp-search').value = '';
+  // Warm up speech voices (populated asynchronously on some browsers).
+  try { if ('speechSynthesis' in window){ window.speechSynthesis.getVoices(); window.speechSynthesis.onvoiceschanged = () => {}; } } catch(_){}
+  lpRender();
+}
+function lpOnLang(){
+  lpLang = document.getElementById('lp-lang').value;
+  try { localStorage.setItem(LP_LANG_KEY, lpLang); } catch(_){}
+  document.getElementById('lp-search').value = '';
+  lpRender();
+}
+function lpToggleFav(id){
+  const k = lpFavKey(id);
+  if (lpFavs[k]) delete lpFavs[k]; else lpFavs[k] = true;
+  lpSaveFavs(); lpRender();
+}
+function lpMatch(ph, L, q){
+  if (!q) return true;
+  const t = L.t[ph.id];
+  const hay = (ph.en + ' ' + (t ? t[0] + ' ' + t[1] : '')).toLowerCase();
+  return hay.includes(q);
+}
+function lpPhraseHTML(ph, L){
+  const t = L.t[ph.id]; if (!t) return '';
+  const fav = !!lpFavs[lpFavKey(ph.id)];
+  const dir = L.rtl ? ' dir="rtl"' : '';
+  return `<div class="lp-phrase">
+    <div>
+      <div class="lp-en">${lpEsc(ph.en)}</div>
+      <div class="lp-native"${dir} onclick="lpBig('${ph.id}')">${lpEsc(t[0])}</div>
+      <div class="lp-pron">${lpEsc(t[1])}</div>
+    </div>
+    <div class="lp-acts">
+      <button class="lp-iconbtn lp-star${fav?' on':''}" title="Save to favourites" aria-label="Favourite" onclick="lpToggleFav('${ph.id}')">${fav?'★':'☆'}</button>
+      <button class="lp-iconbtn lp-say" title="Hear it" aria-label="Hear it" onclick="lpSay('${ph.id}')">🔊</button>
+    </div>
+  </div>`;
+}
+function lpRender(){
+  const L = lpGetLang();
+  const q = (document.getElementById('lp-search').value || '').trim().toLowerCase();
+  document.getElementById('lp-note').innerHTML =
+    `Showing <strong>${lpEsc(L.name)}</strong> (${lpEsc(L.endo)}). Tap 🔊 to hear it, tap the phrase to enlarge it for showing someone.${L.rtl ? ' This language reads right-to-left.' : ''} Pronunciations are approximate.`;
+  let html = '';
+  const favPhrases = LP_PHRASES.filter(ph => lpFavs[lpFavKey(ph.id)] && lpMatch(ph, L, q));
+  let any = false;
+  if (favPhrases.length){
+    any = true;
+    html += `<div class="lp-cat lp-favs-h"><div class="lp-cat-h">⭐ Favourites</div>${favPhrases.map(ph => lpPhraseHTML(ph, L)).join('')}</div>`;
+  }
+  LP_CATS.forEach(cat => {
+    const list = LP_PHRASES.filter(ph => ph.cat === cat.id && lpMatch(ph, L, q));
+    if (!list.length) return;
+    any = true;
+    html += `<div class="lp-cat"><div class="lp-cat-h">${lpEsc(cat.n)}</div>${list.map(ph => lpPhraseHTML(ph, L)).join('')}</div>`;
+  });
+  if (!any) html = `<div class="lp-empty-search">No phrases match “${lpEsc(q)}”.</div>`;
+  document.getElementById('lp-list').innerHTML = html;
+}
+function lpBig(id){
+  const L = lpGetLang(); const t = L.t[id]; if (!t) return;
+  const ph = LP_PHRASES.find(p => p.id === id);
+  document.getElementById('lp-modal-en').textContent = ph ? ph.en : '';
+  const nat = document.getElementById('lp-modal-native');
+  nat.textContent = t[0]; nat.setAttribute('dir', L.rtl ? 'rtl' : 'ltr');
+  document.getElementById('lp-modal-pron').textContent = t[1];
+  document.getElementById('lp-modal').classList.add('show');
+}
+function lpCloseBig(){ document.getElementById('lp-modal').classList.remove('show'); }
+function lpSay(id){
+  const L = lpGetLang(); const t = L.t[id]; if (!t) return;
+  if (!('speechSynthesis' in window)){ alert('Sorry — your device can’t read phrases aloud.'); return; }
+  try {
+    const u = new SpeechSynthesisUtterance(t[0]);
+    u.lang = L.bcp; u.rate = 0.85;
+    const voices = window.speechSynthesis.getVoices() || [];
+    const pre = L.bcp.toLowerCase(); const two = pre.slice(0,2);
+    const v = voices.find(x => x.lang && x.lang.toLowerCase() === pre) || voices.find(x => x.lang && x.lang.toLowerCase().startsWith(two));
+    if (v) u.voice = v;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(u);
+  } catch(e){}
 }
 
 /* ══════════════════════════════════════════════════════
