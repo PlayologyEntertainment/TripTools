@@ -3959,17 +3959,120 @@ body.no-scroll { overflow: hidden; }
     </div>
   </div>
 </div>
-<div id="view-placeholder-intl-driving" class="view">
-  <nav class="tool-topbar">
+<div id="view-intl-driving" class="view">
+  <style>
+  /* ── INTERNATIONAL DRIVING GUIDE ── */
+  #view-intl-driving .id-section-lbl { font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 18px 0 8px; }
+  #view-intl-driving .id-route { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: end; }
+  @media(max-width:540px){ #view-intl-driving .id-route { grid-template-columns: 1fr; } }
+  #view-intl-driving .id-results { border-top: 2px solid var(--ink); margin-top: 24px; padding-top: 24px; }
+  #view-intl-driving .id-results-inner { animation: fc-result-in .22s cubic-bezier(.2,.8,.2,1) both; }
+  /* verdict hero */
+  #view-intl-driving .id-hero { border: 2px solid var(--ink); border-radius: var(--r); padding: 20px 22px; margin-bottom: 20px; position: relative; overflow: hidden; }
+  #view-intl-driving .id-hero::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; }
+  #view-intl-driving .id-hero.lv-required::before { background: var(--accent); }
+  #view-intl-driving .id-hero.lv-recommended::before { background: var(--orange); }
+  #view-intl-driving .id-hero.lv-none::before { background: var(--green); }
+  #view-intl-driving .id-hero.lv-warn::before, #view-intl-driving .id-hero.lv-special::before { background: var(--yellow); }
+  #view-intl-driving .id-hero.lv-own::before { background: var(--muted); }
+  #view-intl-driving .id-hero-tag { font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+  #view-intl-driving .id-hero-h { font-family: var(--serif); font-weight: 600; font-size: clamp(21px,4.6vw,30px); letter-spacing: -.02em; line-height: 1.12; color: var(--ink); display: flex; align-items: center; gap: 11px; }
+  #view-intl-driving .id-hero-h .em { font-size: 1.05em; flex-shrink: 0; }
+  #view-intl-driving .id-hero-sub { font-size: 14px; color: var(--ink-2); line-height: 1.55; margin-top: 9px; }
+  #view-intl-driving .id-hero-sub b { color: var(--ink); }
+  /* IDP detail card */
+  #view-intl-driving .id-idp { border: 1.5px solid var(--rule); border-radius: var(--r); background: var(--paper); padding: 4px 16px; margin-bottom: 16px; }
+  #view-intl-driving .id-idp-row { display: flex; gap: 12px; align-items: baseline; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--rule); font-size: 13px; color: var(--ink-2); }
+  #view-intl-driving .id-idp-row:last-child { border-bottom: none; }
+  #view-intl-driving .id-idp-row .k { font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); flex-shrink: 0; }
+  #view-intl-driving .id-idp-row .v { text-align: right; color: var(--ink); }
+  #view-intl-driving .id-idp-row .v b { font-family: var(--sans); }
+  /* glance grid */
+  #view-intl-driving .id-glance { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 8px; }
+  @media(max-width:560px){ #view-intl-driving .id-glance { grid-template-columns: 1fr; } }
+  #view-intl-driving .id-glance-card { border: 1.5px solid var(--ink); border-radius: var(--r); background: var(--paper); padding: 13px 15px; }
+  #view-intl-driving .id-glance-lbl { font-family: var(--mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 7px; }
+  #view-intl-driving .id-glance-val { font-family: var(--serif); font-size: 20px; font-weight: 600; color: var(--ink); line-height: 1.15; display: flex; align-items: center; gap: 8px; }
+  #view-intl-driving .id-glance-val .em { font-size: 22px; }
+  #view-intl-driving .id-glance-sub { font-size: 12px; color: var(--ink-2); line-height: 1.45; margin-top: 6px; }
+  /* lists */
+  #view-intl-driving .id-list { border: 1.5px solid var(--rule); border-radius: var(--r); background: var(--paper); padding: 4px 16px; margin-bottom: 8px; }
+  #view-intl-driving .id-li { display: flex; gap: 11px; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid var(--rule); font-size: 13.5px; color: var(--ink-2); line-height: 1.5; }
+  #view-intl-driving .id-li:last-child { border-bottom: none; }
+  #view-intl-driving .id-li .em { flex-shrink: 0; font-size: 15px; line-height: 1.4; }
+  #view-intl-driving .id-li b { font-family: var(--sans); color: var(--ink); }
+  #view-intl-driving .id-step-n { flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%; background: var(--ink); color: var(--paper); font-family: var(--mono); font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center; }
+  #view-intl-driving .id-xlink { border-left: 3px solid var(--blue); padding: 11px 14px; background: rgba(21,101,192,.05); border-radius: 0 var(--r) var(--r) 0; font-size: 13px; color: var(--ink-2); line-height: 1.55; margin: 8px 0 16px; }
+  #view-intl-driving .id-xlink b { color: var(--ink); }
+  #view-intl-driving .id-xlink button { background: none; border: none; color: var(--blue); font: inherit; font-weight: 600; text-decoration: underline; cursor: pointer; padding: 0; }
+  #view-intl-driving .id-caveat { font-size: 12px; color: var(--ink-2); line-height: 1.5; border-left: 3px solid var(--muted); padding: 10px 14px; background: var(--paper-2); border-radius: 0 var(--r) var(--r) 0; }
+  #view-intl-driving .id-msg { background: var(--paper-2); border-left: 3px solid var(--muted); color: var(--ink-2); padding: 12px 14px; border-radius: 0 var(--r) var(--r) 0; font-size: 13.5px; line-height: 1.5; }
+  #view-intl-driving .id-print-header { display: none; }
+  @media print {
+    #view-intl-driving .tool-bar, #view-intl-driving .ctx-banner, #view-intl-driving .pro-tip,
+    #view-intl-driving .related, #view-intl-driving .btn-ghost, #view-intl-driving .id-route { display: none !important; }
+    #view-intl-driving .id-print-header { display: flex !important; justify-content: space-between; font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid #ccc; padding-bottom: 8px; margin-bottom: 16px; }
+    #view-intl-driving .id-results { border-top: 1px solid #ccc; margin-top: 0; }
+    #view-intl-driving .id-glance-card, #view-intl-driving .id-hero { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    body { background: #fff !important; background-image: none !important; }
+  }
+  </style>
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="window.print()">🖨 Print</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">🚗</span>
-    <h2>International Driving Guide</h2>
-    <p style="margin-bottom:24px">IDP requirements, driving side & speed limits for 80+ countries.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-intl-driving"></div>
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>International Driving Guide</h1>
+    <p class="tool-sub">Sort the paperwork before you go. Tell us where your licence is from and where you'll drive, and we'll tell you whether you need an International Driving Permit — which type, where to get it, and what to carry.</p>
+  </div>
+
+  <div class="tool-body">
+
+    <!-- ── ROUTE ── -->
+    <div class="id-route">
+      <div class="fg" style="margin-bottom:0">
+        <label for="id-home">🪪 Your driving licence is from</label>
+        <select id="id-home" onchange="idChange()"></select>
+      </div>
+      <div class="fg" style="margin-bottom:0">
+        <label for="id-dest">🚗 You'll be driving in</label>
+        <select id="id-dest" onchange="idChange()"></select>
+      </div>
     </div>
+
+    <!-- ── RESULTS ── -->
+    <div class="id-results" id="id-results" style="display:none" aria-live="polite">
+      <div class="id-results-inner" id="id-results-inner"><!-- injected by JS --></div>
+    </div>
+    <div class="id-msg" id="id-msg" style="margin-top:18px">Pick your licence country and your destination to see whether you need an International Driving Permit.</div>
+
+    <!-- ── RESET ── -->
+    <div style="margin-top:16px;text-align:right">
+      <button class="btn-ghost" onclick="idReset()">↺ Reset</button>
+    </div>
+
+  </div><!-- /tool-body -->
+
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    An International Driving Permit is just an official translation of your licence — it's never valid on its own, so always carry your normal licence alongside it. You can only get an IDP in the country that issued your licence, and you can't get one once you've left home, so sort it before you fly. Most rental desks and police want to see both documents together.
+  </div>
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('driving-rules')">🚦 Driving &amp; Road Rules</button>
+      <button class="rel-btn" onclick="openTool('doc-checklist')">✅ Travel Document Checklist</button>
+      <button class="rel-btn" onclick="openTool('toll-est')">🛣 Toll Cost Estimator</button>
+      <button class="rel-btn" onclick="openTool('fuel-cost')">⛽ Fuel Cost Calculator</button>
+    </div>
+  </div>
+
+  <!-- Print-only header -->
+  <div class="id-print-header">
+    <strong>TripTools — International Driving Guide</strong>
+    <span id="id-print-date"></span>
   </div>
 </div>
 <style>
@@ -12722,7 +12825,7 @@ const TOOLS = [
   {id:'passport',      nm:'Passport Expiry Checker',    ico:'📕', ph:'docs',      on:false, live:true,  ds:'Enter expiry + destination. Returns days left & 6-month rule check.'},
   {id:'visa-guide',    nm:'Visa Requirement Guide',     ico:'🌍', ph:'docs',      on:false, live:true,  ds:'Nationality + destination = visa type, cost & processing time.'},
   {id:'doc-checklist', nm:'Travel Document Checklist',  ico:'✅', ph:'docs',      on:false, live:true,  ds:'Customizable pre-trip checklist adapting to trip type.'},
-  {id:'intl-driving',  nm:'International Driving Guide',ico:'🚗', ph:'docs',      on:false, live:false, ds:'IDP requirements, driving side & speed limits for 80+ countries.'},
+  {id:'intl-driving',  nm:'International Driving Guide',ico:'🚗', ph:'docs',      on:false, live:true,  ds:'Do you need an International Driving Permit? Licence-aware IDP, driving side & sign guide for 90+ countries.'},
   {id:'flight-delay',  nm:'Flight Delay Compensation',  ico:'⚖️', ph:'docs',      on:false, live:true,  ds:'Your rights for delays, cancellations & bumping — EU261, UK261, US DOT, Canada APPR. With complaint-letter generator.'},
   {id:'customs-decl',  nm:'Customs Declaration Helper', ico:'📦', ph:'docs',      on:false, live:true,  ds:"What you can & can't bring in. Duty-free allowances, prohibited items & a declare-or-not self-check."},
   {id:'ff-tracker',    nm:'Frequent Flyer Tracker',     ico:'🏆', ph:'docs',      on:false, live:false, ds:'Log miles/points across programs. Track expiry & redemption value.'},
@@ -13428,6 +13531,7 @@ function injectTripCtx(id) {
   if(id==='rest-stop') rsInit();
   if(id==='flight-est') feInit();
   if(id==='hotel-rental') hrInit();
+  if(id==='intl-driving') idInit();
   if(id==='cruise-compare') ccInit();
   if(id==='sea-sick')      ssInit();
   if(id==='cruise-grat')   cgInit();
@@ -19468,6 +19572,326 @@ function rsPrint() {
   window.addEventListener('afterprint', cleanup);
   setTimeout(() => window.print(), 50);
   setTimeout(cleanup, 8000);
+}
+
+/* ══════════════════════════════════════════════════════
+   INTERNATIONAL DRIVING GUIDE
+   Offline, licence-centric pre-trip paperwork tool. Given
+   the country that issued your licence + your destination,
+   it computes whether you need an International Driving
+   Permit using 1949 Geneva / 1968 Vienna convention
+   membership and EU/EEA mutual recognition, names the IDP
+   type, and lists what to carry. Planning guidance only.
+   ══════════════════════════════════════════════════════ */
+
+const ID_LS = 'tt_intldriving_v1';
+let idState = { home:null, dest:null };
+let idBuilt = false;
+
+const ID_REGIONS = [['am','Americas'],['eu','Europe'],['me','Middle East & Africa'],['as','Asia & Pacific']];
+
+const ID_CONV = {
+  '1968':{ nm:'1968 Vienna Convention', valid:'up to 3 years, or until your licence expires (whichever is first)' },
+  '1949':{ nm:'1949 Geneva Convention', valid:'1 year from the date of issue' },
+  '1926':{ nm:'1926 Paris Convention',  valid:'1 year from the date of issue' },
+};
+const ID_SIGNS = {
+  vienna:{ nm:'Vienna Convention signs', d:'Standard pictographic signs used across Europe and much of the world — red triangles warn, red circles prohibit, blue circles instruct.' },
+  americas:{ nm:'North American (MUTCD) signs', d:'More text-based than Europe: yellow diamonds warn, white rectangles regulate, a red octagon means STOP.' },
+  uk:{ nm:'UK / Commonwealth signs', d:'Pictographic with English text — red triangles warn, red circles prohibit. Watch for distances posted in miles where mph is used.' },
+  au:{ nm:'Australian / NZ-style signs', d:'Pictographic with English wording; yellow diamonds warn. Speeds and distances are metric.' },
+  sadc:{ nm:'Southern African (SADC) signs', d:'Pictographic with English text, broadly like the Vienna set — triangles warn, circles command.' },
+  jp:{ nm:'Japanese signs', d:'International symbols combined with Japanese text. A few differ from Western norms — learn the key ones before you drive.' },
+  other:{ nm:'Local signage', d:'Largely pictographic, but conventions vary — learn the main warning, priority and prohibition signs before driving.' },
+};
+
+/* side L/R · unit · conv[] (conventions the country is party to) · signs · mr (EU/EEA+CH mutual recognition) · idp baseline for visitors (no/rec/req/special) */
+const ID_DATA = {
+  /* ===== AMERICAS ===== */
+  US:{ n:'United States', f:'🇺🇸', rg:'am', side:'R', unit:'mph', conv:['1949'], signs:'americas', idp:'rec', note:'Visitors may drive on a valid foreign licence; some states and rental firms ask for an IDP or a certified English translation if your licence isn’t in English.' },
+  CA:{ n:'Canada', f:'🇨🇦', rg:'am', side:'R', unit:'km/h', conv:['1949'], signs:'americas', idp:'rec' },
+  MX:{ n:'Mexico', f:'🇲🇽', rg:'am', side:'R', unit:'km/h', conv:['1968'], signs:'americas', idp:'rec' },
+  BR:{ n:'Brazil', f:'🇧🇷', rg:'am', side:'R', unit:'km/h', conv:['1968'], signs:'vienna', idp:'req', note:'Foreign visitors need an IDP (or a sworn Portuguese translation) with their licence; valid for up to 180 days.' },
+  AR:{ n:'Argentina', f:'🇦🇷', rg:'am', side:'R', unit:'km/h', conv:['1949'], signs:'vienna', idp:'rec' },
+  CL:{ n:'Chile', f:'🇨🇱', rg:'am', side:'R', unit:'km/h', conv:['1968'], signs:'vienna', idp:'rec' },
+  PE:{ n:'Peru', f:'🇵🇪', rg:'am', side:'R', unit:'km/h', conv:['1949'], signs:'vienna', idp:'rec' },
+  CR:{ n:'Costa Rica', f:'🇨🇷', rg:'am', side:'R', unit:'km/h', conv:['1949'], signs:'vienna', idp:'no', note:'Tourists may drive on a valid home licence for up to 90 days (the length of the tourist entry stamp).' },
+  CO:{ n:'Colombia', f:'🇨🇴', rg:'am', side:'R', unit:'km/h', conv:[], signs:'vienna', idp:'no', note:'Visitors may drive on a valid home licence; carry a Spanish translation or an IDP to smooth things with police and rentals.' },
+  EC:{ n:'Ecuador', f:'🇪🇨', rg:'am', side:'R', unit:'km/h', conv:['1968'], signs:'vienna', idp:'rec' },
+  UY:{ n:'Uruguay', f:'🇺🇾', rg:'am', side:'R', unit:'km/h', conv:['1968'], signs:'vienna', idp:'rec' },
+  DO:{ n:'Dominican Republic', f:'🇩🇴', rg:'am', side:'R', unit:'km/h', conv:['1949'], signs:'vienna', idp:'rec' },
+  PA:{ n:'Panama', f:'🇵🇦', rg:'am', side:'R', unit:'km/h', conv:[], signs:'americas', idp:'no', note:'Tourists may drive on a valid home licence for up to 90 days.' },
+  GT:{ n:'Guatemala', f:'🇬🇹', rg:'am', side:'R', unit:'km/h', conv:['1949'], signs:'vienna', idp:'rec' },
+  JM:{ n:'Jamaica', f:'🇯🇲', rg:'am', side:'L', unit:'km/h', conv:['1949'], signs:'uk', idp:'no', note:'Visitors may drive on a valid foreign licence for up to 12 months; an IDP helps if it isn’t in English.' },
+  BS:{ n:'Bahamas', f:'🇧🇸', rg:'am', side:'L', unit:'mph', conv:['1949'], signs:'uk', idp:'no', note:'Visitors may drive on a valid home licence for up to 3 months.' },
+
+  /* ===== EUROPE ===== */
+  GB:{ n:'United Kingdom', f:'🇬🇧', rg:'eu', side:'L', unit:'mph', conv:['1949','1968'], signs:'uk', idp:'no', note:'Visitors may drive on a full valid foreign licence for up to 12 months.' },
+  IE:{ n:'Ireland', f:'🇮🇪', rg:'eu', side:'L', unit:'km/h', conv:['1949'], signs:'uk', mr:true, idp:'rec' },
+  FR:{ n:'France', f:'🇫🇷', rg:'eu', side:'R', unit:'km/h', conv:['1968','1949'], signs:'vienna', mr:true, idp:'rec' },
+  DE:{ n:'Germany', f:'🇩🇪', rg:'eu', side:'R', unit:'km/h', conv:['1968','1949'], signs:'vienna', mr:true, idp:'rec' },
+  IT:{ n:'Italy', f:'🇮🇹', rg:'eu', side:'R', unit:'km/h', conv:['1968','1949'], signs:'vienna', mr:true, idp:'rec' },
+  ES:{ n:'Spain', f:'🇪🇸', rg:'eu', side:'R', unit:'km/h', conv:['1968','1949'], signs:'vienna', mr:true, idp:'rec' },
+  PT:{ n:'Portugal', f:'🇵🇹', rg:'eu', side:'R', unit:'km/h', conv:['1968','1949'], signs:'vienna', mr:true, idp:'rec' },
+  NL:{ n:'Netherlands', f:'🇳🇱', rg:'eu', side:'R', unit:'km/h', conv:['1968','1949'], signs:'vienna', mr:true, idp:'rec' },
+  BE:{ n:'Belgium', f:'🇧🇪', rg:'eu', side:'R', unit:'km/h', conv:['1968','1949'], signs:'vienna', mr:true, idp:'rec' },
+  LU:{ n:'Luxembourg', f:'🇱🇺', rg:'eu', side:'R', unit:'km/h', conv:['1968','1949'], signs:'vienna', mr:true, idp:'rec' },
+  AT:{ n:'Austria', f:'🇦🇹', rg:'eu', side:'R', unit:'km/h', conv:['1968','1949'], signs:'vienna', mr:true, idp:'rec' },
+  CH:{ n:'Switzerland', f:'🇨🇭', rg:'eu', side:'R', unit:'km/h', conv:['1968','1949'], signs:'vienna', mr:true, idp:'rec' },
+  SE:{ n:'Sweden', f:'🇸🇪', rg:'eu', side:'R', unit:'km/h', conv:['1968','1949'], signs:'vienna', mr:true, idp:'rec' },
+  NO:{ n:'Norway', f:'🇳🇴', rg:'eu', side:'R', unit:'km/h', conv:['1968','1949'], signs:'vienna', mr:true, idp:'rec' },
+  DK:{ n:'Denmark', f:'🇩🇰', rg:'eu', side:'R', unit:'km/h', conv:['1968','1949'], signs:'vienna', mr:true, idp:'rec' },
+  FI:{ n:'Finland', f:'🇫🇮', rg:'eu', side:'R', unit:'km/h', conv:['1968','1949'], signs:'vienna', mr:true, idp:'rec' },
+  IS:{ n:'Iceland', f:'🇮🇸', rg:'eu', side:'R', unit:'km/h', conv:['1949'], signs:'vienna', mr:true, idp:'rec' },
+  CZ:{ n:'Czechia', f:'🇨🇿', rg:'eu', side:'R', unit:'km/h', conv:['1968','1949'], signs:'vienna', mr:true, idp:'rec' },
+  PL:{ n:'Poland', f:'🇵🇱', rg:'eu', side:'R', unit:'km/h', conv:['1968','1949'], signs:'vienna', mr:true, idp:'rec' },
+  HU:{ n:'Hungary', f:'🇭🇺', rg:'eu', side:'R', unit:'km/h', conv:['1968','1949'], signs:'vienna', mr:true, idp:'rec' },
+  HR:{ n:'Croatia', f:'🇭🇷', rg:'eu', side:'R', unit:'km/h', conv:['1968','1949'], signs:'vienna', mr:true, idp:'rec' },
+  SK:{ n:'Slovakia', f:'🇸🇰', rg:'eu', side:'R', unit:'km/h', conv:['1968','1949'], signs:'vienna', mr:true, idp:'rec' },
+  SI:{ n:'Slovenia', f:'🇸🇮', rg:'eu', side:'R', unit:'km/h', conv:['1968','1949'], signs:'vienna', mr:true, idp:'rec' },
+  GR:{ n:'Greece', f:'🇬🇷', rg:'eu', side:'R', unit:'km/h', conv:['1968','1949'], signs:'vienna', mr:true, idp:'rec' },
+  RO:{ n:'Romania', f:'🇷🇴', rg:'eu', side:'R', unit:'km/h', conv:['1968','1949'], signs:'vienna', mr:true, idp:'rec' },
+  BG:{ n:'Bulgaria', f:'🇧🇬', rg:'eu', side:'R', unit:'km/h', conv:['1968','1949'], signs:'vienna', mr:true, idp:'rec' },
+  EE:{ n:'Estonia', f:'🇪🇪', rg:'eu', side:'R', unit:'km/h', conv:['1968','1949'], signs:'vienna', mr:true, idp:'rec' },
+  LV:{ n:'Latvia', f:'🇱🇻', rg:'eu', side:'R', unit:'km/h', conv:['1968','1949'], signs:'vienna', mr:true, idp:'rec' },
+  LT:{ n:'Lithuania', f:'🇱🇹', rg:'eu', side:'R', unit:'km/h', conv:['1968','1949'], signs:'vienna', mr:true, idp:'rec' },
+  MT:{ n:'Malta', f:'🇲🇹', rg:'eu', side:'L', unit:'km/h', conv:['1949'], signs:'uk', mr:true, idp:'rec' },
+  CY:{ n:'Cyprus', f:'🇨🇾', rg:'eu', side:'L', unit:'km/h', conv:['1949'], signs:'uk', mr:true, idp:'rec' },
+  MC:{ n:'Monaco', f:'🇲🇨', rg:'eu', side:'R', unit:'km/h', conv:['1968','1949'], signs:'vienna', mr:true, idp:'rec' },
+  TR:{ n:'Türkiye', f:'🇹🇷', rg:'eu', side:'R', unit:'km/h', conv:['1949','1968'], signs:'vienna', idp:'rec' },
+  RU:{ n:'Russia', f:'🇷🇺', rg:'eu', side:'R', unit:'km/h', conv:['1968','1949'], signs:'vienna', idp:'rec' },
+  RS:{ n:'Serbia', f:'🇷🇸', rg:'eu', side:'R', unit:'km/h', conv:['1968','1949'], signs:'vienna', idp:'rec' },
+  UA:{ n:'Ukraine', f:'🇺🇦', rg:'eu', side:'R', unit:'km/h', conv:['1968'], signs:'vienna', idp:'rec' },
+
+  /* ===== MIDDLE EAST & AFRICA ===== */
+  AE:{ n:'United Arab Emirates', f:'🇦🇪', rg:'me', side:'R', unit:'km/h', conv:['1968'], signs:'vienna', idp:'rec', note:'Tourists can usually rent and drive on many national licences (incl. EU, UK, US, GCC); an IDP is recommended and required for some nationalities.' },
+  SA:{ n:'Saudi Arabia', f:'🇸🇦', rg:'me', side:'R', unit:'km/h', conv:['1968'], signs:'vienna', idp:'req' },
+  IL:{ n:'Israel', f:'🇮🇱', rg:'me', side:'R', unit:'km/h', conv:['1949'], signs:'vienna', idp:'rec', note:'Visitors may drive on a valid foreign licence for up to 1 year; an IDP helps if it isn’t in English or Hebrew.' },
+  EG:{ n:'Egypt', f:'🇪🇬', rg:'me', side:'R', unit:'km/h', conv:['1968','1949'], signs:'vienna', idp:'req' },
+  MA:{ n:'Morocco', f:'🇲🇦', rg:'me', side:'R', unit:'km/h', conv:['1968','1949'], signs:'vienna', idp:'rec' },
+  TN:{ n:'Tunisia', f:'🇹🇳', rg:'me', side:'R', unit:'km/h', conv:['1968','1949'], signs:'vienna', idp:'rec' },
+  ZA:{ n:'South Africa', f:'🇿🇦', rg:'me', side:'L', unit:'km/h', conv:['1968','1949'], signs:'sadc', idp:'no', note:'You may drive on a foreign licence if it shows your photo and signature and is in English; otherwise carry an IDP or translation.' },
+  KE:{ n:'Kenya', f:'🇰🇪', rg:'me', side:'L', unit:'km/h', conv:['1949','1968'], signs:'sadc', idp:'rec' },
+  NG:{ n:'Nigeria', f:'🇳🇬', rg:'me', side:'R', unit:'km/h', conv:['1968'], signs:'vienna', idp:'rec' },
+  TZ:{ n:'Tanzania', f:'🇹🇿', rg:'me', side:'L', unit:'km/h', conv:['1949'], signs:'sadc', idp:'req', note:'Carry an IDP; for longer stays a Tanzanian endorsement of your IDP is required.' },
+  NA:{ n:'Namibia', f:'🇳🇦', rg:'me', side:'L', unit:'km/h', conv:['1968','1949'], signs:'sadc', idp:'no', note:'An English-language licence with your photo is accepted; otherwise carry an IDP.' },
+  BW:{ n:'Botswana', f:'🇧🇼', rg:'me', side:'L', unit:'km/h', conv:['1949'], signs:'sadc', idp:'no', note:'An English-language licence is accepted for up to 6 months; otherwise carry an IDP.' },
+  MU:{ n:'Mauritius', f:'🇲🇺', rg:'me', side:'L', unit:'km/h', conv:['1949'], signs:'uk', idp:'no', note:'Visitors may drive on a valid foreign licence; an IDP helps if it isn’t in English or French.' },
+  QA:{ n:'Qatar', f:'🇶🇦', rg:'me', side:'R', unit:'km/h', conv:['1968'], signs:'vienna', idp:'rec' },
+  KW:{ n:'Kuwait', f:'🇰🇼', rg:'me', side:'R', unit:'km/h', conv:['1968'], signs:'vienna', idp:'rec' },
+  BH:{ n:'Bahrain', f:'🇧🇭', rg:'me', side:'R', unit:'km/h', conv:['1968'], signs:'vienna', idp:'rec' },
+  OM:{ n:'Oman', f:'🇴🇲', rg:'me', side:'R', unit:'km/h', conv:[], signs:'vienna', idp:'rec', note:'Tourists can usually rent on a national licence; an IDP is recommended.' },
+  JO:{ n:'Jordan', f:'🇯🇴', rg:'me', side:'R', unit:'km/h', conv:['1949'], signs:'vienna', idp:'rec' },
+
+  /* ===== ASIA & PACIFIC ===== */
+  JP:{ n:'Japan', f:'🇯🇵', rg:'as', side:'L', unit:'km/h', conv:['1949'], signs:'jp', idp:'req', note:'Japan recognises only a 1949 Geneva IDP. Holders of licences from France, Germany, Switzerland, Belgium, Monaco, Slovenia and Taiwan must instead carry an official Japanese (JAF) translation of their licence.' },
+  KR:{ n:'South Korea', f:'🇰🇷', rg:'as', side:'R', unit:'km/h', conv:['1949','1968'], signs:'vienna', idp:'req' },
+  CN:{ n:'China (mainland)', f:'🇨🇳', rg:'as', side:'R', unit:'km/h', conv:[], signs:'other', idp:'special', note:'Mainland China doesn’t recognise foreign licences or International Driving Permits. To drive you must obtain a temporary Chinese driving permit (available at major airports and licensing offices for short visits) or a full Chinese licence. Hong Kong and Macau have separate rules.' },
+  HK:{ n:'Hong Kong', f:'🇭🇰', rg:'as', side:'L', unit:'km/h', conv:['1968','1949'], signs:'uk', idp:'no', note:'Visitors may drive on a valid overseas licence (or IDP) for up to 12 months.' },
+  TW:{ n:'Taiwan', f:'🇹🇼', rg:'as', side:'R', unit:'km/h', conv:[], signs:'vienna', idp:'rec', note:'Taiwan isn’t party to the road-traffic conventions but accepts IDPs from many countries on a reciprocal basis; some require the IDP to be validated locally or an authenticated Chinese translation.' },
+  TH:{ n:'Thailand', f:'🇹🇭', rg:'as', side:'L', unit:'km/h', conv:['1949'], signs:'vienna', idp:'req', note:'Thailand recognises the 1949 Geneva IDP (not the 1968 Vienna IDP).' },
+  VN:{ n:'Vietnam', f:'🇻🇳', rg:'as', side:'R', unit:'km/h', conv:['1968'], signs:'vienna', idp:'req', note:'Vietnam recognises only the 1968 Vienna IDP. A 1949 Geneva IDP is not valid — drivers from 1949-only countries generally need a Vietnamese licence.' },
+  ID:{ n:'Indonesia', f:'🇮🇩', rg:'as', side:'L', unit:'km/h', conv:['1968','1949'], signs:'vienna', idp:'req' },
+  MY:{ n:'Malaysia', f:'🇲🇾', rg:'as', side:'L', unit:'km/h', conv:['1949','1968'], signs:'uk', idp:'rec', note:'An English-language licence is accepted; otherwise carry an IDP.' },
+  SG:{ n:'Singapore', f:'🇸🇬', rg:'as', side:'L', unit:'km/h', conv:['1949','1968'], signs:'uk', idp:'rec', note:'A valid foreign licence is accepted for up to 12 months if in English; otherwise carry an IDP.' },
+  PH:{ n:'Philippines', f:'🇵🇭', rg:'as', side:'R', unit:'km/h', conv:['1949','1968'], signs:'americas', idp:'no', note:'Visitors may drive on a valid foreign licence for up to 90 days if it’s in English; otherwise carry an IDP.' },
+  IN:{ n:'India', f:'🇮🇳', rg:'as', side:'L', unit:'km/h', conv:['1949'], signs:'vienna', idp:'req' },
+  AU:{ n:'Australia', f:'🇦🇺', rg:'as', side:'L', unit:'km/h', conv:['1949'], signs:'au', idp:'rec', note:'You may drive on a valid overseas licence (rules vary by state); carry an IDP or certified translation if it isn’t in English.' },
+  NZ:{ n:'New Zealand', f:'🇳🇿', rg:'as', side:'L', unit:'km/h', conv:['1949'], signs:'au', idp:'no', note:'You may drive on a valid overseas licence for up to 12 months; carry an IDP or translation if it isn’t in English.' },
+  FJ:{ n:'Fiji', f:'🇫🇯', rg:'as', side:'L', unit:'km/h', conv:['1949'], signs:'au', idp:'no', note:'A valid English-language licence is accepted; otherwise carry an IDP.' },
+  LK:{ n:'Sri Lanka', f:'🇱🇰', rg:'as', side:'L', unit:'km/h', conv:['1949'], signs:'vienna', idp:'req', note:'Carry an IDP; it must be validated by the local automobile association (AAC) on arrival.' },
+  NP:{ n:'Nepal', f:'🇳🇵', rg:'as', side:'L', unit:'km/h', conv:[], signs:'vienna', idp:'rec', note:'Rentals usually accept an IDP; for self-drive a local permit may be required.' },
+  PK:{ n:'Pakistan', f:'🇵🇰', rg:'as', side:'L', unit:'km/h', conv:['1949','1968'], signs:'vienna', idp:'rec' },
+  BD:{ n:'Bangladesh', f:'🇧🇩', rg:'as', side:'L', unit:'km/h', conv:['1949'], signs:'vienna', idp:'req' },
+  KZ:{ n:'Kazakhstan', f:'🇰🇿', rg:'as', side:'R', unit:'km/h', conv:['1968'], signs:'vienna', idp:'rec' },
+};
+
+function idInit() {
+  const pd = document.getElementById('id-print-date');
+  if(pd) pd.textContent = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+
+  if(!idBuilt) {
+    idBuildSelects();
+    // Restore last-used licence country
+    try { const s = JSON.parse(localStorage.getItem(ID_LS) || 'null'); if(s && s.home && ID_DATA[s.home]) idState.home = s.home; } catch(e){}
+    // Prefill destination from the active trip
+    const trip = getActiveTrip();
+    if(trip && trip.destination) {
+      const guess = tcGuessCountryFromDest(trip.destination);
+      if(guess && ID_DATA[guess.c]) idState.dest = guess.c;
+    }
+    if(idState.home) document.getElementById('id-home').value = idState.home;
+    if(idState.dest) document.getElementById('id-dest').value = idState.dest;
+    idBuilt = true;
+  }
+  idRender();
+}
+
+function idBuildSelects() {
+  let html = '<option value="">Select a country…</option>';
+  ID_REGIONS.forEach(([rg,label]) => {
+    const list = Object.keys(ID_DATA).filter(c => ID_DATA[c].rg === rg)
+      .sort((a,b) => ID_DATA[a].n.localeCompare(ID_DATA[b].n));
+    if(!list.length) return;
+    html += `<optgroup label="${label}">`;
+    list.forEach(c => { html += `<option value="${c}">${ID_DATA[c].f} ${ID_DATA[c].n}</option>`; });
+    html += '</optgroup>';
+  });
+  document.getElementById('id-home').innerHTML = html;
+  document.getElementById('id-dest').innerHTML = html;
+}
+
+function idChange() {
+  idState.home = document.getElementById('id-home').value || null;
+  idState.dest = document.getElementById('id-dest').value || null;
+  if(idState.home) { try { localStorage.setItem(ID_LS, JSON.stringify({ home: idState.home })); } catch(e){} }
+  idRender();
+}
+
+function idConvNames(arr) { return (arr||[]).map(c => ID_CONV[c] ? ID_CONV[c].nm : c).join(' & '); }
+
+/* Core engine — returns { level, idpType, ... } */
+function idVerdict(hc, dc) {
+  const h = ID_DATA[hc], d = ID_DATA[dc];
+  if(hc === dc) return { level:'own' };
+  if((h.mr && d.mr) || (hc === 'GB' && d.mr) || (h.mr && dc === 'GB')) return { level:'none', mr:true };
+  if(d.idp === 'special') return { level:'special' };
+
+  const shared = (h.conv||[]).filter(c => (d.conv||[]).includes(c));
+  const idpType = shared.includes('1968') ? '1968' : shared.includes('1949') ? '1949' : shared.includes('1926') ? '1926' : null;
+
+  if(d.idp === 'no') return { level:'none', latin:true, idpType };
+  if(d.idp === 'req') {
+    if(idpType) return { level:'required', idpType };
+    return { level:'warn', idpType:null, homeNoConv:(h.conv||[]).length === 0 };
+  }
+  return { level:'recommended', idpType };   // 'rec'
+}
+
+function idSideText(side) {
+  return side === 'L'
+    ? { val:'⬅️ Drive on the LEFT', sub:'Right-hand-drive cars · keep left, overtake on the right.' }
+    : { val:'➡️ Drive on the RIGHT', sub:'Left-hand-drive cars · keep right, overtake on the left.' };
+}
+
+function idRender() {
+  const resultsEl = document.getElementById('id-results');
+  const msgEl = document.getElementById('id-msg');
+  const hc = idState.home, dc = idState.dest;
+
+  if(!hc || !dc) {
+    resultsEl.style.display = 'none';
+    msgEl.style.display = '';
+    msgEl.innerHTML = !hc && !dc
+      ? 'Pick your licence country and your destination to see whether you need an International Driving Permit.'
+      : !hc ? 'Now choose the country that issued your driving licence.'
+            : 'Now choose where you’ll be driving.';
+    return;
+  }
+  msgEl.style.display = 'none';
+  resultsEl.style.display = '';
+
+  const h = ID_DATA[hc], d = ID_DATA[dc];
+  const v = idVerdict(hc, dc);
+  const homeNm = `${h.f} ${h.n}`, destNm = `${d.f} ${d.n}`;
+  const inner = document.getElementById('id-results-inner');
+  inner.style.animation = 'none'; inner.offsetHeight; inner.style.animation = '';
+
+  // ── Hero ──
+  let tag, em, hh, sub;
+  if(v.level === 'own') {
+    tag = 'Heads up'; em = '🏠'; hh = 'That’s your home country';
+    sub = `You can drive on your own licence in <b>${d.n}</b> — no International Driving Permit needed. Choose a different destination to check the rules abroad.`;
+  } else if(v.level === 'special') {
+    tag = 'Special rules'; em = '🛑'; hh = `${d.n} doesn’t recognise foreign licences`;
+    sub = d.note;
+  } else if(v.level === 'none' && v.mr) {
+    tag = 'Good news'; em = '✅'; hh = 'No IDP needed — your licence is recognised';
+    sub = `<b>${h.n}</b> and <b>${d.n}</b> are in the EU/EEA driving-licence mutual-recognition area, so your national licence is valid for visits. Just bring your licence and ID.`;
+  } else if(v.level === 'none') {
+    tag = 'Good news'; em = '✅'; hh = 'No IDP required for a short visit';
+    sub = `${d.n} lets visitors drive on a valid foreign licence for short stays. ${d.note ? d.note + ' ' : ''}<b>If your licence isn’t in the Latin alphabet</b> or has no photo, carry an IDP or an official translation alongside it.`;
+  } else if(v.level === 'recommended') {
+    tag = 'Recommended'; em = '🪪'; hh = 'An International Driving Permit is recommended';
+    sub = `${d.n} will generally accept your national licence, but you’re strongly advised to carry an IDP too — police and rental desks often expect it, and it’s an official translation of your licence if questioned.`;
+  } else if(v.level === 'required') {
+    tag = 'Required'; em = '🪪'; hh = 'You’ll need an International Driving Permit';
+    sub = `To drive in ${d.n}, carry a <b>${ID_CONV[v.idpType].nm}</b> IDP together with your national licence. Driving without one can void rental insurance and bring fines.${d.note ? ' ' + d.note : ''}`;
+  } else { // warn
+    tag = 'Check carefully'; em = '⚠️'; hh = `Your licence may not be recognised in ${d.n}`;
+    if(v.homeNoConv) {
+      sub = `${d.n} requires an International Driving Permit, but <b>${h.n}</b> doesn’t issue one under the road-traffic conventions. You’ll likely need an official translation of your licence or a local permit — check with ${d.n}’s embassy before you travel.`;
+    } else {
+      sub = `${d.n} requires an IDP and recognises the <b>${idConvNames(d.conv)}</b>, while your licence country (<b>${h.n}</b>) is under the <b>${idConvNames(h.conv)}</b>. A standard IDP from home may not be honoured — you may need an official translation or a temporary local licence.${d.note ? ' ' + d.note : ''} Confirm with ${d.n}’s embassy first.`;
+    }
+  }
+  let html = `<div class="id-hero lv-${v.level}"><div class="id-hero-tag">${tag} · ${homeNm} → ${destNm}</div><div class="id-hero-h"><span class="em">${em}</span>${hh}</div><div class="id-hero-sub">${sub}</div></div>`;
+
+  // ── IDP detail card (when an IDP is advised/required) ──
+  const showIdp = v.level === 'recommended' || v.level === 'required';
+  if(showIdp) {
+    const typeLabel = v.idpType ? ID_CONV[v.idpType].nm : 'IDP (or an official translation of your licence)';
+    const validLabel = v.idpType ? ID_CONV[v.idpType].valid : 'typically 1–3 years, depending on the permit';
+    html += `<div class="id-section-lbl">Your International Driving Permit</div>
+      <div class="id-idp">
+        <div class="id-idp-row"><span class="k">Permit type</span><span class="v"><b>${typeLabel}</b></span></div>
+        <div class="id-idp-row"><span class="k">Where to get it</span><span class="v">In <b>${h.n}</b>, before you travel — usually via your national automobile association, post office, or licensing authority. You can’t obtain one once abroad.</span></div>
+        <div class="id-idp-row"><span class="k">You’ll need</span><span class="v">Your licence, passport-style photo(s) and a small fee.</span></div>
+        <div class="id-idp-row"><span class="k">Valid for</span><span class="v">${validLabel}</span></div>
+      </div>`;
+  }
+
+  // ── At a glance (destination) ──
+  const sd = idSideText(d.side);
+  const unitSub = d.unit === 'mph' ? 'Speeds & distances posted in miles. 1 mph ≈ 1.6 km/h.' : 'Speeds & distances posted in kilometres. 100 km/h ≈ 62 mph.';
+  const sg = ID_SIGNS[d.signs] || ID_SIGNS.other;
+  html += `<div class="id-section-lbl">Driving in ${d.n} — at a glance</div>
+    <div class="id-glance">
+      <div class="id-glance-card"><div class="id-glance-lbl">Which side</div><div class="id-glance-val">${sd.val}</div><div class="id-glance-sub">${sd.sub}</div></div>
+      <div class="id-glance-card"><div class="id-glance-lbl">Speed limits in</div><div class="id-glance-val">${d.unit}</div><div class="id-glance-sub">${unitSub}</div></div>
+      <div class="id-glance-card"><div class="id-glance-lbl">Road signs</div><div class="id-glance-val" style="font-size:16px">${sg.nm}</div><div class="id-glance-sub">${sg.d}</div></div>
+    </div>`;
+
+  // ── What to carry ──
+  if(v.level !== 'own' && v.level !== 'special') {
+    const carry = ['<span class="em">🪪</span><span>Your full, in-date national driving licence</span>'];
+    if(showIdp) {
+      const t = v.idpType ? `(${ID_CONV[v.idpType].nm})` : '(or a certified translation)';
+      carry.push(`<span class="em">📄</span><span>An <b>International Driving Permit</b> ${t}</span>`);
+    }
+    carry.push('<span class="em">🛂</span><span>Your passport or photo ID</span>');
+    carry.push('<span class="em">🚗</span><span>The rental agreement and a credit card in the main driver’s name</span>');
+    carry.push('<span class="em">🛡</span><span>Proof of insurance / collision-damage cover</span>');
+    html += `<div class="id-section-lbl">What to carry when you drive</div><div class="id-list">${carry.map(c => `<div class="id-li">${c}</div>`).join('')}</div>`;
+  }
+
+  // ── Before you go ──
+  if(v.level !== 'own') {
+    const steps = [];
+    if(showIdp) steps.push(`Get your IDP in <b>${h.n}</b> before you leave — you can’t obtain one abroad.`);
+    if(v.level === 'special') steps.push(`Arrange the local permit for ${d.n} (or plan to use taxis, transfers or a driver instead).`);
+    if(v.level === 'warn') steps.push(`Contact ${d.n}’s embassy or licensing authority to confirm exactly what they accept from a ${h.n} licence holder.`);
+    steps.push('Check your national licence is valid for your whole trip and won’t expire while you’re away.');
+    steps.push('Confirm the rental company’s minimum driver age and any young- or senior-driver fees.');
+    steps.push('Sort insurance — notify your insurer or buy collision-damage / excess cover.');
+    html += `<div class="id-section-lbl">Before you go</div><div class="id-list">${steps.map((s,i) => `<div class="id-li"><span class="id-step-n">${i+1}</span><span>${s}</span></div>`).join('')}</div>`;
+  }
+
+  // ── Cross-link + caveat ──
+  if(v.level !== 'own') {
+    html += `<div class="id-xlink">🚦 <b>Once you’re on the road</b>, see <button onclick="openTool('driving-rules')">Driving &amp; Road Rules</button> for ${d.n}’s speed limits, drink-drive limit, tolls and a full road-sign reference.</div>`;
+  }
+  html += `<div class="id-caveat">Planning guidance, not legal advice. Recognised conventions, validity and whether a permit is required can depend on your length of stay and residency, and the rules change. Always confirm with ${d.n}’s embassy or official licensing authority — and your rental company — before you drive.</div>`;
+
+  inner.innerHTML = html;
+}
+
+function idReset() {
+  idState.dest = null;
+  document.getElementById('id-dest').value = '';
+  // keep the saved home licence country for convenience
+  if(idState.home) document.getElementById('id-home').value = idState.home;
+  idRender();
 }
 
 /* ══════════════════════════════════════════════════════
