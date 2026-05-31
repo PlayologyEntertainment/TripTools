@@ -3076,17 +3076,196 @@ body.no-scroll { overflow: hidden; }
     <span id="fe-print-date"></span>
   </div>
 </div>
-<div id="view-placeholder-hotel-rental" class="view">
-  <nav class="tool-topbar">
+<div id="view-hotel-rental" class="view">
+  <style>
+  /* ── HOTEL vs. VACATION RENTAL ── */
+  #view-hotel-rental .hr-section-lbl { font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 18px 0 8px; }
+  #view-hotel-rental .hr-section-lbl .opt { text-transform: none; letter-spacing: 0; font-family: var(--sans); color: var(--muted); font-weight: 400; }
+  #view-hotel-rental .hr-rate-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media(max-width:540px){ #view-hotel-rental .hr-rate-grid { grid-template-columns: 1fr; } }
+  #view-hotel-rental .hr-rate-card { border: 1.5px solid var(--ink); border-radius: var(--r); background: var(--paper); padding: 14px 16px; position: relative; overflow: hidden; }
+  #view-hotel-rental .hr-rate-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; }
+  #view-hotel-rental .hr-rate-card.hotel::before  { background: var(--blue); }
+  #view-hotel-rental .hr-rate-card.rental::before { background: var(--accent); }
+  #view-hotel-rental .hr-rate-hd { display: flex; align-items: center; gap: 8px; font-family: var(--serif); font-size: 18px; color: var(--ink); margin-bottom: 12px; }
+  #view-hotel-rental .hr-rate-hd .em { font-size: 20px; }
+  #view-hotel-rental .hr-rate-card .fg:last-child { margin-bottom: 0; }
+  #view-hotel-rental .hr-input-pre { position: relative; }
+  #view-hotel-rental .hr-input-pre input { padding-left: 26px; }
+  #view-hotel-rental .hr-input-pre::before { content: '$'; position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--muted); font-family: var(--mono); font-size: 14px; pointer-events: none; }
+  #view-hotel-rental .hr-prio-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  @media(max-width:540px){ #view-hotel-rental .hr-prio-grid { grid-template-columns: 1fr; } }
+  #view-hotel-rental .hr-prio { display: flex; align-items: center; gap: 9px; text-align: left; background: var(--paper); border: 1.5px solid var(--rule); border-radius: var(--r); padding: 10px 12px; cursor: pointer; font-family: var(--sans); font-size: 13px; color: var(--ink-2); transition: background .12s, border-color .12s, color .12s; }
+  #view-hotel-rental .hr-prio .em { font-size: 16px; flex-shrink: 0; }
+  #view-hotel-rental .hr-prio:hover { border-color: var(--ink); }
+  #view-hotel-rental .hr-prio.on { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+  #view-hotel-rental .hr-results { border-top: 2px solid var(--ink); margin-top: 24px; padding-top: 24px; }
+  #view-hotel-rental .hr-results-inner { animation: fc-result-in .22s cubic-bezier(.2,.8,.2,1) both; }
+  /* verdict */
+  #view-hotel-rental .hr-verdict { border: 2px solid var(--ink); border-radius: var(--r); background: var(--paper-2); padding: 20px 22px; margin-bottom: 20px; }
+  #view-hotel-rental .hr-verdict-tag { font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+  #view-hotel-rental .hr-verdict-h { font-family: var(--serif); font-weight: 600; font-size: clamp(22px,5vw,32px); letter-spacing: -.02em; line-height: 1.1; color: var(--ink); display: flex; align-items: center; gap: 10px; }
+  #view-hotel-rental .hr-verdict-h .em { font-size: 1.1em; }
+  #view-hotel-rental .hr-verdict-sub { font-size: 14px; color: var(--ink-2); line-height: 1.5; margin-top: 8px; }
+  #view-hotel-rental .hr-match { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+  #view-hotel-rental .hr-match-card { border: 1.5px solid var(--rule); border-radius: var(--r); background: var(--paper); padding: 12px 14px; text-align: center; position: relative; }
+  #view-hotel-rental .hr-match-card.win { border-width: 2px; border-color: var(--ink); }
+  #view-hotel-rental .hr-match-card.win.hotel  { box-shadow: inset 4px 0 0 var(--blue); }
+  #view-hotel-rental .hr-match-card.win.rental { box-shadow: inset 4px 0 0 var(--accent); }
+  #view-hotel-rental .hr-match-lbl { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+  #view-hotel-rental .hr-match-num { font-family: var(--serif); font-weight: 600; font-size: 34px; line-height: 1; color: var(--ink); margin: 6px 0 2px; }
+  #view-hotel-rental .hr-match-card.win.hotel  .hr-match-num { color: var(--blue); }
+  #view-hotel-rental .hr-match-card.win.rental .hr-match-num { color: var(--accent); }
+  #view-hotel-rental .hr-match-sub { font-family: var(--mono); font-size: 9px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  #view-hotel-rental .hr-win-flag { position: absolute; top: -9px; left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--paper); font-family: var(--mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; padding: 2px 8px; border-radius: 2px; white-space: nowrap; }
+  /* cost strip */
+  #view-hotel-rental .hr-cost-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 8px; }
+  @media(max-width:540px){ #view-hotel-rental .hr-cost-grid { grid-template-columns: 1fr; } }
+  #view-hotel-rental .hr-cost-card { border: 1.5px solid var(--ink); border-radius: var(--r); background: var(--paper); padding: 14px 16px; position: relative; overflow: hidden; }
+  #view-hotel-rental .hr-cost-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; }
+  #view-hotel-rental .hr-cost-card.hotel::before  { background: var(--blue); }
+  #view-hotel-rental .hr-cost-card.rental::before { background: var(--accent); }
+  #view-hotel-rental .hr-cost-card.delta::before  { background: var(--green); }
+  #view-hotel-rental .hr-cost-lbl { font-family: var(--mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+  #view-hotel-rental .hr-cost-num { font-family: var(--serif); font-weight: 600; font-size: clamp(22px,5vw,30px); letter-spacing: -.02em; line-height: 1; color: var(--ink); margin: 7px 0 4px; }
+  #view-hotel-rental .hr-cost-sub { font-family: var(--mono); font-size: 10px; color: var(--muted); line-height: 1.4; }
+  #view-hotel-rental .hr-cost-detail { font-size: 12px; color: var(--ink-2); line-height: 1.6; margin: 4px 0 16px; }
+  #view-hotel-rental .hr-cost-detail b { font-family: var(--sans); color: var(--ink); }
+  /* factor bars */
+  #view-hotel-rental .hr-factor { border-bottom: 1px solid var(--rule); padding: 12px 0; }
+  #view-hotel-rental .hr-factor:last-child { border-bottom: none; }
+  #view-hotel-rental .hr-factor-top { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+  #view-hotel-rental .hr-factor-nm { font-size: 14px; font-weight: 600; color: var(--ink); display: flex; align-items: center; gap: 7px; }
+  #view-hotel-rental .hr-factor-nm .em { font-size: 15px; }
+  #view-hotel-rental .hr-prio-star { font-family: var(--mono); font-size: 9px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); border: 1px solid var(--accent); border-radius: 2px; padding: 1px 5px; margin-left: 4px; }
+  #view-hotel-rental .hr-factor-hint { font-size: 11px; color: var(--muted); }
+  #view-hotel-rental .hr-bar-row { display: flex; align-items: center; gap: 8px; margin: 4px 0; }
+  #view-hotel-rental .hr-bar-key { font-family: var(--mono); font-size: 10px; letter-spacing: .04em; color: var(--muted); width: 52px; flex-shrink: 0; }
+  #view-hotel-rental .hr-bar-track { flex: 1; height: 14px; background: var(--paper-2); border: 1px solid var(--rule); border-radius: 2px; overflow: hidden; }
+  #view-hotel-rental .hr-bar-fill { height: 100%; border-radius: 1px; transition: width .4s cubic-bezier(.2,.8,.2,1); }
+  #view-hotel-rental .hr-bar-fill.hotel  { background: var(--blue); }
+  #view-hotel-rental .hr-bar-fill.rental { background: var(--accent); }
+  #view-hotel-rental .hr-bar-val { font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--ink); width: 28px; flex-shrink: 0; text-align: right; }
+  #view-hotel-rental .hr-bar-win { width: 16px; flex-shrink: 0; font-size: 12px; text-align: center; color: var(--green); }
+  /* why list */
+  #view-hotel-rental .hr-why { border: 1.5px solid var(--rule); border-radius: var(--r); background: var(--paper); padding: 4px 16px; margin: 16px 0; }
+  #view-hotel-rental .hr-why-row { display: flex; gap: 10px; align-items: flex-start; padding: 9px 0; border-bottom: 1px solid var(--rule); font-size: 13px; color: var(--ink-2); line-height: 1.5; }
+  #view-hotel-rental .hr-why-row:last-child { border-bottom: none; }
+  #view-hotel-rental .hr-why-row .em { flex-shrink: 0; font-size: 15px; }
+  #view-hotel-rental .hr-why-row b { font-family: var(--sans); color: var(--ink); }
+  #view-hotel-rental .hr-caveat { font-size: 12px; color: var(--ink-2); line-height: 1.5; border-left: 3px solid var(--blue); padding: 10px 14px; background: rgba(21,101,192,.05); border-radius: 0 var(--r) var(--r) 0; }
+  #view-hotel-rental .hr-msg { background: rgba(255,77,46,.06); border-left: 3px solid var(--accent); color: var(--accent); padding: 11px 14px; border-radius: 0 var(--r) var(--r) 0; font-size: 13px; margin-top: 14px; display: none; }
+  #view-hotel-rental .hr-msg.show { display: block; }
+  #view-hotel-rental .hr-print-header { display: none; }
+  @media print {
+    #view-hotel-rental .tool-bar, #view-hotel-rental .ctx-banner, #view-hotel-rental .pro-tip,
+    #view-hotel-rental .related, #view-hotel-rental .btn-ghost { display: none !important; }
+    #view-hotel-rental .hr-print-header { display: flex !important; justify-content: space-between; font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid #ccc; padding-bottom: 8px; margin-bottom: 16px; }
+    #view-hotel-rental .hr-results { border-top: 1px solid #ccc; }
+    #view-hotel-rental .hr-prio { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    body { background: #fff !important; background-image: none !important; }
+  }
+  </style>
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="window.print()">🖨 Print</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">🏨</span>
-    <h2>Hotel vs. Vacation Rental</h2>
-    <p style="margin-bottom:24px">Compare hotel vs. Airbnb/VRBO across 8 factors with a personalized recommendation.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-hotel-rental"></div>
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>Hotel vs. Vacation Rental</h1>
+    <p class="tool-sub">Tell us about your trip and we'll compare a hotel against an Airbnb/VRBO-style rental across eight factors — then estimate the total cost of each and recommend the better fit for <em>your</em> party.</p>
+  </div>
+
+  <div class="tool-body">
+
+    <!-- ── YOUR TRIP ── -->
+    <div class="hr-section-lbl">Your trip</div>
+    <div class="frow">
+      <div class="fg">
+        <label for="hr-people">Travelers</label>
+        <input type="number" id="hr-people" value="2" min="1" max="30" oninput="hrCalc()">
+      </div>
+      <div class="fg">
+        <label for="hr-nights">Nights</label>
+        <input type="number" id="hr-nights" value="4" min="1" max="60" oninput="hrCalc()">
+      </div>
     </div>
+
+    <!-- ── TRIP TYPE ── -->
+    <div class="fg">
+      <label>What kind of trip is this?</label>
+      <div class="chip-grp" id="hr-grp-trip">
+        <button class="chip on" data-hr-val="family"   onclick="hrSetTrip(this)">👨‍👩‍👧 Family with kids</button>
+        <button class="chip"    data-hr-val="couple"   onclick="hrSetTrip(this)">💑 Couple / romantic</button>
+        <button class="chip"    data-hr-val="group"    onclick="hrSetTrip(this)">👥 Group of friends</button>
+        <button class="chip"    data-hr-val="business" onclick="hrSetTrip(this)">💼 Business</button>
+        <button class="chip"    data-hr-val="solo"     onclick="hrSetTrip(this)">🎒 Solo</button>
+      </div>
+    </div>
+
+    <!-- ── PRIORITIES ── -->
+    <div class="hr-section-lbl">What matters most? <span class="opt">— tap any that apply</span></div>
+    <div class="hr-prio-grid" id="hr-prio-grid"><!-- injected by JS --></div>
+
+    <!-- ── NIGHTLY RATES ── -->
+    <div class="hr-section-lbl">Nightly rates <span class="opt">— rough quotes you're comparing</span></div>
+    <div class="hr-rate-grid">
+      <div class="hr-rate-card hotel">
+        <div class="hr-rate-hd"><span class="em">🏨</span> Hotel</div>
+        <div class="fg">
+          <label for="hr-hotel-rate">Price per room / night</label>
+          <div class="hr-input-pre"><input type="number" id="hr-hotel-rate" value="180" min="0" max="5000" step="5" oninput="hrCalc()"></div>
+        </div>
+        <div class="fg">
+          <label for="hr-hotel-rooms">Rooms needed</label>
+          <input type="number" id="hr-hotel-rooms" value="1" min="1" max="15" oninput="hrCalc(true)">
+        </div>
+      </div>
+      <div class="hr-rate-card rental">
+        <div class="hr-rate-hd"><span class="em">🏠</span> Vacation rental</div>
+        <div class="fg">
+          <label for="hr-rental-rate">Price per night</label>
+          <div class="hr-input-pre"><input type="number" id="hr-rental-rate" value="240" min="0" max="9000" step="5" oninput="hrCalc()"></div>
+        </div>
+        <div class="fg">
+          <label for="hr-rental-clean">One-time cleaning fee</label>
+          <div class="hr-input-pre"><input type="number" id="hr-rental-clean" value="120" min="0" max="2000" step="5" oninput="hrCalc()"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── RESULTS ── -->
+    <div class="hr-results" id="hr-results" style="display:none" aria-live="polite">
+      <div class="hr-results-inner" id="hr-results-inner"><!-- injected by JS --></div>
+    </div>
+    <div class="hr-msg" id="hr-msg"></div>
+
+    <!-- ── RESET ── -->
+    <div style="margin-top:16px;text-align:right">
+      <button class="btn-ghost" onclick="hrReset()">↺ Reset</button>
+    </div>
+
+  </div><!-- /tool-body -->
+
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    The break-even usually comes down to party size and trip length. For 1–2 people on a short city trip, a hotel's nightly service and central location often win. Once you need two or more rooms — or you'll be cooking, doing laundry, and staying four-plus nights — a whole-place rental tends to pull ahead on both cost and comfort. Always add the cleaning and service fees before you compare a rental's "nightly" rate to a hotel's.
+  </div>
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('budget-plan')">💰 Budget Planner</button>
+      <button class="rel-btn" onclick="openTool('flight-est')">✈️ Flight Cost Estimator</button>
+      <button class="rel-btn" onclick="openTool('group-trip')">👥 Group Trip Organizer</button>
+      <button class="rel-btn" onclick="openTool('trip-duration')">🗓 Trip Duration Calculator</button>
+    </div>
+  </div>
+
+  <!-- Print-only header -->
+  <div class="hr-print-header">
+    <strong>TripTools — Hotel vs. Vacation Rental</strong>
+    <span id="hr-print-date"></span>
   </div>
 </div>
 <div id="view-road-planner" class="view">
@@ -12536,7 +12715,7 @@ const TOOLS = [
   {id:'budget-plan',   nm:'Travel Budget Planner',      ico:'💰', ph:'discovery', on:false, live:true,  ds:'Full trip budget builder: flights, hotels, food & activities. Pie chart.'},
   {id:'group-trip',    nm:'Group Trip Organizer',       ico:'👥', ph:'discovery', on:false, live:true,  ds:'Headcounts, preferences & destination voting for groups.'},
   {id:'flight-est',    nm:'Flight Cost Estimator',      ico:'✈️', ph:'discovery', on:false, live:true,  ds:'Budget calculator estimating round-trip airfare (low/avg/high).'},
-  {id:'hotel-rental',  nm:'Hotel vs. Vacation Rental',  ico:'🏨', ph:'discovery', on:false, live:false, ds:'Compare hotel vs. Airbnb/VRBO across 8 factors.'},
+  {id:'hotel-rental',  nm:'Hotel vs. Vacation Rental',  ico:'🏨', ph:'discovery', on:false, live:true,  ds:'Compare hotel vs. Airbnb/VRBO across 8 factors with a personalized, cost-aware recommendation.'},
   {id:'road-planner',  nm:'Road Trip Route Planner',    ico:'🗺', ph:'discovery', on:true,  live:true,  ds:'Waypoints, distance, drive time & map via Leaflet + OSM.'},
   {id:'itinerary',     nm:'Itinerary Builder',          ico:'📋', ph:'discovery', on:false, live:true,  ds:'Day-by-day planner with drag-and-drop scheduling. Printable.'},
   {id:'travel-ins',    nm:'Travel Insurance Worksheet', ico:'🛡', ph:'discovery', on:false, live:false, ds:'Side-by-side framework for comparing insurance policies.'},
@@ -13248,6 +13427,7 @@ function injectTripCtx(id) {
   if(id==='fuel-cost') fcInit();
   if(id==='rest-stop') rsInit();
   if(id==='flight-est') feInit();
+  if(id==='hotel-rental') hrInit();
   if(id==='cruise-compare') ccInit();
   if(id==='sea-sick')      ssInit();
   if(id==='cruise-grat')   cgInit();
@@ -19288,6 +19468,355 @@ function rsPrint() {
   window.addEventListener('afterprint', cleanup);
   setTimeout(() => window.print(), 50);
   setTimeout(cleanup, 8000);
+}
+
+/* ══════════════════════════════════════════════════════
+   HOTEL vs. VACATION RENTAL
+   Offline decision tool. Takes party size, trip length,
+   trip type, what-matters priorities, and rough nightly
+   rates; estimates the all-in cost of each option, scores
+   both across 8 weighted factors, and recommends a fit.
+   No network — pure heuristic model.
+   ══════════════════════════════════════════════════════ */
+
+/* Baked-in fee / tax assumptions (shown transparently in the breakdown) */
+const HR_HOTEL_TAX   = 0.13;   // typical lodging / occupancy tax
+const HR_RENTAL_SVC  = 0.12;   // platform service fee on the nightly subtotal
+const HR_RENTAL_TAX  = 0.10;   // occupancy tax on rental subtotal
+
+/* The 8 comparison factors */
+const HR_FACTORS = [
+  {k:'cost',      nm:'Cost & value',     ico:'💵', hint:'Estimated all-in total for your stay'},
+  {k:'space',     nm:'Space & bedrooms', ico:'🛏', hint:'Room to spread out & sleep everyone'},
+  {k:'kitchen',   nm:'Kitchen & laundry',ico:'🍳', hint:'Cook meals & wash clothes in-unit'},
+  {k:'privacy',   nm:'Privacy & quiet',  ico:'🤫', hint:'A whole place to yourselves'},
+  {k:'service',   nm:'Service & support',ico:'🛎', hint:'Front desk, daily housekeeping, help on call'},
+  {k:'amenities', nm:'Amenities',        ico:'🏊', hint:'Pool, gym, breakfast, bar, room service'},
+  {k:'location',  nm:'Location & access',ico:'📍', hint:'Central, walkable, easy to get around'},
+  {k:'predict',   nm:'Predictability',   ico:'✅', hint:'Consistent standards & simple check-in'},
+];
+
+/* Trip-type presets — additive weight bonuses on top of a base weight of 1 */
+const HR_TRIPS = {
+  family:   {nm:'family trip',          w:{space:2.0, kitchen:1.8, cost:1.6, privacy:1.2}},
+  couple:   {nm:'couples getaway',      w:{service:1.6, amenities:1.5, location:1.4, predict:1.2}},
+  group:    {nm:'group trip',           w:{space:2.0, cost:1.8, kitchen:1.4, privacy:1.4}},
+  business: {nm:'business trip',        w:{location:2.0, predict:1.8, service:1.6, amenities:1.2}},
+  solo:     {nm:'solo trip',            w:{location:1.6, cost:1.6, service:1.3, predict:1.2}},
+};
+
+/* "What matters most" toggles — each maps to a factor and adds weight */
+const HR_PRIOS = [
+  {k:'kitchen',   ico:'🍳', nm:"We'll cook our own meals"},
+  {k:'service',   ico:'🧹', nm:'Want daily housekeeping'},
+  {k:'space',     ico:'🛏', nm:'Need separate bedrooms'},
+  {k:'amenities', ico:'🏊', nm:'Want pool / gym / breakfast'},
+  {k:'location',  ico:'📍', nm:'Need a central location'},
+  {k:'privacy',   ico:'🤫', nm:'Value privacy & quiet'},
+  {k:'cost',      ico:'💵', nm:'On a tight budget'},
+  {k:'predict',   ico:'✅', nm:'Want a no-surprises stay'},
+];
+const HR_PRIO_BONUS = 1.6;   // weight added when a priority is toggled on
+
+const hrState = { trip:'family', prio:{}, roomsTouched:false };
+let hrBuilt = false;
+
+function hrClamp(min, v, max) { return Math.max(min, Math.min(max, v)); }
+function hrMoney(n) { return '$' + Math.round(n).toLocaleString('en-US'); }
+
+function hrInit() {
+  const pd = document.getElementById('hr-print-date');
+  if(pd) pd.textContent = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+
+  if(!hrBuilt) {
+    // Build the priority toggle grid
+    document.getElementById('hr-prio-grid').innerHTML = HR_PRIOS.map(p =>
+      `<button class="hr-prio" data-hr-prio="${p.k}" onclick="hrTogglePrio(this)" aria-pressed="false"><span class="em">${p.ico}</span><span>${p.nm}</span></button>`
+    ).join('');
+    hrApplyTripContext();
+    hrBuilt = true;
+  }
+  hrCalc();
+}
+
+/* Pull party size & nights from the active trip, suggest rooms */
+function hrApplyTripContext() {
+  const trip = getActiveTrip();
+  if(!trip) { hrSuggestRooms(); return; }
+  if(trip.travelers && trip.travelers >= 1) {
+    document.getElementById('hr-people').value = hrClamp(1, trip.travelers, 30);
+  }
+  if(trip.departDate && trip.returnDate) {
+    const n = Math.round((new Date(trip.returnDate) - new Date(trip.departDate)) / 864e5);
+    if(n >= 1) document.getElementById('hr-nights').value = hrClamp(1, n, 60);
+  }
+  hrSuggestRooms();
+}
+
+/* Default rooms to one per two travelers (until the user overrides) */
+function hrSuggestRooms() {
+  if(hrState.roomsTouched) return;
+  const people = Math.max(1, parseInt(document.getElementById('hr-people').value,10) || 1);
+  document.getElementById('hr-hotel-rooms').value = Math.max(1, Math.ceil(people / 2));
+}
+
+function hrSetTrip(btn) {
+  hrState.trip = btn.dataset.hrVal;
+  document.querySelectorAll('#hr-grp-trip .chip').forEach(b => b.classList.toggle('on', b === btn));
+  hrCalc();
+}
+
+function hrTogglePrio(btn) {
+  const k = btn.dataset.hrPrio;
+  hrState.prio[k] = !hrState.prio[k];
+  btn.classList.toggle('on', hrState.prio[k]);
+  btn.setAttribute('aria-pressed', hrState.prio[k] ? 'true' : 'false');
+  hrCalc();
+}
+
+/* roomsTouched flag set when the rooms field is edited directly */
+function hrCalc(roomsEdited) {
+  if(roomsEdited) hrState.roomsTouched = true;
+  else hrSuggestRooms();
+
+  const msgEl = document.getElementById('hr-msg');
+  const resultsEl = document.getElementById('hr-results');
+  const hide = () => { resultsEl.style.display = 'none'; };
+  const showMsg = txt => { msgEl.textContent = txt; msgEl.classList.add('show'); };
+  msgEl.classList.remove('show');
+
+  const people = Math.max(0, parseInt(document.getElementById('hr-people').value,10) || 0);
+  const nights = Math.max(0, parseInt(document.getElementById('hr-nights').value,10) || 0);
+  const hotelRate  = Math.max(0, parseFloat(document.getElementById('hr-hotel-rate').value) || 0);
+  const rooms      = Math.max(1, parseInt(document.getElementById('hr-hotel-rooms').value,10) || 1);
+  const rentalRate = Math.max(0, parseFloat(document.getElementById('hr-rental-rate').value) || 0);
+  const cleanFee   = Math.max(0, parseFloat(document.getElementById('hr-rental-clean').value) || 0);
+
+  if(people < 1) { hide(); showMsg('Add at least one traveler.'); return; }
+  if(nights < 1) { hide(); showMsg('Enter how many nights you’ll stay.'); return; }
+  if(hotelRate <= 0 || rentalRate <= 0) { hide(); showMsg('Enter a nightly rate for both the hotel and the rental to compare them.'); return; }
+
+  // ── Cost estimates ──
+  const hotelSubtotal = rooms * hotelRate * nights;
+  const hotelTax      = hotelSubtotal * HR_HOTEL_TAX;
+  const hotelTotal    = hotelSubtotal + hotelTax;
+
+  const rentalNightly = rentalRate * nights;
+  const rentalSvc     = rentalNightly * HR_RENTAL_SVC;
+  const rentalPreTax  = rentalNightly + cleanFee + rentalSvc;
+  const rentalTax     = rentalPreTax * HR_RENTAL_TAX;
+  const rentalTotal   = rentalPreTax + rentalTax;
+
+  // ── Factor scores (0–10) for [hotel, rental] ──
+  const scores = hrScores(people, nights, hotelTotal, rentalTotal);
+
+  // ── Weights ──
+  const weights = hrWeights();
+  const totalW = HR_FACTORS.reduce((s,f) => s + weights[f.k], 0);
+
+  let hotelW = 0, rentalW = 0;
+  HR_FACTORS.forEach(f => {
+    hotelW  += scores[f.k][0] * weights[f.k];
+    rentalW += scores[f.k][1] * weights[f.k];
+  });
+  const hotelMatch  = Math.round(hotelW  / totalW * 10);   // 0–100
+  const rentalMatch = Math.round(rentalW / totalW * 10);
+
+  hrRender({
+    people, nights, rooms,
+    hotelTotal, hotelSubtotal, hotelTax,
+    rentalTotal, rentalNightly, cleanFee, rentalSvc, rentalTax,
+    scores, weights, hotelMatch, rentalMatch,
+  });
+  resultsEl.style.display = '';
+}
+
+/* Per-factor 0–10 scores that respond to party size & trip length */
+function hrScores(p, nights, hotelTotal, rentalTotal) {
+  const extra = Math.max(0, p - 2);   // travelers beyond a couple
+
+  // Cost: the cheaper option scores high; the dearer is scaled by the price ratio
+  const lo = Math.min(hotelTotal, rentalTotal);
+  const hi = Math.max(hotelTotal, rentalTotal);
+  const ratio = hi > 0 ? lo / hi : 1;
+  const dearScore = hrClamp(2.5, 9.4 * ratio, 9.0);
+  const hCost = hotelTotal <= rentalTotal ? 9.4 : dearScore;
+  const rCost = rentalTotal <  hotelTotal ? 9.4 : (rentalTotal === hotelTotal ? 9.4 : dearScore);
+
+  return {
+    cost:      [hCost, rCost],
+    space:     [hrClamp(2.5, 7.2 - extra * 0.8, 8.0), hrClamp(0, 6.4 + p * 0.45 + (nights >= 4 ? 0.8 : 0), 10)],
+    kitchen:   [2.5, hrClamp(0, 8.6 + (nights >= 5 ? 1.0 : 0), 10)],
+    privacy:   [hrClamp(3.0, 6.8 - extra * 0.4, 7.5), hrClamp(0, 7.6 + p * 0.18, 10)],
+    service:   [9.0, 3.5],
+    amenities: [8.5, 5.0],
+    location:  [7.6, 6.6],
+    predict:   [9.0, 5.6],
+  };
+}
+
+/* Factor weights = base 1 + trip-type bonus + priority bonus */
+function hrWeights() {
+  const w = {};
+  HR_FACTORS.forEach(f => w[f.k] = 1);
+  const t = HR_TRIPS[hrState.trip];
+  if(t) for(const k in t.w) w[k] += t.w[k];
+  HR_FACTORS.forEach(f => { if(hrState.prio[f.k]) w[f.k] += HR_PRIO_BONUS; });
+  return w;
+}
+
+function hrRender(d) {
+  const inner = document.getElementById('hr-results-inner');
+  inner.style.animation = 'none'; inner.offsetHeight; inner.style.animation = '';
+
+  const hotelWins  = d.hotelMatch  > d.rentalMatch;
+  const rentalWins = d.rentalMatch > d.hotelMatch;
+  const close = Math.abs(d.hotelMatch - d.rentalMatch) <= 4;
+  const tripNm = (HR_TRIPS[hrState.trip] || {}).nm || 'trip';
+
+  // ── Verdict ──
+  let vTag, vH, vEm;
+  if(close) {
+    vTag = 'It’s a close call';
+    vEm  = '⚖️';
+    vH   = rentalWins ? 'A slight edge to the vacation rental'
+          : hotelWins ? 'A slight edge to the hotel'
+          : 'Too close to call — it’s a toss-up';
+  } else if(rentalWins) {
+    vTag = 'Our recommendation'; vEm = '🏠'; vH = 'A vacation rental is your better fit';
+  } else {
+    vTag = 'Our recommendation'; vEm = '🏨'; vH = 'A hotel is your better fit';
+  }
+
+  // Winning option name for the rationale
+  const winKey = rentalWins ? 'rental' : hotelWins ? 'hotel' : (d.rentalTotal < d.hotelTotal ? 'rental' : 'hotel');
+  const winNm  = winKey === 'rental' ? 'the rental' : 'the hotel';
+  const winIdx = winKey === 'rental' ? 1 : 0;
+
+  const vSub = close
+    ? `For a ${tripNm} like yours the two are nearly even — let cost or a single must-have break the tie.`
+    : `Based on your ${tripNm}, what you said matters, and the rates you entered, ${winNm} comes out ahead across the factors weighted for you.`;
+
+  // ── Cost strip ──
+  const cheaper = d.rentalTotal < d.hotelTotal ? 'rental' : (d.hotelTotal < d.rentalTotal ? 'hotel' : 'tie');
+  const diff = Math.abs(d.hotelTotal - d.rentalTotal);
+  const deltaSub = cheaper === 'tie'
+    ? 'Same all-in cost'
+    : `${cheaper === 'rental' ? 'Rental' : 'Hotel'} saves ${hrMoney(diff)}`;
+
+  const costGrid = `
+    <div class="hr-cost-grid">
+      <div class="hr-cost-card hotel">
+        <div class="hr-cost-lbl">🏨 Hotel — all in</div>
+        <div class="hr-cost-num">${hrMoney(d.hotelTotal)}</div>
+        <div class="hr-cost-sub">${hrMoney(d.hotelTotal / d.nights)} / night · ${d.rooms} room${d.rooms !== 1 ? 's' : ''}</div>
+      </div>
+      <div class="hr-cost-card rental">
+        <div class="hr-cost-lbl">🏠 Rental — all in</div>
+        <div class="hr-cost-num">${hrMoney(d.rentalTotal)}</div>
+        <div class="hr-cost-sub">${hrMoney(d.rentalTotal / d.nights)} / night · whole place</div>
+      </div>
+      <div class="hr-cost-card delta">
+        <div class="hr-cost-lbl">Difference</div>
+        <div class="hr-cost-num">${hrMoney(diff)}</div>
+        <div class="hr-cost-sub">${deltaSub}</div>
+      </div>
+    </div>
+    <div class="hr-cost-detail">
+      <b>Hotel:</b> ${d.rooms} room${d.rooms !== 1 ? 's' : ''} × ${hrMoney(d.hotelSubtotal / d.rooms / d.nights)}/night × ${d.nights} night${d.nights !== 1 ? 's' : ''} = ${hrMoney(d.hotelSubtotal)} + ${hrMoney(d.hotelTax)} tax (${Math.round(HR_HOTEL_TAX*100)}%).<br>
+      <b>Rental:</b> ${hrMoney(d.rentalNightly)} nightly + ${hrMoney(d.cleanFee)} cleaning + ${hrMoney(d.rentalSvc)} service (${Math.round(HR_RENTAL_SVC*100)}%) + ${hrMoney(d.rentalTax)} tax (${Math.round(HR_RENTAL_TAX*100)}%).
+    </div>`;
+
+  // ── Factor breakdown bars ──
+  let factorHtml = '';
+  HR_FACTORS.forEach(f => {
+    const [h, r] = d.scores[f.k];
+    const isPrio = hrState.prio[f.k];
+    const hWin = h > r + 0.05, rWin = r > h + 0.05;
+    factorHtml += `
+      <div class="hr-factor">
+        <div class="hr-factor-top">
+          <span class="hr-factor-nm"><span class="em">${f.ico}</span>${f.nm}${isPrio ? '<span class="hr-prio-star">★ Priority</span>' : ''}</span>
+          <span class="hr-factor-hint">${f.hint}</span>
+        </div>
+        <div class="hr-bar-row">
+          <span class="hr-bar-key">Hotel</span>
+          <span class="hr-bar-track"><span class="hr-bar-fill hotel" style="width:${h*10}%"></span></span>
+          <span class="hr-bar-val">${h.toFixed(1)}</span>
+          <span class="hr-bar-win">${hWin ? '✓' : ''}</span>
+        </div>
+        <div class="hr-bar-row">
+          <span class="hr-bar-key">Rental</span>
+          <span class="hr-bar-track"><span class="hr-bar-fill rental" style="width:${r*10}%"></span></span>
+          <span class="hr-bar-val">${r.toFixed(1)}</span>
+          <span class="hr-bar-win">${rWin ? '✓' : ''}</span>
+        </div>
+      </div>`;
+  });
+
+  // ── "Why" — the factors that most drove the recommendation toward the winner ──
+  const contribs = HR_FACTORS.map(f => {
+    const [h, r] = d.scores[f.k];
+    const edge = (winIdx === 1 ? r - h : h - r) * d.weights[f.k];   // weighted edge for the winner
+    return { f, edge, h, r };
+  }).filter(c => c.edge > 0).sort((a,b) => b.edge - a.edge).slice(0, 3);
+
+  let whyHtml = '';
+  if(contribs.length) {
+    whyHtml = `<div class="hr-section-lbl">Why ${winNm}</div><div class="hr-why">` +
+      contribs.map(c => {
+        const better = winIdx === 1 ? 'the rental' : 'the hotel';
+        return `<div class="hr-why-row"><span class="em">${c.f.ico}</span><span><b>${c.f.nm}</b> — ${better} scores ${(winIdx===1?c.r:c.h).toFixed(1)} vs ${(winIdx===1?c.h:c.r).toFixed(1)}${hrState.prio[c.f.k] ? ', and you flagged this as a priority' : ''}.</span></div>`;
+      }).join('') + `</div>`;
+  }
+
+  inner.innerHTML = `
+    <div class="hr-verdict">
+      <div class="hr-verdict-tag">${vTag}</div>
+      <div class="hr-verdict-h"><span class="em">${vEm}</span>${vH}</div>
+      <div class="hr-verdict-sub">${vSub}</div>
+      <div class="hr-match">
+        <div class="hr-match-card hotel ${hotelWins ? 'win' : ''}">
+          ${hotelWins ? '<span class="hr-win-flag">Better fit</span>' : ''}
+          <div class="hr-match-lbl">🏨 Hotel</div>
+          <div class="hr-match-num">${d.hotelMatch}</div>
+          <div class="hr-match-sub">match score</div>
+        </div>
+        <div class="hr-match-card rental ${rentalWins ? 'win' : ''}">
+          ${(rentalWins) ? '<span class="hr-win-flag">Better fit</span>' : ''}
+          <div class="hr-match-lbl">🏠 Rental</div>
+          <div class="hr-match-num">${d.rentalMatch}</div>
+          <div class="hr-match-sub">match score</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hr-section-lbl">Estimated cost — your whole stay</div>
+    ${costGrid}
+
+    <div class="hr-section-lbl">The 8 factors, scored for your trip</div>
+    ${factorHtml}
+
+    ${whyHtml}
+
+    <div class="hr-caveat">
+      Scores are a planning heuristic, not a guarantee — individual properties vary widely. Cost estimates use typical add-ons (hotel tax ${Math.round(HR_HOTEL_TAX*100)}%, rental service fee ${Math.round(HR_RENTAL_SVC*100)}% + tax ${Math.round(HR_RENTAL_TAX*100)}%); your real quotes may differ, so confirm the final price before booking.
+    </div>`;
+}
+
+function hrReset() {
+  hrState.trip = 'family';
+  hrState.prio = {};
+  hrState.roomsTouched = false;
+  document.getElementById('hr-people').value = 2;
+  document.getElementById('hr-nights').value = 4;
+  document.getElementById('hr-hotel-rate').value = 180;
+  document.getElementById('hr-rental-rate').value = 240;
+  document.getElementById('hr-rental-clean').value = 120;
+  document.querySelectorAll('#hr-grp-trip .chip').forEach(b => b.classList.toggle('on', b.dataset.hrVal === 'family'));
+  document.querySelectorAll('#hr-prio-grid .hr-prio').forEach(b => { b.classList.remove('on'); b.setAttribute('aria-pressed','false'); });
+  hrSuggestRooms();
+  hrCalc();
 }
 
 /* ══════════════════════════════════════════════════════
