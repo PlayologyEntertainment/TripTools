@@ -3733,17 +3733,196 @@ body.no-scroll { overflow: hidden; }
     </div>
   </div>
 </div>
-<div id="view-placeholder-travel-ins" class="view">
-  <nav class="tool-topbar">
+<div id="view-travel-ins" class="view">
+  <style>
+  /* ── TRAVEL INSURANCE WORKSHEET ── */
+  #view-travel-ins .ti-section-lbl { font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 20px 0 8px; }
+  #view-travel-ins .ti-section-lbl .opt { text-transform: none; letter-spacing: 0; font-family: var(--sans); color: var(--muted); font-weight: 400; }
+  /* policy header cards */
+  #view-travel-ins .ti-pol-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media(max-width:560px){ #view-travel-ins .ti-pol-grid { grid-template-columns: 1fr; } }
+  #view-travel-ins .ti-pol-card { border: 1.5px solid var(--ink); border-radius: var(--r); background: var(--paper); padding: 14px 16px; position: relative; overflow: hidden; }
+  #view-travel-ins .ti-pol-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; }
+  #view-travel-ins .ti-pol-card.a::before { background: var(--blue); }
+  #view-travel-ins .ti-pol-card.b::before { background: var(--accent); }
+  #view-travel-ins .ti-pol-tag { font-family: var(--mono); font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  #view-travel-ins .ti-pol-card.a .ti-pol-tag { color: var(--blue); }
+  #view-travel-ins .ti-pol-card.b .ti-pol-tag { color: var(--accent); }
+  #view-travel-ins .ti-pol-card .fg:last-child { margin-bottom: 0; }
+  #view-travel-ins .ti-input-pre { position: relative; }
+  #view-travel-ins .ti-input-pre input { padding-left: 26px; }
+  #view-travel-ins .ti-input-pre::before { content: '$'; position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--muted); font-family: var(--mono); font-size: 14px; pointer-events: none; }
+  /* coverage checklist rows */
+  #view-travel-ins .ti-cov-row { border-bottom: 1px solid var(--rule); padding: 14px 0; }
+  #view-travel-ins .ti-cov-row:last-child { border-bottom: none; }
+  #view-travel-ins .ti-cov-head { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
+  #view-travel-ins .ti-star { flex-shrink: 0; width: 30px; height: 30px; border: 1.5px solid var(--rule); border-radius: var(--r); background: var(--paper); cursor: pointer; font-size: 15px; line-height: 1; color: var(--muted); display: flex; align-items: center; justify-content: center; transition: background .12s, border-color .12s, color .12s; }
+  #view-travel-ins .ti-star:hover { border-color: var(--ink); }
+  #view-travel-ins .ti-star.on { background: var(--yellow); border-color: var(--ink); color: var(--ink); }
+  #view-travel-ins .ti-cov-meta { flex: 1; min-width: 0; }
+  #view-travel-ins .ti-cov-nm { font-size: 14px; font-weight: 600; color: var(--ink); display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+  #view-travel-ins .ti-cov-nm .em { font-size: 16px; }
+  #view-travel-ins .ti-prio-flag { font-family: var(--mono); font-size: 9px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink); background: var(--yellow); border-radius: 2px; padding: 1px 5px; }
+  #view-travel-ins .ti-cov-hint { font-size: 11.5px; color: var(--muted); line-height: 1.45; margin-top: 3px; }
+  #view-travel-ins .ti-cov-rec { font-family: var(--mono); font-size: 10px; color: var(--ink-2); margin-top: 3px; }
+  #view-travel-ins .ti-cov-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  @media(max-width:560px){ #view-travel-ins .ti-cov-cols { grid-template-columns: 1fr; } }
+  #view-travel-ins .ti-cov-cell { border: 1.5px solid var(--rule); border-radius: var(--r); padding: 8px 10px; }
+  #view-travel-ins .ti-cov-cell.a { border-left: 3px solid var(--blue); }
+  #view-travel-ins .ti-cov-cell.b { border-left: 3px solid var(--accent); }
+  #view-travel-ins .ti-cell-tag { font-family: var(--mono); font-size: 9px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+  #view-travel-ins .ti-seg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
+  #view-travel-ins .ti-seg button { font-family: var(--sans); font-size: 11px; font-weight: 600; padding: 6px 2px; border: 1.5px solid var(--rule); border-radius: 3px; background: var(--paper); color: var(--muted); cursor: pointer; transition: background .12s, border-color .12s, color .12s; display: flex; align-items: center; justify-content: center; gap: 3px; }
+  #view-travel-ins .ti-seg button:hover { border-color: var(--ink); }
+  #view-travel-ins .ti-seg button.on[data-lvl="0"] { background: #b9402f; border-color: #b9402f; color: #fff; }
+  #view-travel-ins .ti-seg button.on[data-lvl="1"] { background: var(--yellow); border-color: var(--ink); color: var(--ink); }
+  #view-travel-ins .ti-seg button.on[data-lvl="2"] { background: var(--green); border-color: var(--green); color: #fff; }
+  #view-travel-ins .ti-limit { position: relative; margin-top: 7px; }
+  #view-travel-ins .ti-limit input { width: 100%; box-sizing: border-box; padding: 5px 8px 5px 22px; border: 1.5px solid var(--rule); border-radius: 3px; font-family: var(--mono); font-size: 12px; background: var(--paper); color: var(--ink); outline: none; }
+  #view-travel-ins .ti-limit input:focus { border-color: var(--accent); }
+  #view-travel-ins .ti-limit::before { content: '$'; position: absolute; left: 8px; top: 50%; transform: translateY(-50%); color: var(--muted); font-family: var(--mono); font-size: 11px; pointer-events: none; }
+  /* results */
+  #view-travel-ins .ti-results { border-top: 2px solid var(--ink); margin-top: 26px; padding-top: 24px; }
+  #view-travel-ins .ti-results-inner { animation: fc-result-in .22s cubic-bezier(.2,.8,.2,1) both; }
+  #view-travel-ins .ti-verdict { border: 2px solid var(--ink); border-radius: var(--r); background: var(--paper-2); padding: 20px 22px; margin-bottom: 20px; }
+  #view-travel-ins .ti-verdict-tag { font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+  #view-travel-ins .ti-verdict-h { font-family: var(--serif); font-weight: 600; font-size: clamp(21px,4.6vw,30px); letter-spacing: -.02em; line-height: 1.12; color: var(--ink); display: flex; align-items: center; gap: 10px; }
+  #view-travel-ins .ti-verdict-h .em { font-size: 1.05em; }
+  #view-travel-ins .ti-verdict-sub { font-size: 14px; color: var(--ink-2); line-height: 1.5; margin-top: 8px; }
+  #view-travel-ins .ti-match { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+  #view-travel-ins .ti-match-card { border: 1.5px solid var(--rule); border-radius: var(--r); background: var(--paper); padding: 12px 14px; text-align: center; position: relative; }
+  #view-travel-ins .ti-match-card.win { border-width: 2px; border-color: var(--ink); }
+  #view-travel-ins .ti-match-card.win.a { box-shadow: inset 4px 0 0 var(--blue); }
+  #view-travel-ins .ti-match-card.win.b { box-shadow: inset 4px 0 0 var(--accent); }
+  #view-travel-ins .ti-match-lbl { font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #view-travel-ins .ti-match-num { font-family: var(--serif); font-weight: 600; font-size: 34px; line-height: 1; color: var(--ink); margin: 6px 0 2px; }
+  #view-travel-ins .ti-match-card.a .ti-match-num { color: var(--blue); }
+  #view-travel-ins .ti-match-card.b .ti-match-num { color: var(--accent); }
+  #view-travel-ins .ti-match-sub { font-family: var(--mono); font-size: 9px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+  #view-travel-ins .ti-win-flag { position: absolute; top: -9px; left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--paper); font-family: var(--mono); font-size: 9px; letter-spacing: .08em; text-transform: uppercase; padding: 2px 8px; border-radius: 2px; white-space: nowrap; }
+  /* premium / value strip */
+  #view-travel-ins .ti-cost-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 8px; }
+  @media(max-width:560px){ #view-travel-ins .ti-cost-grid { grid-template-columns: 1fr; } }
+  #view-travel-ins .ti-cost-card { border: 1.5px solid var(--ink); border-radius: var(--r); background: var(--paper); padding: 14px 16px; position: relative; overflow: hidden; }
+  #view-travel-ins .ti-cost-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; }
+  #view-travel-ins .ti-cost-card.a::before { background: var(--blue); }
+  #view-travel-ins .ti-cost-card.b::before { background: var(--accent); }
+  #view-travel-ins .ti-cost-card.delta::before { background: var(--green); }
+  #view-travel-ins .ti-cost-lbl { font-family: var(--mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #view-travel-ins .ti-cost-num { font-family: var(--serif); font-weight: 600; font-size: clamp(22px,5vw,30px); letter-spacing: -.02em; line-height: 1; color: var(--ink); margin: 7px 0 4px; }
+  #view-travel-ins .ti-cost-sub { font-family: var(--mono); font-size: 10px; color: var(--muted); line-height: 1.4; }
+  /* coverage matrix */
+  #view-travel-ins .ti-matrix { border: 1.5px solid var(--rule); border-radius: var(--r); overflow: hidden; margin-top: 4px; }
+  #view-travel-ins .ti-mx-row { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--rule); }
+  #view-travel-ins .ti-mx-row:last-child { border-bottom: none; }
+  #view-travel-ins .ti-mx-row.head { background: var(--paper-2); }
+  #view-travel-ins .ti-mx-row.head span { font-family: var(--mono); font-size: 9px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  #view-travel-ins .ti-mx-nm { font-size: 13px; color: var(--ink-2); display: flex; align-items: center; gap: 7px; min-width: 0; }
+  #view-travel-ins .ti-mx-nm .em { font-size: 14px; flex-shrink: 0; }
+  #view-travel-ins .ti-mx-nm .ti-mx-star { color: #c79a1a; flex-shrink: 0; }
+  #view-travel-ins .ti-mx-pill { width: 84px; text-align: center; flex-shrink: 0; }
+  #view-travel-ins .ti-pill { font-family: var(--mono); font-size: 10px; font-weight: 600; letter-spacing: .04em; padding: 3px 7px; border-radius: 3px; display: inline-block; }
+  #view-travel-ins .ti-pill.l0 { background: rgba(185,64,47,.12); color: #b9402f; }
+  #view-travel-ins .ti-pill.l1 { background: rgba(214,167,30,.16); color: #8a6d10; }
+  #view-travel-ins .ti-pill.l2 { background: rgba(46,125,50,.14); color: #2e7d32; }
+  #view-travel-ins .ti-pill.win { outline: 1.5px solid currentColor; }
+  #view-travel-ins .ti-pill-amt { font-family: var(--mono); font-size: 9px; color: var(--muted); margin-top: 2px; }
+  /* gaps / why / caveat */
+  #view-travel-ins .ti-gap { border: 1.5px solid #d8a99f; background: rgba(185,64,47,.05); border-radius: var(--r); padding: 4px 16px; margin: 8px 0 0; }
+  #view-travel-ins .ti-gap-row { display: flex; gap: 10px; align-items: flex-start; padding: 9px 0; border-bottom: 1px solid rgba(185,64,47,.18); font-size: 13px; color: var(--ink-2); line-height: 1.5; }
+  #view-travel-ins .ti-gap-row:last-child { border-bottom: none; }
+  #view-travel-ins .ti-gap-row .em { flex-shrink: 0; }
+  #view-travel-ins .ti-gap-row b { font-family: var(--sans); color: var(--ink); }
+  #view-travel-ins .ti-why { border: 1.5px solid var(--rule); border-radius: var(--r); background: var(--paper); padding: 4px 16px; margin: 8px 0 0; }
+  #view-travel-ins .ti-why-row { display: flex; gap: 10px; align-items: flex-start; padding: 9px 0; border-bottom: 1px solid var(--rule); font-size: 13px; color: var(--ink-2); line-height: 1.5; }
+  #view-travel-ins .ti-why-row:last-child { border-bottom: none; }
+  #view-travel-ins .ti-why-row .em { flex-shrink: 0; font-size: 15px; }
+  #view-travel-ins .ti-why-row b { font-family: var(--sans); color: var(--ink); }
+  #view-travel-ins .ti-caveat { font-size: 12px; color: var(--ink-2); line-height: 1.5; border-left: 3px solid var(--blue); padding: 10px 14px; background: rgba(21,101,192,.05); border-radius: 0 var(--r) var(--r) 0; margin-top: 16px; }
+  #view-travel-ins .ti-print-header { display: none; }
+  @media print {
+    #view-travel-ins .tool-bar, #view-travel-ins .ctx-banner, #view-travel-ins .pro-tip,
+    #view-travel-ins .related, #view-travel-ins .btn-ghost { display: none !important; }
+    #view-travel-ins .ti-print-header { display: flex !important; justify-content: space-between; font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid #ccc; padding-bottom: 8px; margin-bottom: 16px; }
+    #view-travel-ins .ti-results { border-top: 1px solid #ccc; }
+    #view-travel-ins .ti-seg button, #view-travel-ins .ti-pill, #view-travel-ins .ti-star { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    body { background: #fff !important; background-image: none !important; }
+  }
+  </style>
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="window.print()">🖨 Print</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">🛡</span>
-    <h2>Travel Insurance Worksheet</h2>
-    <p style="margin-bottom:24px">Side-by-side framework for comparing insurance policies. Coverage checklist scoring.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-travel-ins"></div>
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>Travel Insurance Worksheet</h1>
+    <p class="tool-sub">Comparing two travel-insurance quotes? Name each policy, mark how well it covers the eight things that matter, and we'll score them side by side — flagging the gaps and telling you which is the better fit and the better value.</p>
+  </div>
+
+  <div class="tool-body">
+
+    <!-- ── THE TWO POLICIES ── -->
+    <div class="ti-section-lbl">The two policies <span class="opt">— give each a name &amp; the premium you were quoted</span></div>
+    <div class="ti-pol-grid">
+      <div class="ti-pol-card a">
+        <div class="ti-pol-tag">Policy A</div>
+        <div class="fg">
+          <label for="ti-a-name">Plan name</label>
+          <input type="text" id="ti-a-name" maxlength="32" placeholder="e.g. Basic Plan" oninput="tiCalc()">
+        </div>
+        <div class="fg">
+          <label for="ti-a-prem">Total premium</label>
+          <div class="ti-input-pre"><input type="number" id="ti-a-prem" min="0" max="20000" step="1" placeholder="0" oninput="tiCalc()"></div>
+        </div>
+      </div>
+      <div class="ti-pol-card b">
+        <div class="ti-pol-tag">Policy B</div>
+        <div class="fg">
+          <label for="ti-b-name">Plan name</label>
+          <input type="text" id="ti-b-name" maxlength="32" placeholder="e.g. Premium Plan" oninput="tiCalc()">
+        </div>
+        <div class="fg">
+          <label for="ti-b-prem">Total premium</label>
+          <div class="ti-input-pre"><input type="number" id="ti-b-prem" min="0" max="20000" step="1" placeholder="0" oninput="tiCalc()"></div>
+        </div>
+      </div>
     </div>
+
+    <!-- ── COVERAGE CHECKLIST ── -->
+    <div class="ti-section-lbl">Coverage checklist <span class="opt">— tap ★ to mark a must-have · set each policy to ✕ none / ◐ limited / ✓ strong · add the $ limit if you have it</span></div>
+    <div id="ti-cov-list"><!-- injected by JS --></div>
+
+    <!-- ── RESULTS ── -->
+    <div class="ti-results" id="ti-results" style="display:none" aria-live="polite">
+      <div class="ti-results-inner" id="ti-results-inner"><!-- injected by JS --></div>
+    </div>
+
+    <!-- ── RESET ── -->
+    <div style="margin-top:18px;text-align:right">
+      <button class="btn-ghost" onclick="tiReset()">↺ Reset worksheet</button>
+    </div>
+
+  </div><!-- /tool-body -->
+
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    Don't shop on premium alone. The two coverages that can actually bankrupt you abroad are <b>emergency medical</b> and <b>medical evacuation</b> — a single air-ambulance flight home can run $50,000–$250,000. Aim for at least $100,000 in medical and $250,000 in evacuation before you worry about the smaller perks. And always read the exclusions: pre-existing conditions, adventure sports, and "known events" (like a named storm) are the usual traps.
+  </div>
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('emergency')">🚨 Emergency Numbers</button>
+      <button class="rel-btn" onclick="openTool('flight-delay')">⚖️ Flight Delay Compensation</button>
+      <button class="rel-btn" onclick="openTool('doc-checklist')">✅ Document Checklist</button>
+      <button class="rel-btn" onclick="openTool('vaccination')">💉 Vaccination Requirements</button>
+    </div>
+  </div>
+
+  <!-- Print-only header -->
+  <div class="ti-print-header">
+    <strong>TripTools — Travel Insurance Worksheet</strong>
+    <span id="ti-print-date"></span>
   </div>
 </div>
 <style>
@@ -12821,7 +13000,7 @@ const TOOLS = [
   {id:'hotel-rental',  nm:'Hotel vs. Vacation Rental',  ico:'🏨', ph:'discovery', on:false, live:true,  ds:'Compare hotel vs. Airbnb/VRBO across 8 factors with a personalized, cost-aware recommendation.'},
   {id:'road-planner',  nm:'Road Trip Route Planner',    ico:'🗺', ph:'discovery', on:true,  live:true,  ds:'Waypoints, distance, drive time & map via Leaflet + OSM.'},
   {id:'itinerary',     nm:'Itinerary Builder',          ico:'📋', ph:'discovery', on:false, live:true,  ds:'Day-by-day planner with drag-and-drop scheduling. Printable.'},
-  {id:'travel-ins',    nm:'Travel Insurance Worksheet', ico:'🛡', ph:'discovery', on:false, live:false, ds:'Side-by-side framework for comparing insurance policies.'},
+  {id:'travel-ins',    nm:'Travel Insurance Worksheet', ico:'🛡', ph:'discovery', on:false, live:true,  ds:'Side-by-side framework for comparing insurance policies.'},
   {id:'passport',      nm:'Passport Expiry Checker',    ico:'📕', ph:'docs',      on:false, live:true,  ds:'Enter expiry + destination. Returns days left & 6-month rule check.'},
   {id:'visa-guide',    nm:'Visa Requirement Guide',     ico:'🌍', ph:'docs',      on:false, live:true,  ds:'Nationality + destination = visa type, cost & processing time.'},
   {id:'doc-checklist', nm:'Travel Document Checklist',  ico:'✅', ph:'docs',      on:false, live:true,  ds:'Customizable pre-trip checklist adapting to trip type.'},
@@ -13545,6 +13724,7 @@ function injectTripCtx(id) {
   if(id==='biz-packing') bpInit();
   if(id==='group-trip') gtInit();
   if(id==='itinerary') ibInit();
+  if(id==='travel-ins') tiInit();
   if(id==='budget-plan') budgetInit();
   if(id==='visa-guide') vgInit();
   if(id==='passport')   paInit();
@@ -20241,6 +20421,333 @@ function hrReset() {
   document.querySelectorAll('#hr-prio-grid .hr-prio').forEach(b => { b.classList.remove('on'); b.setAttribute('aria-pressed','false'); });
   hrSuggestRooms();
   hrCalc();
+}
+
+/* ══════════════════════════════════════════════════════
+   TRAVEL INSURANCE WORKSHEET
+   Side-by-side comparison of two policies across 8 weighted
+   coverage types. Each policy is rated none / limited / strong
+   per coverage (with an optional dollar limit); the user can
+   star the coverages that matter most to lift their weight.
+   Produces a 0–100 match score for each policy, a premium /
+   value read, a coverage matrix, and gap warnings. Auto-saved
+   to localStorage. No network — pure offline worksheet.
+   ══════════════════════════════════════════════════════ */
+
+const TI_KEY = 'tt_travelins';
+
+/* The 8 coverage types. w = base importance weight; rec = a plain-English
+   guideline limit shown as a nudge. */
+const TI_COVS = [
+  {k:'cancel',   nm:'Trip Cancellation',        ico:'🚫', w:2.4, hint:'Refunds prepaid, non-refundable costs if you cancel for a covered reason (illness, jury duty, etc).', rec:'Aim for 100% of your trip cost'},
+  {k:'interrupt',nm:'Trip Interruption',        ico:'🔁', w:2.0, hint:'Reimburses unused days and the cost to get home if you must cut the trip short.',                 rec:'100–150% of trip cost'},
+  {k:'medical',  nm:'Emergency Medical',        ico:'🏥', w:3.0, hint:'Pays for hospital, doctor and dental treatment for injury or illness while travelling.',          rec:'≥ $100,000'},
+  {k:'evac',     nm:'Medical Evacuation',       ico:'🚁', w:3.0, hint:'Transport to an adequate hospital or back home — an air ambulance can cost six figures.',          rec:'≥ $250,000'},
+  {k:'baggage',  nm:'Baggage & Belongings',     ico:'🧳', w:1.4, hint:'Lost, stolen or damaged luggage, plus a baggage-delay allowance for essentials.',                 rec:'$1,000–$2,500'},
+  {k:'delay',    nm:'Travel Delay',             ico:'⏱', w:1.5, hint:'Meals and lodging when a covered delay strands you for several hours or more.',                   rec:'$150–$300 per day'},
+  {k:'assist',   nm:'24/7 Assistance',          ico:'☎️', w:1.8, hint:'A round-the-clock hotline to coordinate care, translation, referrals and emergencies.',           rec:'Worldwide, multilingual'},
+  {k:'cfar',     nm:'Cancel For Any Reason',    ico:'🎲', w:1.1, hint:'Optional upgrade to cancel for reasons a standard policy excludes — usually refunds 50–75%.',     rec:'Optional add-on'},
+];
+
+const TI_LVL = { 0:{nm:'None', ab:'✕', cls:'l0'}, 1:{nm:'Limited', ab:'◐', cls:'l1'}, 2:{nm:'Strong', ab:'✓', cls:'l2'} };
+const TI_LVL_SCORE = { 0:0, 1:5.5, 2:10 };   // 0–10 contribution per level
+const TI_PRIO_BONUS = 2.0;                    // weight added when a coverage is starred
+
+/* Sensible starter worksheet: a lean plan vs. a comprehensive one. */
+function tiDefaults() {
+  return {
+    a: { name:'Basic Plan',   prem:89,  cov:{ cancel:{l:1,amt:''}, interrupt:{l:1,amt:''}, medical:{l:2,amt:'50000'}, evac:{l:1,amt:'100000'}, baggage:{l:1,amt:''}, delay:{l:0,amt:''}, assist:{l:2,amt:''}, cfar:{l:0,amt:''} } },
+    b: { name:'Premium Plan', prem:169, cov:{ cancel:{l:2,amt:''}, interrupt:{l:2,amt:''}, medical:{l:2,amt:'250000'}, evac:{l:2,amt:'500000'}, baggage:{l:2,amt:'2500'}, delay:{l:2,amt:''}, assist:{l:2,amt:''}, cfar:{l:1,amt:''} } },
+    prio: { medical:true, evac:true, cancel:true },
+  };
+}
+
+let tiState = null;
+let tiBuilt = false;
+
+function tiMoney(n) { return '$' + Math.round(n).toLocaleString('en-US'); }
+function tiFmtAmt(s) {
+  const n = parseFloat(String(s).replace(/[^0-9.]/g,''));
+  return (isFinite(n) && n > 0) ? '$' + Math.round(n).toLocaleString('en-US') : '';
+}
+
+function tiLoad() {
+  try { const raw = localStorage.getItem(TI_KEY); if(raw) { tiState = JSON.parse(raw); } } catch(_){}
+  if(!tiState || !tiState.a || !tiState.b) tiState = tiDefaults();
+  // backfill any newly-added coverage keys
+  TI_COVS.forEach(c => {
+    ['a','b'].forEach(p => { if(!tiState[p].cov[c.k]) tiState[p].cov[c.k] = {l:0,amt:''}; });
+  });
+  if(!tiState.prio) tiState.prio = {};
+}
+function tiSave() { try { localStorage.setItem(TI_KEY, JSON.stringify(tiState)); } catch(_){} }
+
+function tiInit() {
+  const pd = document.getElementById('ti-print-date');
+  if(pd) pd.textContent = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  if(!tiState) tiLoad();
+
+  if(!tiBuilt) {
+    document.getElementById('ti-cov-list').innerHTML = TI_COVS.map(c => `
+      <div class="ti-cov-row">
+        <div class="ti-cov-head">
+          <button class="ti-star" data-ti-star="${c.k}" onclick="tiToggleStar('${c.k}')" aria-label="Mark ${c.nm} as a must-have" aria-pressed="false">☆</button>
+          <div class="ti-cov-meta">
+            <div class="ti-cov-nm"><span class="em">${c.ico}</span>${c.nm}<span class="ti-prio-flag" data-ti-flag="${c.k}" style="display:none">★ Must-have</span></div>
+            <div class="ti-cov-hint">${c.hint}</div>
+            <div class="ti-cov-rec">Guideline: ${c.rec}</div>
+          </div>
+        </div>
+        <div class="ti-cov-cols">
+          ${['a','b'].map(p => `
+            <div class="ti-cov-cell ${p}">
+              <div class="ti-cell-tag" data-ti-celltag="${p}">Policy ${p.toUpperCase()}</div>
+              <div class="ti-seg" data-ti-seg="${p}-${c.k}">
+                ${[0,1,2].map(l => `<button data-lvl="${l}" onclick="tiSetLvl('${p}','${c.k}',${l})">${TI_LVL[l].ab} ${TI_LVL[l].nm}</button>`).join('')}
+              </div>
+              <div class="ti-limit"><input type="text" inputmode="numeric" data-ti-amt="${p}-${c.k}" placeholder="limit (optional)" oninput="tiSetAmt('${p}','${c.k}',this.value)"></div>
+            </div>`).join('')}
+        </div>
+      </div>`).join('');
+    tiBuilt = true;
+  }
+  tiSyncInputs();
+  tiCalc();
+}
+
+/* Push state → form fields (on open / reset) */
+function tiSyncInputs() {
+  document.getElementById('ti-a-name').value = tiState.a.name || '';
+  document.getElementById('ti-b-name').value = tiState.b.name || '';
+  document.getElementById('ti-a-prem').value = tiState.a.prem || '';
+  document.getElementById('ti-b-prem').value = tiState.b.prem || '';
+  ['a','b'].forEach(p => {
+    const nm = tiState[p].name || ('Policy ' + p.toUpperCase());
+    document.querySelectorAll(`[data-ti-celltag="${p}"]`).forEach(el => el.textContent = nm);
+    TI_COVS.forEach(c => {
+      const cov = tiState[p].cov[c.k];
+      document.querySelectorAll(`[data-ti-seg="${p}-${c.k}"] button`).forEach(b =>
+        b.classList.toggle('on', +b.dataset.lvl === cov.l));
+      const amt = document.querySelector(`[data-ti-amt="${p}-${c.k}"]`);
+      if(amt) amt.value = cov.amt || '';
+    });
+  });
+  TI_COVS.forEach(c => {
+    const on = !!tiState.prio[c.k];
+    const star = document.querySelector(`[data-ti-star="${c.k}"]`);
+    if(star) { star.classList.toggle('on', on); star.textContent = on ? '★' : '☆'; star.setAttribute('aria-pressed', on?'true':'false'); }
+    const flag = document.querySelector(`[data-ti-flag="${c.k}"]`);
+    if(flag) flag.style.display = on ? '' : 'none';
+  });
+}
+
+function tiSetLvl(p, k, l) {
+  tiState[p].cov[k].l = l;
+  document.querySelectorAll(`[data-ti-seg="${p}-${k}"] button`).forEach(b =>
+    b.classList.toggle('on', +b.dataset.lvl === l));
+  tiCalc();
+}
+function tiSetAmt(p, k, v) { tiState[p].cov[k].amt = v; tiSave(); tiRender(); /* limits don't change score, but show in the matrix */ }
+function tiToggleStar(k) {
+  tiState.prio[k] = !tiState.prio[k];
+  const on = tiState.prio[k];
+  const star = document.querySelector(`[data-ti-star="${k}"]`);
+  if(star) { star.classList.toggle('on', on); star.textContent = on ? '★' : '☆'; star.setAttribute('aria-pressed', on?'true':'false'); }
+  const flag = document.querySelector(`[data-ti-flag="${k}"]`);
+  if(flag) flag.style.display = on ? '' : 'none';
+  tiCalc();
+}
+
+function tiWeight(k) {
+  const base = (TI_COVS.find(c => c.k === k) || {w:1}).w;
+  return base + (tiState.prio[k] ? TI_PRIO_BONUS : 0);
+}
+
+/* Weighted 0–100 match score for one policy */
+function tiScore(p) {
+  let got = 0, max = 0;
+  TI_COVS.forEach(c => { const w = tiWeight(c.k); got += TI_LVL_SCORE[tiState[p].cov[c.k].l] * w; max += 10 * w; });
+  return max > 0 ? Math.round(got / max * 100) : 0;
+}
+
+function tiCalc() {
+  // read the free-text / number fields back into state
+  tiState.a.name = document.getElementById('ti-a-name').value.trim();
+  tiState.b.name = document.getElementById('ti-b-name').value.trim();
+  tiState.a.prem = Math.max(0, parseFloat(document.getElementById('ti-a-prem').value) || 0);
+  tiState.b.prem = Math.max(0, parseFloat(document.getElementById('ti-b-prem').value) || 0);
+  // keep the per-policy column labels in step with the names
+  ['a','b'].forEach(p => {
+    const nm = tiState[p].name || ('Policy ' + p.toUpperCase());
+    document.querySelectorAll(`[data-ti-celltag="${p}"]`).forEach(el => el.textContent = nm);
+  });
+  tiSave();
+  tiRender();
+}
+
+function tiRender() {
+  const resultsEl = document.getElementById('ti-results');
+  const inner = document.getElementById('ti-results-inner');
+  inner.style.animation = 'none'; inner.offsetHeight; inner.style.animation = '';
+
+  const aNm = tiState.a.name || 'Policy A';
+  const bNm = tiState.b.name || 'Policy B';
+  const aScore = tiScore('a'), bScore = tiScore('b');
+  const aPrem = tiState.a.prem, bPrem = tiState.b.prem;
+
+  const aWins = aScore > bScore + 3, bWins = bScore > aScore + 3;
+  const close = Math.abs(aScore - bScore) <= 3;
+
+  // ── value: cost per coverage point (lower = better value); needs both premiums ──
+  const haveBothPrem = aPrem > 0 && bPrem > 0;
+  const aCPP = aScore > 0 ? aPrem / aScore : Infinity;
+  const bCPP = bScore > 0 ? bPrem / bScore : Infinity;
+  let valueWin = null;
+  if(haveBothPrem && isFinite(aCPP) && isFinite(bCPP) && Math.abs(aCPP - bCPP) > 0.04 * Math.min(aCPP, bCPP)) {
+    valueWin = aCPP < bCPP ? 'a' : 'b';
+  }
+
+  // ── verdict ──
+  let vTag, vEm, vH, vSub;
+  const covWin = aWins ? 'a' : bWins ? 'b' : null;
+  const covWinNm = covWin === 'a' ? aNm : covWin === 'b' ? bNm : null;
+  if(close) {
+    vTag = 'It’s close'; vEm = '⚖️';
+    if(valueWin) {
+      const vwNm = valueWin === 'a' ? aNm : bNm;
+      vH = `Neck and neck on coverage — ${vwNm} is the better value`;
+      vSub = `${aNm} and ${bNm} score within a few points of each other, so let price decide: ${vwNm} delivers more coverage per dollar at the premiums you entered.`;
+    } else {
+      vH = 'Too close to call — compare the fine print';
+      vSub = `${aNm} and ${bNm} land within a few points. Check exclusions, deductibles and the actual dollar limits to break the tie.`;
+    }
+  } else {
+    vTag = 'Our read'; vEm = '🛡';
+    vH = `${covWinNm} is the stronger policy`;
+    if(valueWin === covWin || !haveBothPrem) {
+      vSub = `${covWinNm} covers more of what you flagged as important${haveBothPrem ? ' — and still holds up on value at its premium' : ''}.`;
+    } else {
+      const vwNm = valueWin === 'a' ? aNm : bNm;
+      vSub = `${covWinNm} gives you the broader protection, but ${vwNm} is the cheaper coverage-per-dollar — decide whether the extra cover is worth the higher premium.`;
+    }
+  }
+
+  // ── premium / value strip (only meaningful with premiums) ──
+  let costGrid = '';
+  if(haveBothPrem) {
+    const diff = Math.abs(aPrem - bPrem);
+    const cheaper = aPrem < bPrem ? aNm : bPrem < aPrem ? bNm : 'tie';
+    costGrid = `
+      <div class="ti-section-lbl">Premium &amp; value</div>
+      <div class="ti-cost-grid">
+        <div class="ti-cost-card a">
+          <div class="ti-cost-lbl">${aNm}</div>
+          <div class="ti-cost-num">${tiMoney(aPrem)}</div>
+          <div class="ti-cost-sub">${isFinite(aCPP) ? tiMoney(aCPP) + ' per coverage point' : '—'}</div>
+        </div>
+        <div class="ti-cost-card b">
+          <div class="ti-cost-lbl">${bNm}</div>
+          <div class="ti-cost-num">${tiMoney(bPrem)}</div>
+          <div class="ti-cost-sub">${isFinite(bCPP) ? tiMoney(bCPP) + ' per coverage point' : '—'}</div>
+        </div>
+        <div class="ti-cost-card delta">
+          <div class="ti-cost-lbl">Difference</div>
+          <div class="ti-cost-num">${tiMoney(diff)}</div>
+          <div class="ti-cost-sub">${cheaper === 'tie' ? 'Same premium' : cheaper + ' is cheaper'}</div>
+        </div>
+      </div>
+      <div class="ti-cost-sub" style="margin:2px 0 4px;color:var(--muted)">“Per coverage point” = premium ÷ match score. Lower means more protection for your money.</div>`;
+  } else {
+    costGrid = `<div class="ti-section-lbl">Premium &amp; value</div>
+      <div class="ti-caveat" style="border-left-color:var(--yellow);background:rgba(214,167,30,.07)">Add the <b>premium</b> for both policies above to see a cost-per-coverage value comparison.</div>`;
+  }
+
+  // ── coverage matrix ──
+  let mxRows = `<div class="ti-mx-row head"><span>Coverage</span><span class="ti-mx-pill">${aNm.length>10?'A':aNm}</span><span class="ti-mx-pill">${bNm.length>10?'B':bNm}</span></div>`;
+  TI_COVS.forEach(c => {
+    const a = tiState.a.cov[c.k], b = tiState.b.cov[c.k];
+    const aw = a.l > b.l, bw = b.l > a.l;
+    const cell = (cov, win) => {
+      const lv = TI_LVL[cov.l], amt = tiFmtAmt(cov.amt);
+      return `<div class="ti-mx-pill"><span class="ti-pill ${lv.cls} ${win?'win':''}">${lv.ab} ${lv.nm}</span>${amt?`<div class="ti-pill-amt">${amt}</div>`:''}</div>`;
+    };
+    mxRows += `<div class="ti-mx-row">
+      <div class="ti-mx-nm">${tiState.prio[c.k]?'<span class="ti-mx-star">★</span>':''}<span class="em">${c.ico}</span>${c.nm}</div>
+      ${cell(a, aw)}${cell(b, bw)}
+    </div>`;
+  });
+  const matrix = `<div class="ti-section-lbl">Coverage matrix</div><div class="ti-matrix">${mxRows}</div>`;
+
+  // ── gap warnings: starred must-haves a policy doesn't cover, plus uncovered core medical/evac ──
+  function gaps(p, nm) {
+    const rows = [];
+    TI_COVS.forEach(c => {
+      const lvl = tiState[p].cov[c.k].l;
+      const starred = !!tiState.prio[c.k];
+      const core = (c.k === 'medical' || c.k === 'evac');
+      if(lvl === 0 && (starred || core)) {
+        rows.push(`<div class="ti-gap-row"><span class="em">⚠️</span><span><b>${c.nm}</b> isn’t covered${starred?' — and you marked it a must-have':' — a critical protection to be missing'}.</span></div>`);
+      } else if(lvl === 1 && core) {
+        rows.push(`<div class="ti-gap-row"><span class="em">❓</span><span><b>${c.nm}</b> is only limited — confirm the dollar limit is high enough (${(TI_COVS.find(x=>x.k===c.k)||{}).rec}).</span></div>`);
+      }
+    });
+    return rows.length ? `<div class="ti-section-lbl">Gaps in ${nm}</div><div class="ti-gap">${rows.join('')}</div>` : '';
+  }
+  const gapHtml = gaps('a', aNm) + gaps('b', bNm);
+
+  // ── why: top weighted coverage differences favouring the winner ──
+  let whyHtml = '';
+  if(covWin) {
+    const winP = covWin, loseP = covWin === 'a' ? 'b' : 'a';
+    const winNm = covWin === 'a' ? aNm : bNm;
+    const contribs = TI_COVS.map(c => {
+      const edge = (TI_LVL_SCORE[tiState[winP].cov[c.k].l] - TI_LVL_SCORE[tiState[loseP].cov[c.k].l]) * tiWeight(c.k);
+      return { c, edge };
+    }).filter(x => x.edge > 0).sort((x,y) => y.edge - x.edge).slice(0,3);
+    if(contribs.length) {
+      whyHtml = `<div class="ti-section-lbl">Why ${winNm} pulls ahead</div><div class="ti-why">` +
+        contribs.map(({c}) => {
+          const wl = TI_LVL[tiState[winP].cov[c.k].l].nm, ll = TI_LVL[tiState[loseP].cov[c.k].l].nm;
+          return `<div class="ti-why-row"><span class="em">${c.ico}</span><span><b>${c.nm}</b> — ${winNm} is ${wl.toLowerCase()} vs ${ll.toLowerCase()}${tiState.prio[c.k]?', a coverage you flagged as a must-have':''}.</span></div>`;
+        }).join('') + `</div>`;
+    }
+  }
+
+  inner.innerHTML = `
+    <div class="ti-verdict">
+      <div class="ti-verdict-tag">${vTag}</div>
+      <div class="ti-verdict-h"><span class="em">${vEm}</span>${vH}</div>
+      <div class="ti-verdict-sub">${vSub}</div>
+      <div class="ti-match">
+        <div class="ti-match-card a ${aWins?'win':''}">
+          ${aWins?'<span class="ti-win-flag">Stronger</span>':''}
+          <div class="ti-match-lbl">${aNm}</div>
+          <div class="ti-match-num">${aScore}</div>
+          <div class="ti-match-sub">match score${valueWin==='a'?' · best value':''}</div>
+        </div>
+        <div class="ti-match-card b ${bWins?'win':''}">
+          ${bWins?'<span class="ti-win-flag">Stronger</span>':''}
+          <div class="ti-match-lbl">${bNm}</div>
+          <div class="ti-match-num">${bScore}</div>
+          <div class="ti-match-sub">match score${valueWin==='b'?' · best value':''}</div>
+        </div>
+      </div>
+    </div>
+    ${costGrid}
+    ${matrix}
+    ${gapHtml}
+    ${whyHtml}
+    <div class="ti-caveat">
+      Scores weight each coverage by importance (your ★ must-haves count extra) — they’re a planning aid, not advice. They don’t read the policy wording, so always confirm the <b>dollar limits, deductibles and exclusions</b> (pre-existing conditions, adventure sports, “known events”) on the actual certificate before you buy.
+    </div>`;
+  resultsEl.style.display = '';
+}
+
+function tiReset() {
+  tiState = tiDefaults();
+  tiSave();
+  tiSyncInputs();
+  tiCalc();
 }
 
 /* ══════════════════════════════════════════════════════
