@@ -14013,16 +14013,199 @@ input:checked + .pb-toggle-box::after { transform:translateX(16px);background:#f
     </div>
   </div>
 </div>
-<div id="view-placeholder-review-draft" class="view">
-  <nav class="tool-topbar">
+<style>
+/* ══════════════════════════════════════════════════════
+   REVIEW DRAFTER  (id: review-draft)
+   ══════════════════════════════════════════════════════ */
+.rd-sec { font-family:var(--mono); font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin:6px 0 12px; }
+.rd-out-sec { margin-top:32px; }
+
+.rd-library { margin-bottom:26px; padding-bottom:22px; border-bottom:1px dashed var(--rule); }
+.rd-lib-hdr { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px; }
+.rd-lib-hdr .rd-sec { margin:0; }
+.rd-lib-list { display:flex; gap:10px; flex-wrap:wrap; }
+.rd-lib-empty { font-family:var(--serif); font-style:italic; color:var(--muted); font-size:14px; }
+.rd-chip { display:flex; align-items:center; gap:10px; border:1.5px solid var(--ink); border-radius:var(--r); background:var(--paper); padding:9px 11px; cursor:pointer; transition:background .12s, box-shadow .12s, transform .12s; max-width:280px; }
+.rd-chip:hover { background:var(--paper-2); }
+.rd-chip.active { box-shadow:2px 2px 0 var(--ink); transform:translate(-1px,-1px); border-color:var(--accent); }
+.rd-chip-ico { font-size:19px; line-height:1; flex-shrink:0; }
+.rd-chip-main { min-width:0; }
+.rd-chip-name { display:block; font-family:var(--serif); font-weight:600; font-size:14px; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:180px; }
+.rd-chip-meta { display:block; font-family:var(--mono); font-size:9px; letter-spacing:.05em; color:var(--muted); text-transform:uppercase; margin-top:2px; }
+.rd-chip.active .rd-chip-meta { color:var(--accent); }
+.rd-chip-del { background:none; border:1px solid var(--rule); border-radius:3px; color:var(--muted); cursor:pointer; width:24px; height:24px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:11px; transition:color .12s, border-color .12s; }
+.rd-chip-del:hover { color:var(--accent); border-color:var(--accent); }
+
+.rd-types { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:22px; }
+.rd-type { display:flex; align-items:center; gap:7px; border:1.5px solid var(--ink); border-radius:var(--r); background:var(--paper); padding:8px 13px; cursor:pointer; font-family:var(--mono); font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-2); transition:background .12s, color .12s; }
+.rd-type .ic { font-size:15px; }
+.rd-type:hover { background:var(--paper-2); }
+.rd-type.active { background:var(--ink); color:var(--paper); border-color:var(--ink); }
+
+.rd-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px; }
+@media(max-width:560px){ .rd-grid { grid-template-columns:1fr; } }
+.rd-grid .sv-fg > input, .rd-grid .sv-fg select { min-height:44px; }
+
+.rd-overall { display:flex; align-items:center; gap:16px; background:var(--paper-2); border:1.5px solid var(--ink); border-radius:var(--r); padding:14px 18px; margin-bottom:26px; flex-wrap:wrap; }
+.rd-ov-label { font-family:var(--mono); font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); }
+.rd-ov-num { font-family:var(--serif); font-weight:600; font-size:18px; color:var(--ink); margin-left:auto; }
+
+.rd-stars { display:inline-flex; gap:3px; }
+.rd-star { cursor:pointer; font-size:21px; line-height:1; color:rgba(23,21,20,.18); transition:color .1s, transform .1s; user-select:none; -webkit-user-select:none; }
+.rd-star:hover { transform:scale(1.15); }
+.rd-star.on { color:#F5B301; }
+.rd-stars-lg .rd-star { font-size:28px; }
+
+.rd-dims { display:grid; grid-template-columns:1fr 1fr; gap:4px 28px; margin-bottom:26px; }
+@media(max-width:560px){ .rd-dims { grid-template-columns:1fr; } }
+.rd-dim { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:8px 0; border-bottom:1px solid var(--rule); }
+.rd-dim-name { font-size:14px; color:var(--ink); }
+
+.rd-field { margin-bottom:18px; }
+.rd-field > label { display:block; font-family:var(--mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
+.rd-field textarea { width:100%; background:var(--paper); border:1.5px solid var(--ink); border-radius:var(--r); color:var(--ink); font-family:var(--sans); font-size:14.5px; line-height:1.5; padding:10px 12px; resize:vertical; outline:none; }
+.rd-field textarea:focus { border-color:var(--accent); }
+
+.rd-seg { display:inline-flex; border:1.5px solid var(--ink); border-radius:var(--r); overflow:hidden; }
+.rd-seg button { background:var(--paper); border:none; border-right:1.5px solid var(--ink); padding:8px 15px; cursor:pointer; font-family:var(--mono); font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-2); transition:background .12s, color .12s; }
+.rd-seg button:last-child { border-right:none; }
+.rd-seg button:hover { background:var(--paper-2); }
+.rd-seg button.active { background:var(--accent); color:#fff; }
+.rd-seg-fill { display:flex; width:100%; }
+.rd-seg-fill button { flex:1 1 0; text-align:center; }
+
+.rd-controls { display:flex; gap:26px; flex-wrap:wrap; margin:8px 0 4px; }
+.rd-ctrl { display:flex; flex-direction:column; gap:8px; }
+.rd-ctrl-lbl { font-family:var(--mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); }
+
+.rd-output { border:1.5px solid var(--ink); border-radius:var(--r); background:var(--paper); overflow:hidden; }
+.rd-output-text { width:100%; min-height:240px; border:none; background:transparent; color:var(--ink); font-family:var(--serif); font-size:15.5px; line-height:1.7; padding:18px; resize:vertical; outline:none; display:block; }
+.rd-out-foot { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 14px; border-top:1.5px solid var(--rule); background:var(--paper-2); flex-wrap:wrap; }
+.rd-count { font-family:var(--mono); font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); }
+.rd-out-actions { display:flex; align-items:center; gap:8px; }
+.rd-copy-ok { align-self:center; }
+
+.rd-print-hdr { display:none; }
+@media print {
+  #view-review-draft .tool-bar, #view-review-draft .ctx-banner, #view-review-draft .pro-tip,
+  #view-review-draft .related, #view-review-draft .rd-library, #view-review-draft .rd-editor,
+  #view-review-draft .rd-out-sec, #view-review-draft .rd-out-foot { display:none !important; }
+  #view-review-draft .rd-print-hdr { display:flex !important; justify-content:space-between; font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:#555; padding-bottom:10px; border-bottom:2px solid #000; margin-bottom:18px; }
+  #view-review-draft .rd-output { border:none; }
+  #view-review-draft .rd-output-text { font-size:13.5px; padding:0; white-space:pre-wrap; }
+  body { background:#fff !important; background-image:none !important; }
+}
+</style>
+<div id="view-review-draft" class="view">
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="rdPrint()">🖨 Print Draft</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">✍️</span>
-    <h2>Review Drafter</h2>
-    <p style="margin-bottom:24px">Guided form → structured, publish-ready hotel & airline review draft.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-review-draft"></div>
+
+  <!-- Print-only header -->
+  <div class="rd-print-hdr"><strong>TripTools — Review Draft</strong><span id="rd-print-date"></span></div>
+
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>Review Drafter</h1>
+    <p class="tool-sub">Answer a few guided questions and get a structured, publish-ready review — for hotels, airlines, cruises, restaurants and attractions. Tweak the tone, then copy it anywhere.</p>
+  </div>
+
+  <div class="tool-body">
+
+    <!-- Draft library -->
+    <div class="rd-library">
+      <div class="rd-lib-hdr">
+        <span class="rd-sec">Your Drafts</span>
+        <button class="btn btn-p btn-sm" onclick="rdNew()">+ New Review</button>
+      </div>
+      <div id="rd-lib-list" class="rd-lib-list"></div>
+    </div>
+
+    <!-- Editor -->
+    <div id="rd-editor" class="rd-editor">
+
+      <!-- Type selector -->
+      <div class="rd-types" id="rd-types"></div>
+
+      <!-- Core fields -->
+      <div class="rd-grid">
+        <div class="sv-fg"><label id="rd-lbl-subject">Hotel name</label><input type="text" id="rd-subject" oninput="rdField('subject',this.value)" autocomplete="off"></div>
+        <div class="sv-fg" id="rd-loc-wrap"><label>Location</label><input type="text" id="rd-location" oninput="rdField('location',this.value)" placeholder="e.g. Vienna, Austria" autocomplete="off"></div>
+        <div class="sv-fg"><label>When</label><input type="text" id="rd-date" oninput="rdField('date',this.value)" placeholder="e.g. May 2026" autocomplete="off"></div>
+        <div class="sv-fg"><label id="rd-lbl-extra">Room type</label><input type="text" id="rd-extra" oninput="rdField('extra',this.value)" autocomplete="off"></div>
+      </div>
+
+      <!-- Overall rating -->
+      <div class="rd-overall">
+        <span class="rd-ov-label">Overall rating</span>
+        <div class="rd-stars rd-stars-lg" id="rd-overall-stars" data-starkey="overall"></div>
+        <span class="rd-ov-num" id="rd-overall-num">—</span>
+      </div>
+
+      <!-- Dimension ratings -->
+      <div class="rd-sec">Rate the details</div>
+      <div class="rd-dims" id="rd-dims"></div>
+
+      <!-- Traveler + recommend -->
+      <div class="rd-grid">
+        <div class="sv-fg">
+          <label>Who traveled</label>
+          <select id="rd-traveler" onchange="rdField('traveler',this.value)">
+            <option value="">Not specified</option>
+            <option value="solo">Solo</option>
+            <option value="couple">Couple</option>
+            <option value="family">Family with kids</option>
+            <option value="friends">Group of friends</option>
+            <option value="business">Business trip</option>
+          </select>
+        </div>
+        <div class="rd-ctrl" style="justify-content:flex-end">
+          <span class="rd-ctrl-lbl">Would you recommend it?</span>
+          <div class="rd-seg rd-seg-fill" id="rd-recommend"></div>
+        </div>
+      </div>
+
+      <!-- Free-text -->
+      <div class="rd-field"><label>What stood out — highlights</label><textarea id="rd-high" rows="2" oninput="rdField('high',this.value)" placeholder="Spotless rooms, friendly front desk, walkable to the old town…"></textarea></div>
+      <div class="rd-field"><label>What fell short — lowlights</label><textarea id="rd-low" rows="2" oninput="rdField('low',this.value)" placeholder="Thin walls, slow check-in, pricey breakfast…"></textarea></div>
+      <div class="rd-field"><label>Anything else — a tip for the next traveler (optional)</label><textarea id="rd-notes" rows="2" oninput="rdField('notes',this.value)" placeholder="Ask for a room away from the elevator…"></textarea></div>
+
+      <!-- Tone + length -->
+      <div class="rd-controls">
+        <div class="rd-ctrl"><span class="rd-ctrl-lbl">Tone</span><div class="rd-seg" id="rd-tone"></div></div>
+        <div class="rd-ctrl"><span class="rd-ctrl-lbl">Length</span><div class="rd-seg" id="rd-length"></div></div>
+      </div>
+
+    </div><!-- /rd-editor -->
+
+    <!-- Output -->
+    <div class="rd-sec rd-out-sec">Your draft — edit freely before copying</div>
+    <div class="rd-output">
+      <textarea id="rd-output" class="rd-output-text" spellcheck="true" oninput="rdOutputEdited()" aria-label="Generated review draft"></textarea>
+      <div class="rd-out-foot">
+        <span class="rd-count" id="rd-count">0 words</span>
+        <div class="rd-out-actions">
+          <button class="btn btn-s btn-sm" onclick="rdRegenerate()">↺ Regenerate</button>
+          <button class="btn btn-p btn-sm" onclick="rdCopy()">📋 Copy</button>
+          <span class="tcr-copy-ok rd-copy-ok" id="rd-copy-ok">✓ Copied</span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /tool-body -->
+
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    Honest, specific reviews are the most useful ones. Name the concrete things — the late-night front desk, the seat pitch, the dish you'd order again — rather than vague praise. The generated draft is a starting point: edit it in your own voice before you post, and it'll read like you, not a template.
+  </div>
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('trip-journal')">📔 Trip Journal</button>
+      <button class="rel-btn" onclick="openTool('trip-recap')">📊 Trip Cost Recap</button>
+      <button class="rel-btn" onclick="openTool('ff-tracker')">🏆 Frequent Flyer Tracker</button>
     </div>
   </div>
 </div>
@@ -14169,7 +14352,7 @@ const TOOLS = [
   {id:'souvenir',      nm:'Souvenir & Gift Tracker',    ico:'🎁', ph:'home',       on:false,live:true,  ds:'Gift list with person, idea, cost & purchased checkbox.'},
   {id:'health-check',  nm:'Post-Trip Health Checklist', ico:'🏥', ph:'home',       on:false,live:true,  ds:'Symptom awareness for common post-travel illnesses.'},
   {id:'trip-journal',  nm:'Trip Journal',               ico:'📔', ph:'home',       on:false,live:true,  ds:'Day-by-day journal. Star ratings, mood emoji, highlights.'},
-  {id:'review-draft',  nm:'Review Drafter',             ico:'✍️', ph:'home',       on:false,live:false, ds:'Guided form → publish-ready hotel & airline review draft.'},
+  {id:'review-draft',  nm:'Review Drafter',             ico:'✍️', ph:'home',       on:false,live:true,  ds:'Guided form → publish-ready review draft for hotels, airlines, cruises, restaurants & attractions. Copy to clipboard.'},
 ];
 
 const PHASES = [
@@ -14838,6 +15021,7 @@ function injectTripCtx(id) {
   if(id==='cruise-day')    cdInit();
   if(id==='shore-exc')     seInit();
   if(id==='trip-journal') tjInit();
+  if(id==='review-draft') rdInit();
   if(id==='park-budget') pbInit();
   if(id==='ride-height') rhInit();
   if(id==='park-optimizer') poInit();
@@ -42954,6 +43138,373 @@ function lgPickAirport(code){
   document.getElementById('lg-picker-bd').classList.remove('open');
   lgRenderAirport();
   lgRenderLounges();
+}
+
+/* ════════════════════════════════════════════════════════════
+   REVIEW DRAFTER  (rd*)
+   Guided form → a structured, publish-ready travel review draft.
+   Five subject types (hotel / airline / cruise / restaurant /
+   attraction), per-type rating dimensions, tone & length controls,
+   and a multi-draft library persisted to localStorage (tt_reviews).
+   Fully offline — no API. The output textarea is freely editable;
+   manual edits are preserved until the user hits Regenerate.
+   ════════════════════════════════════════════════════════════ */
+const RD_TYPES = {
+  hotel:      { ico:'🏨', label:'Hotel',      noun:'stay',   prep:'at',   verb:'stayed at',  loc:true,
+                subjLbl:'Hotel name',          subjPh:'e.g. The Grand Budapest',
+                extraLbl:'Room type',          extraPh:'e.g. Deluxe King',
+                dims:['Cleanliness','Comfort','Location','Service','Value','Amenities'] },
+  airline:    { ico:'✈️', label:'Airline',    noun:'flight', prep:'with', verb:'flew',        loc:false,
+                subjLbl:'Airline',             subjPh:'e.g. Lufthansa',
+                extraLbl:'Route & cabin',      extraPh:'e.g. JFK→LHR, Economy',
+                dims:['Boarding','Seat Comfort','Crew & Service','Punctuality','Food & Drink','Value'] },
+  cruise:     { ico:'🚢', label:'Cruise',     noun:'cruise', prep:'with', verb:'sailed with', loc:false,
+                subjLbl:'Ship / cruise line',  subjPh:'e.g. Royal Caribbean — Wonder of the Seas',
+                extraLbl:'Itinerary',          extraPh:'e.g. 7-night Caribbean',
+                dims:['Cabin','Dining','Entertainment','Service','Excursions','Value'] },
+  restaurant: { ico:'🍽', label:'Restaurant', noun:'meal',   prep:'at',   verb:'dined at',    loc:true,
+                subjLbl:'Restaurant name',     subjPh:'e.g. Osteria Francescana',
+                extraLbl:'Cuisine',            extraPh:'e.g. Northern Italian',
+                dims:['Food','Service','Ambiance','Cleanliness','Value'] },
+  attraction: { ico:'🎟', label:'Attraction', noun:'visit',  prep:'to',   verb:'visited',     loc:true,
+                subjLbl:'Attraction name',     subjPh:'e.g. The Louvre',
+                extraLbl:'Type',               extraPh:'e.g. Museum, theme park, tour',
+                dims:['Experience','Value','Accessibility','Wait Times','Staff'] },
+};
+const RD_TYPE_ORDER = ['hotel','airline','cruise','restaurant','attraction'];
+const RD_TRAVELERS = {
+  '':       { we:'We', poss:'our', phrase:'most travelers' },
+  solo:     { we:'I',  poss:'my',  phrase:'solo travelers' },
+  couple:   { we:'We', poss:'our', phrase:'couples' },
+  family:   { we:'We', poss:'our', phrase:'families' },
+  friends:  { we:'We', poss:'our', phrase:'groups of friends' },
+  business: { we:'I',  poss:'my',  phrase:'business travelers' },
+};
+const RD_RECS  = [['yes','Yes'],['maybe','Maybe'],['no','No']];
+const RD_TONES = [['balanced','Balanced'],['enthusiastic','Enthusiastic'],['critical','Critical']];
+const RD_LENS  = [['concise','Concise'],['detailed','Detailed']];
+const RD_SCORE_WORDS = {
+  enthusiastic:{5:'absolutely outstanding',4:'really great',3:'pretty decent',2:'underwhelming',1:'a real letdown'},
+  balanced:    {5:'excellent',4:'very good',3:'decent',2:'disappointing',1:'poor'},
+  critical:    {5:'surprisingly strong',4:'good, with caveats',3:'middling',2:'disappointing',1:'genuinely bad'},
+};
+
+let rdDrafts = [];
+let rdActiveId = null;
+
+function rdEsc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function rdCap(s){ s=(s||'').trim(); return s ? s.charAt(0).toUpperCase()+s.slice(1) : s; }
+function rdPeriod(s){ s=(s||'').trim(); if(!s) return s; return /[.!?]$/.test(s) ? s : s+'.'; }
+function rdStarStr(n){ n=Math.max(0,Math.min(5,n|0)); return '★'.repeat(n)+'☆'.repeat(5-n); }
+/* Join a lead phrase to user text. Capitalize the text only when the lead
+   ends a sentence (?, !, .) — after a comma/colon lowercase reads naturally. */
+function rdLeadJoin(lead, text){
+  text=rdPeriod((text||'').trim());
+  if(/[.!?]$/.test(lead)) text=rdCap(text);
+  return lead+' '+text;
+}
+
+function rdNewDraft(type){
+  return {
+    id:'rd_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
+    type: type || 'hotel',
+    subject:'', location:'', date:'', extra:'',
+    overall:0, ratings:{}, traveler:'', recommend:'',
+    high:'', low:'', notes:'',
+    tone:'balanced', length:'detailed',
+    customOutput:null,
+    createdAt:new Date().toISOString(), updatedAt:new Date().toISOString()
+  };
+}
+function rdLoad(){
+  let s=null;
+  try { const raw=localStorage.getItem('tt_reviews'); if(raw) s=JSON.parse(raw); } catch(_){}
+  let drafts = (s && Array.isArray(s.drafts)) ? s.drafts : [];
+  rdDrafts = drafts.filter(d=>d && typeof d==='object').map(d=>{
+    const base=rdNewDraft(RD_TYPES[d.type]?d.type:'hotel');
+    const merged=Object.assign(base, d);
+    merged.ratings = (d.ratings && typeof d.ratings==='object') ? d.ratings : {};
+    if(typeof merged.customOutput==='undefined') merged.customOutput=null;
+    return merged;
+  });
+  rdActiveId = (s && s.activeId) || null;
+}
+function rdSave(){
+  try { localStorage.setItem('tt_reviews', JSON.stringify({ drafts:rdDrafts, activeId:rdActiveId })); } catch(_){}
+}
+function rdActive(){ return rdDrafts.find(d=>d.id===rdActiveId) || null; }
+function rdIsEmpty(d){
+  if(!d) return true;
+  return !d.subject && !d.location && !d.date && !d.extra && !d.high && !d.low && !d.notes
+    && !d.overall && Object.keys(d.ratings||{}).length===0;
+}
+
+function rdInit(){
+  rdLoad();
+  if(!rdDrafts.length){ const d=rdNewDraft('hotel'); rdDrafts.push(d); rdActiveId=d.id; }
+  if(!rdActive()) rdActiveId = rdDrafts[0].id;
+  // Pre-fill an empty draft from the active MyTrip (location only — everything else is review-specific)
+  const d=rdActive(), trip=getActiveTrip();
+  if(trip && rdIsEmpty(d) && RD_TYPES[d.type].loc && trip.destination){ d.location=trip.destination; }
+  rdSave();
+  rdRenderEditor();
+  rdRenderLibrary();
+  rdUpdateOutput();
+}
+
+function rdStarsHtml(key, val){
+  let h='';
+  for(let i=1;i<=5;i++){
+    h += `<span class="rd-star${i<=val?' on':''}" onclick="rdSetRating('${key}',${i})" role="button" aria-label="${i} star${i>1?'s':''}">★</span>`;
+  }
+  return h;
+}
+
+function rdRenderEditor(){
+  const d=rdActive(); if(!d) return;
+  const t=RD_TYPES[d.type];
+  // Type pills
+  document.getElementById('rd-types').innerHTML = RD_TYPE_ORDER.map(k=>{
+    const tt=RD_TYPES[k];
+    return `<button class="rd-type${k===d.type?' active':''}" onclick="rdSetType('${k}')"><span class="ic">${tt.ico}</span>${tt.label}</button>`;
+  }).join('');
+  // Labels, placeholders, values
+  document.getElementById('rd-lbl-subject').textContent=t.subjLbl;
+  const subj=document.getElementById('rd-subject'); subj.value=d.subject||''; subj.placeholder=t.subjPh;
+  const locWrap=document.getElementById('rd-loc-wrap'); locWrap.style.display = t.loc ? '' : 'none';
+  document.getElementById('rd-location').value=d.location||'';
+  document.getElementById('rd-date').value=d.date||'';
+  document.getElementById('rd-lbl-extra').textContent=t.extraLbl;
+  const ex=document.getElementById('rd-extra'); ex.value=d.extra||''; ex.placeholder=t.extraPh;
+  // Overall stars
+  document.getElementById('rd-overall-stars').innerHTML=rdStarsHtml('overall', d.overall||0);
+  document.getElementById('rd-overall-num').textContent = d.overall ? d.overall+'/5' : '—';
+  // Dimension ratings (keyed by index to keep onclick payloads simple)
+  document.getElementById('rd-dims').innerHTML = t.dims.map((dim,i)=>{
+    const key='d'+i;
+    return `<div class="rd-dim"><span class="rd-dim-name">${rdEsc(dim)}</span><div class="rd-stars" data-starkey="${key}">${rdStarsHtml(key, d.ratings[dim]||0)}</div></div>`;
+  }).join('');
+  // Traveler + free-text
+  document.getElementById('rd-traveler').value=d.traveler||'';
+  document.getElementById('rd-high').value=d.high||'';
+  document.getElementById('rd-low').value=d.low||'';
+  document.getElementById('rd-notes').value=d.notes||'';
+  rdRenderSegments();
+}
+
+function rdRenderSegments(){
+  const d=rdActive(); if(!d) return;
+  const seg=(elId,opts,field)=>{
+    document.getElementById(elId).innerHTML = opts.map(([v,l])=>
+      `<button class="${d[field]===v?'active':''}" onclick="rdSetSeg('${field}','${v}')">${l}</button>`).join('');
+  };
+  seg('rd-recommend',RD_RECS,'recommend');
+  seg('rd-tone',RD_TONES,'tone');
+  seg('rd-length',RD_LENS,'length');
+}
+
+function rdRenderLibrary(){
+  const list=document.getElementById('rd-lib-list');
+  if(!rdDrafts.length){ list.innerHTML='<span class="rd-lib-empty">No drafts yet — start one above.</span>'; return; }
+  list.innerHTML = rdDrafts.map(d=>{
+    const t=RD_TYPES[d.type]||RD_TYPES.hotel;
+    const nm=(d.subject||'').trim() || ('Untitled '+t.label.toLowerCase()+' review');
+    const stars=d.overall ? '★'.repeat(d.overall) : '—';
+    return `<div class="rd-chip${d.id===rdActiveId?' active':''}" onclick="rdSelect('${d.id}')">
+      <span class="rd-chip-ico">${t.ico}</span>
+      <span class="rd-chip-main"><span class="rd-chip-name">${rdEsc(nm)}</span><span class="rd-chip-meta">${t.label} · ${stars}</span></span>
+      <button class="rd-chip-del" onclick="rdDelete('${d.id}',event)" title="Delete draft" aria-label="Delete draft">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function rdSelect(id){
+  if(!rdDrafts.find(d=>d.id===id)) return;
+  rdActiveId=id; rdSave();
+  rdRenderEditor(); rdRenderLibrary(); rdUpdateOutput();
+  const ed=document.getElementById('rd-editor'); if(ed) ed.scrollIntoView({behavior:'smooth',block:'start'});
+}
+function rdNew(){
+  const a=rdActive();
+  if(a && rdIsEmpty(a)){ document.getElementById('rd-subject').focus(); return; }
+  const d=rdNewDraft(a?a.type:'hotel');
+  rdDrafts.unshift(d); rdActiveId=d.id; rdSave();
+  rdRenderEditor(); rdRenderLibrary(); rdUpdateOutput();
+  document.getElementById('rd-subject').focus();
+}
+function rdDelete(id, ev){
+  if(ev) ev.stopPropagation();
+  const d=rdDrafts.find(x=>x.id===id); if(!d) return;
+  if(!rdIsEmpty(d) && !confirm('Delete this review draft? This cannot be undone.')) return;
+  rdDrafts = rdDrafts.filter(x=>x.id!==id);
+  if(!rdDrafts.length){ const nd=rdNewDraft('hotel'); rdDrafts.push(nd); rdActiveId=nd.id; }
+  else if(rdActiveId===id){ rdActiveId=rdDrafts[0].id; }
+  rdSave();
+  rdRenderEditor(); rdRenderLibrary(); rdUpdateOutput();
+}
+
+function rdField(field, val){
+  const d=rdActive(); if(!d) return;
+  d[field]=val; d.updatedAt=new Date().toISOString();
+  rdSave(); rdUpdateOutput(); rdRenderLibrary();
+}
+function rdSetSeg(field, val){
+  const d=rdActive(); if(!d) return;
+  d[field]=val; d.updatedAt=new Date().toISOString();
+  rdSave(); rdRenderSegments(); rdUpdateOutput(); rdRenderLibrary();
+}
+function rdSetType(type){
+  const d=rdActive(); if(!d || d.type===type || !RD_TYPES[type]) return;
+  d.type=type;
+  // Keep only ratings whose dimension exists in the new type
+  const valid=RD_TYPES[type].dims, kept={};
+  valid.forEach(dim=>{ if(d.ratings[dim]!=null) kept[dim]=d.ratings[dim]; });
+  d.ratings=kept;
+  d.updatedAt=new Date().toISOString();
+  rdSave(); rdRenderEditor(); rdRenderLibrary(); rdUpdateOutput();
+}
+function rdSetRating(key, val){
+  const d=rdActive(); if(!d) return;
+  if(key==='overall'){
+    d.overall = (d.overall===val ? 0 : val);
+    document.getElementById('rd-overall-stars').innerHTML=rdStarsHtml('overall', d.overall);
+    document.getElementById('rd-overall-num').textContent = d.overall ? d.overall+'/5' : '—';
+  } else {
+    const idx=parseInt(key.slice(1),10);
+    const dim=RD_TYPES[d.type].dims[idx];
+    if(!dim) return;
+    if(d.ratings[dim]===val) delete d.ratings[dim]; else d.ratings[dim]=val;
+    const el=document.querySelector('#rd-dims [data-starkey="'+key+'"]');
+    if(el) el.innerHTML=rdStarsHtml(key, d.ratings[dim]||0);
+  }
+  d.updatedAt=new Date().toISOString();
+  rdSave(); rdUpdateOutput(); rdRenderLibrary();
+}
+
+function rdUpdateOutput(){
+  const d=rdActive(), ta=document.getElementById('rd-output');
+  ta.value = !d ? '' : (d.customOutput!=null ? d.customOutput : rdGenerate(d));
+  rdUpdateCount();
+}
+function rdUpdateCount(){
+  const txt=(document.getElementById('rd-output').value||'').trim();
+  const words=txt ? txt.split(/\s+/).length : 0;
+  document.getElementById('rd-count').textContent = words+' word'+(words===1?'':'s');
+}
+function rdOutputEdited(){
+  const d=rdActive(); if(!d) return;
+  d.customOutput=document.getElementById('rd-output').value;
+  d.updatedAt=new Date().toISOString();
+  rdSave(); rdUpdateCount();
+}
+function rdRegenerate(){
+  const d=rdActive(); if(!d) return;
+  if(d.customOutput!=null && !confirm('Regenerate will replace your manual edits to the draft text. Continue?')) return;
+  d.customOutput=null; rdSave(); rdUpdateOutput();
+}
+
+function rdGenerate(d){
+  if(rdIsEmpty(d)) return 'Fill in the form above and your review draft will appear here — ready to copy, edit, and post.';
+  const t=RD_TYPES[d.type]||RD_TYPES.hotel;
+  const tone=d.tone||'balanced';
+  const detailed=(d.length||'detailed')==='detailed';
+  const trav=RD_TRAVELERS[d.traveler]||RD_TRAVELERS[''];
+  const we=trav.we, weWould=(we==='I'?"I'd":"We'd"), weWont=(we==='I'?"I wouldn't":"We wouldn't");
+  const subj=(d.subject||'').trim();
+  const subjOr=subj || ('the '+t.label.toLowerCase());
+  const loc=(d.location||'').trim();
+  const date=(d.date||'').trim();
+  const extra=(d.extra||'').trim();
+  const overall=d.overall||0;
+  const headWord=overall ? RD_SCORE_WORDS[tone][overall] : '';
+
+  // Headline
+  const headline = overall
+    ? `${rdStarStr(overall)}  ${rdCap(headWord)} ${t.noun}${subj?` ${t.prep} ${subj}`:''}`
+    : `${t.ico} ${rdCap(subjOr)} — a quick review`;
+
+  // Opening
+  const opening = t.loc
+    ? `${we} ${t.verb} ${subjOr}${extra?` — ${extra}`:''}${loc?` in ${loc}`:''}${date?` (${date})`:''}.`
+    : `${we} ${t.verb} ${subjOr}${extra?` (${extra})`:''}${date?` in ${date}`:''}.`;
+  const verdict = overall ? `Overall, it was ${headWord} (${overall}/5).` : '';
+
+  // Highlights
+  const hiLead={balanced:'On the plus side,',enthusiastic:'The best part?',critical:'To its credit,'}[tone];
+  let hi='';
+  if((d.high||'').trim()) hi=rdLeadJoin(hiLead, d.high);
+  else { const top=t.dims.filter(dim=>(d.ratings[dim]||0)>=4);
+    if(top.length) hi = top.length>=2 ? `The ${top[0].toLowerCase()} and ${top[1].toLowerCase()} stood out.` : `The ${top[0].toLowerCase()} stood out.`; }
+
+  // Lowlights
+  const loLead={balanced:'That said,',enthusiastic:'A couple of minor gripes:',critical:'On the downside,'}[tone];
+  let lo='';
+  if((d.low||'').trim()) lo=rdLeadJoin(loLead, d.low);
+  else { const bot=t.dims.filter(dim=>{const r=d.ratings[dim]||0; return r>0 && r<=2;});
+    if(bot.length) lo = bot.length>=2 ? `The ${bot[0].toLowerCase()} and ${bot[1].toLowerCase()} could be better.` : `The ${bot[0].toLowerCase()} could be better.`; }
+
+  const hiLo = tone==='critical' ? [lo,hi] : [hi,lo];
+
+  // Per-dimension breakdown (detailed only)
+  let breakdown='';
+  if(detailed){
+    const rated=t.dims.filter(dim=>(d.ratings[dim]||0)>0);
+    if(rated.length) breakdown = 'Ratings:\n'+rated.map(dim=>`• ${dim}: ${rdStarStr(d.ratings[dim])} (${d.ratings[dim]}/5)`).join('\n');
+  }
+
+  // Tip
+  const notes=(d.notes||'').trim() ? `One tip: ${rdPeriod((d.notes||'').trim())}` : '';
+
+  // Recommendation
+  let rec='';
+  if(d.recommend==='yes'){
+    rec = tone==='enthusiastic'
+      ? `${weWould} book it again in a heartbeat${d.traveler?` and recommend it to other ${trav.phrase}`:' and happily recommend it'}.`
+      : tone==='critical'
+        ? `Despite the gripes, it earns a recommendation${d.traveler?` for ${trav.phrase}`:''}.`
+        : `${weWould} recommend ${subjOr}${d.traveler?` for ${trav.phrase}`:''}.`;
+  } else if(d.recommend==='maybe'){
+    rec = `Worth considering${d.traveler?` for ${trav.phrase}`:''} — just go in knowing the trade-offs.`;
+  } else if(d.recommend==='no'){
+    rec = `${weWont} choose ${subjOr} again${d.traveler?`, at least not for ${trav.phrase}`:''}.`;
+  }
+
+  // Assemble
+  let body;
+  if(detailed){
+    const paras=[];
+    const lead=[opening,verdict].filter(Boolean).join(' ');
+    if(lead) paras.push(lead);
+    const pl=hiLo.filter(Boolean).join(' '); if(pl) paras.push(pl);
+    if(breakdown) paras.push(breakdown);
+    if(notes) paras.push(notes);
+    if(rec) paras.push(rec);
+    body=paras.join('\n\n');
+  } else {
+    const sentences=[opening,verdict,...hiLo,rec].filter(Boolean).join(' ');
+    body = notes ? sentences+'\n\n'+notes : sentences;
+  }
+  return headline+'\n\n'+body;
+}
+
+function rdCopy(){
+  const text=document.getElementById('rd-output').value;
+  const ok=document.getElementById('rd-copy-ok');
+  const show=()=>{ ok.classList.add('show'); setTimeout(()=>ok.classList.remove('show'),1800); };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(show).catch(()=>{ rdCopyFallback(text); show(); });
+  } else { rdCopyFallback(text); show(); }
+}
+function rdCopyFallback(text){
+  const ta=document.createElement('textarea');
+  ta.value=text; ta.style.position='fixed'; ta.style.top='-1000px';
+  document.body.appendChild(ta); ta.select();
+  try{ document.execCommand('copy'); }catch(_){}
+  document.body.removeChild(ta);
+}
+function rdPrint(){
+  const el=document.getElementById('rd-print-date'); if(el) el.textContent=new Date().toLocaleDateString();
+  window.print();
 }
 
 </script>
