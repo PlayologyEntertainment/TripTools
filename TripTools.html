@@ -157,6 +157,8 @@ body {
 .conn-tag { font-family: var(--mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; padding: 2px 5px; border-radius: 2px; flex-shrink: 0; margin-top: 2px; }
 .cn-on  { background: var(--blue); color: #fff; }
 .cn-off { background: var(--paper-2); color: var(--muted); border: 1px solid var(--rule); }
+.card-tags { display: flex; gap: 4px; flex-shrink: 0; }
+.cn-aware { background: var(--paper-2); color: #6E5200; border: 1px solid var(--rule); }
 .card-name { font-family: var(--serif); font-weight: 500; font-size: 15px; letter-spacing: -.005em; line-height: 1.25; margin-bottom: 5px; }
 .card-desc { font-size: 12px; color: var(--muted); line-height: 1.4; flex: 1; }
 .card-cta { margin-top: 10px; font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
@@ -1855,12 +1857,12 @@ body.no-scroll { overflow: hidden; }
 <div id="view-hub" class="view active">
   <div class="hub-hero">
     <h1>Trip<em>Tools</em></h1>
-    <p class="hub-tagline">Every trip. Every tool. One place. Free, private, and works at 30,000 feet.</p>
+    <p class="hub-tagline">Every trip. Every tool. One place.</p>
     <div class="hub-stats">
-      <div class="hub-stat"><b>75</b>Tools</div>
-      <div class="hub-stat"><b>10</b>Travel Phases</div>
-      <div class="hub-stat"><b>57</b>Work Offline</div>
-      <div class="hub-stat"><b>0</b>Accounts Needed</div>
+      <div class="hub-stat"><b id="stat-tools">0</b>Tools</div>
+      <div class="hub-stat"><b id="stat-phases">0</b>Travel Phases</div>
+      <div class="hub-stat"><b id="stat-trip">0</b>Trip Aware</div>
+      <div class="hub-stat"><b>✓</b>Private &amp; Free</div>
     </div>
   </div>
   <div class="search-area">
@@ -14285,8 +14287,8 @@ const TOOLS = [
   {id:'best-time',     nm:'Best Time to Visit',         ico:'📅', ph:'discovery', on:false, live:true,  ds:'Month-by-month weather, crowd & cost heat map for 100+ destinations.'},
   {id:'travel-quiz',   nm:'Travel Style Quiz',          ico:'🧠', ph:'discovery', on:false, live:true,  ds:'10-question quiz to discover your travel personality.'},
   {id:'bucket-list',   nm:'Bucket List Builder',        ico:'⭐', ph:'discovery', on:false, live:true,  ds:'Create, organize & check off dream destinations. Printable.'},
-  {id:'trip-duration', nm:'Trip Duration Calculator',   ico:'🗓', ph:'discovery', on:false, live:true,  ds:'How many days do you really need? Accounts for jet lag & transit.'},
-  {id:'budget-plan',   nm:'Travel Budget Planner',      ico:'💰', ph:'discovery', on:false, live:true,  ds:'Full trip budget builder: flights, hotels, food & activities. Pie chart.'},
+  {id:'trip-duration', nm:'Trip Duration Calculator',   ico:'🗓', ph:'discovery', on:false, live:true, trip:true,  ds:'How many days do you really need? Accounts for jet lag & transit.'},
+  {id:'budget-plan',   nm:'Travel Budget Planner',      ico:'💰', ph:'discovery', on:false, live:true, trip:true,  ds:'Full trip budget builder: flights, hotels, food & activities. Pie chart.'},
   {id:'group-trip',    nm:'Group Trip Organizer',       ico:'👥', ph:'discovery', on:false, live:true,  ds:'Headcounts, preferences & destination voting for groups.'},
   {id:'flight-est',    nm:'Flight Cost Estimator',      ico:'✈️', ph:'discovery', on:false, live:true,  ds:'Budget calculator estimating round-trip airfare (low/avg/high).'},
   {id:'hotel-rental',  nm:'Hotel vs. Vacation Rental',  ico:'🏨', ph:'discovery', on:false, live:true,  ds:'Compare hotel vs. Airbnb/VRBO across 8 factors with a personalized, cost-aware recommendation.'},
@@ -14294,24 +14296,24 @@ const TOOLS = [
   {id:'itinerary',     nm:'Itinerary Builder',          ico:'📋', ph:'discovery', on:false, live:true,  ds:'Day-by-day planner with drag-and-drop scheduling. Printable.'},
   {id:'travel-ins',    nm:'Travel Insurance Worksheet', ico:'🛡', ph:'discovery', on:false, live:true,  ds:'Side-by-side framework for comparing insurance policies.'},
   {id:'passport',      nm:'Passport Expiry Checker',    ico:'📕', ph:'docs',      on:false, live:true,  ds:'Enter expiry + destination. Returns days left & 6-month rule check.'},
-  {id:'visa-guide',    nm:'Visa Requirement Guide',     ico:'🌍', ph:'docs',      on:false, live:true,  ds:'Nationality + destination = visa type, cost & processing time.'},
+  {id:'visa-guide',    nm:'Visa Requirement Guide',     ico:'🌍', ph:'docs',      on:false, live:true, trip:true,  ds:'Nationality + destination = visa type, cost & processing time.'},
   {id:'doc-checklist', nm:'Travel Document Checklist',  ico:'✅', ph:'docs',      on:false, live:true,  ds:'Customizable pre-trip checklist adapting to trip type.'},
   {id:'intl-driving',  nm:'International Driving Guide',ico:'🚗', ph:'docs',      on:false, live:true,  ds:'Do you need an International Driving Permit? Licence-aware IDP, driving side & sign guide for 90+ countries.'},
-  {id:'flight-delay',  nm:'Flight Delay Compensation',  ico:'⚖️', ph:'docs',      on:false, live:true,  ds:'Your rights for delays, cancellations & bumping — EU261, UK261, US DOT, Canada APPR. With complaint-letter generator.'},
-  {id:'customs-decl',  nm:'Customs Declaration Helper', ico:'📦', ph:'docs',      on:false, live:true,  ds:"What you can & can't bring in. Duty-free allowances, prohibited items & a declare-or-not self-check."},
+  {id:'flight-delay',  nm:'Flight Delay Compensation',  ico:'⚖️', ph:'docs',      on:false, live:true, trip:true,  ds:'Your rights for delays, cancellations & bumping — EU261, UK261, US DOT, Canada APPR. With complaint-letter generator.'},
+  {id:'customs-decl',  nm:'Customs Declaration Helper', ico:'📦', ph:'docs',      on:false, live:true, trip:true,  ds:"What you can & can't bring in. Duty-free allowances, prohibited items & a declare-or-not self-check."},
   {id:'ff-tracker',    nm:'Frequent Flyer Tracker',     ico:'🏆', ph:'docs',      on:false, live:true,  ds:'Log miles/points across programs. Track expiry & redemption value.'},
-  {id:'vaccination',   nm:'Vaccination Requirements',   ico:'💉', ph:'docs',      on:false, live:true,  ds:'Required & recommended vaccines for 120+ destinations. Malaria risk zones, Yellow Fever certificate guide & personal record.'},
-  {id:'tsa-guide',     nm:'TSA & Security Guide',       ico:'🔒', ph:'docs',      on:false, live:true,  ds:'Search any item for carry-on / checked / prohibited status.'},
-  {id:'packing',       nm:'Smart Packing List',         ico:'📝', ph:'packing',   on:false, live:true,  ds:'Generate a list by trip type, duration & climate. Check off as you go.'},
+  {id:'vaccination',   nm:'Vaccination Requirements',   ico:'💉', ph:'docs',      on:false, live:true, trip:true,  ds:'Required & recommended vaccines for 120+ destinations. Malaria risk zones, Yellow Fever certificate guide & personal record.'},
+  {id:'tsa-guide',     nm:'TSA & Security Guide',       ico:'🔒', ph:'docs',      on:false, live:true, trip:true,  ds:'Search any item for carry-on / checked / prohibited status.'},
+  {id:'packing',       nm:'Smart Packing List',         ico:'📝', ph:'packing',   on:false, live:true, trip:true,  ds:'Generate a list by trip type, duration & climate. Check off as you go.'},
   {id:'baggage',       nm:'Baggage Fee Calculator',     ico:'💸', ph:'packing',   on:false, live:true,  ds:'Carry-on & checked bag fees for 35 major airlines.'},
   {id:'carry-on',      nm:'Carry-On Size Checker',      ico:'📐', ph:'packing',   on:false, live:true,  ds:'Enter dimensions + airline → fits / borderline / too large.'},
-  {id:'luggage-wt',    nm:'Luggage Weight Calculator',  ico:'⚖️', ph:'packing',   on:false, live:true,  ds:'Virtual baggage scale. Add items & see remaining allowance.'},
-  {id:'wardrobe',      nm:'Weather-Based Wardrobe',     ico:'🌤', ph:'packing',   on:true,  live:true,  ds:'14-day forecast → packing suggestions per condition.'},
-  {id:'power-plug',    nm:'Power Plug & Adapter Guide', ico:'🔌', ph:'packing',   on:false, live:true,  ds:'Home + destination = plug types needed, voltage & converter advice.'},
-  {id:'no-pack',       nm:'What NOT to Pack',           ico:'🚫', ph:'packing',   on:false, live:true,  ds:'TSA, customs & cruise prohibited items. Searchable guide.'},
+  {id:'luggage-wt',    nm:'Luggage Weight Calculator',  ico:'⚖️', ph:'packing',   on:false, live:true, trip:true,  ds:'Virtual baggage scale. Add items & see remaining allowance.'},
+  {id:'wardrobe',      nm:'Weather-Based Wardrobe',     ico:'🌤', ph:'packing',   on:true,  live:true, trip:true,  ds:'14-day forecast → packing suggestions per condition.'},
+  {id:'power-plug',    nm:'Power Plug & Adapter Guide', ico:'🔌', ph:'packing',   on:false, live:true, trip:true,  ds:'Home + destination = plug types needed, voltage & converter advice.'},
+  {id:'no-pack',       nm:'What NOT to Pack',           ico:'🚫', ph:'packing',   on:false, live:true, trip:true,  ds:'TSA, customs & cruise prohibited items. Searchable guide.'},
   {id:'currency',      nm:'Currency Converter',         ico:'💱', ph:'money',     on:true,  live:true,  ds:'Live rates for 150+ currencies. Cached for offline use.'},
   {id:'tip-calc',      nm:'Tip Calculator by Country',  ico:'🤝', ph:'money',     on:false, live:true,  ds:'Local tipping culture + standard % by venue. Exact tip calculator.'},
-  {id:'expense-track', nm:'Daily Expense Tracker',      ico:'📊', ph:'money',     on:false, live:true,  ds:'Log expenses by category. Auto-converts to home currency. Running total vs. daily budget.'},
+  {id:'expense-track', nm:'Daily Expense Tracker',      ico:'📊', ph:'money',     on:false, live:true, trip:true,  ds:'Log expenses by category. Auto-converts to home currency. Running total vs. daily budget.'},
   {id:'bill-split',    nm:'Bill Splitter',              ico:'➗', ph:'money',     on:false, live:true,  ds:'Split any bill evenly or item-by-item. Names, per-person extras, tip & tax shared fairly.'},
   {id:'atm-fee',       nm:'ATM Fee Estimator',          ico:'🏧', ph:'money',     on:false, live:true,  ds:'True cost of foreign ATM withdrawals including DCC.'},
   {id:'cost-living',   nm:'Cost of Living Comparison',  ico:'🌐', ph:'money',     on:false, live:true,  ds:'How far will $100/day go in Bangkok vs. Paris vs. Tokyo? Budget, mid-range & comfortable tiers.'},
@@ -14321,7 +14323,7 @@ const TOOLS = [
   {id:'jet-lag',       nm:'Jet Lag Calculator',         ico:'😴', ph:'destination',on:false,live:true,  ds:'Pre-travel adjustment schedule + post-arrival recovery plan.'},
   {id:'unit-conv',     nm:'Universal Unit Converter',   ico:'📏', ph:'destination',on:false,live:true,  ds:'Temp, distance, weight, volume, speed — all traveler conversions.'},
   {id:'phrasebook',    nm:'Language Phrasebook',        ico:'💬', ph:'destination',on:false,live:true,  ds:'Essential travel phrases in 25 languages with pronunciation. Dietary & allergy phrases, tap-to-hear, point-to-show.'},
-  {id:'emergency',     nm:'Emergency Numbers',          ico:'🚨', ph:'destination',on:false,live:true,  ds:'Police, fire & ambulance for 150+ countries. Embassy finder & your insurance card, always offline.'},
+  {id:'emergency',     nm:'Emergency Numbers',          ico:'🚨', ph:'destination',on:false,live:true, trip:true,  ds:'Police, fire & ambulance for 150+ countries. Embassy finder & your insurance card, always offline.'},
   {id:'uv-index',      nm:'UV Index & Sun Safety',      ico:'☀️', ph:'destination',on:true, live:true,  ds:'Live UV index, SPF recommendations by skin type.'},
   {id:'altitude',      nm:'Altitude Sickness Guide',    ico:'⛰', ph:'destination',on:false,live:true,  ds:'Enter elevation → risk level + acclimatization timeline.'},
   {id:'weather',       nm:'Weather Forecast',           ico:'🌦', ph:'destination',on:true, live:true,  ds:'5-day forecast via Open-Meteo. Free, no API key.'},
@@ -14334,24 +14336,24 @@ const TOOLS = [
   {id:'border-cross',  nm:'Border Crossing Guide',      ico:'🛂', ph:'road',       on:true, live:true,  ds:'US/Canada, US/Mexico & major land borders. Documents, duty-free & wait times.'},
   {id:'car-kit',       nm:'Car Emergency Kit Checklist',ico:'🚨', ph:'road',       on:false,live:true,  ds:'What to carry for road trip safety. Customizable by season & route.'},
   {id:'toll-est',      nm:'Toll Cost Estimator',        ico:'💲', ph:'road',       on:false,live:true,  ds:'Major US toll roads. Estimated total cost city-to-city.'},
-  {id:'shore-exc',     nm:'Shore Excursion Planner',    ico:'⚓', ph:'cruise',     on:false,live:true,  ds:'Per-port budget & time planner. Never miss ship departure.'},
+  {id:'shore-exc',     nm:'Shore Excursion Planner',    ico:'⚓', ph:'cruise',     on:false,live:true, trip:true,  ds:'Per-port budget & time planner. Never miss ship departure.'},
   {id:'cruise-compare',nm:'Cruise Line Comparison',     ico:'🔍', ph:'cruise',     on:false,live:true,  ds:'Side-by-side of 12 major cruise lines across 10 attributes.'},
   {id:'sea-sick',      nm:'Sea Sickness Guide',         ico:'🌊', ph:'cruise',     on:false,live:true,  ds:'Prevention, treatment & best cabin locations for motion sickness.'},
-  {id:'cruise-day',    nm:'Cruise Day Planner',         ico:'📆', ph:'cruise',     on:false,live:true,  ds:'Visual calendar: sea day vs. port day modes.'},
+  {id:'cruise-day',    nm:'Cruise Day Planner',         ico:'📆', ph:'cruise',     on:false,live:true, trip:true,  ds:'Visual calendar: sea day vs. port day modes.'},
   {id:'park-budget',   nm:'Theme Park Budget',          ico:'🎟', ph:'theme',      on:false,live:true,  ds:'Tickets, food, merch & parking — total cost for any party size.'},
   {id:'park-optimizer',nm:'Park Day Optimizer',         ico:'🗺', ph:'theme',      on:false,live:true,  ds:'Builds an hour-by-hour park day plan: arrival time, rope-drop order, skip-the-line strategy & crowd timing for Disney, Universal, SeaWorld & more.'},
   {id:'ride-height',   nm:'Ride Height Checker',        ico:'📏', ph:'theme',      on:false,live:true,  ds:'Height requirements across Disney, Universal, SeaWorld & more. Check who can ride what.'},
   {id:'park-dining',   nm:'Park Dining Strategy',       ico:'🍴', ph:'theme',      on:false,live:true,  ds:'When reservations open, which tables to book, the best value picks & dietary guidance across Disney, Universal & more.'},
   {id:'per-diem',      nm:'Per Diem Calculator',        ico:'📋', ph:'business',   on:false,live:true,  ds:'US GSA per diem rates by city. International via State Dept.'},
-  {id:'expense-report',nm:'Expense Report Builder',     ico:'🧾', ph:'business',   on:false,live:true,  ds:'Log business expenses. Per diem vs. actual. Mileage, billable, receipts. Export CSV.'},
+  {id:'expense-report',nm:'Expense Report Builder',     ico:'🧾', ph:'business',   on:false,live:true, trip:true,  ds:'Log business expenses. Per diem vs. actual. Mileage, billable, receipts. Export CSV.'},
   {id:'meeting-tz',    nm:'Meeting Time Zone Planner',  ico:'🗓', ph:'business',   on:false,live:true,  ds:'Participants + cities + work hours → color-coded overlap grid and copy-paste invite text.'},
   {id:'lounge-guide',  nm:'Airport Lounge Guide',       ico:'🛋', ph:'business',   on:false,live:true,  ds:'Lounge access by credit card, status or paid entry at 50+ airports.'},
-  {id:'biz-packing',   nm:'Business Trip Packing',      ico:'👔', ph:'business',   on:false,live:true,  ds:'Professional carry-on-only checklist. Tech, attire, docs & wrinkle tips.'},
-  {id:'customs-duty',  nm:'Customs Duty Calculator',    ico:'🛃', ph:'home',       on:false,live:true,  ds:'Estimate US customs duties on goods purchased abroad.'},
-  {id:'trip-recap',    nm:'Trip Cost Recap',            ico:'📊', ph:'home',       on:false,live:true,  ds:'Actual vs. budgeted expenses. Visual summary by category.'},
-  {id:'souvenir',      nm:'Souvenir & Gift Tracker',    ico:'🎁', ph:'home',       on:false,live:true,  ds:'Gift list with person, idea, cost & purchased checkbox.'},
+  {id:'biz-packing',   nm:'Business Trip Packing',      ico:'👔', ph:'business',   on:false,live:true, trip:true,  ds:'Professional carry-on-only checklist. Tech, attire, docs & wrinkle tips.'},
+  {id:'customs-duty',  nm:'Customs Duty Calculator',    ico:'🛃', ph:'home',       on:false,live:true, trip:true,  ds:'Estimate US customs duties on goods purchased abroad.'},
+  {id:'trip-recap',    nm:'Trip Cost Recap',            ico:'📊', ph:'home',       on:false,live:true, trip:true,  ds:'Actual vs. budgeted expenses. Visual summary by category.'},
+  {id:'souvenir',      nm:'Souvenir & Gift Tracker',    ico:'🎁', ph:'home',       on:false,live:true, trip:true,  ds:'Gift list with person, idea, cost & purchased checkbox.'},
   {id:'health-check',  nm:'Post-Trip Health Checklist', ico:'🏥', ph:'home',       on:false,live:true,  ds:'Symptom awareness for common post-travel illnesses.'},
-  {id:'trip-journal',  nm:'Trip Journal',               ico:'📔', ph:'home',       on:false,live:true,  ds:'Day-by-day journal. Star ratings, mood emoji, highlights.'},
+  {id:'trip-journal',  nm:'Trip Journal',               ico:'📔', ph:'home',       on:false,live:true, trip:true,  ds:'Day-by-day journal. Star ratings, mood emoji, highlights.'},
   {id:'review-draft',  nm:'Review Drafter',             ico:'✍️', ph:'home',       on:false,live:true,  ds:'Guided form → publish-ready review draft for hotels, airlines, cruises, restaurants & attractions. Copy to clipboard.'},
 ];
 
@@ -15093,9 +15095,9 @@ function renderHub() {
     html+=`<div class="phase-sec"><div class="phase-hdr"><div class="phase-dot" style="background:${phase.c}"></div><span class="phase-lbl">${phase.lbl}</span><span class="phase-cnt">${filtered.length} tools</span></div><div class="tools-grid">`;
     filtered.forEach(t=>{
       if(t.live){
-        html+=`<div class="tcard" style="--pc:${PHASES.find(p=>p.id===t.ph)?.c}" onclick="openTool('${t.id}')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')openTool('${t.id}')"><div class="card-top"><span class="card-emoji">${t.ico}</span><span class="conn-tag ${t.on?'cn-on':'cn-off'}">${t.on?'🌐 Online':'✈️ Offline'}</span></div><div class="card-name">${t.nm}</div><div class="card-desc">${t.ds}</div><div class="card-cta">Open →</div></div>`;
+        html+=`<div class="tcard" style="--pc:${PHASES.find(p=>p.id===t.ph)?.c}" onclick="openTool('${t.id}')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')openTool('${t.id}')"><div class="card-top"><span class="card-emoji">${t.ico}</span><span class="card-tags">${t.trip?`<span class="conn-tag cn-aware">✈ Aware</span>`:''}<span class="conn-tag ${t.on?'cn-on':'cn-off'}">${t.on?'🌐 Online':'✈️ Offline'}</span></span></div><div class="card-name">${t.nm}</div><div class="card-desc">${t.ds}</div><div class="card-cta">Open →</div></div>`;
       } else {
-        html+=`<div class="tcard ph" style="--pc:${PHASES.find(p=>p.id===t.ph)?.c}"><div class="card-top"><span class="card-emoji">${t.ico}</span><span class="conn-tag ${t.on?'cn-on':'cn-off'}">${t.on?'🌐':'✈️'}</span></div><div class="card-name">${t.nm}</div><div class="card-desc">${t.ds}</div></div>`;
+        html+=`<div class="tcard ph" style="--pc:${PHASES.find(p=>p.id===t.ph)?.c}"><div class="card-top"><span class="card-emoji">${t.ico}</span><span class="card-tags">${t.trip?`<span class="conn-tag cn-aware">✈ Aware</span>`:''}<span class="conn-tag ${t.on?'cn-on':'cn-off'}">${t.on?'🌐':'✈️'}</span></span></div><div class="card-name">${t.nm}</div><div class="card-desc">${t.ds}</div></div>`;
       }
     });
     html+=`</div></div>`;
@@ -15104,6 +15106,15 @@ function renderHub() {
   if(!total) html=`<div class="zero-state"><span>🔍</span>No tools match "${q}"</div>`;
   document.getElementById('tools-wrap').innerHTML=html;
   document.getElementById('result-cnt').textContent=total?`${total} tools`:'';
+  renderHubStats();
+}
+function renderHubStats(){
+  const tools=document.getElementById('stat-tools');
+  if(tools) tools.textContent=TOOLS.length;
+  const phases=document.getElementById('stat-phases');
+  if(phases) phases.textContent=PHASES.length;
+  const trip=document.getElementById('stat-trip');
+  if(trip) trip.textContent=TOOLS.filter(t=>t.trip).length;
 }
 function setPill(el){
   document.querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));
