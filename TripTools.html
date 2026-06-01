@@ -9503,16 +9503,194 @@ body.no-scroll { overflow: hidden; }
     </div>
   </div>
 </div>
-<div id="view-placeholder-playlist-time" class="view">
-  <nav class="tool-topbar">
+<style>
+/* ── ROAD TRIP PLAYLIST TIMER ── */
+#view-playlist-time .pt-section-lbl {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--muted); margin: 18px 0 8px;
+}
+#view-playlist-time .pt-hint {
+  font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--muted); font-size: 11px;
+}
+/* Summary bar */
+#view-playlist-time .pt-summary {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 22px;
+}
+@media(max-width:520px){ #view-playlist-time .pt-summary { grid-template-columns: 1fr 1fr; } }
+#view-playlist-time .pt-sum-card {
+  background: var(--paper-2); border: 1.5px solid var(--ink); border-radius: var(--r);
+  padding: 12px 10px; text-align: center;
+}
+#view-playlist-time .pt-sum-num {
+  font-family: var(--serif); font-weight: 600; font-size: 22px; letter-spacing: -.02em;
+  color: var(--ink); line-height: 1.1; font-variation-settings: "opsz" 72;
+}
+#view-playlist-time .pt-sum-lbl {
+  font-family: var(--mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--muted); margin-top: 5px;
+}
+/* Content cards */
+#view-playlist-time .pt-content-grid {
+  display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 18px;
+}
+#view-playlist-time .pt-card {
+  background: var(--paper); border: 1.5px solid var(--ink); border-radius: var(--r);
+  padding: 14px 16px;
+}
+#view-playlist-time .pt-card-header {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;
+}
+#view-playlist-time .pt-card-title {
+  font-family: var(--sans); font-weight: 700; font-size: 15px; color: var(--ink);
+  display: flex; align-items: center; gap: 8px;
+}
+#view-playlist-time .pt-card-count {
+  font-family: var(--mono); font-size: 12px; font-weight: 700; color: var(--accent);
+  background: rgba(255,77,46,.08); border: 1px solid rgba(255,77,46,.25);
+  border-radius: 2px; padding: 3px 8px;
+}
+#view-playlist-time .pt-card-rows { display: flex; flex-direction: column; gap: 7px; }
+#view-playlist-time .pt-row {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 10px;
+  padding: 6px 0; border-top: 1px dotted var(--rule);
+}
+#view-playlist-time .pt-row:first-child { border-top: none; }
+#view-playlist-time .pt-row-nm {
+  font-family: var(--sans); font-size: 13px; color: var(--ink-2); flex: 1;
+}
+#view-playlist-time .pt-row-val {
+  font-family: var(--mono); font-size: 12px; color: var(--ink); font-weight: 600;
+  white-space: nowrap;
+}
+#view-playlist-time .pt-row-sub {
+  font-family: var(--sans); font-size: 11px; color: var(--muted); white-space: nowrap;
+}
+/* Buffer note */
+#view-playlist-time .pt-buffer-note {
+  font-family: var(--sans); font-size: 12.5px; color: var(--ink-2); line-height: 1.55;
+  background: var(--paper-2); border: 1.5px solid var(--rule); border-radius: var(--r);
+  padding: 11px 14px; margin-bottom: 18px;
+}
+#view-playlist-time .pt-buffer-note strong { color: var(--ink); }
+/* Download list */
+#view-playlist-time .pt-dl-list {
+  list-style: none; margin: 0 0 18px; padding: 0;
+}
+#view-playlist-time .pt-dl-list li {
+  position: relative; padding: 0 0 8px 22px;
+  font-family: var(--sans); font-size: 13px; color: var(--ink-2); line-height: 1.5;
+}
+#view-playlist-time .pt-dl-list li::before {
+  content: '↓'; position: absolute; left: 0; top: 0; color: var(--accent); font-weight: 700;
+}
+/* Empty state */
+#view-playlist-time .pt-empty {
+  text-align: center; color: var(--muted); font-size: 14px; padding: 28px 10px; line-height: 1.6;
+}
+#view-playlist-time .pt-empty-ico { font-size: 36px; display: block; margin-bottom: 10px; }
+/* Print */
+.pt-print-header { display: none; }
+@media print {
+  body.pt-printing > .view:not(#view-playlist-time) { display: none !important; }
+  body.pt-printing #view-playlist-time { display: block !important; }
+  #view-playlist-time .tool-bar, #view-playlist-time .ctx-banner,
+  #view-playlist-time .pro-tip, #view-playlist-time .related,
+  #view-playlist-time .pt-inputs, #view-playlist-time #pt-actions { display: none !important; }
+  .pt-print-header {
+    display: flex !important; justify-content: space-between;
+    font-family: var(--mono); font-size: 11px; letter-spacing: .08em;
+    text-transform: uppercase; color: #555;
+    padding-bottom: 10px; border-bottom: 2px solid #000; margin-bottom: 18px;
+  }
+  #view-playlist-time .pt-card { break-inside: avoid; }
+  body { background: #fff !important; background-image: none !important; }
+}
+</style>
+<div id="view-playlist-time" class="view">
+  <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="ptPrint()">🖨 Print</button>
   </nav>
-  <div class="placeholder-body">
-    <span class="ph-emoji">🎵</span>
-    <h2>Road Trip Playlist Timer</h2>
-    <p style="margin-bottom:24px">Enter drive hours → how many albums, podcasts or audiobook hours to download.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--paper-2);border:1.5px solid var(--ink);padding:8px 16px;border-radius:2px;color:var(--muted)">
-      🛠 Coming in Phase 2
+  <div class="ctx-banner" id="ctx-playlist-time"></div>
+  <div class="pt-print-header">
+    <strong>TripTools — Road Trip Playlist Timer</strong>
+    <span id="pt-print-date"></span>
+  </div>
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>Road Trip Playlist Timer</h1>
+    <p class="tool-sub">Enter your drive time and what you like to listen to. Get the exact number of albums, podcast episodes, and audiobook hours to download before you hit the road — no dead air, no scrambling at a rest stop.</p>
+  </div>
+
+  <div class="tool-body">
+    <div class="pt-inputs">
+
+      <!-- ── DRIVE TIME ── -->
+      <div class="pt-section-lbl">Total Drive Time</div>
+      <div class="frow">
+        <div class="fg" style="margin-bottom:0">
+          <label for="pt-hours">Hours</label>
+          <input type="number" id="pt-hours" min="0" max="48" step="1" placeholder="e.g. 6" oninput="ptCalc()">
+        </div>
+        <div class="fg" style="margin-bottom:0">
+          <label for="pt-mins">Minutes</label>
+          <input type="number" id="pt-mins" min="0" max="59" step="5" placeholder="e.g. 30" oninput="ptCalc()">
+        </div>
+      </div>
+
+      <!-- ── BUFFER ── -->
+      <div class="fg" style="margin-top:16px">
+        <label for="pt-buffer">Extra Buffer <span class="pt-hint">(add extra content beyond drive time)</span></label>
+        <select id="pt-buffer" onchange="ptCalc()">
+          <option value="0">No buffer — just enough for the drive</option>
+          <option value="30">+30 minutes extra</option>
+          <option value="60" selected>+1 hour extra (recommended)</option>
+          <option value="120">+2 hours extra</option>
+          <option value="180">+3 hours extra</option>
+        </select>
+      </div>
+
+      <!-- ── CONTENT TYPES ── -->
+      <div class="pt-section-lbl">What Do You Want to Listen To? <span class="pt-hint">(select all that apply)</span></div>
+      <div class="chip-grp" id="pt-type-chips">
+        <span class="chip on" data-pt="albums"    onclick="ptToggleType(this)">💿 Music Albums</span>
+        <span class="chip on" data-pt="podcasts"  onclick="ptToggleType(this)">🎙 Podcasts</span>
+        <span class="chip on" data-pt="audiobooks" onclick="ptToggleType(this)">📚 Audiobooks</span>
+        <span class="chip"    data-pt="playlists"  onclick="ptToggleType(this)">🎵 Playlists / Mixes</span>
+      </div>
+
+    </div><!-- /pt-inputs -->
+
+    <!-- ── RESULTS ── -->
+    <div id="pt-results" style="display:none;margin-top:24px" aria-live="polite">
+      <div id="pt-results-inner"><!-- injected by JS --></div>
+    </div>
+
+    <!-- ── EMPTY STATE ── -->
+    <div id="pt-empty" style="display:none">
+      <div class="pt-empty">
+        <span class="pt-empty-ico">🎵</span>
+        Enter your drive time above to see how much content to download.
+      </div>
+    </div>
+
+    <!-- ── ACTIONS ── -->
+    <div id="pt-actions" style="margin-top:14px;text-align:right">
+      <button class="btn-ghost" onclick="ptReset()">↺ Reset</button>
+    </div>
+
+  </div><!-- /tool-body -->
+
+  <div class="pro-tip">
+    <strong>§ Pro Tip</strong>
+    Download everything before you leave home — cell coverage on highways can be spotty, and streaming while driving burns through data fast. For audiobooks, bookmark where you stopped so your co-pilot can pick up narration when you switch drivers. A mix of short podcasts and a long audiobook gives you the best flexibility.
+  </div>
+  <div class="related">
+    Related Tools
+    <div class="rel-links">
+      <button class="rel-btn" onclick="openTool('fuel-cost')">⛽ Fuel Cost Calculator</button>
+      <button class="rel-btn" onclick="openTool('rest-stop')">⏸ Rest Stop Planner</button>
+      <button class="rel-btn" onclick="openTool('car-kit')">🚨 Car Emergency Kit</button>
     </div>
   </div>
 </div>
@@ -13969,7 +14147,7 @@ const TOOLS = [
   {id:'quiet-hours',   nm:'Local Quiet Hours Guide',    ico:'🤫', ph:'destination',on:false,live:true,  ds:'Siesta & quiet hours, Sunday trading, noise ordinances, dress codes & photography restrictions by country.'},
   {id:'fuel-cost',     nm:'Fuel Cost Calculator',       ico:'⛽', ph:'road',       on:false,live:true,  ds:'Distance + MPG + fuel price = total cost. Compare two vehicles.'},
   {id:'rest-stop',     nm:'Rest Stop Planner',          ico:'⏸', ph:'road',       on:false,live:true,  ds:'Recommended break schedule. Adjusts for kids, pets & elderly.'},
-  {id:'playlist-time', nm:'Road Trip Playlist Timer',   ico:'🎵', ph:'road',       on:false,live:false, ds:'Enter drive hours → how many albums/podcasts to download.'},
+  {id:'playlist-time', nm:'Road Trip Playlist Timer',   ico:'🎵', ph:'road',       on:false,live:true,  ds:'Enter drive hours → how many albums/podcasts to download.'},
   {id:'border-cross',  nm:'Border Crossing Guide',      ico:'🛂', ph:'road',       on:true, live:true,  ds:'US/Canada, US/Mexico & major land borders. Documents, duty-free & wait times.'},
   {id:'car-kit',       nm:'Car Emergency Kit Checklist',ico:'🚨', ph:'road',       on:false,live:true,  ds:'What to carry for road trip safety. Customizable by season & route.'},
   {id:'toll-est',      nm:'Toll Cost Estimator',        ico:'💲', ph:'road',       on:false,live:true,  ds:'Major US toll roads. Estimated total cost city-to-city.'},
@@ -14650,6 +14828,7 @@ function injectTripCtx(id) {
   if(id==='unit-conv') ucInit();
   if(id==='fuel-cost') fcInit();
   if(id==='rest-stop') rsInit();
+  if(id==='playlist-time') ptInit();
   if(id==='flight-est') feInit();
   if(id==='hotel-rental') hrInit();
   if(id==='intl-driving') idInit();
@@ -20697,6 +20876,265 @@ function rsPrint() {
   document.body.classList.add('rs-printing');
   const cleanup = () => {
     document.body.classList.remove('rs-printing');
+    window.removeEventListener('afterprint', cleanup);
+  };
+  window.addEventListener('afterprint', cleanup);
+  setTimeout(() => window.print(), 50);
+  setTimeout(cleanup, 8000);
+}
+
+/* ══════════════════════════════════════════════════════
+   ROAD TRIP PLAYLIST TIMER
+   Offline content-download calculator. Takes total drive time
+   (hours + minutes) plus a buffer preference and which content
+   types the traveler wants (albums, podcasts, audiobooks,
+   playlists/mixes). Returns concrete download targets:
+   album count (avg 45 min each), podcast episode count per
+   length, and audiobook hours — with a summary bar and
+   per-type breakdown cards. Persists inputs to localStorage.
+   ══════════════════════════════════════════════════════ */
+
+/* Typical durations (minutes) */
+const PT_ALBUM_MIN      = 45;   // average studio album
+const PT_PODCAST_SHORT  = 20;   // bite-sized episodes (e.g. news briefings)
+const PT_PODCAST_MED    = 45;   // standard episodes
+const PT_PODCAST_LONG   = 75;   // long-form/deep dives
+const PT_PLAYLIST_MIN   = 60;   // curated mix / playlist block
+const PT_AUDIOBOOK_MIN  = 60;   // audiobook: count in full hours
+
+let ptTypes = ['albums', 'podcasts', 'audiobooks'];  // currently selected
+
+function ptKey(tid) { return 'tt_playlist_time_' + (tid || 'default'); }
+
+function ptInit() {
+  const pd = document.getElementById('pt-print-date');
+  if (pd) pd.textContent = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+  const tid = getActiveTripId();
+  let s = null;
+  try { s = JSON.parse(localStorage.getItem(ptKey(tid)) || 'null'); } catch (_) {}
+  if (s) {
+    document.getElementById('pt-hours').value  = s.hours  !== undefined ? s.hours  : '';
+    document.getElementById('pt-mins').value   = s.mins   !== undefined ? s.mins   : '';
+    document.getElementById('pt-buffer').value = s.buffer !== undefined ? s.buffer : 60;
+    ptTypes = Array.isArray(s.types) ? s.types : ['albums', 'podcasts', 'audiobooks'];
+  } else {
+    ptTypes = ['albums', 'podcasts', 'audiobooks'];
+  }
+  document.querySelectorAll('#pt-type-chips .chip').forEach(c => {
+    c.classList.toggle('on', ptTypes.includes(c.dataset.pt));
+  });
+  ptCalc();
+}
+
+function ptSave() {
+  const tid = getActiveTripId();
+  try {
+    localStorage.setItem(ptKey(tid), JSON.stringify({
+      hours:  document.getElementById('pt-hours').value,
+      mins:   document.getElementById('pt-mins').value,
+      buffer: document.getElementById('pt-buffer').value,
+      types:  ptTypes
+    }));
+  } catch (_) {}
+}
+
+function ptToggleType(el) {
+  const v = el.dataset.pt;
+  el.classList.toggle('on');
+  if (el.classList.contains('on')) {
+    if (!ptTypes.includes(v)) ptTypes.push(v);
+  } else {
+    ptTypes = ptTypes.filter(t => t !== v);
+  }
+  ptCalc();
+}
+
+function ptFmtHrMin(totalMins) {
+  totalMins = Math.round(totalMins);
+  const h = Math.floor(totalMins / 60);
+  const m = totalMins % 60;
+  if (h === 0) return `${m} min`;
+  if (m === 0) return `${h} hr`;
+  return `${h} hr ${m} min`;
+}
+
+function ptCalc() {
+  ptSave();
+  const hrs    = parseFloat(document.getElementById('pt-hours').value) || 0;
+  const mins   = parseFloat(document.getElementById('pt-mins').value)  || 0;
+  const buffer = parseFloat(document.getElementById('pt-buffer').value) || 0;
+
+  const driveMin  = hrs * 60 + mins;
+  const totalMin  = driveMin + buffer;
+
+  const resultsEl = document.getElementById('pt-results');
+  const emptyEl   = document.getElementById('pt-empty');
+
+  if (driveMin <= 0) {
+    resultsEl.style.display = 'none';
+    emptyEl.style.display   = 'block';
+    return;
+  }
+  emptyEl.style.display   = 'none';
+  resultsEl.style.display = 'block';
+
+  /* ── Build cards for selected types ── */
+  const cards = [];
+
+  /* Albums */
+  if (ptTypes.includes('albums')) {
+    const count     = Math.ceil(totalMin / PT_ALBUM_MIN);
+    const countBase = Math.ceil(driveMin / PT_ALBUM_MIN);
+    cards.push({
+      ico:   '💿',
+      title: 'Music Albums',
+      count: count,
+      countLabel: `${count} album${count !== 1 ? 's' : ''}`,
+      rows: [
+        { nm: 'Short album (~35 min)',   val: Math.ceil(totalMin / 35),   sub: '35 min avg' },
+        { nm: 'Standard album (~45 min)', val: count,                      sub: '45 min avg' },
+        { nm: 'Long album (~60 min)',     val: Math.ceil(totalMin / 60),   sub: '60 min avg' },
+      ],
+      note: `Based on ${ptFmtHrMin(driveMin)} drive${buffer > 0 ? ` + ${ptFmtHrMin(buffer)} buffer` : ''}.`
+    });
+  }
+
+  /* Podcasts */
+  if (ptTypes.includes('podcasts')) {
+    const countMed  = Math.ceil(totalMin / PT_PODCAST_MED);
+    cards.push({
+      ico:   '🎙',
+      title: 'Podcast Episodes',
+      count: countMed,
+      countLabel: `${countMed} ep${countMed !== 1 ? 's' : ''}`,
+      rows: [
+        { nm: 'Short episodes (~20 min)',   val: Math.ceil(totalMin / PT_PODCAST_SHORT), sub: '20 min avg' },
+        { nm: 'Standard episodes (~45 min)', val: countMed,                              sub: '45 min avg' },
+        { nm: 'Long-form episodes (~75 min)', val: Math.ceil(totalMin / PT_PODCAST_LONG), sub: '75 min avg' },
+      ],
+      note: `Mix episode lengths to match your rest-stop schedule.`
+    });
+  }
+
+  /* Audiobooks */
+  if (ptTypes.includes('audiobooks')) {
+    const audioHrs  = Math.ceil(totalMin / PT_AUDIOBOOK_MIN);
+    const audioMins = totalMin;
+    cards.push({
+      ico:   '📚',
+      title: 'Audiobooks',
+      count: audioHrs,
+      countLabel: `${audioHrs} hr${audioHrs !== 1 ? 's' : ''}`,
+      rows: [
+        { nm: 'Short book (4–6 hrs)',     val: Math.ceil(totalMin / (5 * 60)),   sub: '5 hr avg' },
+        { nm: 'Standard book (8–12 hrs)', val: Math.ceil(totalMin / (10 * 60)),  sub: '10 hr avg' },
+        { nm: 'Long book (14–20 hrs)',     val: Math.ceil(totalMin / (17 * 60)),  sub: '17 hr avg' },
+      ],
+      note: `Download ${ptFmtHrMin(audioMins)} of audio (${audioHrs} full hour${audioHrs !== 1 ? 's' : ''}).`
+    });
+  }
+
+  /* Playlists / Mixes */
+  if (ptTypes.includes('playlists')) {
+    const count = Math.ceil(totalMin / PT_PLAYLIST_MIN);
+    cards.push({
+      ico:   '🎵',
+      title: 'Playlists / Mixes',
+      count: count,
+      countLabel: `${count} playlist${count !== 1 ? 's' : ''}`,
+      rows: [
+        { nm: '30-minute mix',    val: Math.ceil(totalMin / 30),  sub: '30 min' },
+        { nm: '60-minute mix',    val: count,                     sub: '60 min' },
+        { nm: '90-minute mix',    val: Math.ceil(totalMin / 90),  sub: '90 min' },
+      ],
+      note: `Great for when you want fresh tracks without manually picking albums.`
+    });
+  }
+
+  /* ── Summary totals ── */
+  const totalHrs   = Math.floor(totalMin / 60);
+  const totalRemMins = Math.round(totalMin % 60);
+  const driveHrs   = Math.floor(driveMin / 60);
+  const driveRemMins = Math.round(driveMin % 60);
+
+  const summaryCards = [
+    { num: ptFmtHrMin(driveMin),  lbl: 'Drive Time' },
+    { num: buffer > 0 ? '+' + ptFmtHrMin(buffer) : '—',  lbl: 'Buffer' },
+    { num: ptFmtHrMin(totalMin), lbl: 'Total Content' },
+  ];
+
+  /* ── Download checklist quick-copy text ── */
+  const dlItems = cards.map(c => `${c.ico} ${c.title}: ${c.countLabel}`);
+
+  /* ── Render ── */
+  const inner = document.getElementById('pt-results-inner');
+  inner.innerHTML = `
+    <!-- Summary bar -->
+    <div class="pt-summary">
+      ${summaryCards.map(sc => `
+        <div class="pt-sum-card">
+          <div class="pt-sum-num">${sc.num}</div>
+          <div class="pt-sum-lbl">${sc.lbl}</div>
+        </div>`).join('')}
+    </div>
+
+    ${buffer > 0 ? `
+    <div class="pt-buffer-note">
+      <strong>Buffer included:</strong> ${ptFmtHrMin(buffer)} of extra content is added so you never run out — especially useful if you stop for a meal or get stuck in traffic.
+    </div>` : ''}
+
+    <!-- Per-type cards -->
+    <div class="pt-content-grid">
+      ${cards.length === 0 ? `
+        <div class="pt-empty"><span class="pt-empty-ico">☝️</span>Select at least one content type above.</div>
+      ` : cards.map(c => `
+        <div class="pt-card">
+          <div class="pt-card-header">
+            <div class="pt-card-title">${c.ico} ${c.title}</div>
+            <div class="pt-card-count">${c.countLabel}</div>
+          </div>
+          <div class="pt-card-rows">
+            ${c.rows.map(r => `
+              <div class="pt-row">
+                <span class="pt-row-nm">${r.nm}</span>
+                <span class="pt-row-val">${r.val}</span>
+                <span class="pt-row-sub">${r.sub}</span>
+              </div>`).join('')}
+          </div>
+        </div>`).join('')}
+    </div>
+
+    <!-- Download checklist -->
+    ${dlItems.length > 0 ? `
+    <div class="pt-section-lbl" style="margin-top:0">Your Download List</div>
+    <ul class="pt-dl-list">
+      ${dlItems.map(item => `<li>${item}</li>`).join('')}
+      <li>Total listening time needed: <strong>${ptFmtHrMin(totalMin)}</strong></li>
+    </ul>
+    ` : ''}
+  `;
+}
+
+function ptReset() {
+  document.getElementById('pt-hours').value  = '';
+  document.getElementById('pt-mins').value   = '';
+  document.getElementById('pt-buffer').value = 60;
+  ptTypes = ['albums', 'podcasts', 'audiobooks'];
+  document.querySelectorAll('#pt-type-chips .chip').forEach(c => {
+    c.classList.toggle('on', ptTypes.includes(c.dataset.pt));
+  });
+  document.getElementById('pt-results').style.display = 'none';
+  document.getElementById('pt-empty').style.display   = 'none';
+  ptSave();
+}
+
+function ptPrint() {
+  const pd = document.getElementById('pt-print-date');
+  if (pd) pd.textContent = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  document.body.classList.add('pt-printing');
+  const cleanup = () => {
+    document.body.classList.remove('pt-printing');
     window.removeEventListener('afterprint', cleanup);
   };
   window.addEventListener('afterprint', cleanup);
