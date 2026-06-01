@@ -15095,9 +15095,9 @@ function renderHub() {
     html+=`<div class="phase-sec"><div class="phase-hdr"><div class="phase-dot" style="background:${phase.c}"></div><span class="phase-lbl">${phase.lbl}</span><span class="phase-cnt">${filtered.length} tools</span></div><div class="tools-grid">`;
     filtered.forEach(t=>{
       if(t.live){
-        html+=`<div class="tcard" style="--pc:${PHASES.find(p=>p.id===t.ph)?.c}" onclick="openTool('${t.id}')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')openTool('${t.id}')"><div class="card-top"><span class="card-emoji">${t.ico}</span><span class="card-tags">${t.trip?`<span class="conn-tag cn-aware">✈ Aware</span>`:''}<span class="conn-tag ${t.on?'cn-on':'cn-off'}">${t.on?'🌐 Online':'✈️ Offline'}</span></span></div><div class="card-name">${t.nm}</div><div class="card-desc">${t.ds}</div><div class="card-cta">Open →</div></div>`;
+        html+=`<div class="tcard" style="--pc:${PHASES.find(p=>p.id===t.ph)?.c}" onclick="openTool('${t.id}')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')openTool('${t.id}')"><div class="card-top"><span class="card-emoji">${t.ico}</span><span class="card-tags">${t.trip?`<span class="conn-tag cn-aware">✈ Aware</span>`:''}<span class="conn-tag ${t.on?'cn-on':'cn-off'}">${t.on?'🌐 Online':'🔌 Offline'}</span></span></div><div class="card-name">${t.nm}</div><div class="card-desc">${t.ds}</div><div class="card-cta">Open →</div></div>`;
       } else {
-        html+=`<div class="tcard ph" style="--pc:${PHASES.find(p=>p.id===t.ph)?.c}"><div class="card-top"><span class="card-emoji">${t.ico}</span><span class="card-tags">${t.trip?`<span class="conn-tag cn-aware">✈ Aware</span>`:''}<span class="conn-tag ${t.on?'cn-on':'cn-off'}">${t.on?'🌐':'✈️'}</span></span></div><div class="card-name">${t.nm}</div><div class="card-desc">${t.ds}</div></div>`;
+        html+=`<div class="tcard ph" style="--pc:${PHASES.find(p=>p.id===t.ph)?.c}"><div class="card-top"><span class="card-emoji">${t.ico}</span><span class="card-tags">${t.trip?`<span class="conn-tag cn-aware">✈ Aware</span>`:''}<span class="conn-tag ${t.on?'cn-on':'cn-off'}">${t.on?'🌐':'🔌'}</span></span></div><div class="card-name">${t.nm}</div><div class="card-desc">${t.ds}</div></div>`;
       }
     });
     html+=`</div></div>`;
