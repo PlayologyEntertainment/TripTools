@@ -14071,6 +14071,8 @@ input:checked + .pb-toggle-box::after { transform:translateX(16px);background:#f
 .rd-seg button:last-child { border-right:none; }
 .rd-seg button:hover { background:var(--paper-2); }
 .rd-seg button.active { background:var(--accent); color:#fff; }
+.rd-seg-fill { display:flex; width:100%; }
+.rd-seg-fill button { flex:1 1 0; text-align:center; }
 
 .rd-controls { display:flex; gap:26px; flex-wrap:wrap; margin:8px 0 4px; }
 .rd-ctrl { display:flex; flex-direction:column; gap:8px; }
@@ -14161,7 +14163,7 @@ input:checked + .pb-toggle-box::after { transform:translateX(16px);background:#f
         </div>
         <div class="rd-ctrl" style="justify-content:flex-end">
           <span class="rd-ctrl-lbl">Would you recommend it?</span>
-          <div class="rd-seg" id="rd-recommend"></div>
+          <div class="rd-seg rd-seg-fill" id="rd-recommend"></div>
         </div>
       </div>
 
