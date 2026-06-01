@@ -157,6 +157,8 @@ body {
 .conn-tag { font-family: var(--mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; padding: 2px 5px; border-radius: 2px; flex-shrink: 0; margin-top: 2px; }
 .cn-on  { background: var(--blue); color: #fff; }
 .cn-off { background: var(--paper-2); color: var(--muted); border: 1px solid var(--rule); }
+.card-tags { display: flex; gap: 4px; flex-shrink: 0; }
+.cn-aware { background: var(--paper-2); color: var(--accent); border: 1px solid var(--accent); }
 .card-name { font-family: var(--serif); font-weight: 500; font-size: 15px; letter-spacing: -.005em; line-height: 1.25; margin-bottom: 5px; }
 .card-desc { font-size: 12px; color: var(--muted); line-height: 1.4; flex: 1; }
 .card-cta { margin-top: 10px; font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
@@ -15093,9 +15095,9 @@ function renderHub() {
     html+=`<div class="phase-sec"><div class="phase-hdr"><div class="phase-dot" style="background:${phase.c}"></div><span class="phase-lbl">${phase.lbl}</span><span class="phase-cnt">${filtered.length} tools</span></div><div class="tools-grid">`;
     filtered.forEach(t=>{
       if(t.live){
-        html+=`<div class="tcard" style="--pc:${PHASES.find(p=>p.id===t.ph)?.c}" onclick="openTool('${t.id}')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')openTool('${t.id}')"><div class="card-top"><span class="card-emoji">${t.ico}</span><span class="conn-tag ${t.on?'cn-on':'cn-off'}">${t.on?'🌐 Online':'✈️ Offline'}</span></div><div class="card-name">${t.nm}</div><div class="card-desc">${t.ds}</div><div class="card-cta">Open →</div></div>`;
+        html+=`<div class="tcard" style="--pc:${PHASES.find(p=>p.id===t.ph)?.c}" onclick="openTool('${t.id}')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')openTool('${t.id}')"><div class="card-top"><span class="card-emoji">${t.ico}</span><span class="card-tags">${t.trip?`<span class="conn-tag cn-aware">✈ Aware</span>`:''}<span class="conn-tag ${t.on?'cn-on':'cn-off'}">${t.on?'🌐 Online':'✈️ Offline'}</span></span></div><div class="card-name">${t.nm}</div><div class="card-desc">${t.ds}</div><div class="card-cta">Open →</div></div>`;
       } else {
-        html+=`<div class="tcard ph" style="--pc:${PHASES.find(p=>p.id===t.ph)?.c}"><div class="card-top"><span class="card-emoji">${t.ico}</span><span class="conn-tag ${t.on?'cn-on':'cn-off'}">${t.on?'🌐':'✈️'}</span></div><div class="card-name">${t.nm}</div><div class="card-desc">${t.ds}</div></div>`;
+        html+=`<div class="tcard ph" style="--pc:${PHASES.find(p=>p.id===t.ph)?.c}"><div class="card-top"><span class="card-emoji">${t.ico}</span><span class="card-tags">${t.trip?`<span class="conn-tag cn-aware">✈ Aware</span>`:''}<span class="conn-tag ${t.on?'cn-on':'cn-off'}">${t.on?'🌐':'✈️'}</span></span></div><div class="card-name">${t.nm}</div><div class="card-desc">${t.ds}</div></div>`;
       }
     });
     html+=`</div></div>`;
