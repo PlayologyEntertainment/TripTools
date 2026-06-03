@@ -99,7 +99,8 @@ body {
   font-variation-settings: "opsz" 144, "SOFT" 30, "WONK" 1;
 }
 .hub-hero h1 em { font-style: italic; color: var(--accent); font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1; }
-.hub-logo { display: block; width: clamp(171px, 32vw, 384px); height: auto; margin: 0 0 14px -6px; filter: drop-shadow(0 14px 16px rgba(35,25,18,.30)); }
+.hub-logo { display: block; width: 384px; max-width: 100%; height: auto; margin: 0 0 14px -6px; filter: drop-shadow(0 14px 16px rgba(35,25,18,.30)); }
+@media(max-width:480px){ .hub-logo { width: 78vw; margin-left: auto; margin-right: auto; } }
 .hub-tagline { font-family: var(--serif); font-style: italic; font-size: clamp(15px, 2vw, 18px); color: var(--ink-2); max-width: 52ch; margin-bottom: 24px; }
 .hub-stats { display: flex; gap: 28px; flex-wrap: wrap; }
 .hub-stat { font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
