@@ -23742,12 +23742,25 @@ function tjRemoveTag(eKey, date, tripId, tag) {
 
 /* ─── Clear entry ─── */
 function tjClearEntry(eKey, date, tripId) {
-  if(!confirm('Clear all content for this entry? The day slot will remain.')) return;
   const storeId = tripId === '__free__' ? '__free__' : tripId;
+  // A date that belongs to the trip's own date range always keeps its day slot,
+  // so clearing just empties it. Any other entry is removed outright.
+  const trip = storeId === '__free__' ? null : (getTrips().find(t => t.id === storeId) || null);
+  const inTripRange = !!(trip && date && tjDateRange(trip).includes(date));
+  const msg = inTripRange
+    ? 'Clear all content for this entry? The day slot will remain.'
+    : 'Remove this entry from the journal?';
+  if(!confirm(msg)) return;
   const entries = tjGetEntries(storeId);
   const idx = date ? entries.findIndex(e => e.date === date) : entries.findIndex(e => e._key === eKey);
   if(idx !== -1) {
-    entries[idx] = { date, _key: eKey, title:'', body:'', rating:0, mood:'', tags:[], highlights:'', updatedAt: new Date().toISOString() };
+    if(inTripRange) {
+      // Keep the slot but wipe its content.
+      entries[idx] = { date, _key: eKey, title:'', body:'', rating:0, mood:'', tags:[], highlights:'', updatedAt: new Date().toISOString() };
+    } else {
+      // Free-form entry (or a stray date outside the trip): remove it entirely.
+      entries.splice(idx, 1);
+    }
     tjSaveEntries(storeId, entries);
   }
   tjRender();
