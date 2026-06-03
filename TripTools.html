@@ -10834,6 +10834,8 @@ input:checked + .pb-toggle-box::after { transform:translateX(16px);background:#f
 .tj-sec { font-family: var(--mono); font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--rule); padding-bottom: 5px; margin: 20px 0 10px; }
 /* Print styles */
 @media print {
+  body.tj-printing > .view:not(#view-trip-journal) { display: none !important; }
+  body.tj-printing #view-trip-journal { display: block !important; }
   .tool-bar, .site-header, .ctx-banner, .pro-tip, .related,
   .tj-trip-selector, .tj-hdr-row .btn, .tj-entry-actions,
   .tj-new-section, #tj-add-btn-wrap, .tj-tag .rm, .tj-tag-input,
@@ -23814,7 +23816,16 @@ function tjPrint() {
   document.querySelectorAll('.tj-ec-body').forEach(b => { b.style.display = 'block'; });
   document.querySelectorAll('.tj-entry-card').forEach(c => c.classList.add('open'));
   document.getElementById('tj-ph-date').textContent = 'Printed ' + new Date().toLocaleDateString();
-  window.print();
+  // Isolate the Trip Journal view so only journal entries print (the global
+  // @media print rule forces every .view visible, so flag this print run).
+  document.body.classList.add('tj-printing');
+  const cleanup = () => {
+    document.body.classList.remove('tj-printing');
+    window.removeEventListener('afterprint', cleanup);
+  };
+  window.addEventListener('afterprint', cleanup);
+  setTimeout(() => window.print(), 50);
+  setTimeout(cleanup, 8000);
 }
 
 /* ─── Escape helper ─── */
