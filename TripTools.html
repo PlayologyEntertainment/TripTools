@@ -100,11 +100,17 @@ body {
 }
 .hub-hero h1 em { font-style: italic; color: var(--accent); font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1; }
 .hub-logo { display: block; width: 384px; max-width: 100%; height: auto; margin: 0 0 14px -6px; filter: drop-shadow(0 14px 16px rgba(35,25,18,.30)); }
-@media(max-width:480px){ .hub-logo { width: 78vw; margin-left: auto; margin-right: auto; } }
 .hub-tagline { font-family: var(--serif); font-style: italic; font-size: clamp(15px, 2vw, 18px); color: var(--ink-2); max-width: 52ch; margin-bottom: 24px; }
 .hub-stats { display: flex; gap: 28px; flex-wrap: wrap; }
 .hub-stat { font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
 .hub-stat b { display: block; font-family: var(--serif); font-weight: 600; font-size: 26px; color: var(--accent); letter-spacing: -.02em; line-height: 1; margin-bottom: 2px; }
+@media(max-width:480px){
+  .hub-logo { width: 78vw; margin-left: auto; margin-right: auto; }
+  .hub-tagline { width: 78vw; max-width: 78vw; margin-left: auto; margin-right: auto; text-align: center; font-size: clamp(19px, 6vw, 28px); line-height: 1.15; }
+  .hub-stats { flex-wrap: nowrap; gap: 2.5vw; justify-content: space-between; }
+  .hub-stat { flex: 1 1 0; text-align: center; font-size: clamp(7px, 2.1vw, 9px); letter-spacing: .02em; white-space: nowrap; }
+  .hub-stat b { font-size: clamp(15px, 4.6vw, 20px); }
+}
 
 /* SEARCH AREA */
 .search-area { padding: 0 24px 18px; max-width: 1200px; margin: 0 auto; }
