@@ -81,17 +81,19 @@ body {
 .mytrip-btn .trip-nm { color: var(--yellow); max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 @media(max-width:480px){ .site-header{padding:0 12px} .wordmark{font-size:18px} .mytrip-btn .trip-nm{display:none} }
 
-/* HELP / ABOUT BUTTON (red question mark, top-right of header) */
+/* HELP / ABOUT BUTTON (orange "?", top-right of header) */
+/* Matches the My Trip button treatment, but uses the orange from the
+   "Tools" wordmark (var(--accent)) instead of the yellow accent. */
 .help-btn {
-  flex-shrink: 0; margin-left: 8px;
-  width: 32px; height: 32px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  background: transparent; border: 1.5px solid var(--accent);
+  flex-shrink: 0; margin-left: 8px;
+  background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.2);
   color: var(--accent); font-family: var(--serif); font-weight: 700;
-  font-size: 18px; line-height: 1; cursor: pointer; padding: 0;
-  transition: background .15s, color .15s, transform .15s;
+  font-size: 15px; line-height: 1; cursor: pointer;
+  padding: 7px 13px; border-radius: var(--r);
+  transition: background .15s, border-color .15s;
 }
-.help-btn:hover { background: var(--accent); color: var(--paper); transform: scale(1.06); }
+.help-btn:hover { background: rgba(255,255,255,.15); border-color: var(--accent); }
 
 /* ABOUT TRIPTOOLS MODAL */
 .about-overlay {
