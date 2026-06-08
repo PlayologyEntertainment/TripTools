@@ -81,6 +81,58 @@ body {
 .mytrip-btn .trip-nm { color: var(--yellow); max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 @media(max-width:480px){ .site-header{padding:0 12px} .wordmark{font-size:18px} .mytrip-btn .trip-nm{display:none} }
 
+/* HELP / ABOUT BUTTON (orange "?", top-right of header) */
+/* Matches the My Trip button treatment, but uses the orange from the
+   "Tools" wordmark (var(--accent)) instead of the yellow accent. */
+.help-btn {
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-left: 8px;
+  background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.2);
+  color: var(--accent); font-family: var(--serif); font-weight: 700;
+  font-size: 15px; line-height: 1; cursor: pointer;
+  padding: 7px 13px; border-radius: var(--r);
+  transition: background .15s, border-color .15s;
+}
+.help-btn:hover { background: rgba(255,255,255,.15); border-color: var(--accent); }
+
+/* ABOUT TRIPTOOLS MODAL */
+.about-overlay {
+  display: none; position: fixed; inset: 0; z-index: 600;
+  background: rgba(23,21,20,.55); backdrop-filter: blur(2px);
+  align-items: flex-end; justify-content: center;
+}
+.about-overlay.open { display: flex; }
+@media(min-width:600px){ .about-overlay { align-items: center; } }
+.about-modal {
+  background: var(--paper); border: 2px solid var(--ink);
+  border-radius: var(--r) var(--r) 0 0; width: 100%; max-width: 560px;
+  padding: 28px 24px 32px; box-shadow: 0 -8px 40px rgba(0,0,0,.2);
+  max-height: 92vh; overflow-y: auto;
+}
+@media(min-width:600px){ .about-modal { border-radius: var(--r); box-shadow: 0 20px 60px rgba(0,0,0,.25); } }
+.about-hdr { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.about-title { font-family: var(--serif); font-weight: 600; font-size: 26px; letter-spacing: -.02em; line-height: 1.1; }
+.about-title em { font-style: italic; color: var(--accent); }
+.about-close {
+  background: none; border: none; font-size: 24px; cursor: pointer; color: var(--muted);
+  line-height: 1; width: 36px; height: 36px; display: flex; align-items: center;
+  justify-content: center; border-radius: 2px; flex-shrink: 0; transition: color .12s, background .12s;
+}
+.about-close:hover { color: var(--accent); background: var(--paper-2); }
+.about-tag { font-family: var(--mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); margin: 4px 0 16px; }
+.about-body h3 { font-family: var(--sans); font-weight: 700; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink); margin: 20px 0 6px; }
+.about-body p { font-family: var(--sans); font-size: 15px; line-height: 1.55; color: var(--ink-2); margin: 0 0 10px; }
+.about-body ul { margin: 0 0 10px; padding-left: 18px; }
+.about-body li { font-family: var(--sans); font-size: 15px; line-height: 1.5; color: var(--ink-2); margin-bottom: 5px; }
+.about-body ol { margin: 0 0 10px; padding-left: 20px; }
+.about-body ol li { margin-bottom: 7px; }
+.about-cta {
+  margin-top: 24px; width: 100%; background: var(--accent); color: var(--paper); border: none;
+  border-radius: var(--r); padding: 13px; font-family: var(--mono); font-size: 12px;
+  letter-spacing: .12em; text-transform: uppercase; cursor: pointer; transition: filter .15s;
+}
+.about-cta:hover { filter: brightness(1.08); }
+
 /* CONTEXT BANNER */
 .ctx-banner {
   display: none; background: var(--blue); color: #fff;
@@ -1859,7 +1911,54 @@ body.no-scroll { overflow: hidden; }
   <button class="mytrip-btn" onclick="showView('mytrip')">
     ✈ <span class="trip-nm" id="hdr-trip">My Trip</span> ▸
   </button>
+  <button class="help-btn" onclick="openAboutModal()" aria-label="About TripTools" title="About TripTools">?</button>
 </header>
+
+<!-- ============================================================
+     ABOUT TRIPTOOLS  —  EASY-EDIT TEXT BLOCK
+     Everything between the two "EDIT TEXT" markers below is safe
+     to change. It's plain HTML text — edit the words, keep the
+     tags (<h3>, <p>, <li>) as they are for consistent styling.
+     ============================================================ -->
+<div class="about-overlay" id="about-modal" onclick="aboutModalBgClick(event)">
+  <div class="about-modal" role="dialog" aria-modal="true" aria-labelledby="about-title-el">
+    <div class="about-hdr">
+      <span class="about-title" id="about-title-el">Trip<em>Tools</em></span>
+      <button class="about-close" onclick="closeAboutModal()" aria-label="Close">✕</button>
+    </div>
+
+    <!-- ===================== EDIT TEXT (start) ===================== -->
+    <p class="about-tag">Every trip. Every tool. One place.</p>
+
+    <div class="about-body">
+      <h3>What is TripTools?</h3>
+      <p>TripTools is a free, all-in-one toolkit for planning, organizing, and remembering your travels. From the first spark of an idea to the souvenirs you bring home, every tool you need lives in one place — no app to download, no account to create.</p>
+
+      <h3>Who is it for?</h3>
+      <p>Anyone who travels. Whether you're mapping a cross-country road trip, setting sail on a cruise, planning a theme-park day, juggling business travel, or dreaming up a family vacation, TripTools adapts to the way you go.</p>
+
+      <h3>What's inside</h3>
+      <ul>
+        <li>Trip planning &amp; itinerary building</li>
+        <li>Packing lists &amp; document keepers</li>
+        <li>Currency, time-zone &amp; travel-day helpers</li>
+        <li>A Trip Journal to capture memories as they happen</li>
+        <li>And specialized kits for road trips, cruises, theme parks &amp; more</li>
+      </ul>
+
+      <h3>How to get started</h3>
+      <ol>
+        <li>Tap <strong>My Trip</strong> in the top corner to name your trip and set the basics.</li>
+        <li>Browse the hub and open whichever tool fits what you're doing right now.</li>
+        <li>Save as you go — your trip stays with you, right in your browser.</li>
+      </ol>
+      <p>Pick a tool and start exploring.</p>
+    </div>
+
+    <button class="about-cta" onclick="closeAboutModal()">Let's Go!</button>
+    <!-- ====================== EDIT TEXT (end) ====================== -->
+  </div>
+</div>
 
 <!-- HUB -->
 <div id="view-hub" class="view active">
@@ -25290,6 +25389,23 @@ document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') {
     const modal = document.getElementById('ib-modal');
     if (modal && modal.classList.contains('open')) ibCloseModal();
+  }
+});
+
+// About TripTools modal (red ? icon in header)
+function openAboutModal() {
+  document.getElementById('about-modal').classList.add('open');
+}
+function closeAboutModal() {
+  document.getElementById('about-modal').classList.remove('open');
+}
+function aboutModalBgClick(e) {
+  if (e.target === document.getElementById('about-modal')) closeAboutModal();
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    const m = document.getElementById('about-modal');
+    if (m && m.classList.contains('open')) closeAboutModal();
   }
 });
 
