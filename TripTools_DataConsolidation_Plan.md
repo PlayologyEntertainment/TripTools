@@ -148,9 +148,11 @@ Each phase is independently shippable and leaves the app fully working.
 - Add a tiny test harness (a hidden debug panel or console asserts) that checks every existing dataset key exists in `TT_COUNTRIES`.
 - *Implemented:* `TT_COUNTRIES` (200 countries — name/flag/iso3/continent/currency/calling + aliases), `ttCountry()`, `resolveDestination()`, and `ttCountriesSelfCheck()` (runs on load, console-only) inserted after the `CURRENCIES` declaration. Additive — no tool consumes it yet.
 
-**Phase 1 — Destination tier consolidation** *(one PR)*
+**Phase 1 — Destination tier consolidation** *(one PR)* ✅ *Done*
 - Build the single `TT_DESTINATIONS` from `DP_DESTINATIONS` + country links + `tz`/`cost` folds, grown to ~140+ to absorb every `TZ_CITIES`/`COL_CITIES` city (decision #4). Tag curated rows with `inspire: true`.
 - Repoint Destination Picker (curated subset), Comparison, Best Time, Time Zone, Cost of Living (full set) to it via the resolver. Retire `TZ_CITIES`/`COL_CITIES`.
+- *Implemented:* single `TT_DESTINATIONS` master (216 rows — 113 curated `inspire` + 103 supplementary cities; 28 destinations have `tz` folded, 22 have `cost`). Every row links to a country via `cc`. `DP_DESTINATIONS`, `TZ_CITIES`, `COL_CITIES` are now **back-compat projections** of the master, verified **byte-identical** to the previous hand-maintained arrays (zero data loss, zero display change), so the five consumer tools stay untouched. `resolveDestination()` extended to resolve bare cities (e.g. "Tokyo" → JP) via `TT_DEST_INDEX`. Added `PF`/`GU` to `TT_COUNTRIES` (now 202) for full Time-Zone coverage.
+- *Deferred to a follow-up:* swapping each consumer tool's bespoke `trip.destination` matcher for `resolveDestination()` (a behavior change best validated in-browser). The projection approach already delivers the single source of truth; the matcher swap is a clean, separate step.
 
 **Phase 2 — Country tier identity migration (one tool at a time)**
 - For each Tier-B dataset: strip identity fields, key payload off ISO-2, pull name/flag/currency from `TT_COUNTRIES`, replace bespoke matcher with `resolveDestination()`. Order by smallest blast radius first: `AF` → `VR` → `QH` → `CDH` → `ID` → `DR` → `PP` → `TC` → `EM` → `VAC` → `VG`.

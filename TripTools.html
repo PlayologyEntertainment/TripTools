@@ -14646,6 +14646,8 @@ const TT_COUNTRIES = {
   FM:{name:'Micronesia', flag:'🇫🇲', iso3:'FSM', continent:'oceania', calling:'691'},
   NR:{name:'Nauru', flag:'112', iso3:'NRU', continent:'oceania', calling:'674'},
   NZ:{name:'New Zealand', flag:'🇳🇿', iso3:'NZL', continent:'oceania', currency:'NZD', calling:'64'},
+  PF:{name:'French Polynesia', flag:'🇵🇫', iso3:'PYF', continent:'oceania', currency:'XPF', calling:'689', aliases:['Tahiti','Bora Bora']},
+  GU:{name:'Guam', flag:'🇬🇺', iso3:'GUM', continent:'oceania', currency:'USD', calling:'1-671'},
   PW:{name:'Palau', flag:'🇵🇼', iso3:'PLW', continent:'oceania', calling:'680'},
   PG:{name:'Papua New Guinea', flag:'🇵🇬', iso3:'PNG', continent:'oceania', calling:'675'},
   WS:{name:'Samoa', flag:'🇼🇸', iso3:'WSM', continent:'oceania', calling:'685'},
@@ -14736,14 +14738,24 @@ function resolveDestination(text){
   // Try each comma-separated segment, last segment first (usually the country).
   const segs = raw.split(',').map(s => s.trim()).filter(Boolean);
   const tryOrder = segs.slice().reverse().concat([raw]);
-  // 1) exact name/alias match on a segment.
+  const destIx = (typeof TT_DEST_INDEX !== 'undefined') ? TT_DEST_INDEX : null;
+  // 1) exact country name/alias on a segment.
   for (const s of tryOrder){
     if (TT_COUNTRY_INDEX[s]) {
       const code = TT_COUNTRY_INDEX[s];
       return { countryCode: code, country: TT_COUNTRIES[code], matched: s, confidence: 'exact' };
     }
   }
-  // 2) substring: a known name/alias appears inside the text.
+  // 2) exact destination/city name on a segment (e.g. "Tokyo" → JP).
+  if (destIx){
+    for (const s of tryOrder){
+      if (destIx[s]) {
+        const d = destIx[s];
+        return { countryCode: d.cc, country: TT_COUNTRIES[d.cc], destinationId: d.id, matched: s, confidence: 'exact' };
+      }
+    }
+  }
+  // 3) substring: a known country name/alias appears inside the text.
   let best = null;
   for (const key in TT_COUNTRY_INDEX){
     if (key.length >= 4 && raw.indexOf(key) !== -1){
@@ -14751,6 +14763,16 @@ function resolveDestination(text){
     }
   }
   if (best) return { countryCode: best.code, country: TT_COUNTRIES[best.code], matched: best.key, confidence: 'partial' };
+  // 4) substring: a known city name appears inside the text.
+  if (destIx){
+    let bestD = null;
+    for (const key in destIx){
+      if (key.length >= 4 && raw.indexOf(key) !== -1){
+        if (!bestD || key.length > bestD.key.length) bestD = { key, d: destIx[key] };
+      }
+    }
+    if (bestD) return { countryCode: bestD.d.cc, country: TT_COUNTRIES[bestD.d.cc], destinationId: bestD.d.id, matched: bestD.key, confidence: 'partial' };
+  }
   return null;
 }
 
@@ -14777,9 +14799,13 @@ function ttCountriesSelfCheck(){
   try { fromKeys('ID_DATA', ID_DATA); } catch(e){}
   try { fromKeys('DR_DATA', DR_DATA); } catch(e){}
   try { fromKeys('QH_DATA', QH_DATA); } catch(e){}
+  try {
+    const badDest = TT_DESTINATIONS.filter(d => d.cc && !TT_COUNTRIES[d.cc]).map(d => d.id);
+    if (badDest.length) (missing.TT_DESTINATIONS = badDest);
+  } catch(e){}
   const srcs = Object.keys(missing);
   if (srcs.length) console.warn('[TT_COUNTRIES] codes missing from registry:', missing);
-  else console.info('[TT_COUNTRIES] self-check OK — ' + Object.keys(TT_COUNTRIES).length + ' countries cover all domain datasets.');
+  else console.info('[TT_COUNTRIES] self-check OK — ' + Object.keys(TT_COUNTRIES).length + ' countries cover all domain datasets; ' + TT_DESTINATIONS.length + ' destinations linked.');
 }
 if (typeof window !== 'undefined') window.addEventListener('load', ttCountriesSelfCheck);
 
@@ -19203,148 +19229,281 @@ function ckSetPrintMeta() {
    DESTINATION PICKER
    ══════════════════════════════════════════ */
 
-const DP_DESTINATIONS = [
-  // EUROPE
-  {id:'paris',       name:'Paris',           country:'France',          flag:'FR', continent:'europe',    types:['city','culture','foodie','romantic','themepark','family'], budget:4, season:'Apr-Jun, Sep-Oct', dailyRange:'$150-$350', visa:'Visa-free (90 days)',  desc:`The City of Light dazzles with iconic art, world-class cuisine, and effortless romance — plus Disneyland Paris just 30 minutes away.`},
-  {id:'rome',        name:'Rome',            country:'Italy',           flag:'IT', continent:'europe',    types:['city','culture','foodie','history'],      budget:3, season:'Apr-May, Sep-Oct', dailyRange:'$100-$250', visa:'Visa-free (90 days)',  desc:`Millennia of history unfold at every step — the Colosseum, Vatican, and pasta al cacio e pepe are just the beginning.`},
-  {id:'barcelona',   name:'Barcelona',       country:'Spain',           flag:'ES', continent:'europe',    types:['city','beach','culture','foodie'],        budget:3, season:'May-Jun, Sep-Oct', dailyRange:'$100-$220', visa:'Visa-free (90 days)',  desc:`Gaudi's wild architecture, tapas culture, and sun-drenched beaches make this one of Europe's most vibrant cities.`},
-  {id:'amsterdam',   name:'Amsterdam',       country:'Netherlands',     flag:'NL', continent:'europe',    types:['city','culture','nature'],               budget:4, season:'Apr-May, Sep',     dailyRange:'$130-$280', visa:'Visa-free (90 days)',  desc:`Canals, world-famous museums, and a free-spirited energy that makes every neighborhood feel like a discovery.`},
-  {id:'lisbon',      name:'Lisbon',          country:'Portugal',        flag:'PT', continent:'europe',    types:['city','culture','foodie','beach'],        budget:2, season:'Mar-May, Sep-Oct', dailyRange:'$80-$180',  visa:'Visa-free (90 days)',  desc:`Europe's most affordable capital charms with fado music, pastel de nata, and stunning hilltop viewpoints.`},
-  {id:'santorini',   name:'Santorini',       country:'Greece',          flag:'GR', continent:'europe',    types:['beach','romance','cruise'],              budget:4, season:'May-Jun, Sep',     dailyRange:'$150-$400', visa:'Visa-free (90 days)',  desc:`Blue-domed churches perched over caldera cliffs, volcanic beaches, and some of the world's most dramatic sunsets.`},
-  {id:'prague',      name:'Prague',          country:'Czech Republic',  flag:'CZ', continent:'europe',    types:['city','culture','history'],              budget:2, season:'May-Jun, Sep',     dailyRange:'$60-$140',  visa:'Visa-free (90 days)',  desc:`A fairytale old town largely untouched by WWII, with Gothic spires, craft beer, and extraordinary nightlife.`},
-  {id:'swiss-alps',  name:'Swiss Alps',      country:'Switzerland',     flag:'CH', continent:'europe',    types:['ski','adventure','nature'],              budget:5, season:'Dec-Mar (ski), Jun-Aug (hike)', dailyRange:'$250-$600', visa:'Visa-free (90 days)', desc:`Snow-capped peaks, pristine mountain villages, and world-class skiing — nature at its most awe-inspiring.`},
-  {id:'vienna',      name:'Vienna',          country:'Austria',         flag:'AT', continent:'europe',    types:['city','culture','history','foodie'],     budget:3, season:'Apr-May, Sep-Oct', dailyRange:'$100-$230', visa:'Visa-free (90 days)',  desc:`Imperial palaces, coffee house culture, and a classical music heritage that still pulses through every street.`},
-  {id:'amalfi',      name:'Amalfi Coast',    country:'Italy',           flag:'IT', continent:'europe',    types:['beach','cruise','romance','nature'],     budget:4, season:'May-Jun, Sep',     dailyRange:'$150-$350', visa:'Visa-free (90 days)',  desc:`Cliffside villages painted in candy colors, with winding coastal roads and the bluest water in Europe.`},
-  {id:'iceland',     name:'Iceland',         country:'Iceland',         flag:'IS', continent:'europe',    types:['adventure','nature'],                   budget:5, season:'Jun-Aug (midnight sun), Nov-Feb (aurora)', dailyRange:'$180-$400', visa:'Visa-free (90 days)', desc:`Otherworldly landscapes of geysers, waterfalls, glaciers, and lava fields — with a bonus aurora borealis season.`},
-  {id:'edinburgh',   name:'Edinburgh',       country:'Scotland',        flag:'GB', continent:'europe',    types:['city','culture','history','adventure'], budget:3, season:'May-Sep',          dailyRange:'$100-$220', visa:'Visa-free (6 months)', desc:`A medieval castle looming over a whisky-soaked capital, with hiking trails, festivals, and jaw-dropping highlands nearby.`},
-  {id:'dubrovnik',   name:'Dubrovnik',       country:'Croatia',         flag:'HR', continent:'europe',    types:['beach','cruise','city','culture'],       budget:3, season:'May-Jun, Sep',     dailyRange:'$90-$200',  visa:'Visa-free (90 days)',  desc:`The Pearl of the Adriatic — perfectly preserved stone walls encircling a turquoise-kissed old town.`},
-  {id:'norwegian-fjords', name:'Norwegian Fjords', country:'Norway',   flag:'NO', continent:'europe',    types:['nature','cruise','adventure'],          budget:5, season:'May-Sep',          dailyRange:'$200-$500', visa:'Visa-free (90 days)',  desc:`Dramatic glacier-carved waterways flanked by thousand-meter cliffs — best experienced by boat or kayak.`},
-  {id:'budapest',    name:'Budapest',        country:'Hungary',         flag:'HU', continent:'europe',    types:['city','culture','history'],             budget:2, season:'Apr-Jun, Sep-Oct', dailyRange:'$60-$140',  visa:'Visa-free (90 days)',  desc:`The Danube splits a city of thermal baths, Art Nouveau grandeur, and ruin bars that party until sunrise.`},
-  {id:'tuscany',     name:'Tuscany',         country:'Italy',           flag:'IT', continent:'europe',    types:['roadtrip','culture','foodie','nature'],  budget:3, season:'Apr-Jun, Sep-Oct', dailyRange:'$120-$280', visa:'Visa-free (90 days)',  desc:`Rolling cypress-lined hills, medieval hilltop towns, and the finest wine and olive oil on earth.`},
-
-  // ASIA
-  {id:'tokyo',       name:'Tokyo',           country:'Japan',           flag:'JP', continent:'asia',      types:['city','culture','foodie','themepark'],   budget:3, season:'Mar-May, Oct-Nov', dailyRange:'$100-$250', visa:'Visa-free (90 days)',  desc:`A city of extraordinary contrasts — ancient shrines next to neon towers, silence next to sensory overload.`},
-  {id:'bali',        name:'Bali',            country:'Indonesia',       flag:'ID', continent:'asia',      types:['beach','culture','nature','adventure'],  budget:1, season:'May-Sep',          dailyRange:'$40-$120',  visa:'Visa on arrival',      desc:`Terraced rice paddies, Hindu temples, surf breaks, and a wellness culture that makes it impossible to leave.`},
-  {id:'bangkok',     name:'Bangkok',         country:'Thailand',        flag:'TH', continent:'asia',      types:['city','culture','foodie'],              budget:1, season:'Nov-Mar',          dailyRange:'$40-$110',  visa:'Visa-free (30 days)',  desc:`Temple-hopping by tuk-tuk, street food that defines flavor, and a rooftop bar culture that rivals any city.`},
-  {id:'kyoto',       name:'Kyoto',           country:'Japan',           flag:'JP', continent:'asia',      types:['culture','history','nature'],           budget:3, season:'Mar-May, Oct-Nov', dailyRange:'$100-$220', visa:'Visa-free (90 days)',  desc:`Japan's cultural soul — thousands of shrines, geisha districts, bamboo groves, and tea ceremony tradition.`},
-  {id:'singapore',   name:'Singapore',       country:'Singapore',       flag:'SG', continent:'asia',      types:['city','foodie','themepark','family'],    budget:4, season:'Feb-Apr',          dailyRange:'$120-$300', visa:'Visa-free (30 days)',  desc:`A perfectly efficient city-state with the world's best airport, extraordinary street food, and Gardens by the Bay.`},
-  {id:'vietnam',     name:'Hoi An',          country:'Vietnam',         flag:'VN', continent:'asia',      types:['culture','foodie','beach','history'],   budget:1, season:'Feb-Jul',          dailyRange:'$30-$90',   visa:'E-visa required',      desc:`Lantern-lit ancient streets, tailors who work overnight, and pho so good you'll skip breakfast to eat it again.`},
-  {id:'nepal',       name:'Nepal',           country:'Nepal',           flag:'NP', continent:'asia',      types:['adventure','nature','culture'],         budget:1, season:'Oct-Nov, Mar-May', dailyRange:'$30-$100',  visa:'Visa on arrival',      desc:`The Himalayas in all their majesty — from trekking the Annapurna circuit to standing in Kathmandu's Durbar Square.`},
-  {id:'phuket',      name:'Phuket',          country:'Thailand',        flag:'TH', continent:'asia',      types:['beach','adventure','cruise'],           budget:2, season:'Nov-Apr',          dailyRange:'$50-$160',  visa:'Visa-free (30 days)',  desc:`Limestone karsts rising from emerald water, island-hopping longtail boats, and beaches for every pace.`},
-  {id:'maldives',    name:'Maldives',        country:'Maldives',        flag:'MV', continent:'asia',      types:['beach','romance','cruise'],             budget:5, season:'Nov-Apr',          dailyRange:'$300-$800', visa:'Visa on arrival',      desc:`Overwater bungalows above the clearest water on earth, with house reefs of every color at your doorstep.`},
-  {id:'hong-kong',   name:'Hong Kong',       country:'China SAR',       flag:'HK', continent:'asia',      types:['city','foodie','culture','themepark','family'],         budget:4, season:'Oct-Apr',          dailyRange:'$120-$300', visa:'Visa-free (90 days)',  desc:`A neon-soaked vertical city where dim sum culture meets skyscraper hikes, Hong Kong Disneyland, and one of the world's great harbours.`},
-  {id:'cambodia',    name:'Angkor Wat',      country:'Cambodia',        flag:'KH', continent:'asia',      types:['culture','history','adventure'],        budget:1, season:'Nov-Mar',          dailyRange:'$30-$80',   visa:'E-visa required',      desc:`The world's largest religious monument rising from jungle — a spiritual and archaeological wonder unlike any other.`},
-  {id:'sri-lanka',   name:'Sri Lanka',       country:'Sri Lanka',       flag:'LK', continent:'asia',      types:['culture','nature','beach','adventure'],  budget:1, season:'Dec-Mar (west), May-Sep (east)', dailyRange:'$35-$100', visa:'ETA required', desc:`Tea plantations, ancient cities, safari parks, whale watching, and beaches — all in an island the size of Ireland.`},
-  {id:'taiwan',      name:'Taipei',          country:'Taiwan',          flag:'TW', continent:'asia',      types:['city','foodie','culture','nature'],     budget:2, season:'Oct-Dec, Mar-May', dailyRange:'$60-$150',  visa:'Visa-free (90 days)',  desc:`Night markets that define Asia's food culture, hot spring mountain villages, and a thriving arts scene.`},
-  {id:'georgia-tb',  name:'Tbilisi',         country:'Georgia',         flag:'GE', continent:'asia',      types:['culture','foodie','adventure'],         budget:1, season:'Apr-Jun, Sep-Oct', dailyRange:'$40-$110',  visa:'Visa-free (365 days)', desc:`Ancient cave cities, natural wine that predates France, and a soul-stirring polyphonic music tradition.`},
-  {id:'philippines', name:'Palawan',         country:'Philippines',     flag:'PH', continent:'asia',      types:['beach','nature','adventure','cruise'],  budget:1, season:'Nov-May',          dailyRange:'$30-$100',  visa:'Visa-free (30 days)',  desc:`Lagoons hidden inside limestone cliffs, crystal water so clear it seems artificial, and world-class diving.`},
-  {id:'bhutan',      name:'Bhutan',          country:'Bhutan',          flag:'BT', continent:'asia',      types:['culture','nature','adventure','history'], budget:5, season:'Mar-May, Sep-Nov', dailyRange:'$250-$350+', visa:'Permit required',    desc:`The Himalayan kingdom that measures Gross National Happiness — Tiger's Nest monastery clings to a 3,120m cliff.`},
-  {id:'uzbekistan',  name:'Samarkand',       country:'Uzbekistan',      flag:'UZ', continent:'asia',      types:['history','culture','adventure'],        budget:1, season:'Apr-Jun, Sep-Oct', dailyRange:'$30-$90',   visa:'E-visa required',      desc:`The jewel of the Silk Road — turquoise-domed mosques and mausoleums unchanged since Tamerlane's empire.`},
-  {id:'japan-rural', name:'Hakone & Nikko',  country:'Japan',           flag:'JP', continent:'asia',      types:['nature','culture','adventure','ski'],    budget:3, season:'Mar-May, Oct-Nov', dailyRange:'$100-$220', visa:'Visa-free (90 days)',  desc:`Mount Fuji views from hot-spring ryokan, cedar-lined temple avenues, and Japan's rural soul.`},
-  {id:'myanmar',     name:'Bagan',           country:'Myanmar',         flag:'MM', continent:'asia',      types:['history','culture','nature'],           budget:1, season:'Nov-Feb',          dailyRange:'$30-$90',   visa:'E-visa required',      desc:`Over 2,000 ancient Buddhist temples and pagodas spread across a plain — best seen from a hot-air balloon at dawn.`},
-  {id:'laos',        name:'Luang Prabang',   country:'Laos',            flag:'LA', continent:'asia',      types:['culture','nature','history'],           budget:1, season:'Nov-Mar',          dailyRange:'$25-$80',   visa:'Visa on arrival',      desc:`Saffron-robed monks collect alms at dawn in a sleepy UNESCO town where waterfalls and the Mekong slow everything down.`},
-
-  // AMERICAS
-  {id:'new-york',    name:'New York City',   country:'USA',             flag:'US', continent:'northamerica',  types:['city','culture','foodie','themepark'],   budget:4, season:'Apr-Jun, Sep-Oct', dailyRange:'$150-$400', visa:'ESTA required',        desc:`The greatest city on earth — for theatre, food, art, and the simple thrill of walking its legendary streets.`},
-  {id:'costa-rica',  name:'Costa Rica',      country:'Costa Rica',      flag:'CR', continent:'centralamerica',  types:['nature','adventure','beach'],           budget:2, season:'Dec-Apr',          dailyRange:'$80-$180',  visa:'Visa-free (90 days)',  desc:`Volcanos, rainforest zip-lines, and sloths blinking at you — biodiversity at its most accessible and extraordinary.`},
-  {id:'machu-picchu',name:'Machu Picchu',    country:'Peru',            flag:'PE', continent:'southamerica',  types:['adventure','culture','history'],        budget:2, season:'May-Sep',          dailyRange:'$60-$180',  visa:'Visa-free (90 days)',  desc:`The lost city of the Incas perched 2,400 meters above the cloud forest — one of humanity's great achievements.`},
-  {id:'patagonia',   name:'Patagonia',       country:'Argentina & Chile', flag:'AR', continent:'southamerica', types:['adventure','nature'],                  budget:3, season:'Nov-Mar',          dailyRange:'$80-$200',  visa:'Visa-free (90 days)',  desc:`The end of the world offers granite towers, glaciers calving into turquoise lakes, and true wilderness.`},
-  {id:'oaxaca',      name:'Oaxaca',          country:'Mexico',          flag:'MX', continent:'northamerica',  types:['culture','foodie','history'],           budget:1, season:'Oct-May',          dailyRange:'$40-$120',  visa:'Visa-free (180 days)', desc:`Mexico's culinary and craft capital — home to mezcal distilleries, mole negro, and vibrant indigenous art.`},
-  {id:'cuba',        name:'Havana',          country:'Cuba',            flag:'CU', continent:'centralamerica',  types:['culture','city','history'],             budget:2, season:'Nov-Apr',          dailyRange:'$60-$150',  visa:'Tourist card required', desc:`Vintage American cars, crumbling colonial grandeur, live salsa on every corner, and the world's best rum.`},
-  {id:'colombia',    name:'Cartagena',       country:'Colombia',        flag:'CO', continent:'centralamerica',  types:['city','beach','culture','foodie'],      budget:2, season:'Dec-Apr',          dailyRange:'$50-$140',  visa:'Visa-free (90 days)',  desc:`A walled colonial city of flamboyant colors, Caribbean beaches, and a food scene finally getting its due.`},
-  {id:'rio',         name:'Rio de Janeiro',  country:'Brazil',          flag:'BR', continent:'southamerica',  types:['beach','city','culture','adventure'],   budget:3, season:'Dec-Mar',          dailyRange:'$80-$200',  visa:'Visa-free (90 days)',  desc:`Carnival, Christ the Redeemer, Copacabana, and samba — a city of extraordinary energy and beauty.`},
-  {id:'galapagos',   name:'Galapagos Islands', country:'Ecuador',       flag:'EC', continent:'southamerica',  types:['nature','adventure','cruise'],          budget:5, season:'Jun-Dec (dry)',    dailyRange:'$200-$500', visa:'Visa-free + entry fee', desc:`Evolution's laboratory — swim with sea lions, watch giant tortoises, and encounter wildlife with no fear of humans.`},
-  {id:'us-parks',    name:'US National Parks', country:'USA',           flag:'US', continent:'northamerica',  types:['nature','roadtrip','adventure','family'], budget:2, season:'May-Sep',       dailyRange:'$80-$200',  visa:'ESTA required',        desc:`From Yellowstone's geysers to Yosemite's walls — America's national park system is the world's greatest road trip.`},
-  {id:'canadian-rockies', name:'Canadian Rockies', country:'Canada',    flag:'CA', continent:'northamerica',  types:['nature','adventure','ski'],            budget:3, season:'Jun-Sep (summer), Dec-Mar (ski)', dailyRange:'$100-$250', visa:'eTA required', desc:`Banff, Jasper, and Lake Louise offer glacial lakes in impossible blues, wildlife, and ski runs that shame the Alps.`},
-  {id:'new-orleans', name:'New Orleans',     country:'USA',             flag:'US', continent:'northamerica',  types:['city','culture','foodie'],             budget:2, season:'Feb-May',          dailyRange:'$80-$200',  visa:'ESTA required',        desc:`Jazz funerals, beignets at Cafe Du Monde, Mardi Gras excess, and a French Quarter that never sleeps.`},
-  {id:'alaska',      name:'Alaska',          country:'USA',             flag:'US', continent:'northamerica',  types:['nature','adventure','cruise'],          budget:4, season:'May-Sep',          dailyRange:'$150-$400', visa:'ESTA required',        desc:`Glaciers, grizzlies, and the Northern Lights — America's final frontier at its most raw and magnificent.`},
-  {id:'grand-canyon',name:'Grand Canyon',    country:'USA',             flag:'US', continent:'northamerica',  types:['nature','roadtrip','adventure'],        budget:2, season:'Mar-May, Sep-Nov', dailyRange:'$80-$200',  visa:'ESTA required',        desc:`Earth split open to reveal a billion years of geology — one of the most spectacular natural sights anywhere.`},
-  {id:'trinidad-cuba', name:'Trinidad',      country:'Cuba',            flag:'CU', continent:'centralamerica',  types:['culture','history','beach'],            budget:1, season:'Nov-Apr',          dailyRange:'$30-$90',   visa:'Tourist card required', desc:`Cuba's best-preserved colonial town — pastel streets, horse-drawn carts, and beaches minutes away.`},
-  {id:'buenos-aires',name:'Buenos Aires',    country:'Argentina',       flag:'AR', continent:'southamerica',  types:['city','culture','foodie'],             budget:2, season:'Sep-Nov, Mar-Apr', dailyRange:'$50-$150',  visa:'Visa-free (90 days)',  desc:`The Paris of South America — tango in milongas, world-class steak, and a literary cafe culture to match.`},
-  {id:'mexico-city', name:'Mexico City',     country:'Mexico',          flag:'MX', continent:'northamerica',  types:['city','culture','foodie','history'],    budget:2, season:'Oct-May',          dailyRange:'$60-$160',  visa:'Visa-free (180 days)', desc:`An enormous capital with Aztec ruins beneath its streets, extraordinary museums, and dining that defines modern Mexican.`},
-  {id:'yucatan',     name:'Yucatan Peninsula', country:'Mexico',        flag:'MX', continent:'northamerica',  types:['culture','history','beach','adventure'], budget:2, season:'Nov-Apr',         dailyRange:'$50-$150',  visa:'Visa-free (180 days)', desc:`Cenotes for swimming, Chichen Itza at dawn, colonial Merida, and Caribbean beaches — Mexico at its most diverse.`},
-  {id:'orlando',     name:'Orlando',         country:'USA',             flag:'US', continent:'northamerica',  types:['themepark','family'],                  budget:3, season:'Sep-Nov, Jan-Feb', dailyRange:'$150-$400', visa:'ESTA required',        desc:`The theme park capital of the world — Walt Disney World, Universal Studios, SeaWorld, and LEGOLAND all within an hour of each other.`},
-  {id:'los-angeles', name:'Los Angeles',     country:'USA',             flag:'US', continent:'northamerica',  types:['themepark','city','beach','culture','family'], budget:3, season:'Mar-May, Sep-Nov', dailyRange:'$130-$350', visa:'ESTA required', desc:`Disneyland, Universal Studios Hollywood, beaches, and endless sunshine — plus world-class dining and the magic of Hollywood.`},
-
-
-  // ── THEME PARKS: USA ──
-  {id:'magic-kingdom',     name:'Magic Kingdom',              country:'USA — Orlando, FL',       flag:'US', continent:'northamerica',  types:['themepark','family'],                  budget:4, season:'Sep-Nov, Jan-Feb', dailyRange:'$150-$400', visa:'ESTA required',        desc:`The most visited theme park on earth — Cinderella Castle, Space Mountain, Pirates of the Caribbean, and the full fairy-tale Disney experience.`},
-  {id:'epcot',             name:'EPCOT',                      country:'USA — Orlando, FL',       flag:'US', continent:'northamerica',  types:['themepark','family','culture','foodie'], budget:4, season:'Sep-Nov, Jan-Feb', dailyRange:'$150-$400', visa:'ESTA required',       desc:`Part world's fair, part food festival, part sci-fi adventure — Guardians of the Galaxy, Remy's Ratatouille, and 11 global pavilions around World Showcase Lagoon.`},
-  {id:'hollywood-studios', name:'Disney Hollywood Studios',   country:'USA — Orlando, FL',       flag:'US', continent:'northamerica',  types:['themepark','family'],                  budget:4, season:'Sep-Nov, Jan-Feb', dailyRange:'$150-$400', visa:'ESTA required',        desc:`Star Wars: Galaxy's Edge, Toy Story Land, and Tower of Terror — Disney's most cinematic and thrilling park.`},
-  {id:'animal-kingdom',    name:'Disney Animal Kingdom',      country:'USA — Orlando, FL',       flag:'US', continent:'northamerica',  types:['themepark','family','nature'],          budget:4, season:'Sep-Nov, Jan-Feb', dailyRange:'$150-$400', visa:'ESTA required',        desc:`Pandora - The World of Avatar, a real working zoo, Kilimanjaro Safaris, and Flight of Passage — Disney's wildest and most visually stunning park.`},
-  {id:'universal-orlando', name:'Universal Studios Florida',  country:'USA — Orlando, FL',       flag:'US', continent:'northamerica',  types:['themepark','family'],                  budget:3, season:'Sep-Nov, Jan-Feb', dailyRange:'$130-$380', visa:'ESTA required',        desc:`Harry Potter, Jurassic World, and a new Epic Universe mega-expansion — Universal's Florida flagship delivers blockbuster thrills at every turn.`},
-  {id:'islands-adventure', name:'Universal Islands of Adventure', country:'USA — Orlando, FL',  flag:'US', continent:'northamerica',  types:['themepark','family'],                  budget:3, season:'Sep-Nov, Jan-Feb', dailyRange:'$130-$380', visa:'ESTA required',        desc:`Hagrid's Magical Creatures Motorbike Adventure and Velocicoaster make this the roller coaster capital of Florida — sheer adrenaline from open to close.`},
-  {id:'disneyland-ca',     name:'Disneyland Park',            country:'USA — Anaheim, CA',       flag:'US', continent:'northamerica',  types:['themepark','family'],                  budget:4, season:'Sep-Nov, Jan-Feb', dailyRange:'$140-$380', visa:'ESTA required',        desc:`The original — Walt Disney's park opened in 1955 and remains uniquely special. New Orleans Square, Matterhorn, and Star Wars: Galaxy's Edge in the park that started it all.`},
-  {id:'california-adventure', name:'Disney California Adventure', country:'USA — Anaheim, CA', flag:'US', continent:'northamerica',  types:['themepark','family'],                  budget:4, season:'Sep-Nov, Jan-Feb', dailyRange:'$140-$380', visa:'ESTA required',        desc:`Radiator Springs Racers, Guardians of the Galaxy Mission: Breakout, and Pixar Pier — DCA has quietly become one of the most satisfying parks Disney operates.`},
-  {id:'universal-hollywood', name:'Universal Studios Hollywood', country:'USA — Los Angeles, CA', flag:'US', continent:'northamerica', types:['themepark','family'],                 budget:3, season:'year-round',       dailyRange:'$120-$300', visa:'ESTA required',        desc:`The Wizarding World, Jurassic World ride, and the legendary Studio Tour tram ride through working Hollywood backlots — compact but packed with iconic experiences.`},
-  {id:'seaworld-orlando',  name:'SeaWorld Orlando',           country:'USA — Orlando, FL',       flag:'US', continent:'northamerica',  types:['themepark','family','nature'],          budget:3, season:'Sep-Nov, Jan-Feb', dailyRange:'$80-$200',  visa:'ESTA required',        desc:`Mako, Manta, and Ice Breaker are among the best coasters in Florida, plus marine animal encounters, Aquatica waterpark, and world-class animal care.`},
-  {id:'knotts-berry-farm', name:"Knott's Berry Farm",         country:'USA — Buena Park, CA',    flag:'US', continent:'northamerica',  types:['themepark','family'],                  budget:2, season:'year-round',       dailyRange:'$80-$200',  visa:'ESTA required',        desc:`America's oldest theme park, home to GhostRider and Hangtime coasters, the iconic Ghost Town, and a fried chicken dinner that predates the rides.`},
-  {id:'busch-gardens-tb',  name:'Busch Gardens Tampa',        country:'USA — Tampa, FL',         flag:'US', continent:'northamerica',  types:['themepark','family','adventure'],       budget:3, season:'Sep-Nov, Mar-May', dailyRange:'$80-$200',  visa:'ESTA required',        desc:`Cheetah Hunt, Tigris, and Montu rank among the Southeast's finest coasters — set inside a sprawling African-themed safari park with real animals.`},
-
-  // ── THEME PARKS: JAPAN ──
-  {id:'tokyo-disneyland',  name:'Tokyo Disneyland',           country:'Japan — Tokyo',           flag:'JP', continent:'asia',      types:['themepark','family'],                  budget:3, season:'Mar-May, Oct-Nov', dailyRange:'$100-$280', visa:'Visa-free (90 days)',  desc:`The most immaculate Disney park on earth — obsessive Japanese guest service, flawless operations, and fan-favorite attractions like Pooh's Hunny Hunt found nowhere else.`},
-  {id:'tokyo-disneysea',   name:'Tokyo DisneySea',            country:'Japan — Tokyo',           flag:'JP', continent:'asia',      types:['themepark','family'],                  budget:3, season:'Mar-May, Oct-Nov', dailyRange:'$100-$280', visa:'Visa-free (90 days)',  desc:`Consistently rated the world's best theme park — seven nautical-themed ports of call, Journey to the Center of the Earth, and the new Fantasy Springs expansion.`},
-  {id:'usj',               name:'Universal Studios Japan',    country:'Japan — Osaka',           flag:'JP', continent:'asia',      types:['themepark','family'],                  budget:3, season:'Mar-May, Oct-Nov', dailyRange:'$100-$280', visa:'Visa-free (90 days)',  desc:`The Wizarding World of Harry Potter, Super Nintendo World, and Minion Park — Japan's version surpasses its American counterparts in atmosphere and execution.`},
-
-  // ── THEME PARKS: EUROPE ──
-  {id:'disneyland-paris',  name:'Disneyland Park Paris',      country:'France — Paris area',     flag:'FR', continent:'europe',    types:['themepark','family'],                  budget:4, season:'Apr-Jun, Sep-Oct', dailyRange:'$150-$380', visa:'Visa-free (90 days)',  desc:`Europe's most visited theme park resort — Phantom Manor, Big Thunder Mountain, and the stunning Sleeping Beauty Castle, with Walt Disney Studios Park next door.`},
-  {id:'europa-park',       name:'Europa-Park',                country:'Germany — Rust',          flag:'DE', continent:'europe',    types:['themepark','family'],                  budget:3, season:'Apr-Oct',          dailyRange:'$80-$200',  visa:'Visa-free (90 days)',  desc:`Europe's largest theme park outside Paris — 18 European-themed areas, Silver Star and Wodan coasters, and theme resort hotels of extraordinary quality.`},
-  {id:'efteling',          name:'Efteling',                   country:'Netherlands — Kaatsheuvel', flag:'NL', continent:'europe',  types:['themepark','family','culture'],        budget:3, season:'Apr-Oct',          dailyRange:'$80-$180',  visa:'Visa-free (90 days)',  desc:`Europe's most magical and unique park — fairytale forests, the spellbinding Symbolica dark ride, and 70 years of Dutch storytelling tradition at its finest.`},
-  {id:'puy-du-fou',        name:'Puy du Fou',                 country:'France — Vendee',         flag:'FR', continent:'europe',    types:['themepark','culture','family'],        budget:3, season:'Apr-Oct',          dailyRange:'$80-$200',  visa:'Visa-free (90 days)',  desc:`No roller coasters — instead, breathtaking live historical spectacles: gladiator battles, Viking raids, and medieval jousting performed by 3,500 volunteers nightly.`},
-  {id:'portaventura',      name:'PortAventura World',         country:'Spain — Salou',           flag:'ES', continent:'europe',    types:['themepark','family','beach'],          budget:3, season:'Apr-Oct',          dailyRange:'$80-$200',  visa:'Visa-free (90 days)',  desc:`Spain's top theme park resort — Shambhala (Europe's tallest hypercoaster), Ferrari Land next door, and a Costa Dorada beach location that seals the deal.`},
-  {id:'phantasialand',     name:'Phantasialand',              country:'Germany — Bruehl',        flag:'DE', continent:'europe',    types:['themepark','family'],                  budget:3, season:'Apr-Oct',          dailyRange:'$70-$180',  visa:'Visa-free (90 days)',  desc:`The coaster connoisseur's park — Taron and F.L.Y. are among the world's finest launched coasters, set inside jaw-dropping immersive themed lands.`},
-  {id:'tivoli-gardens',    name:'Tivoli Gardens',             country:'Denmark — Copenhagen',    flag:'DK', continent:'europe',    types:['themepark','family','culture'],        budget:4, season:'Apr-Sep',          dailyRange:'$100-$220', visa:'Visa-free (90 days)',  desc:`One of the world's oldest amusement parks (1843) and the inspiration for Disneyland — gardens, pantomime theater, and rides in the heart of Copenhagen.`},
-  {id:'alton-towers',      name:'Alton Towers',               country:'England — Staffordshire', flag:'GB', continent:'europe',    types:['themepark','family'],                  budget:3, season:'Apr-Oct',          dailyRange:'$80-$200',  visa:'Visa-free (6 months)', desc:`The UK's theme park icon — Nemesis, Oblivion, and Wicker Man coasters hidden inside a stunning ruined Gothic manor estate in the Staffordshire countryside.`},
-  {id:'gardaland',         name:'Gardaland',                  country:'Italy — Lake Garda',      flag:'IT', continent:'europe',    types:['themepark','family'],                  budget:3, season:'Apr-Oct',          dailyRange:'$80-$200',  visa:'Visa-free (90 days)',  desc:`Italy's top theme park on the shores of Lake Garda — Oblivion The Black Hole, Legoland Water Park, and the perfect base for exploring one of Italy's most beautiful lakes.`},
-
-  // ── THEME PARKS: CHINA ──
-  {id:'shanghai-disney',   name:'Shanghai Disneyland',        country:'China — Shanghai',        flag:'CN', continent:'asia',      types:['themepark','family'],                  budget:3, season:'Oct-Nov, Mar-May', dailyRange:'$80-$250',  visa:'Visa required',        desc:`Disney's most ambitious park — the world's largest castle, TRON Lightcycle Run, and Zootopia land in a park that blends Disney magic with Chinese cultural storytelling.`},
-  {id:'chimelong-ocean',   name:'Chimelong Ocean Kingdom',    country:'China — Zhuhai',          flag:'CN', continent:'asia',      types:['themepark','family','nature'],          budget:2, season:'year-round',       dailyRange:'$60-$160',  visa:'Visa required',        desc:`The world's largest aquarium combined with world-class thrill rides — record-breaking whale shark tanks, Flying over the Whale, and a sprawling ocean-themed resort.`},
-
-  // ── THEME PARKS: SOUTH KOREA ──
-  {id:'lotte-world',       name:'Lotte World Adventure',      country:'South Korea — Seoul',     flag:'KR', continent:'asia',      types:['themepark','family'],                  budget:2, season:'year-round',       dailyRange:'$60-$160',  visa:'K-ETA required',      desc:`The world's largest indoor theme park in the heart of Seoul — French Revolution coaster, Magic Island on an outdoor lake, and K-pop festival events year-round.`},
-  {id:'everland',          name:'Everland',                   country:'South Korea — Yongin',    flag:'KR', continent:'asia',      types:['themepark','family'],                  budget:2, season:'Apr-Oct',          dailyRange:'$60-$160',  visa:'K-ETA required',      desc:`South Korea's most popular theme park — the legendary wooden T-Express coaster, a working safari zone, and four distinct seasonal festivals including a stunning tulip garden.`},
-
-  // ── THEME PARKS: MIDDLE EAST ──
-  {id:'ferrari-world',     name:'Ferrari World Abu Dhabi',    country:'UAE — Abu Dhabi',         flag:'AE', continent:'middleeast', types:['themepark','family','adventure'],      budget:4, season:'Nov-Mar',          dailyRange:'$120-$280', visa:'Visa on arrival',      desc:`Formula Rossa — the world's fastest roller coaster at 240 km/h — anchors this Ferrari-red indoor megapark, with Italian theming and a scale of ambition that matches the brand.`},
-  {id:'img-worlds',        name:'IMG Worlds of Adventure',    country:'UAE — Dubai',             flag:'AE', continent:'middleeast', types:['themepark','family'],                  budget:3, season:'Nov-Mar',          dailyRange:'$80-$200',  visa:'Visa on arrival',      desc:`The world's largest indoor theme park — Marvel, Cartoon Network, Haunted Hotel, and the Jurassic zones under one massive climate-controlled roof in Dubai.`},
-  {id:'warner-abu-dhabi',  name:'Warner Bros. World Abu Dhabi', country:'UAE — Abu Dhabi',      flag:'AE', continent:'middleeast', types:['themepark','family'],                  budget:4, season:'Nov-Mar',          dailyRange:'$100-$250', visa:'Visa on arrival',      desc:`Six fully immersive worlds — Metropolis, Gotham City, Bedrock, Cartoon Junction, Dynamite Gulch, and Warner Bros. Plaza — all indoors with astonishing detail.`},
-
-  // ── THEME PARKS: SINGAPORE / ASIA ──
-  {id:'universal-singapore', name:'Universal Studios Singapore', country:'Singapore',           flag:'SG', continent:'asia',      types:['themepark','family'],                  budget:3, season:'Feb-Apr',          dailyRange:'$100-$250', visa:'Visa-free (30 days)',  desc:`Southeast Asia's only Universal park — Battlestar Galactica dueling coasters, Transformers, and Jurassic World Rapids on Sentosa Island.`},
-  {id:'ocean-park-hk',     name:'Ocean Park Hong Kong',       country:'Hong Kong',              flag:'HK', continent:'asia',      types:['themepark','family','nature'],          budget:3, season:'Oct-Apr',          dailyRange:'$80-$200',  visa:'Visa-free (90 days)',  desc:`Perched on Hong Kong's southern cliffs — giant pandas, world-class aquarium, cable car with harbor views, and a full complement of thrill rides above the South China Sea.`},
-
-  // ── THEME PARKS: LATIN AMERICA / AUSTRALIA ──
-  {id:'beto-carrero',      name:'Beto Carrero World',         country:'Brazil — Santa Catarina', flag:'BR', continent:'southamerica',  types:['themepark','family'],                  budget:2, season:'Nov-Mar',          dailyRange:'$40-$100',  visa:'Visa-free (90 days)',  desc:`The largest theme park in Latin America — a 1.5 million m2 resort with Brazil's best roller coasters, a wildlife park, and themed lands based on ancient civilizations.`},
-  {id:'dreamworld-au',     name:'Dreamworld',                 country:'Australia — Gold Coast',  flag:'AU', continent:'oceania',   types:['themepark','family'],                  budget:3, season:'Apr-Sep',          dailyRange:'$80-$180',  visa:'ETA required',         desc:`Australia's largest theme park — Thor's Hammer, Steel Taipan, and the Big 9 Thrill Rides, combined with the Tiger Island wildlife sanctuary on the Gold Coast.`},
-  // AFRICA
-  {id:'serengeti',   name:'Serengeti',       country:'Tanzania',        flag:'TZ', continent:'africa',    types:['nature','adventure'],                  budget:5, season:'Jun-Sep (migration)', dailyRange:'$200-$800', visa:'Visa on arrival', desc:`The greatest wildlife spectacle on earth — over a million wildebeest migrating across endless golden plains.`},
-  {id:'morocco',     name:'Marrakech',       country:'Morocco',         flag:'MA', continent:'africa',    types:['city','culture','history','foodie'],    budget:2, season:'Mar-May, Sep-Oct', dailyRange:'$50-$150',  visa:'Visa-free (90 days)',  desc:`Labyrinthine souks, snake charmers, rooftop riads, and a sensory experience unlike anywhere else on earth.`},
-  {id:'cape-town',   name:'Cape Town',       country:'South Africa',    flag:'ZA', continent:'africa',    types:['city','nature','beach','adventure'],    budget:2, season:'Nov-Apr',          dailyRange:'$70-$180',  visa:'Visa-free (90 days)',  desc:`Table Mountain, penguin beaches, world-class wine country, and a culinary scene punching far above its weight.`},
-  {id:'egypt',       name:'Cairo & Pyramids', country:'Egypt',          flag:'EG', continent:'africa',    types:['history','culture','adventure'],        budget:2, season:'Oct-Apr',          dailyRange:'$50-$150',  visa:'E-visa required',      desc:`The last of the Seven Wonders still standing, the Sphinx, and 3,000 years of civilization in the Nile valley.`},
-  {id:'zanzibar',    name:'Zanzibar',        country:'Tanzania',        flag:'TZ', continent:'africa',    types:['beach','culture','history','cruise'],   budget:2, season:'Jun-Oct',          dailyRange:'$60-$180',  visa:'Visa on arrival',      desc:`Spice-scented Stone Town meets white coral sand beaches and coral reefs teeming with color.`},
-  {id:'kenya',       name:'Masai Mara',      country:'Kenya',           flag:'KE', continent:'africa',    types:['nature','adventure'],                  budget:4, season:'Jul-Oct',          dailyRange:'$150-$600', visa:'E-visa required',      desc:`Witness the Big Five from an open Land Rover as dawn breaks over the acacia-dotted savanna.`},
-  {id:'madagascar',  name:'Madagascar',      country:'Madagascar',      flag:'MG', continent:'africa',    types:['nature','adventure'],                  budget:2, season:'Apr-Oct',          dailyRange:'$50-$150',  visa:'Visa on arrival',      desc:`90% of its wildlife found nowhere else on earth — lemurs, baobab avenues, and an ecosystem like no other.`},
-  {id:'ethiopia',    name:'Lalibela',        country:'Ethiopia',        flag:'ET', continent:'africa',    types:['history','culture','adventure'],        budget:1, season:'Oct-Feb',          dailyRange:'$30-$90',   visa:'E-visa required',      desc:`Eleven monolithic rock-hewn churches carved underground in the 12th century — an African Jerusalem.`},
-  {id:'namibia',     name:'Namibia',         country:'Namibia',         flag:'NA', continent:'africa',    types:['nature','adventure','roadtrip'],        budget:3, season:'May-Sep',          dailyRange:'$100-$280', visa:'Visa-free (90 days)',  desc:`The Namib Desert's red dunes tumbling into the Atlantic, ghost towns, and wildlife-rich Etosha Pan.`},
-  {id:'rwanda',      name:'Rwanda',          country:'Rwanda',          flag:'RW', continent:'africa',    types:['nature','adventure','culture'],         budget:4, season:'Jun-Sep',          dailyRange:'$100-$400', visa:'Visa on arrival',      desc:`Mountain gorilla trekking in mist-draped forests — one of the world's most profound wildlife encounters.`},
-
-  // OCEANIA
-  {id:'sydney',      name:'Sydney',          country:'Australia',       flag:'AU', continent:'oceania',   types:['city','beach','nature','foodie'],       budget:4, season:'Sep-Nov, Mar-May', dailyRange:'$130-$300', visa:'ETA required',         desc:`The Opera House, Bondi Beach, the Harbour Bridge, and a wine-and-food culture that finally rivals Europe.`},
-  {id:'great-barrier-reef', name:'Great Barrier Reef', country:'Australia', flag:'AU', continent:'oceania', types:['beach','nature','adventure','cruise'], budget:4, season:'Jun-Oct',       dailyRange:'$120-$280', visa:'ETA required',         desc:`The world's largest living structure — dive into 2,900 individual reefs of extraordinary marine biodiversity.`},
-  {id:'new-zealand', name:'New Zealand',     country:'New Zealand',     flag:'NZ', continent:'oceania',   types:['nature','adventure','roadtrip'],        budget:3, season:'Dec-Feb',          dailyRange:'$100-$250', visa:'NZeTA required',       desc:`Tolkien's Middle-earth brought to life — from Milford Sound's drama to Rotorua's geothermal wonder.`},
-  {id:'fiji',        name:'Fiji',            country:'Fiji',            flag:'FJ', continent:'oceania',   types:['beach','romance','cruise'],             budget:3, season:'May-Oct',          dailyRange:'$100-$400', visa:'Visa-free (4 months)', desc:`322 islands of dazzling coral reefs, warm Melanesian hospitality, and resort beaches that justify every cliche.`},
-  {id:'queensland',  name:'Queensland',      country:'Australia',       flag:'AU', continent:'oceania',   types:['beach','nature','themepark','family'],  budget:3, season:'Apr-Sep',          dailyRange:'$100-$250', visa:'ETA required',         desc:`The Gold Coast's theme parks, Daintree Rainforest, and the Whitsundays — Australia's adventure playground.`},
-
-  // MIDDLE EAST
-  {id:'dubai',       name:'Dubai',           country:'UAE',             flag:'AE', continent:'middleeast', types:['city','beach','themepark','family'],   budget:4, season:'Nov-Mar',          dailyRange:'$130-$400', visa:'Visa on arrival',      desc:`Record-breaking architecture, the world's largest mall, desert safaris at sunset, and tax-free shopping.`},
-  {id:'istanbul',    name:'Istanbul',        country:'Turkey',          flag:'TR', continent:'middleeast', types:['city','culture','history','foodie'],   budget:2, season:'Apr-May, Sep-Oct', dailyRange:'$60-$160',  visa:'E-visa required',      desc:`The only city straddling two continents — the Hagia Sophia, Grand Bazaar, and a Bosphorus cruise are obligatory.`},
-  {id:'jordan',      name:'Petra',           country:'Jordan',          flag:'JO', continent:'middleeast', types:['history','culture','adventure'],       budget:2, season:'Mar-May, Sep-Oct', dailyRange:'$60-$160',  visa:'Jordan Pass available', desc:`The Rose-Red City carved into sandstone cliffs by Nabataean traders — walk the Siq at dawn for maximum wonder.`},
-  {id:'oman',        name:'Oman',            country:'Oman',            flag:'OM', continent:'middleeast', types:['culture','nature','adventure'],         budget:3, season:'Oct-Mar',          dailyRange:'$80-$200',  visa:'E-visa required',      desc:`The friendliest country in the Middle East — forts, desert dunes, fjord-like wadis, and Muscat's spice souks.`},
-  {id:'israel',      name:'Jerusalem',       country:'Israel',          flag:'IL', continent:'middleeast', types:['history','culture','city'],            budget:3, season:'Mar-May, Sep-Nov', dailyRange:'$90-$220',  visa:'Visa-free (90 days)',  desc:`Three of the world's great religions converge in one ancient walled city of extraordinary spiritual weight.`},
-  {id:'abu-dhabi',   name:'Abu Dhabi',       country:'UAE',             flag:'AE', continent:'middleeast', types:['city','culture','themepark','family'],  budget:4, season:'Nov-Mar',          dailyRange:'$120-$350', visa:'Visa on arrival',      desc:`The Sheikh Zayed Grand Mosque, Formula 1 racing, Ferrari World, and a calmer luxury than neighbour Dubai.`},
-  {id:'alula',       name:'AlUla',           country:'Saudi Arabia',    flag:'SA', continent:'middleeast', types:['history','nature','adventure'],        budget:3, season:'Oct-Mar',          dailyRange:'$80-$250',  visa:'Tourist visa required', desc:`Saudi Arabia's jaw-dropping ancient Nabataean city and rock formations — travel's most exciting new frontier.`},
+const TT_DESTINATIONS = [
+  /* ════════════════════════════════════════════════════════════════
+     The single destination registry (Phase 1). Each row links to a
+     country via `cc` (ISO-2 → TT_COUNTRIES). `inspire:true` marks the
+     curated places the Destination Picker draws from; the rest are
+     supplementary cities the Time Zone / Cost of Living tools need.
+     `tz` and `cost` are folded onto a destination when known.
+     DP_DESTINATIONS / TZ_CITIES / COL_CITIES below are projections of
+     this list — do not edit them by hand. See the consolidation plan.
+     ════════════════════════════════════════════════════════════════ */
+  // ── inspire · europe ──
+  {id:"paris", name:"Paris", cc:"FR", inspire:true, country:"France", continent:"europe", types:["city","culture","foodie","romantic","themepark","family"], budget:4, season:"Apr-Jun, Sep-Oct", dailyRange:"$150-$350", visa:"Visa-free (90 days)", desc:"The City of Light dazzles with iconic art, world-class cuisine, and effortless romance — plus Disneyland Paris just 30 minutes away.", tz:"Europe/Paris", tzCity:"Paris", tzCountry:"France", tzFlag:"🇫🇷", _tzi:40, cost:{"cur":"EUR","acc":[45,120,260],"food":[20,45,95],"trans":[8,16,35],"fun":[15,35,75]}, colId:"paris", colName:"Paris", colFlag:"🇫🇷", colRegion:"Europe", _coli:13},
+  {id:"rome", name:"Rome", cc:"IT", inspire:true, country:"Italy", continent:"europe", types:["city","culture","foodie","history"], budget:3, season:"Apr-May, Sep-Oct", dailyRange:"$100-$250", visa:"Visa-free (90 days)", desc:"Millennia of history unfold at every step — the Colosseum, Vatican, and pasta al cacio e pepe are just the beginning.", tz:"Europe/Rome", tzCity:"Rome", tzCountry:"Italy", tzFlag:"🇮🇹", _tzi:56, cost:{"cur":"EUR","acc":[38,100,220],"food":[18,40,85],"trans":[7,15,32],"fun":[13,32,70]}, colId:"rome", colName:"Rome", colFlag:"🇮🇹", colRegion:"Europe", _coli:15},
+  {id:"barcelona", name:"Barcelona", cc:"ES", inspire:true, country:"Spain", continent:"europe", types:["city","beach","culture","foodie"], budget:3, season:"May-Jun, Sep-Oct", dailyRange:"$100-$220", visa:"Visa-free (90 days)", desc:"Gaudi's wild architecture, tapas culture, and sun-drenched beaches make this one of Europe's most vibrant cities.", tz:"Europe/Madrid", tzCity:"Barcelona", tzCountry:"Spain", tzFlag:"🇪🇸", _tzi:54, cost:{"cur":"EUR","acc":[36,98,215],"food":[17,38,82],"trans":[7,15,32],"fun":[13,32,70]}, colId:"barcelona", colName:"Barcelona", colFlag:"🇪🇸", colRegion:"Europe", _coli:16},
+  {id:"amsterdam", name:"Amsterdam", cc:"NL", inspire:true, country:"Netherlands", continent:"europe", types:["city","culture","nature"], budget:4, season:"Apr-May, Sep", dailyRange:"$130-$280", visa:"Visa-free (90 days)", desc:"Canals, world-famous museums, and a free-spirited energy that makes every neighborhood feel like a discovery.", tz:"Europe/Amsterdam", tzCity:"Amsterdam", tzCountry:"Netherlands", tzFlag:"🇳🇱", _tzi:45, cost:{"cur":"EUR","acc":[48,125,270],"food":[20,44,92],"trans":[8,17,36],"fun":[15,35,76]}, colId:"amsterdam", colName:"Amsterdam", colFlag:"🇳🇱", colRegion:"Europe", _coli:17},
+  {id:"lisbon", name:"Lisbon", cc:"PT", inspire:true, country:"Portugal", continent:"europe", types:["city","culture","foodie","beach"], budget:2, season:"Mar-May, Sep-Oct", dailyRange:"$80-$180", visa:"Visa-free (90 days)", desc:"Europe's most affordable capital charms with fado music, pastel de nata, and stunning hilltop viewpoints.", tz:"Europe/Lisbon", tzCity:"Lisbon", tzCountry:"Portugal", tzFlag:"🇵🇹", _tzi:55, cost:{"cur":"EUR","acc":[30,82,180],"food":[14,32,70],"trans":[6,13,28],"fun":[11,27,60]}, colId:"lisbon", colName:"Lisbon", colFlag:"🇵🇹", colRegion:"Europe", _coli:19},
+  {id:"santorini", name:"Santorini", cc:"GR", inspire:true, country:"Greece", continent:"europe", types:["beach","romance","cruise"], budget:4, season:"May-Jun, Sep", dailyRange:"$150-$400", visa:"Visa-free (90 days)", desc:"Blue-domed churches perched over caldera cliffs, volcanic beaches, and some of the world's most dramatic sunsets."},
+  {id:"prague", name:"Prague", cc:"CZ", inspire:true, country:"Czech Republic", continent:"europe", types:["city","culture","history"], budget:2, season:"May-Jun, Sep", dailyRange:"$60-$140", visa:"Visa-free (90 days)", desc:"A fairytale old town largely untouched by WWII, with Gothic spires, craft beer, and extraordinary nightlife.", tz:"Europe/Prague", tzCity:"Prague", tzCountry:"Czech Republic", tzFlag:"🇨🇿", _tzi:50, cost:{"cur":"CZK","acc":[24,68,150],"food":[12,28,62],"trans":[5,11,24],"fun":[9,23,52]}, colId:"prague", colName:"Prague", colFlag:"🇨🇿", colRegion:"Europe", _coli:20},
+  {id:"swiss-alps", name:"Swiss Alps", cc:"CH", inspire:true, country:"Switzerland", continent:"europe", types:["ski","adventure","nature"], budget:5, season:"Dec-Mar (ski), Jun-Aug (hike)", dailyRange:"$250-$600", visa:"Visa-free (90 days)", desc:"Snow-capped peaks, pristine mountain villages, and world-class skiing — nature at its most awe-inspiring."},
+  {id:"vienna", name:"Vienna", cc:"AT", inspire:true, country:"Austria", continent:"europe", types:["city","culture","history","foodie"], budget:3, season:"Apr-May, Sep-Oct", dailyRange:"$100-$230", visa:"Visa-free (90 days)", desc:"Imperial palaces, coffee house culture, and a classical music heritage that still pulses through every street.", tz:"Europe/Vienna", tzCity:"Vienna", tzCountry:"Austria", tzFlag:"🇦🇹", _tzi:49, cost:{"cur":"EUR","acc":[38,100,218],"food":[17,38,82],"trans":[7,15,32],"fun":[13,32,70]}, colId:"vienna", colName:"Vienna", colFlag:"🇦🇹", colRegion:"Europe", _coli:21},
+  {id:"amalfi", name:"Amalfi Coast", cc:"IT", inspire:true, country:"Italy", continent:"europe", types:["beach","cruise","romance","nature"], budget:4, season:"May-Jun, Sep", dailyRange:"$150-$350", visa:"Visa-free (90 days)", desc:"Cliffside villages painted in candy colors, with winding coastal roads and the bluest water in Europe."},
+  {id:"iceland", name:"Iceland", cc:"IS", inspire:true, country:"Iceland", continent:"europe", types:["adventure","nature"], budget:5, season:"Jun-Aug (midnight sun), Nov-Feb (aurora)", dailyRange:"$180-$400", visa:"Visa-free (90 days)", desc:"Otherworldly landscapes of geysers, waterfalls, glaciers, and lava fields — with a bonus aurora borealis season."},
+  {id:"edinburgh", name:"Edinburgh", cc:"GB", inspire:true, country:"Scotland", continent:"europe", types:["city","culture","history","adventure"], budget:3, season:"May-Sep", dailyRange:"$100-$220", visa:"Visa-free (6 months)", desc:"A medieval castle looming over a whisky-soaked capital, with hiking trails, festivals, and jaw-dropping highlands nearby.", tz:"Europe/London", tzCity:"Edinburgh", tzCountry:"United Kingdom", tzFlag:"🇬🇧", _tzi:38},
+  {id:"dubrovnik", name:"Dubrovnik", cc:"HR", inspire:true, country:"Croatia", continent:"europe", types:["beach","cruise","city","culture"], budget:3, season:"May-Jun, Sep", dailyRange:"$90-$200", visa:"Visa-free (90 days)", desc:"The Pearl of the Adriatic — perfectly preserved stone walls encircling a turquoise-kissed old town."},
+  {id:"norwegian-fjords", name:"Norwegian Fjords", cc:"NO", inspire:true, country:"Norway", continent:"europe", types:["nature","cruise","adventure"], budget:5, season:"May-Sep", dailyRange:"$200-$500", visa:"Visa-free (90 days)", desc:"Dramatic glacier-carved waterways flanked by thousand-meter cliffs — best experienced by boat or kayak."},
+  {id:"budapest", name:"Budapest", cc:"HU", inspire:true, country:"Hungary", continent:"europe", types:["city","culture","history"], budget:2, season:"Apr-Jun, Sep-Oct", dailyRange:"$60-$140", visa:"Visa-free (90 days)", desc:"The Danube splits a city of thermal baths, Art Nouveau grandeur, and ruin bars that party until sunrise.", tz:"Europe/Budapest", tzCity:"Budapest", tzCountry:"Hungary", tzFlag:"🇭🇺", _tzi:51},
+  {id:"tuscany", name:"Tuscany", cc:"IT", inspire:true, country:"Italy", continent:"europe", types:["roadtrip","culture","foodie","nature"], budget:3, season:"Apr-Jun, Sep-Oct", dailyRange:"$120-$280", visa:"Visa-free (90 days)", desc:"Rolling cypress-lined hills, medieval hilltop towns, and the finest wine and olive oil on earth."},
+  // ── inspire · asia ──
+  {id:"tokyo", name:"Tokyo", cc:"JP", inspire:true, country:"Japan", continent:"asia", types:["city","culture","foodie","themepark"], budget:3, season:"Mar-May, Oct-Nov", dailyRange:"$100-$250", visa:"Visa-free (90 days)", desc:"A city of extraordinary contrasts — ancient shrines next to neon towers, silence next to sensory overload.", tz:"Asia/Tokyo", tzCity:"Tokyo", tzCountry:"Japan", tzFlag:"🇯🇵", _tzi:111, cost:{"cur":"JPY","acc":[35,95,200],"food":[18,40,85],"trans":[8,16,35],"fun":[12,30,65]}, colId:"tokyo", colName:"Tokyo", colFlag:"🇯🇵", colRegion:"Asia", _coli:6},
+  {id:"bali", name:"Bali", cc:"ID", inspire:true, country:"Indonesia", continent:"asia", types:["beach","culture","nature","adventure"], budget:1, season:"May-Sep", dailyRange:"$40-$120", visa:"Visa on arrival", desc:"Terraced rice paddies, Hindu temples, surf breaks, and a wellness culture that makes it impossible to leave."},
+  {id:"bangkok", name:"Bangkok", cc:"TH", inspire:true, country:"Thailand", continent:"asia", types:["city","culture","foodie"], budget:1, season:"Nov-Mar", dailyRange:"$40-$110", visa:"Visa-free (30 days)", desc:"Temple-hopping by tuk-tuk, street food that defines flavor, and a rooftop bar culture that rivals any city.", tz:"Asia/Bangkok", tzCity:"Bangkok", tzCountry:"Thailand", tzFlag:"🇹🇭", _tzi:95, cost:{"cur":"THB","acc":[12,40,90],"food":[8,20,45],"trans":[3,8,20],"fun":[6,18,40]}, colId:"bangkok", colName:"Bangkok", colFlag:"🇹🇭", colRegion:"Asia", _coli:0},
+  {id:"kyoto", name:"Kyoto", cc:"JP", inspire:true, country:"Japan", continent:"asia", types:["culture","history","nature"], budget:3, season:"Mar-May, Oct-Nov", dailyRange:"$100-$220", visa:"Visa-free (90 days)", desc:"Japan's cultural soul — thousands of shrines, geisha districts, bamboo groves, and tea ceremony tradition.", tz:"Asia/Tokyo", tzCity:"Kyoto", tzCountry:"Japan", tzFlag:"🇯🇵", _tzi:113, cost:{"cur":"JPY","acc":[32,88,185],"food":[16,36,78],"trans":[7,15,32],"fun":[11,28,60]}, colId:"kyoto", colName:"Kyoto", colFlag:"🇯🇵", colRegion:"Asia", _coli:7},
+  {id:"singapore", name:"Singapore", cc:"SG", inspire:true, country:"Singapore", continent:"asia", types:["city","foodie","themepark","family"], budget:4, season:"Feb-Apr", dailyRange:"$120-$300", visa:"Visa-free (30 days)", desc:"A perfectly efficient city-state with the world's best airport, extraordinary street food, and Gardens by the Bay.", tz:"Asia/Singapore", tzCity:"Singapore", tzCountry:"Singapore", tzFlag:"🇸🇬", _tzi:97, cost:{"cur":"SGD","acc":[45,110,240],"food":[14,36,80],"trans":[6,14,30],"fun":[12,30,68]}, colId:"singapore", colName:"Singapore", colFlag:"🇸🇬", colRegion:"Asia", _coli:10},
+  {id:"vietnam", name:"Hoi An", cc:"VN", inspire:true, country:"Vietnam", continent:"asia", types:["culture","foodie","beach","history"], budget:1, season:"Feb-Jul", dailyRange:"$30-$90", visa:"E-visa required", desc:"Lantern-lit ancient streets, tailors who work overnight, and pho so good you'll skip breakfast to eat it again."},
+  {id:"nepal", name:"Nepal", cc:"NP", inspire:true, country:"Nepal", continent:"asia", types:["adventure","nature","culture"], budget:1, season:"Oct-Nov, Mar-May", dailyRange:"$30-$100", visa:"Visa on arrival", desc:"The Himalayas in all their majesty — from trekking the Annapurna circuit to standing in Kathmandu's Durbar Square."},
+  {id:"phuket", name:"Phuket", cc:"TH", inspire:true, country:"Thailand", continent:"asia", types:["beach","adventure","cruise"], budget:2, season:"Nov-Apr", dailyRange:"$50-$160", visa:"Visa-free (30 days)", desc:"Limestone karsts rising from emerald water, island-hopping longtail boats, and beaches for every pace."},
+  {id:"maldives", name:"Maldives", cc:"MV", inspire:true, country:"Maldives", continent:"asia", types:["beach","romance","cruise"], budget:5, season:"Nov-Apr", dailyRange:"$300-$800", visa:"Visa on arrival", desc:"Overwater bungalows above the clearest water on earth, with house reefs of every color at your doorstep."},
+  {id:"hong-kong", name:"Hong Kong", cc:"HK", inspire:true, country:"China SAR", continent:"asia", types:["city","foodie","culture","themepark","family"], budget:4, season:"Oct-Apr", dailyRange:"$120-$300", visa:"Visa-free (90 days)", desc:"A neon-soaked vertical city where dim sum culture meets skyscraper hikes, Hong Kong Disneyland, and one of the world's great harbours.", tz:"Asia/Hong_Kong", tzCity:"Hong Kong", tzCountry:"Hong Kong", tzFlag:"🇭🇰", _tzi:106, cost:{"cur":"HKD","acc":[40,105,230],"food":[16,38,82],"trans":[6,14,30],"fun":[12,30,66]}, colId:"hongkong", colName:"Hong Kong", colFlag:"🇭🇰", colRegion:"Asia", _coli:9},
+  {id:"cambodia", name:"Angkor Wat", cc:"KH", inspire:true, country:"Cambodia", continent:"asia", types:["culture","history","adventure"], budget:1, season:"Nov-Mar", dailyRange:"$30-$80", visa:"E-visa required", desc:"The world's largest religious monument rising from jungle — a spiritual and archaeological wonder unlike any other."},
+  {id:"sri-lanka", name:"Sri Lanka", cc:"LK", inspire:true, country:"Sri Lanka", continent:"asia", types:["culture","nature","beach","adventure"], budget:1, season:"Dec-Mar (west), May-Sep (east)", dailyRange:"$35-$100", visa:"ETA required", desc:"Tea plantations, ancient cities, safari parks, whale watching, and beaches — all in an island the size of Ireland."},
+  {id:"taiwan", name:"Taipei", cc:"TW", inspire:true, country:"Taiwan", continent:"asia", types:["city","foodie","culture","nature"], budget:2, season:"Oct-Dec, Mar-May", dailyRange:"$60-$150", visa:"Visa-free (90 days)", desc:"Night markets that define Asia's food culture, hot spring mountain villages, and a thriving arts scene.", tz:"Asia/Taipei", tzCity:"Taipei", tzCountry:"Taiwan", tzFlag:"🇹🇼", _tzi:107, cost:{"cur":"TWD","acc":[22,65,150],"food":[10,26,58],"trans":[5,12,26],"fun":[8,22,50]}, colId:"taipei", colName:"Taipei", colFlag:"🇹🇼", colRegion:"Asia", _coli:11},
+  {id:"georgia-tb", name:"Tbilisi", cc:"GE", inspire:true, country:"Georgia", continent:"asia", types:["culture","foodie","adventure"], budget:1, season:"Apr-Jun, Sep-Oct", dailyRange:"$40-$110", visa:"Visa-free (365 days)", desc:"Ancient cave cities, natural wine that predates France, and a soul-stirring polyphonic music tradition."},
+  {id:"philippines", name:"Palawan", cc:"PH", inspire:true, country:"Philippines", continent:"asia", types:["beach","nature","adventure","cruise"], budget:1, season:"Nov-May", dailyRange:"$30-$100", visa:"Visa-free (30 days)", desc:"Lagoons hidden inside limestone cliffs, crystal water so clear it seems artificial, and world-class diving."},
+  {id:"bhutan", name:"Bhutan", cc:"BT", inspire:true, country:"Bhutan", continent:"asia", types:["culture","nature","adventure","history"], budget:5, season:"Mar-May, Sep-Nov", dailyRange:"$250-$350+", visa:"Permit required", desc:"The Himalayan kingdom that measures Gross National Happiness — Tiger's Nest monastery clings to a 3,120m cliff."},
+  {id:"uzbekistan", name:"Samarkand", cc:"UZ", inspire:true, country:"Uzbekistan", continent:"asia", types:["history","culture","adventure"], budget:1, season:"Apr-Jun, Sep-Oct", dailyRange:"$30-$90", visa:"E-visa required", desc:"The jewel of the Silk Road — turquoise-domed mosques and mausoleums unchanged since Tamerlane's empire."},
+  {id:"japan-rural", name:"Hakone & Nikko", cc:"JP", inspire:true, country:"Japan", continent:"asia", types:["nature","culture","adventure","ski"], budget:3, season:"Mar-May, Oct-Nov", dailyRange:"$100-$220", visa:"Visa-free (90 days)", desc:"Mount Fuji views from hot-spring ryokan, cedar-lined temple avenues, and Japan's rural soul."},
+  {id:"myanmar", name:"Bagan", cc:"MM", inspire:true, country:"Myanmar", continent:"asia", types:["history","culture","nature"], budget:1, season:"Nov-Feb", dailyRange:"$30-$90", visa:"E-visa required", desc:"Over 2,000 ancient Buddhist temples and pagodas spread across a plain — best seen from a hot-air balloon at dawn."},
+  {id:"laos", name:"Luang Prabang", cc:"LA", inspire:true, country:"Laos", continent:"asia", types:["culture","nature","history"], budget:1, season:"Nov-Mar", dailyRange:"$25-$80", visa:"Visa on arrival", desc:"Saffron-robed monks collect alms at dawn in a sleepy UNESCO town where waterfalls and the Mekong slow everything down."},
+  // ── inspire · northamerica ──
+  {id:"new-york", name:"New York City", cc:"US", inspire:true, country:"USA", continent:"northamerica", types:["city","culture","foodie","themepark"], budget:4, season:"Apr-Jun, Sep-Oct", dailyRange:"$150-$400", visa:"ESTA required", desc:"The greatest city on earth — for theatre, food, art, and the simple thrill of walking its legendary streets."},
+  // ── inspire · centralamerica ──
+  {id:"costa-rica", name:"Costa Rica", cc:"CR", inspire:true, country:"Costa Rica", continent:"centralamerica", types:["nature","adventure","beach"], budget:2, season:"Dec-Apr", dailyRange:"$80-$180", visa:"Visa-free (90 days)", desc:"Volcanos, rainforest zip-lines, and sloths blinking at you — biodiversity at its most accessible and extraordinary."},
+  // ── inspire · southamerica ──
+  {id:"machu-picchu", name:"Machu Picchu", cc:"PE", inspire:true, country:"Peru", continent:"southamerica", types:["adventure","culture","history"], budget:2, season:"May-Sep", dailyRange:"$60-$180", visa:"Visa-free (90 days)", desc:"The lost city of the Incas perched 2,400 meters above the cloud forest — one of humanity's great achievements."},
+  {id:"patagonia", name:"Patagonia", cc:"AR", inspire:true, country:"Argentina & Chile", continent:"southamerica", types:["adventure","nature"], budget:3, season:"Nov-Mar", dailyRange:"$80-$200", visa:"Visa-free (90 days)", desc:"The end of the world offers granite towers, glaciers calving into turquoise lakes, and true wilderness."},
+  // ── inspire · northamerica ──
+  {id:"oaxaca", name:"Oaxaca", cc:"MX", inspire:true, country:"Mexico", continent:"northamerica", types:["culture","foodie","history"], budget:1, season:"Oct-May", dailyRange:"$40-$120", visa:"Visa-free (180 days)", desc:"Mexico's culinary and craft capital — home to mezcal distilleries, mole negro, and vibrant indigenous art."},
+  // ── inspire · centralamerica ──
+  {id:"cuba", name:"Havana", cc:"CU", inspire:true, country:"Cuba", continent:"centralamerica", types:["culture","city","history"], budget:2, season:"Nov-Apr", dailyRange:"$60-$150", visa:"Tourist card required", desc:"Vintage American cars, crumbling colonial grandeur, live salsa on every corner, and the world's best rum.", tz:"America/Havana", tzCity:"Havana", tzCountry:"Cuba", tzFlag:"🇨🇺", _tzi:25},
+  {id:"colombia", name:"Cartagena", cc:"CO", inspire:true, country:"Colombia", continent:"centralamerica", types:["city","beach","culture","foodie"], budget:2, season:"Dec-Apr", dailyRange:"$50-$140", visa:"Visa-free (90 days)", desc:"A walled colonial city of flamboyant colors, Caribbean beaches, and a food scene finally getting its due."},
+  // ── inspire · southamerica ──
+  {id:"rio", name:"Rio de Janeiro", cc:"BR", inspire:true, country:"Brazil", continent:"southamerica", types:["beach","city","culture","adventure"], budget:3, season:"Dec-Mar", dailyRange:"$80-$200", visa:"Visa-free (90 days)", desc:"Carnival, Christ the Redeemer, Copacabana, and samba — a city of extraordinary energy and beauty.", tz:"America/Sao_Paulo", tzCity:"Rio de Janeiro", tzCountry:"Brazil", tzFlag:"🇧🇷", _tzi:32, cost:{"cur":"BRL","acc":[22,62,140],"food":[10,25,56],"trans":[4,10,22],"fun":[8,21,48]}, colId:"rio", colName:"Rio de Janeiro", colFlag:"🇧🇷", colRegion:"Latin America", _coli:33},
+  {id:"galapagos", name:"Galapagos Islands", cc:"EC", inspire:true, country:"Ecuador", continent:"southamerica", types:["nature","adventure","cruise"], budget:5, season:"Jun-Dec (dry)", dailyRange:"$200-$500", visa:"Visa-free + entry fee", desc:"Evolution's laboratory — swim with sea lions, watch giant tortoises, and encounter wildlife with no fear of humans."},
+  // ── inspire · northamerica ──
+  {id:"us-parks", name:"US National Parks", cc:"US", inspire:true, country:"USA", continent:"northamerica", types:["nature","roadtrip","adventure","family"], budget:2, season:"May-Sep", dailyRange:"$80-$200", visa:"ESTA required", desc:"From Yellowstone's geysers to Yosemite's walls — America's national park system is the world's greatest road trip."},
+  {id:"canadian-rockies", name:"Canadian Rockies", cc:"CA", inspire:true, country:"Canada", continent:"northamerica", types:["nature","adventure","ski"], budget:3, season:"Jun-Sep (summer), Dec-Mar (ski)", dailyRange:"$100-$250", visa:"eTA required", desc:"Banff, Jasper, and Lake Louise offer glacial lakes in impossible blues, wildlife, and ski runs that shame the Alps."},
+  {id:"new-orleans", name:"New Orleans", cc:"US", inspire:true, country:"USA", continent:"northamerica", types:["city","culture","foodie"], budget:2, season:"Feb-May", dailyRange:"$80-$200", visa:"ESTA required", desc:"Jazz funerals, beignets at Cafe Du Monde, Mardi Gras excess, and a French Quarter that never sleeps."},
+  {id:"alaska", name:"Alaska", cc:"US", inspire:true, country:"USA", continent:"northamerica", types:["nature","adventure","cruise"], budget:4, season:"May-Sep", dailyRange:"$150-$400", visa:"ESTA required", desc:"Glaciers, grizzlies, and the Northern Lights — America's final frontier at its most raw and magnificent."},
+  {id:"grand-canyon", name:"Grand Canyon", cc:"US", inspire:true, country:"USA", continent:"northamerica", types:["nature","roadtrip","adventure"], budget:2, season:"Mar-May, Sep-Nov", dailyRange:"$80-$200", visa:"ESTA required", desc:"Earth split open to reveal a billion years of geology — one of the most spectacular natural sights anywhere."},
+  // ── inspire · centralamerica ──
+  {id:"trinidad-cuba", name:"Trinidad", cc:"CU", inspire:true, country:"Cuba", continent:"centralamerica", types:["culture","history","beach"], budget:1, season:"Nov-Apr", dailyRange:"$30-$90", visa:"Tourist card required", desc:"Cuba's best-preserved colonial town — pastel streets, horse-drawn carts, and beaches minutes away."},
+  // ── inspire · southamerica ──
+  {id:"buenos-aires", name:"Buenos Aires", cc:"AR", inspire:true, country:"Argentina", continent:"southamerica", types:["city","culture","foodie"], budget:2, season:"Sep-Nov, Mar-Apr", dailyRange:"$50-$150", visa:"Visa-free (90 days)", desc:"The Paris of South America — tango in milongas, world-class steak, and a literary cafe culture to match.", tz:"America/Argentina/Buenos_Aires", tzCity:"Buenos Aires", tzCountry:"Argentina", tzFlag:"🇦🇷", _tzi:31, cost:{"cur":"ARS","acc":[18,52,120],"food":[9,22,50],"trans":[3,8,18],"fun":[7,18,42]}, colId:"buenosaires", colName:"Buenos Aires", colFlag:"🇦🇷", colRegion:"Latin America", _coli:32},
+  // ── inspire · northamerica ──
+  {id:"mexico-city", name:"Mexico City", cc:"MX", inspire:true, country:"Mexico", continent:"northamerica", types:["city","culture","foodie","history"], budget:2, season:"Oct-May", dailyRange:"$60-$160", visa:"Visa-free (180 days)", desc:"An enormous capital with Aztec ruins beneath its streets, extraordinary museums, and dining that defines modern Mexican.", tz:"America/Mexico_City", tzCity:"Mexico City", tzCountry:"Mexico", tzFlag:"🇲🇽", _tzi:22, cost:{"cur":"MXN","acc":[22,62,140],"food":[10,26,58],"trans":[4,10,22],"fun":[8,22,50]}, colId:"mexicocity", colName:"Mexico City", colFlag:"🇲🇽", colRegion:"Latin America", _coli:31},
+  {id:"yucatan", name:"Yucatan Peninsula", cc:"MX", inspire:true, country:"Mexico", continent:"northamerica", types:["culture","history","beach","adventure"], budget:2, season:"Nov-Apr", dailyRange:"$50-$150", visa:"Visa-free (180 days)", desc:"Cenotes for swimming, Chichen Itza at dawn, colonial Merida, and Caribbean beaches — Mexico at its most diverse."},
+  {id:"orlando", name:"Orlando", cc:"US", inspire:true, country:"USA", continent:"northamerica", types:["themepark","family"], budget:3, season:"Sep-Nov, Jan-Feb", dailyRange:"$150-$400", visa:"ESTA required", desc:"The theme park capital of the world — Walt Disney World, Universal Studios, SeaWorld, and LEGOLAND all within an hour of each other.", tz:"America/New_York", tzCity:"Orlando", tzCountry:"United States", tzFlag:"🇺🇸", _tzi:11},
+  {id:"los-angeles", name:"Los Angeles", cc:"US", inspire:true, country:"USA", continent:"northamerica", types:["themepark","city","beach","culture","family"], budget:3, season:"Mar-May, Sep-Nov", dailyRange:"$130-$350", visa:"ESTA required", desc:"Disneyland, Universal Studios Hollywood, beaches, and endless sunshine — plus world-class dining and the magic of Hollywood.", tz:"America/Los_Angeles", tzCity:"Los Angeles", tzCountry:"United States", tzFlag:"🇺🇸", _tzi:1, cost:{"cur":"USD","acc":[50,130,280],"food":[22,48,102],"trans":[10,20,42],"fun":[17,40,86]}, colId:"la", colName:"Los Angeles", colFlag:"🇺🇸", colRegion:"North America", _coli:28},
+  {id:"magic-kingdom", name:"Magic Kingdom", cc:"US", inspire:true, country:"USA — Orlando, FL", continent:"northamerica", types:["themepark","family"], budget:4, season:"Sep-Nov, Jan-Feb", dailyRange:"$150-$400", visa:"ESTA required", desc:"The most visited theme park on earth — Cinderella Castle, Space Mountain, Pirates of the Caribbean, and the full fairy-tale Disney experience."},
+  {id:"epcot", name:"EPCOT", cc:"US", inspire:true, country:"USA — Orlando, FL", continent:"northamerica", types:["themepark","family","culture","foodie"], budget:4, season:"Sep-Nov, Jan-Feb", dailyRange:"$150-$400", visa:"ESTA required", desc:"Part world's fair, part food festival, part sci-fi adventure — Guardians of the Galaxy, Remy's Ratatouille, and 11 global pavilions around World Showcase Lagoon."},
+  {id:"hollywood-studios", name:"Disney Hollywood Studios", cc:"US", inspire:true, country:"USA — Orlando, FL", continent:"northamerica", types:["themepark","family"], budget:4, season:"Sep-Nov, Jan-Feb", dailyRange:"$150-$400", visa:"ESTA required", desc:"Star Wars: Galaxy's Edge, Toy Story Land, and Tower of Terror — Disney's most cinematic and thrilling park."},
+  {id:"animal-kingdom", name:"Disney Animal Kingdom", cc:"US", inspire:true, country:"USA — Orlando, FL", continent:"northamerica", types:["themepark","family","nature"], budget:4, season:"Sep-Nov, Jan-Feb", dailyRange:"$150-$400", visa:"ESTA required", desc:"Pandora - The World of Avatar, a real working zoo, Kilimanjaro Safaris, and Flight of Passage — Disney's wildest and most visually stunning park."},
+  {id:"universal-orlando", name:"Universal Studios Florida", cc:"US", inspire:true, country:"USA — Orlando, FL", continent:"northamerica", types:["themepark","family"], budget:3, season:"Sep-Nov, Jan-Feb", dailyRange:"$130-$380", visa:"ESTA required", desc:"Harry Potter, Jurassic World, and a new Epic Universe mega-expansion — Universal's Florida flagship delivers blockbuster thrills at every turn."},
+  {id:"islands-adventure", name:"Universal Islands of Adventure", cc:"US", inspire:true, country:"USA — Orlando, FL", continent:"northamerica", types:["themepark","family"], budget:3, season:"Sep-Nov, Jan-Feb", dailyRange:"$130-$380", visa:"ESTA required", desc:"Hagrid's Magical Creatures Motorbike Adventure and Velocicoaster make this the roller coaster capital of Florida — sheer adrenaline from open to close."},
+  {id:"disneyland-ca", name:"Disneyland Park", cc:"US", inspire:true, country:"USA — Anaheim, CA", continent:"northamerica", types:["themepark","family"], budget:4, season:"Sep-Nov, Jan-Feb", dailyRange:"$140-$380", visa:"ESTA required", desc:"The original — Walt Disney's park opened in 1955 and remains uniquely special. New Orleans Square, Matterhorn, and Star Wars: Galaxy's Edge in the park that started it all."},
+  {id:"california-adventure", name:"Disney California Adventure", cc:"US", inspire:true, country:"USA — Anaheim, CA", continent:"northamerica", types:["themepark","family"], budget:4, season:"Sep-Nov, Jan-Feb", dailyRange:"$140-$380", visa:"ESTA required", desc:"Radiator Springs Racers, Guardians of the Galaxy Mission: Breakout, and Pixar Pier — DCA has quietly become one of the most satisfying parks Disney operates."},
+  {id:"universal-hollywood", name:"Universal Studios Hollywood", cc:"US", inspire:true, country:"USA — Los Angeles, CA", continent:"northamerica", types:["themepark","family"], budget:3, season:"year-round", dailyRange:"$120-$300", visa:"ESTA required", desc:"The Wizarding World, Jurassic World ride, and the legendary Studio Tour tram ride through working Hollywood backlots — compact but packed with iconic experiences."},
+  {id:"seaworld-orlando", name:"SeaWorld Orlando", cc:"US", inspire:true, country:"USA — Orlando, FL", continent:"northamerica", types:["themepark","family","nature"], budget:3, season:"Sep-Nov, Jan-Feb", dailyRange:"$80-$200", visa:"ESTA required", desc:"Mako, Manta, and Ice Breaker are among the best coasters in Florida, plus marine animal encounters, Aquatica waterpark, and world-class animal care."},
+  {id:"knotts-berry-farm", name:"Knott's Berry Farm", cc:"US", inspire:true, country:"USA — Buena Park, CA", continent:"northamerica", types:["themepark","family"], budget:2, season:"year-round", dailyRange:"$80-$200", visa:"ESTA required", desc:"America's oldest theme park, home to GhostRider and Hangtime coasters, the iconic Ghost Town, and a fried chicken dinner that predates the rides."},
+  {id:"busch-gardens-tb", name:"Busch Gardens Tampa", cc:"US", inspire:true, country:"USA — Tampa, FL", continent:"northamerica", types:["themepark","family","adventure"], budget:3, season:"Sep-Nov, Mar-May", dailyRange:"$80-$200", visa:"ESTA required", desc:"Cheetah Hunt, Tigris, and Montu rank among the Southeast's finest coasters — set inside a sprawling African-themed safari park with real animals."},
+  // ── inspire · asia ──
+  {id:"tokyo-disneyland", name:"Tokyo Disneyland", cc:"JP", inspire:true, country:"Japan — Tokyo", continent:"asia", types:["themepark","family"], budget:3, season:"Mar-May, Oct-Nov", dailyRange:"$100-$280", visa:"Visa-free (90 days)", desc:"The most immaculate Disney park on earth — obsessive Japanese guest service, flawless operations, and fan-favorite attractions like Pooh's Hunny Hunt found nowhere else."},
+  {id:"tokyo-disneysea", name:"Tokyo DisneySea", cc:"JP", inspire:true, country:"Japan — Tokyo", continent:"asia", types:["themepark","family"], budget:3, season:"Mar-May, Oct-Nov", dailyRange:"$100-$280", visa:"Visa-free (90 days)", desc:"Consistently rated the world's best theme park — seven nautical-themed ports of call, Journey to the Center of the Earth, and the new Fantasy Springs expansion."},
+  {id:"usj", name:"Universal Studios Japan", cc:"JP", inspire:true, country:"Japan — Osaka", continent:"asia", types:["themepark","family"], budget:3, season:"Mar-May, Oct-Nov", dailyRange:"$100-$280", visa:"Visa-free (90 days)", desc:"The Wizarding World of Harry Potter, Super Nintendo World, and Minion Park — Japan's version surpasses its American counterparts in atmosphere and execution."},
+  // ── inspire · europe ──
+  {id:"disneyland-paris", name:"Disneyland Park Paris", cc:"FR", inspire:true, country:"France — Paris area", continent:"europe", types:["themepark","family"], budget:4, season:"Apr-Jun, Sep-Oct", dailyRange:"$150-$380", visa:"Visa-free (90 days)", desc:"Europe's most visited theme park resort — Phantom Manor, Big Thunder Mountain, and the stunning Sleeping Beauty Castle, with Walt Disney Studios Park next door."},
+  {id:"europa-park", name:"Europa-Park", cc:"DE", inspire:true, country:"Germany — Rust", continent:"europe", types:["themepark","family"], budget:3, season:"Apr-Oct", dailyRange:"$80-$200", visa:"Visa-free (90 days)", desc:"Europe's largest theme park outside Paris — 18 European-themed areas, Silver Star and Wodan coasters, and theme resort hotels of extraordinary quality."},
+  {id:"efteling", name:"Efteling", cc:"NL", inspire:true, country:"Netherlands — Kaatsheuvel", continent:"europe", types:["themepark","family","culture"], budget:3, season:"Apr-Oct", dailyRange:"$80-$180", visa:"Visa-free (90 days)", desc:"Europe's most magical and unique park — fairytale forests, the spellbinding Symbolica dark ride, and 70 years of Dutch storytelling tradition at its finest."},
+  {id:"puy-du-fou", name:"Puy du Fou", cc:"FR", inspire:true, country:"France — Vendee", continent:"europe", types:["themepark","culture","family"], budget:3, season:"Apr-Oct", dailyRange:"$80-$200", visa:"Visa-free (90 days)", desc:"No roller coasters — instead, breathtaking live historical spectacles: gladiator battles, Viking raids, and medieval jousting performed by 3,500 volunteers nightly."},
+  {id:"portaventura", name:"PortAventura World", cc:"ES", inspire:true, country:"Spain — Salou", continent:"europe", types:["themepark","family","beach"], budget:3, season:"Apr-Oct", dailyRange:"$80-$200", visa:"Visa-free (90 days)", desc:"Spain's top theme park resort — Shambhala (Europe's tallest hypercoaster), Ferrari Land next door, and a Costa Dorada beach location that seals the deal."},
+  {id:"phantasialand", name:"Phantasialand", cc:"DE", inspire:true, country:"Germany — Bruehl", continent:"europe", types:["themepark","family"], budget:3, season:"Apr-Oct", dailyRange:"$70-$180", visa:"Visa-free (90 days)", desc:"The coaster connoisseur's park — Taron and F.L.Y. are among the world's finest launched coasters, set inside jaw-dropping immersive themed lands."},
+  {id:"tivoli-gardens", name:"Tivoli Gardens", cc:"DK", inspire:true, country:"Denmark — Copenhagen", continent:"europe", types:["themepark","family","culture"], budget:4, season:"Apr-Sep", dailyRange:"$100-$220", visa:"Visa-free (90 days)", desc:"One of the world's oldest amusement parks (1843) and the inspiration for Disneyland — gardens, pantomime theater, and rides in the heart of Copenhagen."},
+  {id:"alton-towers", name:"Alton Towers", cc:"GB", inspire:true, country:"England — Staffordshire", continent:"europe", types:["themepark","family"], budget:3, season:"Apr-Oct", dailyRange:"$80-$200", visa:"Visa-free (6 months)", desc:"The UK's theme park icon — Nemesis, Oblivion, and Wicker Man coasters hidden inside a stunning ruined Gothic manor estate in the Staffordshire countryside."},
+  {id:"gardaland", name:"Gardaland", cc:"IT", inspire:true, country:"Italy — Lake Garda", continent:"europe", types:["themepark","family"], budget:3, season:"Apr-Oct", dailyRange:"$80-$200", visa:"Visa-free (90 days)", desc:"Italy's top theme park on the shores of Lake Garda — Oblivion The Black Hole, Legoland Water Park, and the perfect base for exploring one of Italy's most beautiful lakes."},
+  // ── inspire · asia ──
+  {id:"shanghai-disney", name:"Shanghai Disneyland", cc:"CN", inspire:true, country:"China — Shanghai", continent:"asia", types:["themepark","family"], budget:3, season:"Oct-Nov, Mar-May", dailyRange:"$80-$250", visa:"Visa required", desc:"Disney's most ambitious park — the world's largest castle, TRON Lightcycle Run, and Zootopia land in a park that blends Disney magic with Chinese cultural storytelling."},
+  {id:"chimelong-ocean", name:"Chimelong Ocean Kingdom", cc:"CN", inspire:true, country:"China — Zhuhai", continent:"asia", types:["themepark","family","nature"], budget:2, season:"year-round", dailyRange:"$60-$160", visa:"Visa required", desc:"The world's largest aquarium combined with world-class thrill rides — record-breaking whale shark tanks, Flying over the Whale, and a sprawling ocean-themed resort."},
+  {id:"lotte-world", name:"Lotte World Adventure", cc:"KR", inspire:true, country:"South Korea — Seoul", continent:"asia", types:["themepark","family"], budget:2, season:"year-round", dailyRange:"$60-$160", visa:"K-ETA required", desc:"The world's largest indoor theme park in the heart of Seoul — French Revolution coaster, Magic Island on an outdoor lake, and K-pop festival events year-round."},
+  {id:"everland", name:"Everland", cc:"KR", inspire:true, country:"South Korea — Yongin", continent:"asia", types:["themepark","family"], budget:2, season:"Apr-Oct", dailyRange:"$60-$160", visa:"K-ETA required", desc:"South Korea's most popular theme park — the legendary wooden T-Express coaster, a working safari zone, and four distinct seasonal festivals including a stunning tulip garden."},
+  // ── inspire · middleeast ──
+  {id:"ferrari-world", name:"Ferrari World Abu Dhabi", cc:"AE", inspire:true, country:"UAE — Abu Dhabi", continent:"middleeast", types:["themepark","family","adventure"], budget:4, season:"Nov-Mar", dailyRange:"$120-$280", visa:"Visa on arrival", desc:"Formula Rossa — the world's fastest roller coaster at 240 km/h — anchors this Ferrari-red indoor megapark, with Italian theming and a scale of ambition that matches the brand."},
+  {id:"img-worlds", name:"IMG Worlds of Adventure", cc:"AE", inspire:true, country:"UAE — Dubai", continent:"middleeast", types:["themepark","family"], budget:3, season:"Nov-Mar", dailyRange:"$80-$200", visa:"Visa on arrival", desc:"The world's largest indoor theme park — Marvel, Cartoon Network, Haunted Hotel, and the Jurassic zones under one massive climate-controlled roof in Dubai."},
+  {id:"warner-abu-dhabi", name:"Warner Bros. World Abu Dhabi", cc:"AE", inspire:true, country:"UAE — Abu Dhabi", continent:"middleeast", types:["themepark","family"], budget:4, season:"Nov-Mar", dailyRange:"$100-$250", visa:"Visa on arrival", desc:"Six fully immersive worlds — Metropolis, Gotham City, Bedrock, Cartoon Junction, Dynamite Gulch, and Warner Bros. Plaza — all indoors with astonishing detail."},
+  // ── inspire · asia ──
+  {id:"universal-singapore", name:"Universal Studios Singapore", cc:"SG", inspire:true, country:"Singapore", continent:"asia", types:["themepark","family"], budget:3, season:"Feb-Apr", dailyRange:"$100-$250", visa:"Visa-free (30 days)", desc:"Southeast Asia's only Universal park — Battlestar Galactica dueling coasters, Transformers, and Jurassic World Rapids on Sentosa Island."},
+  {id:"ocean-park-hk", name:"Ocean Park Hong Kong", cc:"HK", inspire:true, country:"Hong Kong", continent:"asia", types:["themepark","family","nature"], budget:3, season:"Oct-Apr", dailyRange:"$80-$200", visa:"Visa-free (90 days)", desc:"Perched on Hong Kong's southern cliffs — giant pandas, world-class aquarium, cable car with harbor views, and a full complement of thrill rides above the South China Sea."},
+  // ── inspire · southamerica ──
+  {id:"beto-carrero", name:"Beto Carrero World", cc:"BR", inspire:true, country:"Brazil — Santa Catarina", continent:"southamerica", types:["themepark","family"], budget:2, season:"Nov-Mar", dailyRange:"$40-$100", visa:"Visa-free (90 days)", desc:"The largest theme park in Latin America — a 1.5 million m2 resort with Brazil's best roller coasters, a wildlife park, and themed lands based on ancient civilizations."},
+  // ── inspire · oceania ──
+  {id:"dreamworld-au", name:"Dreamworld", cc:"AU", inspire:true, country:"Australia — Gold Coast", continent:"oceania", types:["themepark","family"], budget:3, season:"Apr-Sep", dailyRange:"$80-$180", visa:"ETA required", desc:"Australia's largest theme park — Thor's Hammer, Steel Taipan, and the Big 9 Thrill Rides, combined with the Tiger Island wildlife sanctuary on the Gold Coast."},
+  // ── inspire · africa ──
+  {id:"serengeti", name:"Serengeti", cc:"TZ", inspire:true, country:"Tanzania", continent:"africa", types:["nature","adventure"], budget:5, season:"Jun-Sep (migration)", dailyRange:"$200-$800", visa:"Visa on arrival", desc:"The greatest wildlife spectacle on earth — over a million wildebeest migrating across endless golden plains."},
+  {id:"morocco", name:"Marrakech", cc:"MA", inspire:true, country:"Morocco", continent:"africa", types:["city","culture","history","foodie"], budget:2, season:"Mar-May, Sep-Oct", dailyRange:"$50-$150", visa:"Visa-free (90 days)", desc:"Labyrinthine souks, snake charmers, rooftop riads, and a sensory experience unlike anywhere else on earth.", tz:"Africa/Casablanca", tzCity:"Marrakech", tzCountry:"Morocco", tzFlag:"🇲🇦", _tzi:79, cost:{"cur":"MAD","acc":[16,48,110],"food":[8,20,46],"trans":[3,9,20],"fun":[7,18,42]}, colId:"marrakech", colName:"Marrakech", colFlag:"🇲🇦", colRegion:"Middle East & Africa", _coli:40},
+  {id:"cape-town", name:"Cape Town", cc:"ZA", inspire:true, country:"South Africa", continent:"africa", types:["city","nature","beach","adventure"], budget:2, season:"Nov-Apr", dailyRange:"$70-$180", visa:"Visa-free (90 days)", desc:"Table Mountain, penguin beaches, world-class wine country, and a culinary scene punching far above its weight.", tz:"Africa/Johannesburg", tzCity:"Cape Town", tzCountry:"South Africa", tzFlag:"🇿🇦", _tzi:84, cost:{"cur":"ZAR","acc":[20,58,132],"food":[10,25,56],"trans":[4,11,24],"fun":[8,21,48]}, colId:"capetown", colName:"Cape Town", colFlag:"🇿🇦", colRegion:"Middle East & Africa", _coli:39},
+  {id:"egypt", name:"Cairo & Pyramids", cc:"EG", inspire:true, country:"Egypt", continent:"africa", types:["history","culture","adventure"], budget:2, season:"Oct-Apr", dailyRange:"$50-$150", visa:"E-visa required", desc:"The last of the Seven Wonders still standing, the Sphinx, and 3,000 years of civilization in the Nile valley."},
+  {id:"zanzibar", name:"Zanzibar", cc:"TZ", inspire:true, country:"Tanzania", continent:"africa", types:["beach","culture","history","cruise"], budget:2, season:"Jun-Oct", dailyRange:"$60-$180", visa:"Visa on arrival", desc:"Spice-scented Stone Town meets white coral sand beaches and coral reefs teeming with color."},
+  {id:"kenya", name:"Masai Mara", cc:"KE", inspire:true, country:"Kenya", continent:"africa", types:["nature","adventure"], budget:4, season:"Jul-Oct", dailyRange:"$150-$600", visa:"E-visa required", desc:"Witness the Big Five from an open Land Rover as dawn breaks over the acacia-dotted savanna."},
+  {id:"madagascar", name:"Madagascar", cc:"MG", inspire:true, country:"Madagascar", continent:"africa", types:["nature","adventure"], budget:2, season:"Apr-Oct", dailyRange:"$50-$150", visa:"Visa on arrival", desc:"90% of its wildlife found nowhere else on earth — lemurs, baobab avenues, and an ecosystem like no other."},
+  {id:"ethiopia", name:"Lalibela", cc:"ET", inspire:true, country:"Ethiopia", continent:"africa", types:["history","culture","adventure"], budget:1, season:"Oct-Feb", dailyRange:"$30-$90", visa:"E-visa required", desc:"Eleven monolithic rock-hewn churches carved underground in the 12th century — an African Jerusalem."},
+  {id:"namibia", name:"Namibia", cc:"NA", inspire:true, country:"Namibia", continent:"africa", types:["nature","adventure","roadtrip"], budget:3, season:"May-Sep", dailyRange:"$100-$280", visa:"Visa-free (90 days)", desc:"The Namib Desert's red dunes tumbling into the Atlantic, ghost towns, and wildlife-rich Etosha Pan."},
+  {id:"rwanda", name:"Rwanda", cc:"RW", inspire:true, country:"Rwanda", continent:"africa", types:["nature","adventure","culture"], budget:4, season:"Jun-Sep", dailyRange:"$100-$400", visa:"Visa on arrival", desc:"Mountain gorilla trekking in mist-draped forests — one of the world's most profound wildlife encounters."},
+  // ── inspire · oceania ──
+  {id:"sydney", name:"Sydney", cc:"AU", inspire:true, country:"Australia", continent:"oceania", types:["city","beach","nature","foodie"], budget:4, season:"Sep-Nov, Mar-May", dailyRange:"$130-$300", visa:"ETA required", desc:"The Opera House, Bondi Beach, the Harbour Bridge, and a wine-and-food culture that finally rivals Europe.", tz:"Australia/Sydney", tzCity:"Sydney", tzCountry:"Australia", tzFlag:"🇦🇺", _tzi:117, cost:{"cur":"AUD","acc":[48,125,268],"food":[22,46,98],"trans":[8,17,36],"fun":[16,38,82]}, colId:"sydney", colName:"Sydney", colFlag:"🇦🇺", colRegion:"Oceania", _coli:35},
+  {id:"great-barrier-reef", name:"Great Barrier Reef", cc:"AU", inspire:true, country:"Australia", continent:"oceania", types:["beach","nature","adventure","cruise"], budget:4, season:"Jun-Oct", dailyRange:"$120-$280", visa:"ETA required", desc:"The world's largest living structure — dive into 2,900 individual reefs of extraordinary marine biodiversity."},
+  {id:"new-zealand", name:"New Zealand", cc:"NZ", inspire:true, country:"New Zealand", continent:"oceania", types:["nature","adventure","roadtrip"], budget:3, season:"Dec-Feb", dailyRange:"$100-$250", visa:"NZeTA required", desc:"Tolkien's Middle-earth brought to life — from Milford Sound's drama to Rotorua's geothermal wonder."},
+  {id:"fiji", name:"Fiji", cc:"FJ", inspire:true, country:"Fiji", continent:"oceania", types:["beach","romance","cruise"], budget:3, season:"May-Oct", dailyRange:"$100-$400", visa:"Visa-free (4 months)", desc:"322 islands of dazzling coral reefs, warm Melanesian hospitality, and resort beaches that justify every cliche."},
+  {id:"queensland", name:"Queensland", cc:"AU", inspire:true, country:"Australia", continent:"oceania", types:["beach","nature","themepark","family"], budget:3, season:"Apr-Sep", dailyRange:"$100-$250", visa:"ETA required", desc:"The Gold Coast's theme parks, Daintree Rainforest, and the Whitsundays — Australia's adventure playground."},
+  // ── inspire · middleeast ──
+  {id:"dubai", name:"Dubai", cc:"AE", inspire:true, country:"UAE", continent:"middleeast", types:["city","beach","themepark","family"], budget:4, season:"Nov-Mar", dailyRange:"$130-$400", visa:"Visa on arrival", desc:"Record-breaking architecture, the world's largest mall, desert safaris at sunset, and tax-free shopping.", tz:"Asia/Dubai", tzCity:"Dubai", tzCountry:"UAE", tzFlag:"🇦🇪", _tzi:70, cost:{"cur":"AED","acc":[40,108,235],"food":[16,40,86],"trans":[6,14,30],"fun":[14,34,76]}, colId:"dubai", colName:"Dubai", colFlag:"🇦🇪", colRegion:"Middle East & Africa", _coli:37},
+  {id:"istanbul", name:"Istanbul", cc:"TR", inspire:true, country:"Turkey", continent:"middleeast", types:["city","culture","history","foodie"], budget:2, season:"Apr-May, Sep-Oct", dailyRange:"$60-$160", visa:"E-visa required", desc:"The only city straddling two continents — the Hagia Sophia, Grand Bazaar, and a Bosphorus cruise are obligatory.", tz:"Europe/Istanbul", tzCity:"Istanbul", tzCountry:"Turkey", tzFlag:"🇹🇷", _tzi:60, cost:{"cur":"TRY","acc":[20,58,135],"food":[9,24,54],"trans":[4,10,22],"fun":[7,20,46]}, colId:"istanbul", colName:"Istanbul", colFlag:"🇹🇷", colRegion:"Europe", _coli:23},
+  {id:"jordan", name:"Petra", cc:"JO", inspire:true, country:"Jordan", continent:"middleeast", types:["history","culture","adventure"], budget:2, season:"Mar-May, Sep-Oct", dailyRange:"$60-$160", visa:"Jordan Pass available", desc:"The Rose-Red City carved into sandstone cliffs by Nabataean traders — walk the Siq at dawn for maximum wonder."},
+  {id:"oman", name:"Oman", cc:"OM", inspire:true, country:"Oman", continent:"middleeast", types:["culture","nature","adventure"], budget:3, season:"Oct-Mar", dailyRange:"$80-$200", visa:"E-visa required", desc:"The friendliest country in the Middle East — forts, desert dunes, fjord-like wadis, and Muscat's spice souks."},
+  {id:"israel", name:"Jerusalem", cc:"IL", inspire:true, country:"Israel", continent:"middleeast", types:["history","culture","city"], budget:3, season:"Mar-May, Sep-Nov", dailyRange:"$90-$220", visa:"Visa-free (90 days)", desc:"Three of the world's great religions converge in one ancient walled city of extraordinary spiritual weight.", tz:"Asia/Jerusalem", tzCity:"Jerusalem", tzCountry:"Israel", tzFlag:"🇮🇱", _tzi:75},
+  {id:"abu-dhabi", name:"Abu Dhabi", cc:"AE", inspire:true, country:"UAE", continent:"middleeast", types:["city","culture","themepark","family"], budget:4, season:"Nov-Mar", dailyRange:"$120-$350", visa:"Visa on arrival", desc:"The Sheikh Zayed Grand Mosque, Formula 1 racing, Ferrari World, and a calmer luxury than neighbour Dubai.", tz:"Asia/Dubai", tzCity:"Abu Dhabi", tzCountry:"UAE", tzFlag:"🇦🇪", _tzi:71},
+  {id:"alula", name:"AlUla", cc:"SA", inspire:true, country:"Saudi Arabia", continent:"middleeast", types:["history","nature","adventure"], budget:3, season:"Oct-Mar", dailyRange:"$80-$250", visa:"Tourist visa required", desc:"Saudi Arabia's jaw-dropping ancient Nabataean city and rock formations — travel's most exciting new frontier."},
+  // ── supplementary cities (Time Zone / Cost of Living coverage) ──
+  {id:"tz-newyork", name:"New York", cc:"US", inspire:false, tz:"America/New_York", tzCity:"New York", tzCountry:"United States", tzFlag:"🇺🇸", _tzi:0, cost:{"cur":"USD","acc":[55,140,300],"food":[24,52,110],"trans":[8,16,34],"fun":[18,42,90]}, colId:"nyc", colName:"New York", colFlag:"🇺🇸", colRegion:"North America", _coli:26},
+  {id:"tz-sanfrancisco", name:"San Francisco", cc:"US", inspire:false, tz:"America/Los_Angeles", tzCity:"San Francisco", tzCountry:"United States", tzFlag:"🇺🇸", _tzi:2, cost:{"cur":"USD","acc":[58,145,310],"food":[24,52,110],"trans":[8,17,36],"fun":[18,42,90]}, colId:"sf", colName:"San Francisco", colFlag:"🇺🇸", colRegion:"North America", _coli:27},
+  {id:"tz-seattle", name:"Seattle", cc:"US", inspire:false, tz:"America/Los_Angeles", tzCity:"Seattle", tzCountry:"United States", tzFlag:"🇺🇸", _tzi:3},
+  {id:"tz-lasvegas", name:"Las Vegas", cc:"US", inspire:false, tz:"America/Los_Angeles", tzCity:"Las Vegas", tzCountry:"United States", tzFlag:"🇺🇸", _tzi:4},
+  {id:"tz-chicago", name:"Chicago", cc:"US", inspire:false, tz:"America/Chicago", tzCity:"Chicago", tzCountry:"United States", tzFlag:"🇺🇸", _tzi:5},
+  {id:"tz-dallas", name:"Dallas", cc:"US", inspire:false, tz:"America/Chicago", tzCity:"Dallas", tzCountry:"United States", tzFlag:"🇺🇸", _tzi:6},
+  {id:"tz-houston", name:"Houston", cc:"US", inspire:false, tz:"America/Chicago", tzCity:"Houston", tzCountry:"United States", tzFlag:"🇺🇸", _tzi:7},
+  {id:"tz-denver", name:"Denver", cc:"US", inspire:false, tz:"America/Denver", tzCity:"Denver", tzCountry:"United States", tzFlag:"🇺🇸", _tzi:8},
+  {id:"tz-phoenix", name:"Phoenix", cc:"US", inspire:false, tz:"America/Phoenix", tzCity:"Phoenix", tzCountry:"United States", tzFlag:"🇺🇸", _tzi:9},
+  {id:"tz-miami", name:"Miami", cc:"US", inspire:false, tz:"America/New_York", tzCity:"Miami", tzCountry:"United States", tzFlag:"🇺🇸", _tzi:10},
+  {id:"tz-boston", name:"Boston", cc:"US", inspire:false, tz:"America/New_York", tzCity:"Boston", tzCountry:"United States", tzFlag:"🇺🇸", _tzi:12},
+  {id:"tz-washingtondc", name:"Washington DC", cc:"US", inspire:false, tz:"America/New_York", tzCity:"Washington DC", tzCountry:"United States", tzFlag:"🇺🇸", _tzi:13},
+  {id:"tz-atlanta", name:"Atlanta", cc:"US", inspire:false, tz:"America/New_York", tzCity:"Atlanta", tzCountry:"United States", tzFlag:"🇺🇸", _tzi:14},
+  {id:"tz-honolulu", name:"Honolulu", cc:"US", inspire:false, tz:"Pacific/Honolulu", tzCity:"Honolulu", tzCountry:"United States", tzFlag:"🇺🇸", _tzi:15},
+  {id:"tz-anchorage", name:"Anchorage", cc:"US", inspire:false, tz:"America/Anchorage", tzCity:"Anchorage", tzCountry:"United States", tzFlag:"🇺🇸", _tzi:16},
+  {id:"tz-toronto", name:"Toronto", cc:"CA", inspire:false, tz:"America/Toronto", tzCity:"Toronto", tzCountry:"Canada", tzFlag:"🇨🇦", _tzi:17, cost:{"cur":"CAD","acc":[42,112,242],"food":[19,42,90],"trans":[8,16,34],"fun":[14,34,74]}, colId:"toronto", colName:"Toronto", colFlag:"🇨🇦", colRegion:"North America", _coli:29},
+  {id:"tz-montreal", name:"Montreal", cc:"CA", inspire:false, tz:"America/Toronto", tzCity:"Montreal", tzCountry:"Canada", tzFlag:"🇨🇦", _tzi:18},
+  {id:"tz-vancouver", name:"Vancouver", cc:"CA", inspire:false, tz:"America/Vancouver", tzCity:"Vancouver", tzCountry:"Canada", tzFlag:"🇨🇦", _tzi:19, cost:{"cur":"CAD","acc":[44,116,250],"food":[19,42,90],"trans":[8,16,34],"fun":[14,34,74]}, colId:"vancouver", colName:"Vancouver", colFlag:"🇨🇦", colRegion:"North America", _coli:30},
+  {id:"tz-calgary", name:"Calgary", cc:"CA", inspire:false, tz:"America/Edmonton", tzCity:"Calgary", tzCountry:"Canada", tzFlag:"🇨🇦", _tzi:20},
+  {id:"tz-halifax", name:"Halifax", cc:"CA", inspire:false, tz:"America/Halifax", tzCity:"Halifax", tzCountry:"Canada", tzFlag:"🇨🇦", _tzi:21},
+  {id:"tz-cancun", name:"Cancún", cc:"MX", inspire:false, tz:"America/Cancun", tzCity:"Cancún", tzCountry:"Mexico", tzFlag:"🇲🇽", _tzi:23},
+  {id:"tz-tijuana", name:"Tijuana", cc:"MX", inspire:false, tz:"America/Tijuana", tzCity:"Tijuana", tzCountry:"Mexico", tzFlag:"🇲🇽", _tzi:24},
+  {id:"tz-sanjose", name:"San José", cc:"CR", inspire:false, tz:"America/Costa_Rica", tzCity:"San José", tzCountry:"Costa Rica", tzFlag:"🇨🇷", _tzi:26},
+  {id:"tz-panamacity", name:"Panama City", cc:"PA", inspire:false, tz:"America/Panama", tzCity:"Panama City", tzCountry:"Panama", tzFlag:"🇵🇦", _tzi:27},
+  {id:"tz-bogota", name:"Bogotá", cc:"CO", inspire:false, tz:"America/Bogota", tzCity:"Bogotá", tzCountry:"Colombia", tzFlag:"🇨🇴", _tzi:28},
+  {id:"tz-lima", name:"Lima", cc:"PE", inspire:false, tz:"America/Lima", tzCity:"Lima", tzCountry:"Peru", tzFlag:"🇵🇪", _tzi:29, cost:{"cur":"PEN","acc":[16,48,110],"food":[8,20,46],"trans":[3,8,18],"fun":[6,17,40]}, colId:"lima", colName:"Lima", colFlag:"🇵🇪", colRegion:"Latin America", _coli:34},
+  {id:"tz-santiago", name:"Santiago", cc:"CL", inspire:false, tz:"America/Santiago", tzCity:"Santiago", tzCountry:"Chile", tzFlag:"🇨🇱", _tzi:30},
+  {id:"tz-saopaulo", name:"São Paulo", cc:"BR", inspire:false, tz:"America/Sao_Paulo", tzCity:"São Paulo", tzCountry:"Brazil", tzFlag:"🇧🇷", _tzi:33},
+  {id:"tz-caracas", name:"Caracas", cc:"VE", inspire:false, tz:"America/Caracas", tzCity:"Caracas", tzCountry:"Venezuela", tzFlag:"🇻🇪", _tzi:34},
+  {id:"tz-quito", name:"Quito", cc:"EC", inspire:false, tz:"America/Guayaquil", tzCity:"Quito", tzCountry:"Ecuador", tzFlag:"🇪🇨", _tzi:35},
+  {id:"tz-montevideo", name:"Montevideo", cc:"UY", inspire:false, tz:"America/Montevideo", tzCity:"Montevideo", tzCountry:"Uruguay", tzFlag:"🇺🇾", _tzi:36},
+  {id:"tz-london", name:"London", cc:"GB", inspire:false, tz:"Europe/London", tzCity:"London", tzCountry:"United Kingdom", tzFlag:"🇬🇧", _tzi:37, cost:{"cur":"GBP","acc":[50,130,280],"food":[22,48,100],"trans":[10,20,42],"fun":[16,38,80]}, colId:"london", colName:"London", colFlag:"🇬🇧", colRegion:"Europe", _coli:14},
+  {id:"tz-dublin", name:"Dublin", cc:"IE", inspire:false, tz:"Europe/Dublin", tzCity:"Dublin", tzCountry:"Ireland", tzFlag:"🇮🇪", _tzi:39},
+  {id:"tz-nice", name:"Nice", cc:"FR", inspire:false, tz:"Europe/Paris", tzCity:"Nice", tzCountry:"France", tzFlag:"🇫🇷", _tzi:41},
+  {id:"tz-berlin", name:"Berlin", cc:"DE", inspire:false, tz:"Europe/Berlin", tzCity:"Berlin", tzCountry:"Germany", tzFlag:"🇩🇪", _tzi:42, cost:{"cur":"EUR","acc":[34,92,200],"food":[16,36,78],"trans":[8,16,34],"fun":[13,30,66]}, colId:"berlin", colName:"Berlin", colFlag:"🇩🇪", colRegion:"Europe", _coli:18},
+  {id:"tz-munich", name:"Munich", cc:"DE", inspire:false, tz:"Europe/Berlin", tzCity:"Munich", tzCountry:"Germany", tzFlag:"🇩🇪", _tzi:43},
+  {id:"tz-frankfurt", name:"Frankfurt", cc:"DE", inspire:false, tz:"Europe/Berlin", tzCity:"Frankfurt", tzCountry:"Germany", tzFlag:"🇩🇪", _tzi:44},
+  {id:"tz-brussels", name:"Brussels", cc:"BE", inspire:false, tz:"Europe/Brussels", tzCity:"Brussels", tzCountry:"Belgium", tzFlag:"🇧🇪", _tzi:46},
+  {id:"tz-zurich", name:"Zurich", cc:"CH", inspire:false, tz:"Europe/Zurich", tzCity:"Zurich", tzCountry:"Switzerland", tzFlag:"🇨🇭", _tzi:47, cost:{"cur":"CHF","acc":[60,150,320],"food":[28,60,125],"trans":[9,19,40],"fun":[20,46,98]}, colId:"zurich", colName:"Zurich", colFlag:"🇨🇭", colRegion:"Europe", _coli:25},
+  {id:"tz-geneva", name:"Geneva", cc:"CH", inspire:false, tz:"Europe/Zurich", tzCity:"Geneva", tzCountry:"Switzerland", tzFlag:"🇨🇭", _tzi:48},
+  {id:"tz-warsaw", name:"Warsaw", cc:"PL", inspire:false, tz:"Europe/Warsaw", tzCity:"Warsaw", tzCountry:"Poland", tzFlag:"🇵🇱", _tzi:52},
+  {id:"tz-madrid", name:"Madrid", cc:"ES", inspire:false, tz:"Europe/Madrid", tzCity:"Madrid", tzCountry:"Spain", tzFlag:"🇪🇸", _tzi:53},
+  {id:"tz-milan", name:"Milan", cc:"IT", inspire:false, tz:"Europe/Rome", tzCity:"Milan", tzCountry:"Italy", tzFlag:"🇮🇹", _tzi:57},
+  {id:"tz-venice", name:"Venice", cc:"IT", inspire:false, tz:"Europe/Rome", tzCity:"Venice", tzCountry:"Italy", tzFlag:"🇮🇹", _tzi:58},
+  {id:"tz-athens", name:"Athens", cc:"GR", inspire:false, tz:"Europe/Athens", tzCity:"Athens", tzCountry:"Greece", tzFlag:"🇬🇷", _tzi:59, cost:{"cur":"EUR","acc":[28,78,170],"food":[13,30,66],"trans":[5,12,26],"fun":[10,25,56]}, colId:"athens", colName:"Athens", colFlag:"🇬🇷", colRegion:"Europe", _coli:22},
+  {id:"tz-copenhagen", name:"Copenhagen", cc:"DK", inspire:false, tz:"Europe/Copenhagen", tzCity:"Copenhagen", tzCountry:"Denmark", tzFlag:"🇩🇰", _tzi:61},
+  {id:"tz-stockholm", name:"Stockholm", cc:"SE", inspire:false, tz:"Europe/Stockholm", tzCity:"Stockholm", tzCountry:"Sweden", tzFlag:"🇸🇪", _tzi:62},
+  {id:"tz-oslo", name:"Oslo", cc:"NO", inspire:false, tz:"Europe/Oslo", tzCity:"Oslo", tzCountry:"Norway", tzFlag:"🇳🇴", _tzi:63},
+  {id:"tz-helsinki", name:"Helsinki", cc:"FI", inspire:false, tz:"Europe/Helsinki", tzCity:"Helsinki", tzCountry:"Finland", tzFlag:"🇫🇮", _tzi:64},
+  {id:"tz-reykjavik", name:"Reykjavík", cc:"IS", inspire:false, tz:"Atlantic/Reykjavik", tzCity:"Reykjavík", tzCountry:"Iceland", tzFlag:"🇮🇸", _tzi:65, cost:{"cur":"ISK","acc":[55,140,300],"food":[26,55,115],"trans":[8,18,38],"fun":[18,42,90]}, colId:"reykjavik", colName:"Reykjavik", colFlag:"🇮🇸", colRegion:"Europe", _coli:24},
+  {id:"tz-moscow", name:"Moscow", cc:"RU", inspire:false, tz:"Europe/Moscow", tzCity:"Moscow", tzCountry:"Russia", tzFlag:"🇷🇺", _tzi:66},
+  {id:"tz-saintpetersburg", name:"Saint Petersburg", cc:"RU", inspire:false, tz:"Europe/Moscow", tzCity:"Saint Petersburg", tzCountry:"Russia", tzFlag:"🇷🇺", _tzi:67},
+  {id:"tz-kyiv", name:"Kyiv", cc:"UA", inspire:false, tz:"Europe/Kyiv", tzCity:"Kyiv", tzCountry:"Ukraine", tzFlag:"🇺🇦", _tzi:68},
+  {id:"tz-bucharest", name:"Bucharest", cc:"RO", inspire:false, tz:"Europe/Bucharest", tzCity:"Bucharest", tzCountry:"Romania", tzFlag:"🇷🇴", _tzi:69},
+  {id:"tz-doha", name:"Doha", cc:"QA", inspire:false, tz:"Asia/Qatar", tzCity:"Doha", tzCountry:"Qatar", tzFlag:"🇶🇦", _tzi:72},
+  {id:"tz-riyadh", name:"Riyadh", cc:"SA", inspire:false, tz:"Asia/Riyadh", tzCity:"Riyadh", tzCountry:"Saudi Arabia", tzFlag:"🇸🇦", _tzi:73},
+  {id:"tz-telaviv", name:"Tel Aviv", cc:"IL", inspire:false, tz:"Asia/Jerusalem", tzCity:"Tel Aviv", tzCountry:"Israel", tzFlag:"🇮🇱", _tzi:74},
+  {id:"tz-tehran", name:"Tehran", cc:"IR", inspire:false, tz:"Asia/Tehran", tzCity:"Tehran", tzCountry:"Iran", tzFlag:"🇮🇷", _tzi:76},
+  {id:"tz-cairo", name:"Cairo", cc:"EG", inspire:false, tz:"Africa/Cairo", tzCity:"Cairo", tzCountry:"Egypt", tzFlag:"🇪🇬", _tzi:77, cost:{"cur":"EGP","acc":[14,42,98],"food":[7,18,40],"trans":[3,8,18],"fun":[6,16,38]}, colId:"cairo", colName:"Cairo", colFlag:"🇪🇬", colRegion:"Middle East & Africa", _coli:38},
+  {id:"tz-casablanca", name:"Casablanca", cc:"MA", inspire:false, tz:"Africa/Casablanca", tzCity:"Casablanca", tzCountry:"Morocco", tzFlag:"🇲🇦", _tzi:78},
+  {id:"tz-lagos", name:"Lagos", cc:"NG", inspire:false, tz:"Africa/Lagos", tzCity:"Lagos", tzCountry:"Nigeria", tzFlag:"🇳🇬", _tzi:80},
+  {id:"tz-nairobi", name:"Nairobi", cc:"KE", inspire:false, tz:"Africa/Nairobi", tzCity:"Nairobi", tzCountry:"Kenya", tzFlag:"🇰🇪", _tzi:81},
+  {id:"tz-addisababa", name:"Addis Ababa", cc:"ET", inspire:false, tz:"Africa/Addis_Ababa", tzCity:"Addis Ababa", tzCountry:"Ethiopia", tzFlag:"🇪🇹", _tzi:82},
+  {id:"tz-johannesburg", name:"Johannesburg", cc:"ZA", inspire:false, tz:"Africa/Johannesburg", tzCity:"Johannesburg", tzCountry:"South Africa", tzFlag:"🇿🇦", _tzi:83},
+  {id:"tz-mumbai", name:"Mumbai", cc:"IN", inspire:false, tz:"Asia/Kolkata", tzCity:"Mumbai", tzCountry:"India", tzFlag:"🇮🇳", _tzi:85},
+  {id:"tz-delhi", name:"Delhi", cc:"IN", inspire:false, tz:"Asia/Kolkata", tzCity:"Delhi", tzCountry:"India", tzFlag:"🇮🇳", _tzi:86, cost:{"cur":"INR","acc":[10,35,85],"food":[5,15,35],"trans":[3,8,18],"fun":[5,14,32]}, colId:"delhi", colName:"Delhi", colFlag:"🇮🇳", colRegion:"Asia", _coli:4},
+  {id:"tz-bengaluru", name:"Bengaluru", cc:"IN", inspire:false, tz:"Asia/Kolkata", tzCity:"Bengaluru", tzCountry:"India", tzFlag:"🇮🇳", _tzi:87},
+  {id:"tz-kolkata", name:"Kolkata", cc:"IN", inspire:false, tz:"Asia/Kolkata", tzCity:"Kolkata", tzCountry:"India", tzFlag:"🇮🇳", _tzi:88},
+  {id:"tz-chennai", name:"Chennai", cc:"IN", inspire:false, tz:"Asia/Kolkata", tzCity:"Chennai", tzCountry:"India", tzFlag:"🇮🇳", _tzi:89},
+  {id:"tz-karachi", name:"Karachi", cc:"PK", inspire:false, tz:"Asia/Karachi", tzCity:"Karachi", tzCountry:"Pakistan", tzFlag:"🇵🇰", _tzi:90},
+  {id:"tz-islamabad", name:"Islamabad", cc:"PK", inspire:false, tz:"Asia/Karachi", tzCity:"Islamabad", tzCountry:"Pakistan", tzFlag:"🇵🇰", _tzi:91},
+  {id:"tz-dhaka", name:"Dhaka", cc:"BD", inspire:false, tz:"Asia/Dhaka", tzCity:"Dhaka", tzCountry:"Bangladesh", tzFlag:"🇧🇩", _tzi:92},
+  {id:"tz-kathmandu", name:"Kathmandu", cc:"NP", inspire:false, tz:"Asia/Kathmandu", tzCity:"Kathmandu", tzCountry:"Nepal", tzFlag:"🇳🇵", _tzi:93},
+  {id:"tz-colombo", name:"Colombo", cc:"LK", inspire:false, tz:"Asia/Colombo", tzCity:"Colombo", tzCountry:"Sri Lanka", tzFlag:"🇱🇰", _tzi:94},
+  {id:"tz-chiangmai", name:"Chiang Mai", cc:"TH", inspire:false, tz:"Asia/Bangkok", tzCity:"Chiang Mai", tzCountry:"Thailand", tzFlag:"🇹🇭", _tzi:96},
+  {id:"tz-kualalumpur", name:"Kuala Lumpur", cc:"MY", inspire:false, tz:"Asia/Kuala_Lumpur", tzCity:"Kuala Lumpur", tzCountry:"Malaysia", tzFlag:"🇲🇾", _tzi:98, cost:{"cur":"MYR","acc":[14,42,95],"food":[7,18,40],"trans":[3,9,20],"fun":[6,16,38]}, colId:"kl", colName:"Kuala Lumpur", colFlag:"🇲🇾", colRegion:"Asia", _coli:3},
+  {id:"tz-jakarta", name:"Jakarta", cc:"ID", inspire:false, tz:"Asia/Jakarta", tzCity:"Jakarta", tzCountry:"Indonesia", tzFlag:"🇮🇩", _tzi:99},
+  {id:"tz-balidenpasar", name:"Bali (Denpasar)", cc:"ID", inspire:false, tz:"Asia/Makassar", tzCity:"Bali (Denpasar)", tzCountry:"Indonesia", tzFlag:"🇮🇩", _tzi:100},
+  {id:"tz-manila", name:"Manila", cc:"PH", inspire:false, tz:"Asia/Manila", tzCity:"Manila", tzCountry:"Philippines", tzFlag:"🇵🇭", _tzi:101, cost:{"cur":"PHP","acc":[14,42,95],"food":[7,18,40],"trans":[4,10,22],"fun":[6,16,36]}, colId:"manila", colName:"Manila", colFlag:"🇵🇭", colRegion:"Asia", _coli:5},
+  {id:"tz-hanoi", name:"Hanoi", cc:"VN", inspire:false, tz:"Asia/Bangkok", tzCity:"Hanoi", tzCountry:"Vietnam", tzFlag:"🇻🇳", _tzi:102, cost:{"cur":"VND","acc":[10,32,75],"food":[6,16,38],"trans":[3,7,18],"fun":[5,15,34]}, colId:"hanoi", colName:"Hanoi", colFlag:"🇻🇳", colRegion:"Asia", _coli:1},
+  {id:"tz-hochiminhcity", name:"Ho Chi Minh City", cc:"VN", inspire:false, tz:"Asia/Ho_Chi_Minh", tzCity:"Ho Chi Minh City", tzCountry:"Vietnam", tzFlag:"🇻🇳", _tzi:103},
+  {id:"tz-phnompenh", name:"Phnom Penh", cc:"KH", inspire:false, tz:"Asia/Phnom_Penh", tzCity:"Phnom Penh", tzCountry:"Cambodia", tzFlag:"🇰🇭", _tzi:104},
+  {id:"tz-yangon", name:"Yangon", cc:"MM", inspire:false, tz:"Asia/Yangon", tzCity:"Yangon", tzCountry:"Myanmar", tzFlag:"🇲🇲", _tzi:105},
+  {id:"tz-shanghai", name:"Shanghai", cc:"CN", inspire:false, tz:"Asia/Shanghai", tzCity:"Shanghai", tzCountry:"China", tzFlag:"🇨🇳", _tzi:108, cost:{"cur":"CNY","acc":[26,75,165],"food":[11,28,62],"trans":[5,12,26],"fun":[9,24,54]}, colId:"shanghai", colName:"Shanghai", colFlag:"🇨🇳", colRegion:"Asia", _coli:12},
+  {id:"tz-beijing", name:"Beijing", cc:"CN", inspire:false, tz:"Asia/Shanghai", tzCity:"Beijing", tzCountry:"China", tzFlag:"🇨🇳", _tzi:109},
+  {id:"tz-guangzhou", name:"Guangzhou", cc:"CN", inspire:false, tz:"Asia/Shanghai", tzCity:"Guangzhou", tzCountry:"China", tzFlag:"🇨🇳", _tzi:110},
+  {id:"tz-osaka", name:"Osaka", cc:"JP", inspire:false, tz:"Asia/Tokyo", tzCity:"Osaka", tzCountry:"Japan", tzFlag:"🇯🇵", _tzi:112},
+  {id:"tz-seoul", name:"Seoul", cc:"KR", inspire:false, tz:"Asia/Seoul", tzCity:"Seoul", tzCountry:"South Korea", tzFlag:"🇰🇷", _tzi:114, cost:{"cur":"KRW","acc":[28,80,175],"food":[14,34,72],"trans":[6,14,30],"fun":[10,26,58]}, colId:"seoul", colName:"Seoul", colFlag:"🇰🇷", colRegion:"Asia", _coli:8},
+  {id:"tz-busan", name:"Busan", cc:"KR", inspire:false, tz:"Asia/Seoul", tzCity:"Busan", tzCountry:"South Korea", tzFlag:"🇰🇷", _tzi:115},
+  {id:"tz-ulaanbaatar", name:"Ulaanbaatar", cc:"MN", inspire:false, tz:"Asia/Ulaanbaatar", tzCity:"Ulaanbaatar", tzCountry:"Mongolia", tzFlag:"🇲🇳", _tzi:116},
+  {id:"tz-melbourne", name:"Melbourne", cc:"AU", inspire:false, tz:"Australia/Melbourne", tzCity:"Melbourne", tzCountry:"Australia", tzFlag:"🇦🇺", _tzi:118},
+  {id:"tz-brisbane", name:"Brisbane", cc:"AU", inspire:false, tz:"Australia/Brisbane", tzCity:"Brisbane", tzCountry:"Australia", tzFlag:"🇦🇺", _tzi:119},
+  {id:"tz-perth", name:"Perth", cc:"AU", inspire:false, tz:"Australia/Perth", tzCity:"Perth", tzCountry:"Australia", tzFlag:"🇦🇺", _tzi:120},
+  {id:"tz-adelaide", name:"Adelaide", cc:"AU", inspire:false, tz:"Australia/Adelaide", tzCity:"Adelaide", tzCountry:"Australia", tzFlag:"🇦🇺", _tzi:121},
+  {id:"tz-auckland", name:"Auckland", cc:"NZ", inspire:false, tz:"Pacific/Auckland", tzCity:"Auckland", tzCountry:"New Zealand", tzFlag:"🇳🇿", _tzi:122, cost:{"cur":"NZD","acc":[40,108,235],"food":[19,42,90],"trans":[7,15,32],"fun":[14,34,74]}, colId:"auckland", colName:"Auckland", colFlag:"🇳🇿", colRegion:"Oceania", _coli:36},
+  {id:"tz-wellington", name:"Wellington", cc:"NZ", inspire:false, tz:"Pacific/Auckland", tzCity:"Wellington", tzCountry:"New Zealand", tzFlag:"🇳🇿", _tzi:123},
+  {id:"tz-christchurch", name:"Christchurch", cc:"NZ", inspire:false, tz:"Pacific/Auckland", tzCity:"Christchurch", tzCountry:"New Zealand", tzFlag:"🇳🇿", _tzi:124},
+  {id:"tz-suva", name:"Suva", cc:"FJ", inspire:false, tz:"Pacific/Fiji", tzCity:"Suva", tzCountry:"Fiji", tzFlag:"🇫🇯", _tzi:125},
+  {id:"tz-apia", name:"Apia", cc:"WS", inspire:false, tz:"Pacific/Apia", tzCity:"Apia", tzCountry:"Samoa", tzFlag:"🇼🇸", _tzi:126},
+  {id:"tz-papeete", name:"Papeete", cc:"PF", inspire:false, tz:"Pacific/Tahiti", tzCity:"Papeete", tzCountry:"French Polynesia", tzFlag:"🇵🇫", _tzi:127},
+  {id:"tz-guam", name:"Guam", cc:"GU", inspire:false, tz:"Pacific/Guam", tzCity:"Guam", tzCountry:"Guam", tzFlag:"🇬🇺", _tzi:128},
+  {id:"tz-utc", name:"UTC", cc:null, inspire:false, tz:"UTC", tzCity:"UTC", tzCountry:"Coordinated", tzFlag:"🌐", _tzi:129},
+  {id:"col-bali", name:"Bali (Ubud)", cc:"ID", inspire:false, cost:{"cur":"IDR","acc":[12,40,100],"food":[7,18,42],"trans":[4,10,22],"fun":[6,18,42]}, colId:"bali", colName:"Bali (Ubud)", colFlag:"🇮🇩", colRegion:"Asia", _coli:2},
 ];
+
+/* Projections — back-compat views so existing tools stay untouched. */
+const DP_DESTINATIONS = TT_DESTINATIONS.filter(d => d.inspire).map(d => ({
+  id:d.id, name:d.name, country:d.country, flag:d.cc, continent:d.continent,
+  types:d.types, budget:d.budget, season:d.season, dailyRange:d.dailyRange, visa:d.visa, desc:d.desc
+}));
+const TZ_CITIES = TT_DESTINATIONS.filter(d => d.tz !== undefined)
+  .sort((a,b) => a._tzi - b._tzi)
+  .map(d => ({ city:d.tzCity, country:d.tzCountry, tz:d.tz, flag:d.tzFlag }));
+const COL_CITIES = TT_DESTINATIONS.filter(d => d.cost !== undefined)
+  .sort((a,b) => a._coli - b._coli)
+  .map(d => ({ id:d.colId, n:d.colName, flag:d.colFlag, region:d.colRegion,
+    cur:d.cost.cur, acc:d.cost.acc, food:d.cost.food, trans:d.cost.trans, fun:d.cost.fun }));
+
+/* City → country index, so resolveDestination() can resolve bare cities
+   (e.g. "Tokyo" → JP). Consulted by the resolver after country matching. */
+const TT_DEST_INDEX = (function(){
+  const ix = {};
+  TT_DESTINATIONS.forEach(d => {
+    if (!d.cc) return;
+    const add = s => { if (s){ const k = s.toLowerCase().trim(); if (!ix[k]) ix[k] = { cc:d.cc, id:d.id }; } };
+    add(d.name); add(d.tzCity); add(d.colName);
+  });
+  return ix;
+})();
 
 /* State */
 let dpFilters = { continent: 'all', type: 'all', budgets: new Set(['1','2','3','4','5']) };
@@ -30157,145 +30316,7 @@ function lwcEsc(s) {
 
 /* Curated list of major travel cities → IANA zones.
    Covers all populated continents + Phase-1 destination matches. */
-const TZ_CITIES = [
-  // ── North America ──
-  {city:'New York',      country:'United States',     tz:'America/New_York',       flag:'🇺🇸'},
-  {city:'Los Angeles',   country:'United States',     tz:'America/Los_Angeles',    flag:'🇺🇸'},
-  {city:'San Francisco', country:'United States',     tz:'America/Los_Angeles',    flag:'🇺🇸'},
-  {city:'Seattle',       country:'United States',     tz:'America/Los_Angeles',    flag:'🇺🇸'},
-  {city:'Las Vegas',     country:'United States',     tz:'America/Los_Angeles',    flag:'🇺🇸'},
-  {city:'Chicago',       country:'United States',     tz:'America/Chicago',        flag:'🇺🇸'},
-  {city:'Dallas',        country:'United States',     tz:'America/Chicago',        flag:'🇺🇸'},
-  {city:'Houston',       country:'United States',     tz:'America/Chicago',        flag:'🇺🇸'},
-  {city:'Denver',        country:'United States',     tz:'America/Denver',         flag:'🇺🇸'},
-  {city:'Phoenix',       country:'United States',     tz:'America/Phoenix',        flag:'🇺🇸'},
-  {city:'Miami',         country:'United States',     tz:'America/New_York',       flag:'🇺🇸'},
-  {city:'Orlando',       country:'United States',     tz:'America/New_York',       flag:'🇺🇸'},
-  {city:'Boston',        country:'United States',     tz:'America/New_York',       flag:'🇺🇸'},
-  {city:'Washington DC', country:'United States',     tz:'America/New_York',       flag:'🇺🇸'},
-  {city:'Atlanta',       country:'United States',     tz:'America/New_York',       flag:'🇺🇸'},
-  {city:'Honolulu',      country:'United States',     tz:'Pacific/Honolulu',       flag:'🇺🇸'},
-  {city:'Anchorage',     country:'United States',     tz:'America/Anchorage',      flag:'🇺🇸'},
-  {city:'Toronto',       country:'Canada',            tz:'America/Toronto',        flag:'🇨🇦'},
-  {city:'Montreal',      country:'Canada',            tz:'America/Toronto',        flag:'🇨🇦'},
-  {city:'Vancouver',     country:'Canada',            tz:'America/Vancouver',      flag:'🇨🇦'},
-  {city:'Calgary',       country:'Canada',            tz:'America/Edmonton',       flag:'🇨🇦'},
-  {city:'Halifax',       country:'Canada',            tz:'America/Halifax',        flag:'🇨🇦'},
-  {city:'Mexico City',   country:'Mexico',            tz:'America/Mexico_City',    flag:'🇲🇽'},
-  {city:'Cancún',        country:'Mexico',            tz:'America/Cancun',         flag:'🇲🇽'},
-  {city:'Tijuana',       country:'Mexico',            tz:'America/Tijuana',        flag:'🇲🇽'},
-  // ── Central / South America / Caribbean ──
-  {city:'Havana',        country:'Cuba',              tz:'America/Havana',         flag:'🇨🇺'},
-  {city:'San José',      country:'Costa Rica',        tz:'America/Costa_Rica',     flag:'🇨🇷'},
-  {city:'Panama City',   country:'Panama',            tz:'America/Panama',         flag:'🇵🇦'},
-  {city:'Bogotá',        country:'Colombia',          tz:'America/Bogota',         flag:'🇨🇴'},
-  {city:'Lima',          country:'Peru',              tz:'America/Lima',           flag:'🇵🇪'},
-  {city:'Santiago',      country:'Chile',             tz:'America/Santiago',       flag:'🇨🇱'},
-  {city:'Buenos Aires',  country:'Argentina',         tz:'America/Argentina/Buenos_Aires', flag:'🇦🇷'},
-  {city:'Rio de Janeiro',country:'Brazil',            tz:'America/Sao_Paulo',      flag:'🇧🇷'},
-  {city:'São Paulo',     country:'Brazil',            tz:'America/Sao_Paulo',      flag:'🇧🇷'},
-  {city:'Caracas',       country:'Venezuela',         tz:'America/Caracas',        flag:'🇻🇪'},
-  {city:'Quito',         country:'Ecuador',           tz:'America/Guayaquil',      flag:'🇪🇨'},
-  {city:'Montevideo',    country:'Uruguay',           tz:'America/Montevideo',     flag:'🇺🇾'},
-  // ── Europe ──
-  {city:'London',        country:'United Kingdom',    tz:'Europe/London',          flag:'🇬🇧'},
-  {city:'Edinburgh',     country:'United Kingdom',    tz:'Europe/London',          flag:'🇬🇧'},
-  {city:'Dublin',        country:'Ireland',           tz:'Europe/Dublin',          flag:'🇮🇪'},
-  {city:'Paris',         country:'France',            tz:'Europe/Paris',           flag:'🇫🇷'},
-  {city:'Nice',          country:'France',            tz:'Europe/Paris',           flag:'🇫🇷'},
-  {city:'Berlin',        country:'Germany',           tz:'Europe/Berlin',          flag:'🇩🇪'},
-  {city:'Munich',        country:'Germany',           tz:'Europe/Berlin',          flag:'🇩🇪'},
-  {city:'Frankfurt',     country:'Germany',           tz:'Europe/Berlin',          flag:'🇩🇪'},
-  {city:'Amsterdam',     country:'Netherlands',       tz:'Europe/Amsterdam',       flag:'🇳🇱'},
-  {city:'Brussels',      country:'Belgium',           tz:'Europe/Brussels',        flag:'🇧🇪'},
-  {city:'Zurich',        country:'Switzerland',       tz:'Europe/Zurich',          flag:'🇨🇭'},
-  {city:'Geneva',        country:'Switzerland',       tz:'Europe/Zurich',          flag:'🇨🇭'},
-  {city:'Vienna',        country:'Austria',           tz:'Europe/Vienna',          flag:'🇦🇹'},
-  {city:'Prague',        country:'Czech Republic',    tz:'Europe/Prague',          flag:'🇨🇿'},
-  {city:'Budapest',      country:'Hungary',           tz:'Europe/Budapest',        flag:'🇭🇺'},
-  {city:'Warsaw',        country:'Poland',            tz:'Europe/Warsaw',          flag:'🇵🇱'},
-  {city:'Madrid',        country:'Spain',             tz:'Europe/Madrid',          flag:'🇪🇸'},
-  {city:'Barcelona',     country:'Spain',             tz:'Europe/Madrid',          flag:'🇪🇸'},
-  {city:'Lisbon',        country:'Portugal',          tz:'Europe/Lisbon',          flag:'🇵🇹'},
-  {city:'Rome',          country:'Italy',             tz:'Europe/Rome',            flag:'🇮🇹'},
-  {city:'Milan',         country:'Italy',             tz:'Europe/Rome',            flag:'🇮🇹'},
-  {city:'Venice',        country:'Italy',             tz:'Europe/Rome',            flag:'🇮🇹'},
-  {city:'Athens',        country:'Greece',            tz:'Europe/Athens',          flag:'🇬🇷'},
-  {city:'Istanbul',      country:'Turkey',            tz:'Europe/Istanbul',        flag:'🇹🇷'},
-  {city:'Copenhagen',    country:'Denmark',           tz:'Europe/Copenhagen',      flag:'🇩🇰'},
-  {city:'Stockholm',     country:'Sweden',            tz:'Europe/Stockholm',       flag:'🇸🇪'},
-  {city:'Oslo',          country:'Norway',            tz:'Europe/Oslo',            flag:'🇳🇴'},
-  {city:'Helsinki',      country:'Finland',           tz:'Europe/Helsinki',        flag:'🇫🇮'},
-  {city:'Reykjavík',     country:'Iceland',           tz:'Atlantic/Reykjavik',     flag:'🇮🇸'},
-  {city:'Moscow',        country:'Russia',            tz:'Europe/Moscow',          flag:'🇷🇺'},
-  {city:'Saint Petersburg',country:'Russia',          tz:'Europe/Moscow',          flag:'🇷🇺'},
-  {city:'Kyiv',          country:'Ukraine',           tz:'Europe/Kyiv',            flag:'🇺🇦'},
-  {city:'Bucharest',     country:'Romania',           tz:'Europe/Bucharest',       flag:'🇷🇴'},
-  // ── Middle East / Africa ──
-  {city:'Dubai',         country:'UAE',               tz:'Asia/Dubai',             flag:'🇦🇪'},
-  {city:'Abu Dhabi',     country:'UAE',               tz:'Asia/Dubai',             flag:'🇦🇪'},
-  {city:'Doha',          country:'Qatar',             tz:'Asia/Qatar',             flag:'🇶🇦'},
-  {city:'Riyadh',        country:'Saudi Arabia',      tz:'Asia/Riyadh',            flag:'🇸🇦'},
-  {city:'Tel Aviv',      country:'Israel',            tz:'Asia/Jerusalem',         flag:'🇮🇱'},
-  {city:'Jerusalem',     country:'Israel',            tz:'Asia/Jerusalem',         flag:'🇮🇱'},
-  {city:'Tehran',        country:'Iran',              tz:'Asia/Tehran',            flag:'🇮🇷'},
-  {city:'Cairo',         country:'Egypt',             tz:'Africa/Cairo',           flag:'🇪🇬'},
-  {city:'Casablanca',    country:'Morocco',           tz:'Africa/Casablanca',      flag:'🇲🇦'},
-  {city:'Marrakech',     country:'Morocco',           tz:'Africa/Casablanca',      flag:'🇲🇦'},
-  {city:'Lagos',         country:'Nigeria',           tz:'Africa/Lagos',           flag:'🇳🇬'},
-  {city:'Nairobi',       country:'Kenya',             tz:'Africa/Nairobi',         flag:'🇰🇪'},
-  {city:'Addis Ababa',   country:'Ethiopia',          tz:'Africa/Addis_Ababa',     flag:'🇪🇹'},
-  {city:'Johannesburg',  country:'South Africa',      tz:'Africa/Johannesburg',    flag:'🇿🇦'},
-  {city:'Cape Town',     country:'South Africa',      tz:'Africa/Johannesburg',    flag:'🇿🇦'},
-  // ── Asia ──
-  {city:'Mumbai',        country:'India',             tz:'Asia/Kolkata',           flag:'🇮🇳'},
-  {city:'Delhi',         country:'India',             tz:'Asia/Kolkata',           flag:'🇮🇳'},
-  {city:'Bengaluru',     country:'India',             tz:'Asia/Kolkata',           flag:'🇮🇳'},
-  {city:'Kolkata',       country:'India',             tz:'Asia/Kolkata',           flag:'🇮🇳'},
-  {city:'Chennai',       country:'India',             tz:'Asia/Kolkata',           flag:'🇮🇳'},
-  {city:'Karachi',       country:'Pakistan',          tz:'Asia/Karachi',           flag:'🇵🇰'},
-  {city:'Islamabad',     country:'Pakistan',          tz:'Asia/Karachi',           flag:'🇵🇰'},
-  {city:'Dhaka',         country:'Bangladesh',        tz:'Asia/Dhaka',             flag:'🇧🇩'},
-  {city:'Kathmandu',     country:'Nepal',             tz:'Asia/Kathmandu',         flag:'🇳🇵'},
-  {city:'Colombo',       country:'Sri Lanka',         tz:'Asia/Colombo',           flag:'🇱🇰'},
-  {city:'Bangkok',       country:'Thailand',          tz:'Asia/Bangkok',           flag:'🇹🇭'},
-  {city:'Chiang Mai',    country:'Thailand',          tz:'Asia/Bangkok',           flag:'🇹🇭'},
-  {city:'Singapore',     country:'Singapore',         tz:'Asia/Singapore',         flag:'🇸🇬'},
-  {city:'Kuala Lumpur',  country:'Malaysia',          tz:'Asia/Kuala_Lumpur',      flag:'🇲🇾'},
-  {city:'Jakarta',       country:'Indonesia',         tz:'Asia/Jakarta',           flag:'🇮🇩'},
-  {city:'Bali (Denpasar)',country:'Indonesia',        tz:'Asia/Makassar',          flag:'🇮🇩'},
-  {city:'Manila',        country:'Philippines',       tz:'Asia/Manila',            flag:'🇵🇭'},
-  {city:'Hanoi',         country:'Vietnam',           tz:'Asia/Bangkok',           flag:'🇻🇳'},
-  {city:'Ho Chi Minh City',country:'Vietnam',         tz:'Asia/Ho_Chi_Minh',       flag:'🇻🇳'},
-  {city:'Phnom Penh',    country:'Cambodia',          tz:'Asia/Phnom_Penh',        flag:'🇰🇭'},
-  {city:'Yangon',        country:'Myanmar',           tz:'Asia/Yangon',            flag:'🇲🇲'},
-  {city:'Hong Kong',     country:'Hong Kong',         tz:'Asia/Hong_Kong',         flag:'🇭🇰'},
-  {city:'Taipei',        country:'Taiwan',            tz:'Asia/Taipei',            flag:'🇹🇼'},
-  {city:'Shanghai',      country:'China',             tz:'Asia/Shanghai',          flag:'🇨🇳'},
-  {city:'Beijing',       country:'China',             tz:'Asia/Shanghai',          flag:'🇨🇳'},
-  {city:'Guangzhou',     country:'China',             tz:'Asia/Shanghai',          flag:'🇨🇳'},
-  {city:'Tokyo',         country:'Japan',             tz:'Asia/Tokyo',             flag:'🇯🇵'},
-  {city:'Osaka',         country:'Japan',             tz:'Asia/Tokyo',             flag:'🇯🇵'},
-  {city:'Kyoto',         country:'Japan',             tz:'Asia/Tokyo',             flag:'🇯🇵'},
-  {city:'Seoul',         country:'South Korea',       tz:'Asia/Seoul',             flag:'🇰🇷'},
-  {city:'Busan',         country:'South Korea',       tz:'Asia/Seoul',             flag:'🇰🇷'},
-  {city:'Ulaanbaatar',   country:'Mongolia',          tz:'Asia/Ulaanbaatar',       flag:'🇲🇳'},
-  // ── Oceania ──
-  {city:'Sydney',        country:'Australia',         tz:'Australia/Sydney',       flag:'🇦🇺'},
-  {city:'Melbourne',     country:'Australia',         tz:'Australia/Melbourne',    flag:'🇦🇺'},
-  {city:'Brisbane',      country:'Australia',         tz:'Australia/Brisbane',     flag:'🇦🇺'},
-  {city:'Perth',         country:'Australia',         tz:'Australia/Perth',        flag:'🇦🇺'},
-  {city:'Adelaide',      country:'Australia',         tz:'Australia/Adelaide',     flag:'🇦🇺'},
-  {city:'Auckland',      country:'New Zealand',       tz:'Pacific/Auckland',       flag:'🇳🇿'},
-  {city:'Wellington',    country:'New Zealand',       tz:'Pacific/Auckland',       flag:'🇳🇿'},
-  {city:'Christchurch',  country:'New Zealand',       tz:'Pacific/Auckland',       flag:'🇳🇿'},
-  {city:'Suva',          country:'Fiji',              tz:'Pacific/Fiji',           flag:'🇫🇯'},
-  {city:'Apia',          country:'Samoa',             tz:'Pacific/Apia',           flag:'🇼🇸'},
-  {city:'Papeete',       country:'French Polynesia',  tz:'Pacific/Tahiti',         flag:'🇵🇫'},
-  {city:'Guam',          country:'Guam',              tz:'Pacific/Guam',           flag:'🇬🇺'},
-  // ── UTC anchors ──
-  {city:'UTC',           country:'Coordinated',       tz:'UTC',                    flag:'🌐'},
-];
+/* TZ_CITIES is now a projection of TT_DESTINATIONS (defined earlier with DP_DESTINATIONS). */
 
 const TZ_KEY = 'tt_timezone_v1';
 let tzState = null;
@@ -34358,55 +34379,7 @@ const COL_FALLBACK = {
 
 /* City dataset — typical USD/day per category, per tier [budget, mid-range, comfortable].
    acc = lodging/night · food = all meals · trans = local transport · fun = a drink + an attraction. */
-const COL_CITIES = [
-  // ── Asia ──
-  {id:'bangkok',  n:'Bangkok',      flag:'🇹🇭', region:'Asia', cur:'THB', acc:[12,40,90],  food:[8,20,45], trans:[3,8,20],  fun:[6,18,40]},
-  {id:'hanoi',    n:'Hanoi',        flag:'🇻🇳', region:'Asia', cur:'VND', acc:[10,32,75],  food:[6,16,38], trans:[3,7,18],  fun:[5,15,34]},
-  {id:'bali',     n:'Bali (Ubud)',  flag:'🇮🇩', region:'Asia', cur:'IDR', acc:[12,40,100], food:[7,18,42], trans:[4,10,22], fun:[6,18,42]},
-  {id:'kl',       n:'Kuala Lumpur', flag:'🇲🇾', region:'Asia', cur:'MYR', acc:[14,42,95],  food:[7,18,40], trans:[3,9,20],  fun:[6,16,38]},
-  {id:'delhi',    n:'Delhi',        flag:'🇮🇳', region:'Asia', cur:'INR', acc:[10,35,85],  food:[5,15,35], trans:[3,8,18],  fun:[5,14,32]},
-  {id:'manila',   n:'Manila',       flag:'🇵🇭', region:'Asia', cur:'PHP', acc:[14,42,95],  food:[7,18,40], trans:[4,10,22], fun:[6,16,36]},
-  {id:'tokyo',    n:'Tokyo',        flag:'🇯🇵', region:'Asia', cur:'JPY', acc:[35,95,200], food:[18,40,85],trans:[8,16,35], fun:[12,30,65]},
-  {id:'kyoto',    n:'Kyoto',        flag:'🇯🇵', region:'Asia', cur:'JPY', acc:[32,88,185], food:[16,36,78],trans:[7,15,32], fun:[11,28,60]},
-  {id:'seoul',    n:'Seoul',        flag:'🇰🇷', region:'Asia', cur:'KRW', acc:[28,80,175], food:[14,34,72],trans:[6,14,30], fun:[10,26,58]},
-  {id:'hongkong', n:'Hong Kong',    flag:'🇭🇰', region:'Asia', cur:'HKD', acc:[40,105,230],food:[16,38,82],trans:[6,14,30], fun:[12,30,66]},
-  {id:'singapore',n:'Singapore',    flag:'🇸🇬', region:'Asia', cur:'SGD', acc:[45,110,240],food:[14,36,80],trans:[6,14,30], fun:[12,30,68]},
-  {id:'taipei',   n:'Taipei',       flag:'🇹🇼', region:'Asia', cur:'TWD', acc:[22,65,150], food:[10,26,58],trans:[5,12,26], fun:[8,22,50]},
-  {id:'shanghai', n:'Shanghai',     flag:'🇨🇳', region:'Asia', cur:'CNY', acc:[26,75,165], food:[11,28,62],trans:[5,12,26], fun:[9,24,54]},
-  // ── Europe ──
-  {id:'paris',    n:'Paris',        flag:'🇫🇷', region:'Europe', cur:'EUR', acc:[45,120,260],food:[20,45,95],trans:[8,16,35], fun:[15,35,75]},
-  {id:'london',   n:'London',       flag:'🇬🇧', region:'Europe', cur:'GBP', acc:[50,130,280],food:[22,48,100],trans:[10,20,42],fun:[16,38,80]},
-  {id:'rome',     n:'Rome',         flag:'🇮🇹', region:'Europe', cur:'EUR', acc:[38,100,220],food:[18,40,85],trans:[7,15,32], fun:[13,32,70]},
-  {id:'barcelona',n:'Barcelona',    flag:'🇪🇸', region:'Europe', cur:'EUR', acc:[36,98,215], food:[17,38,82],trans:[7,15,32], fun:[13,32,70]},
-  {id:'amsterdam',n:'Amsterdam',    flag:'🇳🇱', region:'Europe', cur:'EUR', acc:[48,125,270],food:[20,44,92],trans:[8,17,36], fun:[15,35,76]},
-  {id:'berlin',   n:'Berlin',       flag:'🇩🇪', region:'Europe', cur:'EUR', acc:[34,92,200], food:[16,36,78],trans:[8,16,34], fun:[13,30,66]},
-  {id:'lisbon',   n:'Lisbon',       flag:'🇵🇹', region:'Europe', cur:'EUR', acc:[30,82,180], food:[14,32,70],trans:[6,13,28], fun:[11,27,60]},
-  {id:'prague',   n:'Prague',       flag:'🇨🇿', region:'Europe', cur:'CZK', acc:[24,68,150], food:[12,28,62],trans:[5,11,24], fun:[9,23,52]},
-  {id:'vienna',   n:'Vienna',       flag:'🇦🇹', region:'Europe', cur:'EUR', acc:[38,100,218],food:[17,38,82],trans:[7,15,32], fun:[13,32,70]},
-  {id:'athens',   n:'Athens',       flag:'🇬🇷', region:'Europe', cur:'EUR', acc:[28,78,170], food:[13,30,66],trans:[5,12,26], fun:[10,25,56]},
-  {id:'istanbul', n:'Istanbul',     flag:'🇹🇷', region:'Europe', cur:'TRY', acc:[20,58,135], food:[9,24,54], trans:[4,10,22], fun:[7,20,46]},
-  {id:'reykjavik',n:'Reykjavik',    flag:'🇮🇸', region:'Europe', cur:'ISK', acc:[55,140,300],food:[26,55,115],trans:[8,18,38],fun:[18,42,90]},
-  {id:'zurich',   n:'Zurich',       flag:'🇨🇭', region:'Europe', cur:'CHF', acc:[60,150,320],food:[28,60,125],trans:[9,19,40],fun:[20,46,98]},
-  // ── North America ──
-  {id:'nyc',      n:'New York',     flag:'🇺🇸', region:'North America', cur:'USD', acc:[55,140,300],food:[24,52,110],trans:[8,16,34],fun:[18,42,90]},
-  {id:'sf',       n:'San Francisco',flag:'🇺🇸', region:'North America', cur:'USD', acc:[58,145,310],food:[24,52,110],trans:[8,17,36],fun:[18,42,90]},
-  {id:'la',       n:'Los Angeles',  flag:'🇺🇸', region:'North America', cur:'USD', acc:[50,130,280],food:[22,48,102],trans:[10,20,42],fun:[17,40,86]},
-  {id:'toronto',  n:'Toronto',      flag:'🇨🇦', region:'North America', cur:'CAD', acc:[42,112,242],food:[19,42,90],trans:[8,16,34],fun:[14,34,74]},
-  {id:'vancouver',n:'Vancouver',    flag:'🇨🇦', region:'North America', cur:'CAD', acc:[44,116,250],food:[19,42,90],trans:[8,16,34],fun:[14,34,74]},
-  // ── Latin America ──
-  {id:'mexicocity',n:'Mexico City', flag:'🇲🇽', region:'Latin America', cur:'MXN', acc:[22,62,140],food:[10,26,58],trans:[4,10,22],fun:[8,22,50]},
-  {id:'buenosaires',n:'Buenos Aires',flag:'🇦🇷',region:'Latin America', cur:'ARS', acc:[18,52,120],food:[9,22,50],trans:[3,8,18],fun:[7,18,42]},
-  {id:'rio',      n:'Rio de Janeiro',flag:'🇧🇷',region:'Latin America', cur:'BRL', acc:[22,62,140],food:[10,25,56],trans:[4,10,22],fun:[8,21,48]},
-  {id:'lima',     n:'Lima',         flag:'🇵🇪', region:'Latin America', cur:'PEN', acc:[16,48,110],food:[8,20,46],trans:[3,8,18],fun:[6,17,40]},
-  // ── Oceania ──
-  {id:'sydney',   n:'Sydney',       flag:'🇦🇺', region:'Oceania', cur:'AUD', acc:[48,125,268],food:[22,46,98],trans:[8,17,36],fun:[16,38,82]},
-  {id:'auckland', n:'Auckland',     flag:'🇳🇿', region:'Oceania', cur:'NZD', acc:[40,108,235],food:[19,42,90],trans:[7,15,32],fun:[14,34,74]},
-  // ── Middle East & Africa ──
-  {id:'dubai',    n:'Dubai',        flag:'🇦🇪', region:'Middle East & Africa', cur:'AED', acc:[40,108,235],food:[16,40,86],trans:[6,14,30],fun:[14,34,76]},
-  {id:'cairo',    n:'Cairo',        flag:'🇪🇬', region:'Middle East & Africa', cur:'EGP', acc:[14,42,98],food:[7,18,40],trans:[3,8,18],fun:[6,16,38]},
-  {id:'capetown', n:'Cape Town',    flag:'🇿🇦', region:'Middle East & Africa', cur:'ZAR', acc:[20,58,132],food:[10,25,56],trans:[4,11,24],fun:[8,21,48]},
-  {id:'marrakech',n:'Marrakech',    flag:'🇲🇦', region:'Middle East & Africa', cur:'MAD', acc:[16,48,110],food:[8,20,46],trans:[3,9,20],fun:[7,18,42]},
-];
+/* COL_CITIES is now a projection of TT_DESTINATIONS (defined earlier with DP_DESTINATIONS). */
 const COL_REGIONS = ['Asia','Europe','North America','Latin America','Oceania','Middle East & Africa'];
 const COL_CATS = [
   {k:'acc',   ico:'🛏', n:'Stay'},
