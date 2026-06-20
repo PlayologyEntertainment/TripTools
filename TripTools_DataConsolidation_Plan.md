@@ -6,7 +6,11 @@
 **Decision inputs (agreed):**
 1. **Scope** — Full two-tier registry (one country registry + one destination registry + one shared resolver).
 2. **Coverage** — Expand every tool to the *union* of countries and **fill in the missing payloads** with real data.
-3. **Deliverable now** — This written plan, for review before any code changes.
+3. **Verification bar** — Filled data ships **best-effort: dated + source-noted + disclaimed** (no per-domain human sign-off gate).
+4. **City coverage** — **Grow into one list**: the destination registry expands to cover everything the city tools need (~140+), so there is truly one destination list.
+5. **Delivery cadence** — **Per-phase PRs** (each phase lands as one PR).
+6. **Currency** — **In scope now** (Phase 4): fold `CURRENCIES` / `FX_*` identity into `TT_COUNTRIES.currency`.
+7. **Deliverable now** — This written plan, for review before any code changes.
 
 ---
 
@@ -108,7 +112,7 @@ const TT_DESTINATIONS = {
 };
 ```
 
-City-only tools (TZ, Cost of Living) that need entries the curated destination list doesn't have (e.g. many TZ cities) keep a **thin supplementary city table** that *also* references a country code — they are not forced into the inspirational destination set, but they share identity and the resolver.
+Per decision #4, there is **one destination list**: `TT_DESTINATIONS` grows to cover everything the city tools need (~140+ entries, absorbing all `TZ_CITIES`/`COL_CITIES` cities), each linked to a country code. To preserve the "spin the globe" inspiration quality, entries carry a flag (e.g. `inspire: true`) so the Destination Picker can draw from the curated subset while Time Zone / Cost of Living draw from the full set — one list, one resolver, role-tagged rows.
 
 ### 4.3 `resolveDestination()` — the one matcher to replace ~11
 
@@ -127,7 +131,7 @@ Every tool calls this instead of rolling its own. One place to fix matching bugs
 Because we expand every tool to the **union (~200 countries)** and fill missing payloads, this is as much a **data-authoring** effort as a refactor. Approach:
 
 - **Build the union first.** Generate the master code list from all Tier-B datasets; that defines the rows every tool must eventually cover.
-- **Fill per domain, with sourcing notes.** For each tool, author the missing rows from authoritative references (e.g. IATA/Timatic-style visa references, WHO/CDC for vaccines, IEC world plugs for power, national customs sites, official emergency-number registries). Record the source + review date per dataset (the file already uses `BT_DATA_VERIFIED`-style stamps — extend that pattern).
+- **Fill per domain, with sourcing notes (best-effort — decision #3).** For each tool, author the missing rows from authoritative references (e.g. IATA/Timatic-style visa references, WHO/CDC for vaccines, IEC world plugs for power, national customs sites, official emergency-number registries). Record the source + `verified` date per dataset (the file already uses `BT_DATA_VERIFIED`-style stamps — extend that pattern). **No per-domain human sign-off gate** — data ships best-effort and dated; correctness rests on the disclaimers + version stamps.
 - **Keep the existing disclaimers.** Visa, customs, vaccination, and driving tools already show "verify with official sources" banners. Authored data is *directional planning guidance*, not authority — every filled payload must carry the same disclaimer and a `verified` date.
 - **Graceful gaps.** Any row still genuinely unknown renders a clear "no data yet" state rather than a blank or a wrong default.
 
@@ -143,9 +147,9 @@ Each phase is independently shippable and leaves the app fully working.
 - Add `TT_COUNTRIES` (identity only, union of existing codes) and `resolveDestination()`.
 - Add a tiny test harness (a hidden debug panel or console asserts) that checks every existing dataset key exists in `TT_COUNTRIES`.
 
-**Phase 1 — Destination tier consolidation**
-- Build `TT_DESTINATIONS` from `DP_DESTINATIONS` + country links + `tz`/`cost` folds.
-- Repoint Destination Picker, Comparison, Best Time, Time Zone, Cost of Living to it via the resolver. Retire `TZ_CITIES`/`COL_CITIES` (or reduce to a thin supplementary city table).
+**Phase 1 — Destination tier consolidation** *(one PR)*
+- Build the single `TT_DESTINATIONS` from `DP_DESTINATIONS` + country links + `tz`/`cost` folds, grown to ~140+ to absorb every `TZ_CITIES`/`COL_CITIES` city (decision #4). Tag curated rows with `inspire: true`.
+- Repoint Destination Picker (curated subset), Comparison, Best Time, Time Zone, Cost of Living (full set) to it via the resolver. Retire `TZ_CITIES`/`COL_CITIES`.
 
 **Phase 2 — Country tier identity migration (one tool at a time)**
 - For each Tier-B dataset: strip identity fields, key payload off ISO-2, pull name/flag/currency from `TT_COUNTRIES`, replace bespoke matcher with `resolveDestination()`. Order by smallest blast radius first: `AF` → `VR` → `QH` → `CDH` → `ID` → `DR` → `PP` → `TC` → `EM` → `VAC` → `VG`.
@@ -153,7 +157,7 @@ Each phase is independently shippable and leaves the app fully working.
 **Phase 3 — Coverage expansion / payload fill**
 - Per domain, author the union rows with sources + `verified` dates and disclaimers. Ship domain-by-domain.
 
-**Phase 4 — Adjacent cleanup (optional)**
+**Phase 4 — Currency registry (in scope — decision #6)**
 - Fold `CURRENCIES`/`FX_*` identity into `TT_COUNTRIES.currency`; keep FX rate fetching as-is.
 
 **Phase 5 — Guardrails**
@@ -165,10 +169,10 @@ Each phase is independently shippable and leaves the app fully working.
 
 | Risk | Mitigation |
 |---|---|
-| 43.6k-line single file; large diffs are hard to review | One tool per commit/PR; registry is additive in Phase 0 |
+| 43.6k-line single file; large diffs are hard to review | Per-phase PRs (decision #5); within a phase, migrate one tool per commit so the diff reads tool-by-tool; registry is additive in Phase 0 |
 | Authored legal/health data could be wrong | Per-domain `verified` stamps, retained disclaimers, human spot-check gate before each domain ships |
 | Matching regressions (a tool stops finding a country) | `resolveDestination()` covered by assertion tests against every known name/alias; migrate behind it, not around it |
-| City tools need cities not in the curated 113 | Thin supplementary city table that still references country codes — identity unified without bloating the inspiration set |
+| Growing to one ~140+ list could dilute "spin the globe" inspiration quality | `inspire: true` tag — Destination Picker draws only curated rows; other tools use the full set |
 | Name/flag drift reappears | Phase 5 guardrail check; payloads forbidden from carrying `name`/`flag` |
 
 ---
@@ -181,9 +185,11 @@ Each phase is independently shippable and leaves the app fully working.
 
 ---
 
-## 9. Open questions for the next round
+## 9. Resolved decisions
 
-1. **Verification bar for filled data** — is directional "best-effort + dated + disclaimed" acceptable, or do you want each domain human-reviewed before merge? (This gates Phase 3 pace.)
-2. **City coverage** — keep the curated inspiration set (~113) separate from the larger functional city table (TZ needs ~140+), or grow the inspiration set too?
-3. **PR cadence** — one big PR per phase, or one PR per tool migrated? (I recommend per-tool.)
-4. **Currency registry** — fold `FX_*`/`CURRENCIES` in now (Phase 4) or defer entirely?
+1. **Verification bar** — Best-effort: dated + source-noted + disclaimed. No per-domain human sign-off gate.
+2. **City coverage** — Grow into **one** destination list (~140+); curated rows tagged `inspire: true` for the Destination Picker.
+3. **PR cadence** — Per-phase PRs (one tool per commit within a phase).
+4. **Currency registry** — In scope as Phase 4.
+
+All open questions are resolved; the plan is ready to execute starting at **Phase 0**.
