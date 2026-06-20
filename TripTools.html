@@ -28439,12 +28439,16 @@ function ppInit() {
   document.getElementById('pp-dest-val').value = '';
   destSearch.value = '';
   if (trip && trip.destination) {
-    const q = trip.destination.toLowerCase().split(',').pop().trim();
-    const dest = PP_COUNTRIES.find(d =>
-      d.n.toLowerCase() === q ||
-      d.n.toLowerCase().includes(q) ||
-      q.includes(d.n.toLowerCase())
-    );
+    const r = (typeof resolveDestination === 'function') ? resolveDestination(trip.destination) : null;
+    let dest = r && r.countryCode ? PP_COUNTRIES.find(d => d.c === r.countryCode) : null;
+    if (!dest) {
+      const q = trip.destination.toLowerCase().split(',').pop().trim();
+      dest = PP_COUNTRIES.find(d =>
+        d.n.toLowerCase() === q ||
+        d.n.toLowerCase().includes(q) ||
+        q.includes(d.n.toLowerCase())
+      );
+    }
     if (dest) { destSearch.value = dest.f + ' ' + dest.n; document.getElementById('pp-dest-val').value = dest.c; }
   }
 
@@ -28697,8 +28701,12 @@ function paInit() {
     if (trip.departDate && !departIn.value) departIn.value = trip.departDate;
     if (trip.returnDate && !returnIn.value) returnIn.value = trip.returnDate;
     if (trip.destination && !document.getElementById('pa-dest-val').value) {
-      const q = trip.destination.toLowerCase().split(',')[0].trim();
-      const dest = VG_COUNTRIES.find(d => d.n.toLowerCase().includes(q) || q.includes(d.n.toLowerCase()));
+      const r = (typeof resolveDestination === 'function') ? resolveDestination(trip.destination) : null;
+      let dest = r && r.countryCode ? VG_COUNTRIES.find(d => d.c === r.countryCode) : null;
+      if (!dest) {
+        const q = trip.destination.toLowerCase().split(',')[0].trim();
+        dest = VG_COUNTRIES.find(d => d.n.toLowerCase().includes(q) || q.includes(d.n.toLowerCase()));
+      }
       if (dest) {
         destSearch.value = paFlag(dest.c) + ' ' + dest.n;
         document.getElementById('pa-dest-val').value = dest.c;
@@ -29183,11 +29191,16 @@ function emInit() {
   const savedDest = localStorage.getItem('tt_em_dest');
   if (savedDest && VG_COUNTRIES.find(d => d.c === savedDest)) autoCode = savedDest;
   if (trip && trip.destination) {
-    const q = trip.destination.toLowerCase().split(',').map(s => s.trim()).filter(Boolean);
-    for (const part of q.reverse()) {
-      const hit = VG_COUNTRIES.find(d => d.n.toLowerCase() === part || d.n.toLowerCase().includes(part) || part.includes(d.n.toLowerCase()));
-      if (hit) { autoCode = hit.c; break; }
+    const r = (typeof resolveDestination === 'function') ? resolveDestination(trip.destination) : null;
+    let tripCode = (r && r.countryCode && VG_COUNTRIES.find(d => d.c === r.countryCode)) ? r.countryCode : '';
+    if (!tripCode) {
+      const q = trip.destination.toLowerCase().split(',').map(s => s.trim()).filter(Boolean);
+      for (const part of q.reverse()) {
+        const hit = VG_COUNTRIES.find(d => d.n.toLowerCase() === part || d.n.toLowerCase().includes(part) || part.includes(d.n.toLowerCase()));
+        if (hit) { tripCode = hit.c; break; }
+      }
     }
+    if (tripCode) autoCode = tripCode;
   }
   if (autoCode) emSelectCountry(autoCode);
 }
@@ -30470,7 +30483,14 @@ function tzMatchDestination(text){
   if (best) return best;
   // Then country match
   best = TZ_CITIES.find(c => t.includes(norm(c.country)));
-  return best || null;
+  if (best) return best;
+  // Fallback: shared resolver (alias-aware: "UK"→GB, "Holland"→NL, bare cities, etc.)
+  const r = (typeof resolveDestination === 'function') ? resolveDestination(text) : null;
+  if (r && r.countryCode){
+    const d = TT_DESTINATIONS.find(x => x.cc === r.countryCode && x.tz);
+    if (d) return { city:d.tzCity || d.name, country:d.tzCountry || (TT_COUNTRIES[d.cc]||{}).name || '', tz:d.tz, flag:d.tzFlag || (TT_COUNTRIES[d.cc]||{}).flag || '🏠' };
+  }
+  return null;
 }
 
 function tzEnsureDefaults(){
@@ -31415,8 +31435,11 @@ function tcInit(){
 
 function tcGuessCountryFromDest(dest){
   if (!dest) return null;
+  // Shared resolver first (alias-aware + full city coverage via TT_DEST_INDEX).
+  const r = (typeof resolveDestination === 'function') ? resolveDestination(dest) : null;
+  if (r && r.countryCode){ const hit = TC_COUNTRIES.find(c => c.c === r.countryCode); if (hit) return hit; }
   const q = dest.toLowerCase();
-  // Try direct name match (longest first for "United States" beating "States")
+  // Legacy fallback: direct name match (longest first for "United States" beating "States")
   const sorted = [...TC_COUNTRIES].sort((a,b)=>b.n.length - a.n.length);
   for (const co of sorted){
     if (q.includes(co.n.toLowerCase())) return co;
@@ -34708,7 +34731,9 @@ function vrDefault(){
   const trip = getActiveTrip();
   if (trip && trip.destination){
     const dest = trip.destination.toLowerCase();
-    const hit = VR_COUNTRIES.find(c => dest.includes(c.n.toLowerCase()));
+    const r = (typeof resolveDestination === 'function') ? resolveDestination(trip.destination) : null;
+    const hit = (r && r.countryCode && VR_COUNTRIES.find(c => c.id === r.countryCode.toLowerCase()))
+              || VR_COUNTRIES.find(c => dest.includes(c.n.toLowerCase()));
     if (hit) country = hit.id;
   }
   return { country, amt:'' };
@@ -38892,7 +38917,9 @@ function vacInit() {
   // Try to autofill from active trip destination (fuzzy match against country name)
   const tripDest = trip && trip.destination ? trip.destination.toLowerCase() : '';
   if (tripDest) {
-    const match = VAC_COUNTRIES.find(d =>
+    const r = (typeof resolveDestination === 'function') ? resolveDestination(trip.destination) : null;
+    let match = r && r.countryCode ? VAC_COUNTRIES.find(d => d.c === r.countryCode) : null;
+    if (!match) match = VAC_COUNTRIES.find(d =>
       tripDest.includes(d.n.toLowerCase()) ||
       d.n.toLowerCase().includes(tripDest.split(/[,\s]/).filter(s => s.length > 2)[0] || '__none__')
     );
@@ -41732,7 +41759,9 @@ function cdhInit(){
   const tripDest = trip && trip.destination ? trip.destination.toLowerCase() : '';
   if (tripDest) {
     const tokens = tripDest.split(/[,\s]+/).filter(s => s.length > 2);
-    const match = CDH_COUNTRIES.find(d =>
+    const r = (typeof resolveDestination === 'function') ? resolveDestination(trip.destination) : null;
+    let match = r && r.countryCode ? CDH_COUNTRIES.find(d => d.c === r.countryCode) : null;
+    if (!match) match = CDH_COUNTRIES.find(d =>
       tripDest.includes(d.n.toLowerCase()) ||
       tokens.some(tk => d.n.toLowerCase().includes(tk))
     );
