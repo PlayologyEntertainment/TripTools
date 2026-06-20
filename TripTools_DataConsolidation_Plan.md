@@ -162,6 +162,7 @@ Each phase is independently shippable and leaves the app fully working.
   - Constructor + inline dataset: `CDH_COUNTRIES` (kept the DRY `cdhEU()` helper; identity now injected from the registry for all 42 entries).
   - Intentional tool-specific labels (e.g. "Türkiye", "China (mainland)", "UAE", "Myanmar (Burma)") preserved as per-entry `n` overrides.
 - *No identity to migrate:* `QH_DATA` and `DR_DATA` carry no name/flag. `EM_DATA` duplicates only the calling code (`cc`) — left as-is (a minor, optional cleanup).
+- *Regression test:* the full page script evaluates without throwing under a DOM stub, and every migrated dataset was diffed against the pre-Phase-2 commit (`4483e7a`) — identical entry count, identical order, zero dropped/added codes, zero name changes, and **zero payload-field diffs** across `VG`/`PP`/`TC`/`VAC`/`AF`/`VR`/`CDH`.
 - *Deferred to a follow-up:* swapping each tool's bespoke `trip.destination` matcher for `resolveDestination()` (behavior change, best validated in-browser) — same deferral as Phase 1.
 
 **Phase 3 — Coverage expansion / payload fill**
