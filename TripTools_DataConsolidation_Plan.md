@@ -143,9 +143,10 @@ Because we expand every tool to the **union (~200 countries)** and fill missing 
 
 Each phase is independently shippable and leaves the app fully working.
 
-**Phase 0 — Scaffolding (no behavior change)**
+**Phase 0 — Scaffolding (no behavior change)** ✅ *Done*
 - Add `TT_COUNTRIES` (identity only, union of existing codes) and `resolveDestination()`.
 - Add a tiny test harness (a hidden debug panel or console asserts) that checks every existing dataset key exists in `TT_COUNTRIES`.
+- *Implemented:* `TT_COUNTRIES` (200 countries — name/flag/iso3/continent/currency/calling + aliases), `ttCountry()`, `resolveDestination()`, and `ttCountriesSelfCheck()` (runs on load, console-only) inserted after the `CURRENCIES` declaration. Additive — no tool consumes it yet.
 
 **Phase 1 — Destination tier consolidation** *(one PR)*
 - Build the single `TT_DESTINATIONS` from `DP_DESTINATIONS` + country links + `tz`/`cost` folds, grown to ~140+ to absorb every `TZ_CITIES`/`COL_CITIES` city (decision #4). Tag curated rows with `inspire: true`.

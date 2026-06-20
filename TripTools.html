@@ -14491,6 +14491,299 @@ const PHASES = [
 
 const CURRENCIES = ["AED","ARS","AUD","BRL","CAD","CHF","CLP","CNY","EUR","GBP","HKD","HUF","IDR","ILS","INR","JPY","KRW","MXN","MYR","NOK","NZD","PEN","PHP","PLN","QAR","SEK","SGD","THB","TRY","TWD","UAH","USD","VND","ZAR"];
 
+/* ════════════════════════════════════════════════════════════════════
+   TT_COUNTRIES — canonical country registry (single source of truth).
+   Phase 0 of the destination/country data-consolidation effort. Identity
+   ONLY (name, flag, iso3, continent, currency, calling), keyed by
+   ISO-3166-1 alpha-2. Domain tools (visa, power-plug, tipping, vaccines,
+   customs, emergency, driving, IDP, VAT, ATM, etiquette) will migrate to
+   key their payloads off these codes and pull identity from here,
+   replacing ~11 duplicated name/flag copies. Additive in Phase 0 —
+   nothing consumes it yet. See TripTools_DataConsolidation_Plan.md.
+   ════════════════════════════════════════════════════════════════════ */
+const TT_COUNTRIES = {
+  // NORTHAMERICA
+  AG:{name:'Antigua & Barbuda', flag:'🇦🇬', iso3:'ATG', continent:'northamerica', calling:'1-268'},
+  BS:{name:'Bahamas', flag:'🇧🇸', iso3:'BHS', continent:'northamerica', calling:'1-242'},
+  BB:{name:'Barbados', flag:'🇧🇧', iso3:'BRB', continent:'northamerica', calling:'1-246'},
+  BZ:{name:'Belize', flag:'🇧🇿', iso3:'BLZ', continent:'northamerica', calling:'501'},
+  CA:{name:'Canada', flag:'🇨🇦', iso3:'CAN', continent:'northamerica', currency:'CAD', calling:'1'},
+  CR:{name:'Costa Rica', flag:'🇨🇷', iso3:'CRI', continent:'northamerica', calling:'506'},
+  CU:{name:'Cuba', flag:'🇨🇺', iso3:'CUB', continent:'northamerica', calling:'53'},
+  DM:{name:'Dominica', flag:'🇩🇲', iso3:'DMA', continent:'northamerica', calling:'1-767'},
+  DO:{name:'Dominican Republic', flag:'🇩🇴', iso3:'DOM', continent:'northamerica', calling:'1-809'},
+  SV:{name:'El Salvador', flag:'🇸🇻', iso3:'SLV', continent:'northamerica', calling:'503'},
+  GD:{name:'Grenada', flag:'🇬🇩', iso3:'GRD', continent:'northamerica', calling:'1-473'},
+  GT:{name:'Guatemala', flag:'🇬🇹', iso3:'GTM', continent:'northamerica', calling:'502'},
+  HT:{name:'Haiti', flag:'🇭🇹', iso3:'HTI', continent:'northamerica', calling:'509'},
+  HN:{name:'Honduras', flag:'🇭🇳', iso3:'HND', continent:'northamerica', calling:'504'},
+  JM:{name:'Jamaica', flag:'🇯🇲', iso3:'JAM', continent:'northamerica', calling:'1-876'},
+  MX:{name:'Mexico', flag:'🇲🇽', iso3:'MEX', continent:'northamerica', currency:'MXN', calling:'52'},
+  NI:{name:'Nicaragua', flag:'🇳🇮', iso3:'NIC', continent:'northamerica', calling:'505'},
+  PA:{name:'Panama', flag:'🇵🇦', iso3:'PAN', continent:'northamerica', calling:'507'},
+  PR:{name:'Puerto Rico', flag:'🇵🇷', iso3:'PRI', continent:'northamerica'},
+  KN:{name:'St. Kitts & Nevis', flag:'🇰🇳', iso3:'KNA', continent:'northamerica', calling:'1-869'},
+  LC:{name:'St. Lucia', flag:'🇱🇨', iso3:'LCA', continent:'northamerica', calling:'1-758'},
+  VC:{name:'St. Vincent & Grenadines', flag:'🇻🇨', iso3:'VCT', continent:'northamerica', calling:'1-784'},
+  TT:{name:'Trinidad & Tobago', flag:'🇹🇹', iso3:'TTO', continent:'northamerica', calling:'1-868'},
+  US:{name:'United States', flag:'🇺🇸', iso3:'USA', continent:'northamerica', currency:'USD', calling:'1', aliases:['United States','USA','America']},
+  // SOUTHAMERICA
+  AR:{name:'Argentina', flag:'🇦🇷', iso3:'ARG', continent:'southamerica', currency:'ARS', calling:'54'},
+  BO:{name:'Bolivia', flag:'🇧🇴', iso3:'BOL', continent:'southamerica', calling:'591', aliases:['Bolivia']},
+  BR:{name:'Brazil', flag:'🇧🇷', iso3:'BRA', continent:'southamerica', currency:'BRL', calling:'55'},
+  CL:{name:'Chile', flag:'🇨🇱', iso3:'CHL', continent:'southamerica', calling:'56'},
+  CO:{name:'Colombia', flag:'🇨🇴', iso3:'COL', continent:'southamerica', calling:'57'},
+  EC:{name:'Ecuador', flag:'🇪🇨', iso3:'ECU', continent:'southamerica', calling:'593'},
+  GY:{name:'Guyana', flag:'🇬🇾', iso3:'GUY', continent:'southamerica', calling:'592'},
+  PY:{name:'Paraguay', flag:'🇵🇾', iso3:'PRY', continent:'southamerica', calling:'595'},
+  PE:{name:'Peru', flag:'🇵🇪', iso3:'PER', continent:'southamerica', calling:'51'},
+  SR:{name:'Suriname', flag:'🇸🇷', iso3:'SUR', continent:'southamerica', calling:'597'},
+  UY:{name:'Uruguay', flag:'🇺🇾', iso3:'URY', continent:'southamerica', calling:'598'},
+  VE:{name:'Venezuela', flag:'🇻🇪', iso3:'VEN', continent:'southamerica', calling:'58', aliases:['Venezuela']},
+  // EUROPE
+  AL:{name:'Albania', flag:'🇦🇱', iso3:'ALB', continent:'europe', calling:'355'},
+  AD:{name:'Andorra', flag:'🇦🇩', iso3:'AND', continent:'europe', calling:'376'},
+  AT:{name:'Austria', flag:'🇦🇹', iso3:'AUT', continent:'europe', currency:'EUR', calling:'43'},
+  BY:{name:'Belarus', flag:'🇧🇾', iso3:'BLR', continent:'europe', calling:'375'},
+  BE:{name:'Belgium', flag:'🇧🇪', iso3:'BEL', continent:'europe', currency:'EUR', calling:'32'},
+  BA:{name:'Bosnia & Herzegovina', flag:'🇧🇦', iso3:'BIH', continent:'europe', calling:'387'},
+  BG:{name:'Bulgaria', flag:'🇧🇬', iso3:'BGR', continent:'europe', calling:'359'},
+  HR:{name:'Croatia', flag:'🇭🇷', iso3:'HRV', continent:'europe', currency:'EUR', calling:'385'},
+  CZ:{name:'Czechia', flag:'🇨🇿', iso3:'CZE', continent:'europe', currency:'CZK', calling:'420', aliases:['Czech Republic','Czechia']},
+  DK:{name:'Denmark', flag:'🇩🇰', iso3:'DNK', continent:'europe', currency:'DKK', calling:'45'},
+  EE:{name:'Estonia', flag:'🇪🇪', iso3:'EST', continent:'europe', calling:'372'},
+  FI:{name:'Finland', flag:'🇫🇮', iso3:'FIN', continent:'europe', currency:'EUR', calling:'358'},
+  FR:{name:'France', flag:'🇫🇷', iso3:'FRA', continent:'europe', currency:'EUR', calling:'33'},
+  DE:{name:'Germany', flag:'🇩🇪', iso3:'DEU', continent:'europe', currency:'EUR', calling:'49'},
+  GR:{name:'Greece', flag:'🇬🇷', iso3:'GRC', continent:'europe', currency:'EUR', calling:'30'},
+  HU:{name:'Hungary', flag:'🇭🇺', iso3:'HUN', continent:'europe', currency:'HUF', calling:'36'},
+  IS:{name:'Iceland', flag:'🇮🇸', iso3:'ISL', continent:'europe', currency:'ISK', calling:'354'},
+  IE:{name:'Ireland', flag:'🇮🇪', iso3:'IRL', continent:'europe', currency:'EUR', calling:'353'},
+  IT:{name:'Italy', flag:'🇮🇹', iso3:'ITA', continent:'europe', currency:'EUR', calling:'39'},
+  XK:{name:'Kosovo', flag:'193', iso3:'XKX', continent:'europe', calling:'383', aliases:['Kosovo']},
+  LV:{name:'Latvia', flag:'🇱🇻', iso3:'LVA', continent:'europe', calling:'371'},
+  LI:{name:'Liechtenstein', flag:'🇱🇮', iso3:'LIE', continent:'europe', calling:'423'},
+  LT:{name:'Lithuania', flag:'🇱🇹', iso3:'LTU', continent:'europe', calling:'370'},
+  LU:{name:'Luxembourg', flag:'🇱🇺', iso3:'LUX', continent:'europe', currency:'EUR', calling:'352'},
+  MT:{name:'Malta', flag:'🇲🇹', iso3:'MLT', continent:'europe', calling:'356'},
+  MD:{name:'Moldova', flag:'🇲🇩', iso3:'MDA', continent:'europe', calling:'373', aliases:['Moldova']},
+  MC:{name:'Monaco', flag:'🇲🇨', iso3:'MCO', continent:'europe', calling:'377'},
+  ME:{name:'Montenegro', flag:'🇲🇪', iso3:'MNE', continent:'europe', calling:'382'},
+  NL:{name:'Netherlands', flag:'🇳🇱', iso3:'NLD', continent:'europe', currency:'EUR', calling:'31', aliases:['Netherlands','Holland']},
+  MK:{name:'North Macedonia', flag:'🇲🇰', iso3:'MKD', continent:'europe', calling:'389', aliases:['North Macedonia','Macedonia']},
+  NO:{name:'Norway', flag:'🇳🇴', iso3:'NOR', continent:'europe', currency:'NOK', calling:'47'},
+  PL:{name:'Poland', flag:'🇵🇱', iso3:'POL', continent:'europe', currency:'PLN', calling:'48'},
+  PT:{name:'Portugal', flag:'🇵🇹', iso3:'PRT', continent:'europe', currency:'EUR', calling:'351'},
+  RO:{name:'Romania', flag:'🇷🇴', iso3:'ROU', continent:'europe', currency:'RON', calling:'40'},
+  RU:{name:'Russia', flag:'🇷🇺', iso3:'RUS', continent:'europe', calling:'7', aliases:['Russia','Russian Federation']},
+  SM:{name:'San Marino', flag:'🇸🇲', iso3:'SMR', continent:'europe', calling:'378'},
+  RS:{name:'Serbia', flag:'🇷🇸', iso3:'SRB', continent:'europe', calling:'381'},
+  SK:{name:'Slovakia', flag:'🇸🇰', iso3:'SVK', continent:'europe', calling:'421'},
+  SI:{name:'Slovenia', flag:'🇸🇮', iso3:'SVN', continent:'europe', currency:'EUR', calling:'386'},
+  ES:{name:'Spain', flag:'🇪🇸', iso3:'ESP', continent:'europe', currency:'EUR', calling:'34'},
+  SE:{name:'Sweden', flag:'🇸🇪', iso3:'SWE', continent:'europe', currency:'SEK', calling:'46'},
+  CH:{name:'Switzerland', flag:'🇨🇭', iso3:'CHE', continent:'europe', currency:'CHF', calling:'41'},
+  UA:{name:'Ukraine', flag:'🇺🇦', iso3:'UKR', continent:'europe', calling:'380'},
+  GB:{name:'United Kingdom', flag:'🇬🇧', iso3:'GBR', continent:'europe', currency:'GBP', calling:'44', aliases:['United Kingdom','UK','Britain','England','Scotland','Wales','Northern Ireland']},
+  VA:{name:'Vatican City', flag:'🇻🇦', iso3:'VAT', continent:'europe', calling:'379', aliases:['Vatican','Vatican City','Holy See']},
+  // ASIA
+  AF:{name:'Afghanistan', flag:'🇦🇫', iso3:'AFG', continent:'asia', calling:'93'},
+  AM:{name:'Armenia', flag:'🇦🇲', iso3:'ARM', continent:'asia', calling:'374'},
+  AZ:{name:'Azerbaijan', flag:'🇦🇿', iso3:'AZE', continent:'asia', calling:'994'},
+  BH:{name:'Bahrain', flag:'🇧🇭', iso3:'BHR', continent:'asia', calling:'973'},
+  BD:{name:'Bangladesh', flag:'🇧🇩', iso3:'BGD', continent:'asia', calling:'880'},
+  BT:{name:'Bhutan', flag:'🇧🇹', iso3:'BTN', continent:'asia', calling:'975'},
+  BN:{name:'Brunei', flag:'🇧🇳', iso3:'BRN', continent:'asia'},
+  KH:{name:'Cambodia', flag:'🇰🇭', iso3:'KHM', continent:'asia', calling:'855'},
+  CN:{name:'China', flag:'🇨🇳', iso3:'CHN', continent:'asia', currency:'CNY', calling:'86'},
+  CY:{name:'Cyprus', flag:'🇨🇾', iso3:'CYP', continent:'asia', calling:'357'},
+  GE:{name:'Georgia', flag:'🇬🇪', iso3:'GEO', continent:'asia', calling:'995'},
+  HK:{name:'Hong Kong', flag:'🇭🇰', iso3:'HKG', continent:'asia', calling:'852', aliases:['Hong Kong']},
+  IN:{name:'India', flag:'🇮🇳', iso3:'IND', continent:'asia', currency:'INR', calling:'91'},
+  ID:{name:'Indonesia', flag:'🇮🇩', iso3:'IDN', continent:'asia', currency:'IDR', calling:'62'},
+  IR:{name:'Iran', flag:'🇮🇷', iso3:'IRN', continent:'asia', calling:'98', aliases:['Iran']},
+  IQ:{name:'Iraq', flag:'🇮🇶', iso3:'IRQ', continent:'asia', calling:'964'},
+  IL:{name:'Israel', flag:'🇮🇱', iso3:'ISR', continent:'asia', currency:'ILS', calling:'972'},
+  JP:{name:'Japan', flag:'🇯🇵', iso3:'JPN', continent:'asia', currency:'JPY', calling:'81'},
+  JO:{name:'Jordan', flag:'🇯🇴', iso3:'JOR', continent:'asia', calling:'962'},
+  KZ:{name:'Kazakhstan', flag:'🇰🇿', iso3:'KAZ', continent:'asia', calling:'7'},
+  KW:{name:'Kuwait', flag:'🇰🇼', iso3:'KWT', continent:'asia', calling:'965'},
+  KG:{name:'Kyrgyzstan', flag:'🇰🇬', iso3:'KGZ', continent:'asia', calling:'996'},
+  LA:{name:'Laos', flag:'🇱🇦', iso3:'LAO', continent:'asia', calling:'856', aliases:['Laos']},
+  LB:{name:'Lebanon', flag:'🇱🇧', iso3:'LBN', continent:'asia', calling:'961'},
+  MO:{name:'Macau', flag:'🇲🇴', iso3:'MAC', continent:'asia', calling:'853', aliases:['Macau','Macao']},
+  MY:{name:'Malaysia', flag:'🇲🇾', iso3:'MYS', continent:'asia', calling:'60'},
+  MV:{name:'Maldives', flag:'🇲🇻', iso3:'MDV', continent:'asia', calling:'960'},
+  MN:{name:'Mongolia', flag:'🇲🇳', iso3:'MNG', continent:'asia', calling:'976'},
+  MM:{name:'Myanmar', flag:'🇲🇲', iso3:'MMR', continent:'asia', calling:'95', aliases:['Myanmar','Burma']},
+  NP:{name:'Nepal', flag:'🇳🇵', iso3:'NPL', continent:'asia', calling:'977'},
+  KP:{name:'North Korea', flag:'119', iso3:'PRK', continent:'asia', calling:'850', aliases:['North Korea']},
+  OM:{name:'Oman', flag:'🇴🇲', iso3:'OMN', continent:'asia', calling:'968'},
+  PK:{name:'Pakistan', flag:'🇵🇰', iso3:'PAK', continent:'asia', calling:'92'},
+  PS:{name:'Palestine', flag:'102', iso3:'PSE', continent:'asia', calling:'970'},
+  PH:{name:'Philippines', flag:'🇵🇭', iso3:'PHL', continent:'asia', currency:'PHP', calling:'63'},
+  QA:{name:'Qatar', flag:'🇶🇦', iso3:'QAT', continent:'asia', calling:'974'},
+  SA:{name:'Saudi Arabia', flag:'🇸🇦', iso3:'SAU', continent:'asia', calling:'966'},
+  SG:{name:'Singapore', flag:'🇸🇬', iso3:'SGP', continent:'asia', currency:'SGD', calling:'65'},
+  KR:{name:'South Korea', flag:'🇰🇷', iso3:'KOR', continent:'asia', currency:'KRW', calling:'82', aliases:['South Korea','Korea','Republic of Korea']},
+  LK:{name:'Sri Lanka', flag:'🇱🇰', iso3:'LKA', continent:'asia', calling:'94'},
+  SY:{name:'Syria', flag:'113', iso3:'SYR', continent:'asia', calling:'963', aliases:['Syria']},
+  TW:{name:'Taiwan', flag:'🇹🇼', iso3:'TWN', continent:'asia', currency:'TWD', calling:'886', aliases:['Taiwan']},
+  TJ:{name:'Tajikistan', flag:'🇹🇯', iso3:'TJK', continent:'asia', calling:'992'},
+  TH:{name:'Thailand', flag:'🇹🇭', iso3:'THA', continent:'asia', currency:'THB', calling:'66'},
+  TL:{name:'Timor-Leste', flag:'🇹🇱', iso3:'TLS', continent:'asia', calling:'670', aliases:['Timor-Leste','East Timor']},
+  TR:{name:'Turkey', flag:'🇹🇷', iso3:'TUR', continent:'asia', currency:'TRY', calling:'90'},
+  TM:{name:'Turkmenistan', flag:'🇹🇲', iso3:'TKM', continent:'asia', calling:'993'},
+  AE:{name:'United Arab Emirates', flag:'🇦🇪', iso3:'ARE', continent:'asia', currency:'AED', calling:'971', aliases:['UAE','United Arab Emirates','Dubai','Abu Dhabi']},
+  UZ:{name:'Uzbekistan', flag:'🇺🇿', iso3:'UZB', continent:'asia', calling:'998'},
+  VN:{name:'Vietnam', flag:'🇻🇳', iso3:'VNM', continent:'asia', currency:'VND', calling:'84', aliases:['Vietnam','Viet Nam']},
+  YE:{name:'Yemen', flag:'191', iso3:'YEM', continent:'asia', calling:'967'},
+  // OCEANIA
+  AU:{name:'Australia', flag:'🇦🇺', iso3:'AUS', continent:'oceania', currency:'AUD', calling:'61'},
+  FJ:{name:'Fiji', flag:'🇫🇯', iso3:'FJI', continent:'oceania', calling:'679'},
+  KI:{name:'Kiribati', flag:'193', iso3:'KIR', continent:'oceania', calling:'686'},
+  MH:{name:'Marshall Islands', flag:'🇲🇭', iso3:'MHL', continent:'oceania', calling:'692'},
+  FM:{name:'Micronesia', flag:'🇫🇲', iso3:'FSM', continent:'oceania', calling:'691'},
+  NR:{name:'Nauru', flag:'112', iso3:'NRU', continent:'oceania', calling:'674'},
+  NZ:{name:'New Zealand', flag:'🇳🇿', iso3:'NZL', continent:'oceania', currency:'NZD', calling:'64'},
+  PW:{name:'Palau', flag:'🇵🇼', iso3:'PLW', continent:'oceania', calling:'680'},
+  PG:{name:'Papua New Guinea', flag:'🇵🇬', iso3:'PNG', continent:'oceania', calling:'675'},
+  WS:{name:'Samoa', flag:'🇼🇸', iso3:'WSM', continent:'oceania', calling:'685'},
+  SB:{name:'Solomon Islands', flag:'🇸🇧', iso3:'SLB', continent:'oceania', calling:'677'},
+  TO:{name:'Tonga', flag:'🇹🇴', iso3:'TON', continent:'oceania', calling:'676'},
+  TV:{name:'Tuvalu', flag:'🇹🇻', iso3:'TUV', continent:'oceania', calling:'688'},
+  VU:{name:'Vanuatu', flag:'🇻🇺', iso3:'VUT', continent:'oceania', calling:'678'},
+  // AFRICA
+  DZ:{name:'Algeria', flag:'🇩🇿', iso3:'DZA', continent:'africa', calling:'213'},
+  AO:{name:'Angola', flag:'🇦🇴', iso3:'AGO', continent:'africa', calling:'244'},
+  BJ:{name:'Benin', flag:'🇧🇯', iso3:'BEN', continent:'africa', calling:'229'},
+  BW:{name:'Botswana', flag:'🇧🇼', iso3:'BWA', continent:'africa', calling:'267'},
+  BF:{name:'Burkina Faso', flag:'🇧🇫', iso3:'BFA', continent:'africa', calling:'226'},
+  BI:{name:'Burundi', flag:'118', iso3:'BDI', continent:'africa', calling:'257'},
+  CM:{name:'Cameroon', flag:'🇨🇲', iso3:'CMR', continent:'africa', calling:'237'},
+  CV:{name:'Cape Verde', flag:'🇨🇻', iso3:'CPV', continent:'africa', calling:'238'},
+  CF:{name:'Central African Republic', flag:'🇨🇫', iso3:'CAF', continent:'africa', calling:'236'},
+  TD:{name:'Chad', flag:'🇹🇩', iso3:'TCD', continent:'africa', calling:'235'},
+  KM:{name:'Comoros', flag:'18', iso3:'COM', continent:'africa', calling:'269'},
+  CI:{name:'Côte d\\', flag:'🇨🇮', iso3:'CIV', continent:'africa', calling:'225', aliases:['Cote d\'Ivoire','Ivory Coast']},
+  CD:{name:'DR Congo', flag:'🇨🇩', iso3:'COD', continent:'africa', calling:'243', aliases:['DR Congo','Democratic Republic of the Congo','Congo-Kinshasa']},
+  DJ:{name:'Djibouti', flag:'🇩🇯', iso3:'DJI', continent:'africa', calling:'253'},
+  EG:{name:'Egypt', flag:'🇪🇬', iso3:'EGY', continent:'africa', calling:'20'},
+  GQ:{name:'Equatorial Guinea', flag:'🇬🇶', iso3:'GNQ', continent:'africa', calling:'240'},
+  ER:{name:'Eritrea', flag:'114', iso3:'ERI', continent:'africa', calling:'291'},
+  SZ:{name:'Eswatini', flag:'933', iso3:'SWZ', continent:'africa', calling:'268', aliases:['Eswatini','Swaziland']},
+  ET:{name:'Ethiopia', flag:'🇪🇹', iso3:'ETH', continent:'africa', calling:'251'},
+  GA:{name:'Gabon', flag:'🇬🇦', iso3:'GAB', continent:'africa', calling:'241'},
+  GM:{name:'Gambia', flag:'🇬🇲', iso3:'GMB', continent:'africa', calling:'220'},
+  GH:{name:'Ghana', flag:'🇬🇭', iso3:'GHA', continent:'africa', calling:'233'},
+  GN:{name:'Guinea', flag:'🇬🇳', iso3:'GIN', continent:'africa', calling:'224'},
+  GW:{name:'Guinea-Bissau', flag:'118', iso3:'GNB', continent:'africa', calling:'245'},
+  KE:{name:'Kenya', flag:'🇰🇪', iso3:'KEN', continent:'africa', calling:'254'},
+  LS:{name:'Lesotho', flag:'122', iso3:'LSO', continent:'africa', calling:'266'},
+  LR:{name:'Liberia', flag:'🇱🇷', iso3:'LBR', continent:'africa', calling:'231'},
+  LY:{name:'Libya', flag:'🇱🇾', iso3:'LBY', continent:'africa', calling:'218'},
+  MG:{name:'Madagascar', flag:'🇲🇬', iso3:'MDG', continent:'africa', calling:'261'},
+  MW:{name:'Malawi', flag:'🇲🇼', iso3:'MWI', continent:'africa', calling:'265'},
+  ML:{name:'Mali', flag:'🇲🇱', iso3:'MLI', continent:'africa', calling:'223'},
+  MR:{name:'Mauritania', flag:'18', iso3:'MRT', continent:'africa', calling:'222'},
+  MU:{name:'Mauritius', flag:'🇲🇺', iso3:'MUS', continent:'africa', calling:'230'},
+  MA:{name:'Morocco', flag:'🇲🇦', iso3:'MAR', continent:'africa', calling:'212'},
+  MZ:{name:'Mozambique', flag:'🇲🇿', iso3:'MOZ', continent:'africa', calling:'258'},
+  NA:{name:'Namibia', flag:'🇳🇦', iso3:'NAM', continent:'africa', calling:'264'},
+  NE:{name:'Niger', flag:'18', iso3:'NER', continent:'africa', calling:'227'},
+  NG:{name:'Nigeria', flag:'🇳🇬', iso3:'NGA', continent:'africa', calling:'234'},
+  CG:{name:'Rep. of Congo', flag:'🇨🇬', iso3:'COG', continent:'africa', calling:'242', aliases:['Congo','Congo-Brazzaville']},
+  RW:{name:'Rwanda', flag:'🇷🇼', iso3:'RWA', continent:'africa', calling:'250'},
+  SN:{name:'Senegal', flag:'🇸🇳', iso3:'SEN', continent:'africa', calling:'221'},
+  SC:{name:'Seychelles', flag:'🇸🇨', iso3:'SYC', continent:'africa', calling:'248'},
+  SL:{name:'Sierra Leone', flag:'🇸🇱', iso3:'SLE', continent:'africa', calling:'232'},
+  SO:{name:'Somalia', flag:'555', iso3:'SOM', continent:'africa', calling:'252'},
+  ZA:{name:'South Africa', flag:'🇿🇦', iso3:'ZAF', continent:'africa', currency:'ZAR', calling:'27'},
+  SS:{name:'South Sudan', flag:'🇸🇸', iso3:'SSD', continent:'africa', calling:'211'},
+  SD:{name:'Sudan', flag:'🇸🇩', iso3:'SDN', continent:'africa', calling:'249'},
+  ST:{name:'São Tomé & Príncipe', flag:'112', iso3:'STP', continent:'africa', calling:'239'},
+  TZ:{name:'Tanzania', flag:'🇹🇿', iso3:'TZA', continent:'africa', calling:'255', aliases:['Tanzania']},
+  TG:{name:'Togo', flag:'🇹🇬', iso3:'TGO', continent:'africa', calling:'228'},
+  TN:{name:'Tunisia', flag:'🇹🇳', iso3:'TUN', continent:'africa', calling:'216'},
+  UG:{name:'Uganda', flag:'🇺🇬', iso3:'UGA', continent:'africa', calling:'256'},
+  ZM:{name:'Zambia', flag:'🇿🇲', iso3:'ZMB', continent:'africa', calling:'260'},
+  ZW:{name:'Zimbabwe', flag:'🇿🇼', iso3:'ZWE', continent:'africa', calling:'263'},
+};
+
+/* Lookup helper: code -> registry entry (case-insensitive). */
+function ttCountry(code){ return code ? (TT_COUNTRIES[String(code).toUpperCase()] || null) : null; }
+
+/* Name/alias -> code index, built once from the registry. */
+const TT_COUNTRY_INDEX = (function(){
+  const ix = {};
+  for (const code in TT_COUNTRIES){
+    const e = TT_COUNTRIES[code];
+    ix[e.name.toLowerCase()] = code;
+    (e.aliases || []).forEach(a => { ix[a.toLowerCase()] = code; });
+  }
+  return ix;
+})();
+
+/* resolveDestination(text) — the single matcher that will replace the
+   ~11 bespoke trip.destination matchers (tcGuessCountryFromDest,
+   tzMatchDestination, and inline .includes/.split logic across tools).
+   Accepts free text like "Paris, France" or "Tokyo". Returns
+   { countryCode, country, matched, confidence } or null.
+   Phase 0: defined and self-tested below, NOT yet wired into any tool. */
+function resolveDestination(text){
+  if (!text) return null;
+  const raw = String(text).toLowerCase().trim();
+  // Try each comma-separated segment, last segment first (usually the country).
+  const segs = raw.split(',').map(s => s.trim()).filter(Boolean);
+  const tryOrder = segs.slice().reverse().concat([raw]);
+  // 1) exact name/alias match on a segment.
+  for (const s of tryOrder){
+    if (TT_COUNTRY_INDEX[s]) {
+      const code = TT_COUNTRY_INDEX[s];
+      return { countryCode: code, country: TT_COUNTRIES[code], matched: s, confidence: 'exact' };
+    }
+  }
+  // 2) substring: a known name/alias appears inside the text.
+  let best = null;
+  for (const key in TT_COUNTRY_INDEX){
+    if (key.length >= 4 && raw.indexOf(key) !== -1){
+      if (!best || key.length > best.key.length) best = { key, code: TT_COUNTRY_INDEX[key] };
+    }
+  }
+  if (best) return { countryCode: best.code, country: TT_COUNTRIES[best.code], matched: best.key, confidence: 'partial' };
+  return null;
+}
+
+/* Phase 0 self-check (console only, never throws to the UI): every country
+   code used by the existing domain datasets must exist in TT_COUNTRIES.
+   Runs once after all datasets are defined. Remove once migration done. */
+function ttCountriesSelfCheck(){
+  const missing = {};
+  const note = (src, code) => {
+    code = String(code).toUpperCase();
+    if (code === 'EU') return; // Eurozone pseudo-entry in the ATM-fee tool, not a country
+    if (!TT_COUNTRIES[code]) (missing[src] = missing[src] || []).push(code);
+  };
+  const fromList = (src, arr, prop) => { try { (arr||[]).forEach(o => o && o[prop] && note(src, o[prop])); } catch(e){} };
+  const fromKeys = (src, obj) => { try { Object.keys(obj||{}).forEach(k => note(src, k)); } catch(e){} };
+  try { fromList('VG_COUNTRIES',  VG_COUNTRIES,  'c');  } catch(e){}
+  try { fromList('PP_COUNTRIES',  PP_COUNTRIES,  'c');  } catch(e){}
+  try { fromList('TC_COUNTRIES',  TC_COUNTRIES,  'c');  } catch(e){}
+  try { fromList('VAC_COUNTRIES', VAC_COUNTRIES, 'c');  } catch(e){}
+  try { fromList('CDH_COUNTRIES', CDH_COUNTRIES, 'c');  } catch(e){}
+  try { fromList('AF_COUNTRIES',  AF_COUNTRIES,  'id'); } catch(e){}
+  try { fromList('VR_COUNTRIES',  VR_COUNTRIES,  'id'); } catch(e){}
+  try { fromKeys('EM_DATA', EM_DATA); } catch(e){}
+  try { fromKeys('ID_DATA', ID_DATA); } catch(e){}
+  try { fromKeys('DR_DATA', DR_DATA); } catch(e){}
+  try { fromKeys('QH_DATA', QH_DATA); } catch(e){}
+  const srcs = Object.keys(missing);
+  if (srcs.length) console.warn('[TT_COUNTRIES] codes missing from registry:', missing);
+  else console.info('[TT_COUNTRIES] self-check OK — ' + Object.keys(TT_COUNTRIES).length + ' countries cover all domain datasets.');
+}
+if (typeof window !== 'undefined') window.addEventListener('load', ttCountriesSelfCheck);
+
+
 /* ── PACKING DATA ── */
 const PL_BASE = {
   'Essentials': ['Passport / government ID','Flight tickets / boarding passes','Travel insurance documents','Hotel / accommodation confirmation','Emergency contact list (printed)','Wallet, cards & cash','Phone & charger'],
