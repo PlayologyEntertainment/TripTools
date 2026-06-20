@@ -27999,6 +27999,11 @@ const VG_PAYLOAD = [
   {cc:"NA", r:["F:90:0:0","F:90:0:0","F:90:0:0","R:0:60:14"]},
   {cc:"SZ", r:["F:30:0:0","F:30:0:0","F:30:0:0","F:30:0:0"]},
   {cc:"ZA", r:["F:90:0:0","F:90:0:0","R:0:80:14","R:0:80:14"]},
+  /* ── Phase 3 coverage · remaining territories (visa policy: PR/GU follow US entry, PF follows France/Schengen short-stay, BN sourced via WebSearch Jun 2026; verify with embassy) ── */
+  {cc:"PR", r:["F:90:0:0","T:90:14:1","T:90:14:1","R:0:185:30"]},
+  {cc:"GU", r:["F:90:0:0","T:90:14:1","T:90:14:1","R:0:185:30"]},
+  {cc:"PF", r:["F:90:0:0","F:90:0:0","R:90:80:14","R:90:120:21"]},
+  {cc:"BN", r:["F:90:0:0","F:30:0:0","A:30:5:0","R:0:20:14"]},
 ];
 const VG_COUNTRIES = VG_PAYLOAD.map(p => { const { cc, n, ...rest } = p; return { c: cc, n: n || TT_COUNTRIES[cc].name, ...rest }; });
 
