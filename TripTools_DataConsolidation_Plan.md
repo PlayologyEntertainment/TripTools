@@ -154,8 +154,15 @@ Each phase is independently shippable and leaves the app fully working.
 - *Implemented:* single `TT_DESTINATIONS` master (216 rows — 113 curated `inspire` + 103 supplementary cities; 28 destinations have `tz` folded, 22 have `cost`). Every row links to a country via `cc`. `DP_DESTINATIONS`, `TZ_CITIES`, `COL_CITIES` are now **back-compat projections** of the master, verified **byte-identical** to the previous hand-maintained arrays (zero data loss, zero display change), so the five consumer tools stay untouched. `resolveDestination()` extended to resolve bare cities (e.g. "Tokyo" → JP) via `TT_DEST_INDEX`. Added `PF`/`GU` to `TT_COUNTRIES` (now 202) for full Time-Zone coverage.
 - *Deferred to a follow-up:* swapping each consumer tool's bespoke `trip.destination` matcher for `resolveDestination()` (a behavior change best validated in-browser). The projection approach already delivers the single source of truth; the matcher swap is a clean, separate step.
 
-**Phase 2 — Country tier identity migration (one tool at a time)**
+**Phase 2 — Country tier identity migration (one tool at a time)** ✅ *Done*
 - For each Tier-B dataset: strip identity fields, key payload off ISO-2, pull name/flag/currency from `TT_COUNTRIES`, replace bespoke matcher with `resolveDestination()`. Order by smallest blast radius first: `AF` → `VR` → `QH` → `CDH` → `ID` → `DR` → `PP` → `TC` → `EM` → `VAC` → `VG`.
+- *Implemented:* migrated every identity-carrying country dataset to a **payload-only** form keyed by ISO-2, with the consumer-facing array/object rebuilt as a **projection** that pulls `name`/`flag` from `TT_COUNTRIES` — each verified **byte-identical** to its previous literal:
+  - List datasets: `AF_COUNTRIES`, `VR_COUNTRIES`, `PP_COUNTRIES`, `TC_COUNTRIES`, `VAC_COUNTRIES`, `VG_COUNTRIES`.
+  - Keyed dataset: `ID_DATA`.
+  - Constructor + inline dataset: `CDH_COUNTRIES` (kept the DRY `cdhEU()` helper; identity now injected from the registry for all 42 entries).
+  - Intentional tool-specific labels (e.g. "Türkiye", "China (mainland)", "UAE", "Myanmar (Burma)") preserved as per-entry `n` overrides.
+- *No identity to migrate:* `QH_DATA` and `DR_DATA` carry no name/flag. `EM_DATA` duplicates only the calling code (`cc`) — left as-is (a minor, optional cleanup).
+- *Deferred to a follow-up:* swapping each tool's bespoke `trip.destination` matcher for `resolveDestination()` (behavior change, best validated in-browser) — same deferral as Phase 1.
 
 **Phase 3 — Coverage expansion / payload fill**
 - Per domain, author the union rows with sources + `verified` dates and disclaimers. Ship domain-by-domain.
