@@ -173,8 +173,9 @@ Each phase is independently shippable and leaves the app fully working.
 - *Visa ✅ (third domain):* `VG_PAYLOAD` was 198/202 — filled the same 4 territories for **full 202 coverage** (PR/GU follow US entry policy, PF follows France/Schengen short-stay, Brunei web-sourced). Each carries the existing per-tier rule encoding behind the tool's verify-with-embassy disclaimer.
 - *Coverage status of other domains:* several are complete-by-design or low-confidence rather than true gaps — VAT refund (~42, only ~50 countries run tourist schemes), ATM fees (16, but operator-fee amounts are volatile), tipping (53, subjective). Vaccination (147) and customs (42) remain genuine high-risk gaps for future sourced/reviewed batches.
 
-**Phase 4 — Currency registry (in scope — decision #6)**
+**Phase 4 — Currency registry (in scope — decision #6)** ✅ *Done*
 - Fold `CURRENCIES`/`FX_*` identity into `TT_COUNTRIES.currency`; keep FX rate fetching as-is.
+- *Implemented:* `FX_ALL_CURRENCIES` is the canonical currency registry (code → name). Backfilled `currency` for the **153** countries that lacked it, so **all 202** now reference the registry (e.g. `BJ → XOF`, `AG → XCD`). Added the one referenced currency that was missing from the registry (`KPW`, North Korean Won → 162 total). Added a **referential-integrity guardrail** to the self-check: warns if any country lacks a currency or references a code absent from `FX_ALL_CURRENCIES`. FX rate fetching and the curated converter lists (`CURRENCIES`, `FX_BOARD_CURRENCIES`) are unchanged.
 
 **Phase 5 — Guardrails** ✅ *Done*
 - Lint/test that no new dataset reintroduces duplicate identity; document the registry contract near the top of the data section.
