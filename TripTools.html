@@ -33926,24 +33926,31 @@ const AF_NO_DEC = ['JPY','KRW','VND','IDR','HUF','CLP','ISK'];
 
 /* Country presets → cash currency + typical local ATM operator surcharge (in cash currency).
    Surcharges are rough, real-world typical values; 0 = local ATMs commonly free of an operator fee. */
-const AF_COUNTRIES = [
-  {id:'th', n:'Thailand',        flag:'🇹🇭', cur:'THB', op:220},
-  {id:'vn', n:'Vietnam',         flag:'🇻🇳', cur:'VND', op:22000},
-  {id:'id', n:'Indonesia',       flag:'🇮🇩', cur:'IDR', op:25000},
-  {id:'jp', n:'Japan',           flag:'🇯🇵', cur:'JPY', op:110},
-  {id:'eu', n:'Eurozone (Euronet)',flag:'🇪🇺', cur:'EUR', op:5},
-  {id:'gb', n:'United Kingdom',  flag:'🇬🇧', cur:'GBP', op:0},
-  {id:'us', n:'United States',   flag:'🇺🇸', cur:'USD', op:3.5},
-  {id:'ca', n:'Canada',          flag:'🇨🇦', cur:'CAD', op:3},
-  {id:'mx', n:'Mexico',          flag:'🇲🇽', cur:'MXN', op:60},
-  {id:'au', n:'Australia',       flag:'🇦🇺', cur:'AUD', op:0},
-  {id:'nz', n:'New Zealand',     flag:'🇳🇿', cur:'NZD', op:0},
-  {id:'in', n:'India',           flag:'🇮🇳', cur:'INR', op:0},
-  {id:'za', n:'South Africa',    flag:'🇿🇦', cur:'ZAR', op:60},
-  {id:'tr', n:'Turkey',          flag:'🇹🇷', cur:'TRY', op:0},
-  {id:'ae', n:'United Arab Emirates',flag:'🇦🇪', cur:'AED', op:0},
-  {id:'ph', n:'Philippines',     flag:'🇵🇭', cur:'PHP', op:250},
+/* ATM-Fee data — payload only; country identity (n/flag) comes from TT_COUNTRIES.
+   'eu' is a non-country Eurozone/Euronet pseudo-entry kept inline. */
+const AF_PAYLOAD = [
+  {cc:"TH", cur:"THB", op:220},
+  {cc:"VN", cur:"VND", op:22000},
+  {cc:"ID", cur:"IDR", op:25000},
+  {cc:"JP", cur:"JPY", op:110},
+  {id:"eu", n:"Eurozone (Euronet)", flag:"🇪🇺", cur:"EUR", op:5},
+  {cc:"GB", cur:"GBP", op:0},
+  {cc:"US", cur:"USD", op:3.5},
+  {cc:"CA", cur:"CAD", op:3},
+  {cc:"MX", cur:"MXN", op:60},
+  {cc:"AU", cur:"AUD", op:0},
+  {cc:"NZ", cur:"NZD", op:0},
+  {cc:"IN", cur:"INR", op:0},
+  {cc:"ZA", cur:"ZAR", op:60},
+  {cc:"TR", cur:"TRY", op:0},
+  {cc:"AE", cur:"AED", op:0},
+  {cc:"PH", cur:"PHP", op:250},
 ];
+const AF_COUNTRIES = AF_PAYLOAD.map(p => {
+  const { cc, id, n, flag, ...rest } = p;
+  return cc ? { id: cc.toLowerCase(), n: TT_COUNTRIES[cc].name, flag: TT_COUNTRIES[cc].flag, ...rest }
+            : { id, n, flag, ...rest };
+});
 
 /* Home card / bank profiles → foreign-transaction fee % + flat out-of-network ATM fee (home currency).
    Flat-fee magnitudes assume a USD-scale home currency; users can edit after selecting. */
@@ -34797,55 +34804,56 @@ const VR_ELIG = [
 /* Country dataset. scheme:true → vat (headline %), net (typical net refund as % of
    gross price, after operator commission), min (minimum spend, local currency).
    Rates/thresholds are typical published values, last verified May 2026. */
-const VR_COUNTRIES = [
-  // ── European Union ──
-  {id:'fr', n:'France',        flag:'🇫🇷', region:'European Union', cur:'EUR', eu:true, scheme:true, vat:20,   net:12,   min:100,  exp:'End of the 3rd month after purchase', proc:'eu'},
-  {id:'de', n:'Germany',       flag:'🇩🇪', region:'European Union', cur:'EUR', eu:true, scheme:true, vat:19,   net:11.5, min:50,   exp:'End of the 3rd month after purchase', proc:'eu'},
-  {id:'it', n:'Italy',         flag:'🇮🇹', region:'European Union', cur:'EUR', eu:true, scheme:true, vat:22,   net:13,   min:70,   exp:'End of the 3rd month after purchase', proc:'eu'},
-  {id:'es', n:'Spain',         flag:'🇪🇸', region:'European Union', cur:'EUR', eu:true, scheme:true, vat:21,   net:12.5, min:0,    minNote:'No minimum spend', exp:'End of the 3rd month after purchase', proc:'eu'},
-  {id:'nl', n:'Netherlands',   flag:'🇳🇱', region:'European Union', cur:'EUR', eu:true, scheme:true, vat:21,   net:12.5, min:50,   exp:'End of the 3rd month after purchase', proc:'eu'},
-  {id:'be', n:'Belgium',       flag:'🇧🇪', region:'European Union', cur:'EUR', eu:true, scheme:true, vat:21,   net:12,   min:125,  exp:'End of the 3rd month after purchase', proc:'eu'},
-  {id:'at', n:'Austria',       flag:'🇦🇹', region:'European Union', cur:'EUR', eu:true, scheme:true, vat:20,   net:12,   min:75,   exp:'End of the 3rd month after purchase', proc:'eu'},
-  {id:'pt', n:'Portugal',      flag:'🇵🇹', region:'European Union', cur:'EUR', eu:true, scheme:true, vat:23,   net:13.5, min:61.5, exp:'End of the 3rd month after purchase', proc:'eu'},
-  {id:'ie', n:'Ireland',       flag:'🇮🇪', region:'European Union', cur:'EUR', eu:true, scheme:true, vat:23,   net:13.5, min:30,   minNote:'Operator-dependent (often €30–€75)', exp:'End of the 3rd month after purchase', proc:'eu'},
-  {id:'gr', n:'Greece',        flag:'🇬🇷', region:'European Union', cur:'EUR', eu:true, scheme:true, vat:24,   net:13.5, min:50,   exp:'End of the 3rd month after purchase', proc:'eu'},
-  {id:'se', n:'Sweden',        flag:'🇸🇪', region:'European Union', cur:'SEK', eu:true, scheme:true, vat:25,   net:15,   min:200,  exp:'End of the 3rd month after purchase', proc:'eu'},
-  {id:'dk', n:'Denmark',       flag:'🇩🇰', region:'European Union', cur:'DKK', eu:true, scheme:true, vat:25,   net:15,   min:300,  exp:'End of the 3rd month after purchase', proc:'eu'},
-  {id:'fi', n:'Finland',       flag:'🇫🇮', region:'European Union', cur:'EUR', eu:true, scheme:true, vat:25.5, net:15,   min:40,   exp:'End of the 3rd month after purchase', proc:'eu'},
-  {id:'pl', n:'Poland',        flag:'🇵🇱', region:'European Union', cur:'PLN', eu:true, scheme:true, vat:23,   net:13,   min:200,  exp:'End of the 3rd month after purchase', proc:'eu'},
-  {id:'cz', n:'Czechia',       flag:'🇨🇿', region:'European Union', cur:'CZK', eu:true, scheme:true, vat:21,   net:12.5, min:2001, exp:'End of the 3rd month after purchase', proc:'eu'},
-  {id:'hu', n:'Hungary',       flag:'🇭🇺', region:'European Union', cur:'HUF', eu:true, scheme:true, vat:27,   net:15,   min:74001,exp:'End of the 3rd month after purchase', proc:'eu'},
-  {id:'hr', n:'Croatia',       flag:'🇭🇷', region:'European Union', cur:'EUR', eu:true, scheme:true, vat:25,   net:14,   min:100,  exp:'End of the 3rd month after purchase', proc:'eu'},
-  {id:'lu', n:'Luxembourg',    flag:'🇱🇺', region:'European Union', cur:'EUR', eu:true, scheme:true, vat:17,   net:11,   min:74,   exp:'End of the 3rd month after purchase', proc:'eu'},
-  {id:'si', n:'Slovenia',      flag:'🇸🇮', region:'European Union', cur:'EUR', eu:true, scheme:true, vat:22,   net:13,   min:50,   exp:'End of the 3rd month after purchase', proc:'eu'},
-  {id:'ro', n:'Romania',       flag:'🇷🇴', region:'European Union', cur:'RON', eu:true, scheme:true, vat:19,   net:11.5, min:250,  exp:'End of the 3rd month after purchase', proc:'eu'},
-  // ── Rest of Europe ──
-  {id:'ch', n:'Switzerland',   flag:'🇨🇭', region:'Rest of Europe', cur:'CHF', scheme:true, vat:8.1, net:6,   min:300,  exp:'Within 30 days of purchase', proc:'ch'},
-  {id:'no', n:'Norway',        flag:'🇳🇴', region:'Rest of Europe', cur:'NOK', scheme:true, vat:25,  net:14,  min:315,  exp:'Within 30 days of purchase', proc:'generic'},
-  {id:'is', n:'Iceland',       flag:'🇮🇸', region:'Rest of Europe', cur:'ISK', scheme:true, vat:24,  net:14,  min:6000, exp:'On departure', proc:'generic'},
-  {id:'tr', n:'Turkey',        flag:'🇹🇷', region:'Rest of Europe', cur:'TRY', scheme:true, vat:20,  net:10,  min:0,    minNote:'Varies by operator', exp:'Within 3 months of purchase', proc:'generic'},
-  {id:'gb', n:'United Kingdom',flag:'🇬🇧', region:'Rest of Europe', cur:'GBP', scheme:false, vat:20, note:'The UK abolished its tourist VAT refund scheme (VAT RES) on 1 January 2021. Visitors can no longer reclaim VAT on goods they carry home. Some retailers will instead ship purchases abroad VAT-free.'},
-  // ── Asia-Pacific ──
-  {id:'jp', n:'Japan',         flag:'🇯🇵', region:'Asia-Pacific', cur:'JPY', scheme:true, vat:10, net:9.1, min:5000,   minNote:'¥5,000 of general goods or consumables', exp:'Within 30 days of purchase', proc:'jp'},
-  {id:'kr', n:'South Korea',   flag:'🇰🇷', region:'Asia-Pacific', cur:'KRW', scheme:true, vat:10, net:7.5, min:15000,  exp:'Within 3 months of purchase', proc:'kr'},
-  {id:'sg', n:'Singapore',     flag:'🇸🇬', region:'Asia-Pacific', cur:'SGD', scheme:true, vat:9,  net:6.5, min:100,    exp:'Within 2 months of purchase', proc:'sg'},
-  {id:'th', n:'Thailand',      flag:'🇹🇭', region:'Asia-Pacific', cur:'THB', scheme:true, vat:7,  net:5,   min:2000,   minNote:'฿2,000 per store; ฿5,000 total to claim', exp:'Within 60 days of purchase', proc:'th'},
-  {id:'cn', n:'China',         flag:'🇨🇳', region:'Asia-Pacific', cur:'CNY', scheme:true, vat:13, net:9,   min:500,    minNote:'¥500 per store per day', exp:'Within 90 days; claim at departure port', proc:'generic'},
-  {id:'tw', n:'Taiwan',        flag:'🇹🇼', region:'Asia-Pacific', cur:'TWD', scheme:true, vat:5,  net:4,   min:2000,   minNote:'NT$2,000 per store per day', exp:'Within 90 days of purchase', proc:'generic'},
-  {id:'id', n:'Indonesia',     flag:'🇮🇩', region:'Asia-Pacific', cur:'IDR', scheme:true, vat:11, net:8,   min:5000000,minNote:'Rp 5,000,000 total (min Rp 500,000 per receipt)', exp:'Within 1 month; claim at the airport', proc:'generic'},
-  {id:'au', n:'Australia',     flag:'🇦🇺', region:'Asia-Pacific', cur:'AUD', scheme:true, vat:10, net:9.1, min:300,    minNote:'A$300 from one business', exp:'Bought within 60 days of departure', proc:'au'},
-  {id:'nz', n:'New Zealand',   flag:'🇳🇿', region:'Asia-Pacific', cur:'NZD', scheme:false, vat:15, note:'New Zealand does not refund GST on goods that tourists take home. GST is only excluded when a retailer ships your purchase directly overseas.'},
-  // ── Middle East & Africa ──
-  {id:'ae', n:'United Arab Emirates', flag:'🇦🇪', region:'Middle East & Africa', cur:'AED', scheme:true, vat:5,  net:4,  min:250, exp:'Validate within 90 days of purchase', proc:'ae'},
-  {id:'za', n:'South Africa',  flag:'🇿🇦', region:'Middle East & Africa', cur:'ZAR', scheme:true, vat:15, net:11, min:250, minNote:'R250 total', exp:'Within 90 days; claim at departure', proc:'generic'},
-  {id:'il', n:'Israel',        flag:'🇮🇱', region:'Middle East & Africa', cur:'ILS', scheme:true, vat:18, net:12, min:125, exp:'On departure (Ben Gurion & main exits)', proc:'generic'},
-  // ── Americas ──
-  {id:'us', n:'United States', flag:'🇺🇸', region:'Americas', cur:'USD', scheme:false, vatLabel:'Sales tax varies by state', note:'The US has no national VAT or sales-tax refund for visitors. A few places run limited programs — e.g. Louisiana’s tax-free shopping and private refund desks in Texas — but most states offer nothing.'},
-  {id:'ca', n:'Canada',        flag:'🇨🇦', region:'Americas', cur:'CAD', scheme:false, vatLabel:'5–15% GST/HST', note:'Canada ended its Visitor Rebate Program in 2007. There is no general GST/HST refund for tourists (a narrow rebate survives only for some tour packages and conventions).'},
-  {id:'mx', n:'Mexico',        flag:'🇲🇽', region:'Americas', cur:'MXN', scheme:true, vat:16, net:9, min:1200, minNote:'MXN 1,200; refunds only at major airports/resorts', exp:'On departure', proc:'generic'},
-  {id:'ar', n:'Argentina',     flag:'🇦🇷', region:'Americas', cur:'ARS', scheme:true, vat:21, net:13, min:0, minNote:'Tax-Free affiliated stores; threshold varies', exp:'On departure', proc:'generic'},
-  {id:'br', n:'Brazil',        flag:'🇧🇷', region:'Americas', cur:'BRL', scheme:false, vatLabel:'~17–20% ICMS', note:'Brazil has no nationwide tourist VAT/ICMS refund scheme for goods carried home.'},
+/* VAT-Refund data — payload only; country identity (n/flag) comes from TT_COUNTRIES. */
+const VR_PAYLOAD = [
+  {cc:"FR", region:"European Union", cur:"EUR", eu:true, scheme:true, vat:20, net:12, min:100, exp:"End of the 3rd month after purchase", proc:"eu"},
+  {cc:"DE", region:"European Union", cur:"EUR", eu:true, scheme:true, vat:19, net:11.5, min:50, exp:"End of the 3rd month after purchase", proc:"eu"},
+  {cc:"IT", region:"European Union", cur:"EUR", eu:true, scheme:true, vat:22, net:13, min:70, exp:"End of the 3rd month after purchase", proc:"eu"},
+  {cc:"ES", region:"European Union", cur:"EUR", eu:true, scheme:true, vat:21, net:12.5, min:0, minNote:"No minimum spend", exp:"End of the 3rd month after purchase", proc:"eu"},
+  {cc:"NL", region:"European Union", cur:"EUR", eu:true, scheme:true, vat:21, net:12.5, min:50, exp:"End of the 3rd month after purchase", proc:"eu"},
+  {cc:"BE", region:"European Union", cur:"EUR", eu:true, scheme:true, vat:21, net:12, min:125, exp:"End of the 3rd month after purchase", proc:"eu"},
+  {cc:"AT", region:"European Union", cur:"EUR", eu:true, scheme:true, vat:20, net:12, min:75, exp:"End of the 3rd month after purchase", proc:"eu"},
+  {cc:"PT", region:"European Union", cur:"EUR", eu:true, scheme:true, vat:23, net:13.5, min:61.5, exp:"End of the 3rd month after purchase", proc:"eu"},
+  {cc:"IE", region:"European Union", cur:"EUR", eu:true, scheme:true, vat:23, net:13.5, min:30, minNote:"Operator-dependent (often €30–€75)", exp:"End of the 3rd month after purchase", proc:"eu"},
+  {cc:"GR", region:"European Union", cur:"EUR", eu:true, scheme:true, vat:24, net:13.5, min:50, exp:"End of the 3rd month after purchase", proc:"eu"},
+  {cc:"SE", region:"European Union", cur:"SEK", eu:true, scheme:true, vat:25, net:15, min:200, exp:"End of the 3rd month after purchase", proc:"eu"},
+  {cc:"DK", region:"European Union", cur:"DKK", eu:true, scheme:true, vat:25, net:15, min:300, exp:"End of the 3rd month after purchase", proc:"eu"},
+  {cc:"FI", region:"European Union", cur:"EUR", eu:true, scheme:true, vat:25.5, net:15, min:40, exp:"End of the 3rd month after purchase", proc:"eu"},
+  {cc:"PL", region:"European Union", cur:"PLN", eu:true, scheme:true, vat:23, net:13, min:200, exp:"End of the 3rd month after purchase", proc:"eu"},
+  {cc:"CZ", region:"European Union", cur:"CZK", eu:true, scheme:true, vat:21, net:12.5, min:2001, exp:"End of the 3rd month after purchase", proc:"eu"},
+  {cc:"HU", region:"European Union", cur:"HUF", eu:true, scheme:true, vat:27, net:15, min:74001, exp:"End of the 3rd month after purchase", proc:"eu"},
+  {cc:"HR", region:"European Union", cur:"EUR", eu:true, scheme:true, vat:25, net:14, min:100, exp:"End of the 3rd month after purchase", proc:"eu"},
+  {cc:"LU", region:"European Union", cur:"EUR", eu:true, scheme:true, vat:17, net:11, min:74, exp:"End of the 3rd month after purchase", proc:"eu"},
+  {cc:"SI", region:"European Union", cur:"EUR", eu:true, scheme:true, vat:22, net:13, min:50, exp:"End of the 3rd month after purchase", proc:"eu"},
+  {cc:"RO", region:"European Union", cur:"RON", eu:true, scheme:true, vat:19, net:11.5, min:250, exp:"End of the 3rd month after purchase", proc:"eu"},
+  {cc:"CH", region:"Rest of Europe", cur:"CHF", scheme:true, vat:8.1, net:6, min:300, exp:"Within 30 days of purchase", proc:"ch"},
+  {cc:"NO", region:"Rest of Europe", cur:"NOK", scheme:true, vat:25, net:14, min:315, exp:"Within 30 days of purchase", proc:"generic"},
+  {cc:"IS", region:"Rest of Europe", cur:"ISK", scheme:true, vat:24, net:14, min:6000, exp:"On departure", proc:"generic"},
+  {cc:"TR", region:"Rest of Europe", cur:"TRY", scheme:true, vat:20, net:10, min:0, minNote:"Varies by operator", exp:"Within 3 months of purchase", proc:"generic"},
+  {cc:"GB", region:"Rest of Europe", cur:"GBP", scheme:false, vat:20, note:"The UK abolished its tourist VAT refund scheme (VAT RES) on 1 January 2021. Visitors can no longer reclaim VAT on goods they carry home. Some retailers will instead ship purchases abroad VAT-free."},
+  {cc:"JP", region:"Asia-Pacific", cur:"JPY", scheme:true, vat:10, net:9.1, min:5000, minNote:"¥5,000 of general goods or consumables", exp:"Within 30 days of purchase", proc:"jp"},
+  {cc:"KR", region:"Asia-Pacific", cur:"KRW", scheme:true, vat:10, net:7.5, min:15000, exp:"Within 3 months of purchase", proc:"kr"},
+  {cc:"SG", region:"Asia-Pacific", cur:"SGD", scheme:true, vat:9, net:6.5, min:100, exp:"Within 2 months of purchase", proc:"sg"},
+  {cc:"TH", region:"Asia-Pacific", cur:"THB", scheme:true, vat:7, net:5, min:2000, minNote:"฿2,000 per store; ฿5,000 total to claim", exp:"Within 60 days of purchase", proc:"th"},
+  {cc:"CN", region:"Asia-Pacific", cur:"CNY", scheme:true, vat:13, net:9, min:500, minNote:"¥500 per store per day", exp:"Within 90 days; claim at departure port", proc:"generic"},
+  {cc:"TW", region:"Asia-Pacific", cur:"TWD", scheme:true, vat:5, net:4, min:2000, minNote:"NT$2,000 per store per day", exp:"Within 90 days of purchase", proc:"generic"},
+  {cc:"ID", region:"Asia-Pacific", cur:"IDR", scheme:true, vat:11, net:8, min:5000000, minNote:"Rp 5,000,000 total (min Rp 500,000 per receipt)", exp:"Within 1 month; claim at the airport", proc:"generic"},
+  {cc:"AU", region:"Asia-Pacific", cur:"AUD", scheme:true, vat:10, net:9.1, min:300, minNote:"A$300 from one business", exp:"Bought within 60 days of departure", proc:"au"},
+  {cc:"NZ", region:"Asia-Pacific", cur:"NZD", scheme:false, vat:15, note:"New Zealand does not refund GST on goods that tourists take home. GST is only excluded when a retailer ships your purchase directly overseas."},
+  {cc:"AE", region:"Middle East & Africa", cur:"AED", scheme:true, vat:5, net:4, min:250, exp:"Validate within 90 days of purchase", proc:"ae"},
+  {cc:"ZA", region:"Middle East & Africa", cur:"ZAR", scheme:true, vat:15, net:11, min:250, minNote:"R250 total", exp:"Within 90 days; claim at departure", proc:"generic"},
+  {cc:"IL", region:"Middle East & Africa", cur:"ILS", scheme:true, vat:18, net:12, min:125, exp:"On departure (Ben Gurion & main exits)", proc:"generic"},
+  {cc:"US", region:"Americas", cur:"USD", scheme:false, vatLabel:"Sales tax varies by state", note:"The US has no national VAT or sales-tax refund for visitors. A few places run limited programs — e.g. Louisiana’s tax-free shopping and private refund desks in Texas — but most states offer nothing."},
+  {cc:"CA", region:"Americas", cur:"CAD", scheme:false, vatLabel:"5–15% GST/HST", note:"Canada ended its Visitor Rebate Program in 2007. There is no general GST/HST refund for tourists (a narrow rebate survives only for some tour packages and conventions)."},
+  {cc:"MX", region:"Americas", cur:"MXN", scheme:true, vat:16, net:9, min:1200, minNote:"MXN 1,200; refunds only at major airports/resorts", exp:"On departure", proc:"generic"},
+  {cc:"AR", region:"Americas", cur:"ARS", scheme:true, vat:21, net:13, min:0, minNote:"Tax-Free affiliated stores; threshold varies", exp:"On departure", proc:"generic"},
+  {cc:"BR", region:"Americas", cur:"BRL", scheme:false, vatLabel:"~17–20% ICMS", note:"Brazil has no nationwide tourist VAT/ICMS refund scheme for goods carried home."},
 ];
+const VR_COUNTRIES = VR_PAYLOAD.map(p => {
+  const { cc, id, n, flag, ...rest } = p;
+  return cc ? { id: cc.toLowerCase(), n: TT_COUNTRIES[cc].name, flag: TT_COUNTRIES[cc].flag, ...rest }
+            : { id, n, flag, ...rest };
+});
 const VR_REGIONS = ['European Union','Rest of Europe','Asia-Pacific','Middle East & Africa','Americas'];
 
 let vrData = null;
