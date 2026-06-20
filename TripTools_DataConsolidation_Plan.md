@@ -165,8 +165,10 @@ Each phase is independently shippable and leaves the app fully working.
 - *Regression test:* the full page script evaluates without throwing under a DOM stub, and every migrated dataset was diffed against the pre-Phase-2 commit (`4483e7a`) — identical entry count, identical order, zero dropped/added codes, zero name changes, and **zero payload-field diffs** across `VG`/`PP`/`TC`/`VAC`/`AF`/`VR`/`CDH`.
 - *Deferred to a follow-up:* swapping each tool's bespoke `trip.destination` matcher for `resolveDestination()` (behavior change, best validated in-browser) — same deferral as Phase 1.
 
-**Phase 3 — Coverage expansion / payload fill**
+**Phase 3 — Coverage expansion / payload fill** 🔶 *In progress*
 - Per domain, author the union rows with sources + `verified` dates and disclaimers. Ship domain-by-domain.
+- *Power Plug ✅ (first domain):* expanded `PP_PAYLOAD` from 144 → **202** countries (full registry coverage). The 58 added rows were web-sourced (worldstandards.eu / power-plugs-sockets.com / wise.com via search, Jun 2026), carry a dated source comment, and are directional planning data behind the tool's existing "verify before travel" disclaimer. Verified: all 202 link to valid registry entries, no duplicate codes, every plug letter is known to `PP_TYPES`.
+- *Bug fixed in passing:* Phase 0's extraction had mistaken `EM_DATA.f` (the **fire** number) for a flag, polluting 17 registry flags (e.g. North Korea showed `119`). All 17 corrected to proper emoji, and a **flag-format guardrail** added to the self-check so non-emoji flags are flagged at load.
 
 **Phase 4 — Currency registry (in scope — decision #6)**
 - Fold `CURRENCIES`/`FX_*` identity into `TT_COUNTRIES.currency`; keep FX rate fetching as-is.
