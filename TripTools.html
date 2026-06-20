@@ -14531,7 +14531,7 @@ const TT_COUNTRIES = {
   MX:{name:'Mexico', flag:'🇲🇽', iso3:'MEX', continent:'northamerica', currency:'MXN', calling:'52'},
   NI:{name:'Nicaragua', flag:'🇳🇮', iso3:'NIC', continent:'northamerica', calling:'505'},
   PA:{name:'Panama', flag:'🇵🇦', iso3:'PAN', continent:'northamerica', calling:'507'},
-  PR:{name:'Puerto Rico', flag:'🇵🇷', iso3:'PRI', continent:'northamerica'},
+  PR:{name:'Puerto Rico', flag:'🇵🇷', iso3:'PRI', continent:'northamerica', currency:'USD', calling:'1-787'},
   KN:{name:'St. Kitts & Nevis', flag:'🇰🇳', iso3:'KNA', continent:'northamerica', calling:'1-869'},
   LC:{name:'St. Lucia', flag:'🇱🇨', iso3:'LCA', continent:'northamerica', calling:'1-758'},
   VC:{name:'St. Vincent & Grenadines', flag:'🇻🇨', iso3:'VCT', continent:'northamerica', calling:'1-784'},
@@ -14603,7 +14603,7 @@ const TT_COUNTRIES = {
   BH:{name:'Bahrain', flag:'🇧🇭', iso3:'BHR', continent:'asia', calling:'973'},
   BD:{name:'Bangladesh', flag:'🇧🇩', iso3:'BGD', continent:'asia', calling:'880'},
   BT:{name:'Bhutan', flag:'🇧🇹', iso3:'BTN', continent:'asia', calling:'975'},
-  BN:{name:'Brunei', flag:'🇧🇳', iso3:'BRN', continent:'asia'},
+  BN:{name:'Brunei', flag:'🇧🇳', iso3:'BRN', continent:'asia', currency:'BND', calling:'673'},
   KH:{name:'Cambodia', flag:'🇰🇭', iso3:'KHM', continent:'asia', calling:'855'},
   CN:{name:'China', flag:'🇨🇳', iso3:'CHN', continent:'asia', currency:'CNY', calling:'86'},
   CY:{name:'Cyprus', flag:'🇨🇾', iso3:'CYP', continent:'asia', calling:'357'},
@@ -29056,6 +29056,11 @@ const EM_DATA = {
   NA:{p:'10111',cc:'264'},
   SZ:{p:'999',f:'933',a:'977',cc:'268'},
   ZA:{u:'112',p:'10111',f:'10177',a:'10177',cc:'27'},
+  // ── Phase 3 coverage · remaining territories (emergency numbers via WebSearch, Jun 2026) ──
+  PR:{u:'911',cc:'1-787'},
+  GU:{u:'911',cc:'1-671'},
+  BN:{p:'993',f:'995',a:'991',cc:'673'},
+  PF:{u:'112',p:'17',f:'18',a:'15',cc:'689'},
 };
 
 // Official embassy / consular directories (MFA-published).
