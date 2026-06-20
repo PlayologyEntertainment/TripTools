@@ -14493,13 +14493,23 @@ const CURRENCIES = ["AED","ARS","AUD","BRL","CAD","CHF","CLP","CNY","EUR","GBP",
 
 /* ════════════════════════════════════════════════════════════════════
    TT_COUNTRIES — canonical country registry (single source of truth).
-   Phase 0 of the destination/country data-consolidation effort. Identity
-   ONLY (name, flag, iso3, continent, currency, calling), keyed by
-   ISO-3166-1 alpha-2. Domain tools (visa, power-plug, tipping, vaccines,
-   customs, emergency, driving, IDP, VAT, ATM, etiquette) will migrate to
-   key their payloads off these codes and pull identity from here,
-   replacing ~11 duplicated name/flag copies. Additive in Phase 0 —
-   nothing consumes it yet. See TripTools_DataConsolidation_Plan.md.
+   Identity ONLY (name, flag, iso3, continent, currency, calling), keyed
+   by ISO-3166-1 alpha-2.
+
+   CONTRACT (enforced by ttCountriesSelfCheck at load):
+   • Country identity lives here and nowhere else. Domain datasets
+     (visa, power-plug, tipping, vaccines, customs, emergency, driving,
+     IDP, VAT, ATM, etiquette) are PAYLOAD-ONLY, keyed by the same ISO-2
+     code (`cc`). They must NOT carry `name`/`flag` that merely duplicates
+     this registry — the consumer-facing array is a projection that injects
+     identity from here (see e.g. VG_PAYLOAD → VG_COUNTRIES).
+   • A payload MAY override display for one tool by setting `n`/`flag` to a
+     value that DIFFERS from the registry (e.g. "Türkiye"); identical
+     copies are flagged as redundant drift by the self-check.
+   • TT_DESTINATIONS is the single destination list; DP_DESTINATIONS /
+     TZ_CITIES / COL_CITIES are projections of it. Each destination links
+     to a country via `cc`.
+   See TripTools_DataConsolidation_Plan.md.
    ════════════════════════════════════════════════════════════════════ */
 const TT_COUNTRIES = {
   // NORTHAMERICA
@@ -14803,6 +14813,28 @@ function ttCountriesSelfCheck(){
     const badDest = TT_DESTINATIONS.filter(d => d.cc && !TT_COUNTRIES[d.cc]).map(d => d.id);
     if (badDest.length) (missing.TT_DESTINATIONS = badDest);
   } catch(e){}
+  // Phase 5 guardrail: payload datasets must not re-introduce identity that
+  // merely duplicates the registry. A DIFFERENT n/flag is an allowed override;
+  // an IDENTICAL copy is redundant drift and gets flagged here.
+  const redundant = {};
+  const checkPayload = (src, arr) => {
+    try {
+      (arr || []).forEach(o => {
+        if (!o || !o.cc || !TT_COUNTRIES[o.cc]) return;
+        const reg = TT_COUNTRIES[o.cc];
+        const nm = o.n || o.name, fl = o.flag || o.f;
+        if (nm && nm === reg.name) (redundant[src] = redundant[src] || []).push(o.cc + ':name');
+        if (fl && fl === reg.flag) (redundant[src] = redundant[src] || []).push(o.cc + ':flag');
+      });
+    } catch(e){}
+  };
+  try { checkPayload('VG_PAYLOAD',  VG_PAYLOAD);  } catch(e){}
+  try { checkPayload('PP_PAYLOAD',  PP_PAYLOAD);  } catch(e){}
+  try { checkPayload('TC_PAYLOAD',  TC_PAYLOAD);  } catch(e){}
+  try { checkPayload('VAC_PAYLOAD', VAC_PAYLOAD); } catch(e){}
+  try { checkPayload('AF_PAYLOAD',  AF_PAYLOAD);  } catch(e){}
+  try { checkPayload('VR_PAYLOAD',  VR_PAYLOAD);  } catch(e){}
+  if (Object.keys(redundant).length) console.warn('[TT_COUNTRIES] payloads re-introduced redundant identity (drop these fields — registry is the source):', redundant);
   const srcs = Object.keys(missing);
   if (srcs.length) console.warn('[TT_COUNTRIES] codes missing from registry:', missing);
   else console.info('[TT_COUNTRIES] self-check OK — ' + Object.keys(TT_COUNTRIES).length + ' countries cover all domain datasets; ' + TT_DESTINATIONS.length + ' destinations linked.');

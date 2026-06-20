@@ -171,8 +171,9 @@ Each phase is independently shippable and leaves the app fully working.
 **Phase 4 — Currency registry (in scope — decision #6)**
 - Fold `CURRENCIES`/`FX_*` identity into `TT_COUNTRIES.currency`; keep FX rate fetching as-is.
 
-**Phase 5 — Guardrails**
+**Phase 5 — Guardrails** ✅ *Done*
 - Lint/test that no new dataset reintroduces duplicate identity; document the registry contract near the top of the data section.
+- *Implemented:* the load-time `ttCountriesSelfCheck()` now scans every payload dataset (`VG`/`PP`/`TC`/`VAC`/`AF`/`VR`) and warns if any entry re-introduces a `name`/`flag` that merely **duplicates** the registry (a *differing* value is an allowed per-tool override and is not flagged). The registry contract is documented in a header comment above `TT_COUNTRIES`. Verified: clean run reports OK; a seeded redundant `name` is correctly flagged.
 
 ---
 
