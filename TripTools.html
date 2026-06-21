@@ -32394,7 +32394,8 @@ function tgRender(){
 
 /* ══════════════════════════════════════════════════════
    DRIVING & ROAD RULES GUIDE
-   Offline reference for 53 countries (shares TC_COUNTRIES picker).
+   Offline reference for all 202 countries (shares the TC_COUNTRIES picker,
+   which now spans the full registry).
    Per-country fields:
      side   : 'left' | 'right'      — which side of the road
      idp    : 'no' | 'rec' | 'req'  — Int'l Driving Permit need for tourists
@@ -37812,6 +37813,11 @@ const VR_ELIG = [
    gross price, after operator commission), min (minimum spend, local currency).
    Rates/thresholds are typical published values, last verified May 2026. */
 /* VAT-Refund data — payload only; country identity (n/flag) comes from TT_COUNTRIES. */
+/* Helper for the coverage-fill rows that have NO tourist VAT-refund scheme:
+   keeps each entry to the essentials (region, currency, rate label, note).
+   A sensible default note is generated where none is supplied. */
+const _vrNo = (cc, region, cur, rate, note) => ({ cc, region, cur, scheme:false, vatLabel:rate,
+  note: note || `${TT_COUNTRIES[cc].name} runs no tourist VAT/sales-tax refund scheme — the tax you pay on goods can't be reclaimed when you leave.` });
 const VR_PAYLOAD = [
   {cc:"FR", region:"European Union", cur:"EUR", eu:true, scheme:true, vat:20, net:12, min:100, exp:"End of the 3rd month after purchase", proc:"eu"},
   {cc:"DE", region:"European Union", cur:"EUR", eu:true, scheme:true, vat:19, net:11.5, min:50, exp:"End of the 3rd month after purchase", proc:"eu"},
@@ -37855,6 +37861,178 @@ const VR_PAYLOAD = [
   {cc:"MX", region:"Americas", cur:"MXN", scheme:true, vat:16, net:9, min:1200, minNote:"MXN 1,200; refunds only at major airports/resorts", exp:"On departure", proc:"generic"},
   {cc:"AR", region:"Americas", cur:"ARS", scheme:true, vat:21, net:13, min:0, minNote:"Tax-Free affiliated stores; threshold varies", exp:"On departure", proc:"generic"},
   {cc:"BR", region:"Americas", cur:"BRL", scheme:false, vatLabel:"~17–20% ICMS", note:"Brazil has no nationwide tourist VAT/ICMS refund scheme for goods carried home."},
+
+  // ── Coverage fill (Jun 2026): remaining EU members + non-EU schemes that run a
+  //    tourist VAT/GST refund. Rates/thresholds are typical published values behind
+  //    the tool's verify-before-travel disclaimer. ──
+  {cc:"BG", region:"European Union", cur:"BGN", eu:true, scheme:true, vat:20, net:12, min:50, minNote:"Operator-dependent", exp:"End of the 3rd month after purchase", proc:"eu"},
+  {cc:"CY", region:"European Union", cur:"EUR", eu:true, scheme:true, vat:19, net:11.5, min:50, exp:"End of the 3rd month after purchase", proc:"eu"},
+  {cc:"EE", region:"European Union", cur:"EUR", eu:true, scheme:true, vat:22, net:13, min:38.01, exp:"End of the 3rd month after purchase", proc:"eu"},
+  {cc:"LV", region:"European Union", cur:"EUR", eu:true, scheme:true, vat:21, net:12.5, min:44, exp:"End of the 3rd month after purchase", proc:"eu"},
+  {cc:"LT", region:"European Union", cur:"EUR", eu:true, scheme:true, vat:21, net:12.5, min:55, exp:"End of the 3rd month after purchase", proc:"eu"},
+  {cc:"MT", region:"European Union", cur:"EUR", eu:true, scheme:true, vat:18, net:11, min:55, exp:"End of the 3rd month after purchase", proc:"eu"},
+  {cc:"SK", region:"European Union", cur:"EUR", eu:true, scheme:true, vat:23, net:13.5, min:100, exp:"End of the 3rd month after purchase", proc:"eu"},
+  {cc:"LI", region:"Rest of Europe", cur:"CHF", scheme:true, vat:8.1, net:6, min:300, exp:"Within 30 days of purchase", proc:"ch", note:"Liechtenstein shares Switzerland's VAT and customs union — tax-free shopping works the same way and is validated by Swiss/Liechtenstein customs on departure."},
+  {cc:"MC", region:"Rest of Europe", cur:"EUR", scheme:true, vat:20, net:12, min:100, exp:"End of the 3rd month after purchase", proc:"eu", note:"Monaco uses the French VAT system, so French tax-free shopping rules, operators and validation apply."},
+  {cc:"RS", region:"Rest of Europe", cur:"RSD", scheme:true, vat:20, net:11, min:6000, minNote:"RSD 6,000 per receipt", exp:"Within 6 months of purchase", proc:"generic"},
+  {cc:"RU", region:"Rest of Europe", cur:"RUB", scheme:true, vat:20, net:11, min:10000, minNote:"RUB 10,000 in one store per day", exp:"Within 3 months; claim on departure", proc:"generic", note:"Russia's Tax-Free scheme covers participating stores in major cities, but refunds to foreign cards may be disrupted — confirm current arrangements before relying on it."},
+  {cc:"VN", region:"Asia-Pacific", cur:"VND", scheme:true, vat:10, net:7, min:2000000, minNote:"VND 2,000,000 per store per day", exp:"Within 60 days; claim at the airport", proc:"generic"},
+
+  // ── Rest of Europe (no tourist VAT refund) ──
+  _vrNo("AL","Rest of Europe","ALL","20% VAT"),
+  _vrNo("AD","Rest of Europe","EUR","4.5% IGI","Andorra is a low-tax shopping haven — its IGI sales tax is only ~4.5% and there is no separate tourist-refund scheme."),
+  _vrNo("BY","Rest of Europe","BYN","20% VAT"),
+  _vrNo("BA","Rest of Europe","BAM","17% VAT"),
+  _vrNo("XK","Rest of Europe","EUR","18% VAT"),
+  _vrNo("MD","Rest of Europe","MDL","20% VAT"),
+  _vrNo("ME","Rest of Europe","EUR","21% VAT"),
+  _vrNo("MK","Rest of Europe","MKD","18% VAT"),
+  _vrNo("SM","Rest of Europe","EUR","No VAT","San Marino levies an import tax rather than VAT and runs no tourist-refund scheme."),
+  _vrNo("UA","Rest of Europe","UAH","20% VAT"),
+  _vrNo("VA","Rest of Europe","EUR","No VAT","Vatican City has no VAT or sales tax; nearby purchases in Italy follow the Italian refund scheme instead."),
+
+  // ── Asia-Pacific (no tourist VAT refund) ──
+  _vrNo("AF","Asia-Pacific","AFN","10% BRT","Afghanistan levies a business receipts tax rather than a refundable VAT — there is no tourist refund."),
+  _vrNo("AM","Asia-Pacific","AMD","20% VAT"),
+  _vrNo("AZ","Asia-Pacific","AZN","18% VAT"),
+  _vrNo("BD","Asia-Pacific","BDT","15% VAT"),
+  _vrNo("BT","Asia-Pacific","BTN","No VAT","Bhutan has no broad VAT on goods for tourists to reclaim (a GST is being phased in)."),
+  _vrNo("BN","Asia-Pacific","BND","No VAT","Brunei has no VAT or general sales tax, so there is nothing for visitors to reclaim."),
+  _vrNo("KH","Asia-Pacific","KHR","10% VAT"),
+  _vrNo("FJ","Asia-Pacific","FJD","9% VAT"),
+  _vrNo("PF","Asia-Pacific","XPF","16% TVA","French Polynesia charges TVA but, unlike mainland France, runs no tourist VAT-refund scheme."),
+  _vrNo("GE","Asia-Pacific","GEL","18% VAT"),
+  _vrNo("GU","Asia-Pacific","USD","No VAT (use tax)","Guam levies a business 'use tax' rather than a refundable sales tax — visitors can't reclaim it."),
+  _vrNo("HK","Asia-Pacific","HKD","No VAT / GST","Hong Kong has no VAT, GST or sales tax at all — prices are tax-free already, so there is nothing to reclaim."),
+  _vrNo("IN","Asia-Pacific","INR","18% GST","India has no operational tourist GST-refund scheme for goods carried home, despite long-standing plans."),
+  _vrNo("KZ","Asia-Pacific","KZT","12% VAT"),
+  _vrNo("KI","Asia-Pacific","AUD","No VAT","Kiribati has no VAT or general sales tax, so there is nothing to reclaim."),
+  _vrNo("KG","Asia-Pacific","KGS","12% VAT"),
+  _vrNo("LA","Asia-Pacific","LAK","10% VAT"),
+  _vrNo("MO","Asia-Pacific","MOP","No VAT","Macau has no VAT or general sales tax, so goods are sold tax-free and there is nothing to refund."),
+  _vrNo("MY","Asia-Pacific","MYR","6–10% SST","Malaysia abolished GST in 2018 (now a sales & service tax) and has no tourist-refund scheme."),
+  _vrNo("MV","Asia-Pacific","MVR","8% GST"),
+  _vrNo("MH","Asia-Pacific","USD","No VAT","The Marshall Islands have no VAT or general sales tax, so there is nothing to reclaim."),
+  _vrNo("FM","Asia-Pacific","USD","No VAT","Micronesia has no national VAT/sales tax on goods, so there is nothing to reclaim."),
+  _vrNo("MN","Asia-Pacific","MNT","10% VAT"),
+  _vrNo("MM","Asia-Pacific","MMK","5% commercial tax"),
+  _vrNo("NR","Asia-Pacific","AUD","No VAT","Nauru has no VAT or general sales tax, so there is nothing to reclaim."),
+  _vrNo("NP","Asia-Pacific","NPR","13% VAT"),
+  _vrNo("KP","Asia-Pacific","KPW","n/a","North Korea has no tourist VAT-refund scheme; shopping is limited to state and tourist outlets."),
+  _vrNo("PK","Asia-Pacific","PKR","18% GST"),
+  _vrNo("PW","Asia-Pacific","USD","No VAT","Palau has no VAT or general sales tax on goods, so there is nothing to reclaim."),
+  _vrNo("PG","Asia-Pacific","PGK","10% GST"),
+  _vrNo("PH","Asia-Pacific","PHP","12% VAT","The Philippines passed a tourist VAT-refund law in 2024, but it is not yet operational — confirm current status before relying on it."),
+  _vrNo("WS","Asia-Pacific","WST","15% VAT"),
+  _vrNo("SB","Asia-Pacific","SBD","10% GST"),
+  _vrNo("LK","Asia-Pacific","LKR","18% VAT"),
+  _vrNo("TJ","Asia-Pacific","TJS","14% VAT"),
+  _vrNo("TL","Asia-Pacific","USD","No VAT","Timor-Leste levies only narrow sales/services taxes and runs no tourist-refund scheme."),
+  _vrNo("TO","Asia-Pacific","TOP","15% consumption tax"),
+  _vrNo("TM","Asia-Pacific","TMT","15% VAT"),
+  _vrNo("TV","Asia-Pacific","AUD","No VAT","Tuvalu has no VAT or general sales tax, so there is nothing to reclaim."),
+  _vrNo("UZ","Asia-Pacific","UZS","12% VAT"),
+  _vrNo("VU","Asia-Pacific","VUV","15% VAT"),
+
+  // ── Middle East & Africa (no tourist VAT refund) ──
+  _vrNo("DZ","Middle East & Africa","DZD","19% VAT"),
+  _vrNo("AO","Middle East & Africa","AOA","14% VAT"),
+  _vrNo("BH","Middle East & Africa","BHD","10% VAT"),
+  _vrNo("BJ","Middle East & Africa","XOF","18% VAT"),
+  _vrNo("BW","Middle East & Africa","BWP","14% VAT"),
+  _vrNo("BF","Middle East & Africa","XOF","18% VAT"),
+  _vrNo("BI","Middle East & Africa","BIF","18% VAT"),
+  _vrNo("CM","Middle East & Africa","XAF","19.25% VAT"),
+  _vrNo("CV","Middle East & Africa","CVE","15% VAT"),
+  _vrNo("CF","Middle East & Africa","XAF","19% VAT"),
+  _vrNo("TD","Middle East & Africa","XAF","18% VAT"),
+  _vrNo("KM","Middle East & Africa","KMF","No VAT","Comoros levies no broad VAT on goods, so there is nothing for visitors to reclaim."),
+  _vrNo("CI","Middle East & Africa","XOF","18% VAT"),
+  _vrNo("DJ","Middle East & Africa","DJF","10% VAT"),
+  _vrNo("CD","Middle East & Africa","CDF","16% VAT"),
+  _vrNo("EG","Middle East & Africa","EGP","14% VAT"),
+  _vrNo("GQ","Middle East & Africa","XAF","15% VAT"),
+  _vrNo("ER","Middle East & Africa","ERN","~12% sales tax"),
+  _vrNo("SZ","Middle East & Africa","SZL","15% VAT"),
+  _vrNo("ET","Middle East & Africa","ETB","15% VAT"),
+  _vrNo("GA","Middle East & Africa","XAF","18% VAT"),
+  _vrNo("GM","Middle East & Africa","GMD","15% VAT"),
+  _vrNo("GH","Middle East & Africa","GHS","15% VAT"),
+  _vrNo("GN","Middle East & Africa","GNF","18% VAT"),
+  _vrNo("GW","Middle East & Africa","XOF","17% VAT"),
+  _vrNo("IR","Middle East & Africa","IRR","10% VAT"),
+  _vrNo("IQ","Middle East & Africa","IQD","No VAT","Iraq has no broad VAT (only limited sales taxes), so there is no general tourist refund."),
+  _vrNo("JO","Middle East & Africa","JOD","16% GST"),
+  _vrNo("KE","Middle East & Africa","KES","16% VAT"),
+  _vrNo("KW","Middle East & Africa","KWD","No VAT","Kuwait has not yet introduced VAT, so there is no sales tax to refund on goods."),
+  _vrNo("LB","Middle East & Africa","LBP","11% VAT"),
+  _vrNo("LS","Middle East & Africa","LSL","15% VAT"),
+  _vrNo("LR","Middle East & Africa","LRD","10% GST"),
+  _vrNo("LY","Middle East & Africa","LYD","No VAT","Libya has no VAT or general sales tax on goods, so there is nothing to refund."),
+  _vrNo("MG","Middle East & Africa","MGA","20% VAT"),
+  _vrNo("MW","Middle East & Africa","MWK","16.5% VAT"),
+  _vrNo("ML","Middle East & Africa","XOF","18% VAT"),
+  _vrNo("MR","Middle East & Africa","MRU","16% VAT"),
+  _vrNo("MU","Middle East & Africa","MUR","15% VAT"),
+  _vrNo("MA","Middle East & Africa","MAD","20% VAT"),
+  _vrNo("MZ","Middle East & Africa","MZN","16% VAT"),
+  _vrNo("NA","Middle East & Africa","NAD","15% VAT"),
+  _vrNo("NE","Middle East & Africa","XOF","19% VAT"),
+  _vrNo("NG","Middle East & Africa","NGN","7.5% VAT"),
+  _vrNo("OM","Middle East & Africa","OMR","5% VAT"),
+  _vrNo("PS","Middle East & Africa","ILS","16% VAT"),
+  _vrNo("QA","Middle East & Africa","QAR","No VAT","Qatar has not yet introduced VAT, so there is no sales tax to refund on goods."),
+  _vrNo("CG","Middle East & Africa","XAF","18.9% VAT"),
+  _vrNo("RW","Middle East & Africa","RWF","18% VAT"),
+  _vrNo("ST","Middle East & Africa","STN","15% VAT"),
+  _vrNo("SA","Middle East & Africa","SAR","15% VAT","Saudi Arabia charges 15% VAT and has announced a tourist-refund scheme, but it is not yet generally operational — confirm before relying on it."),
+  _vrNo("SN","Middle East & Africa","XOF","18% VAT"),
+  _vrNo("SC","Middle East & Africa","SCR","15% VAT"),
+  _vrNo("SL","Middle East & Africa","SLE","15% GST"),
+  _vrNo("SO","Middle East & Africa","SOS","No VAT","Somalia has no functioning national VAT/sales-tax regime, so there is no refund to claim."),
+  _vrNo("SS","Middle East & Africa","SSP","18% VAT"),
+  _vrNo("SD","Middle East & Africa","SDG","~17% VAT"),
+  _vrNo("SY","Middle East & Africa","SYP","~? sales tax"),
+  _vrNo("TZ","Middle East & Africa","TZS","18% VAT"),
+  _vrNo("TG","Middle East & Africa","XOF","18% VAT"),
+  _vrNo("TN","Middle East & Africa","TND","19% VAT"),
+  _vrNo("UG","Middle East & Africa","UGX","18% VAT"),
+  _vrNo("YE","Middle East & Africa","YER","5% sales tax"),
+  _vrNo("ZM","Middle East & Africa","ZMW","16% VAT"),
+  _vrNo("ZW","Middle East & Africa","ZWL","15% VAT"),
+
+  // ── Americas (no tourist VAT refund) ──
+  _vrNo("AG","Americas","XCD","15% ABST"),
+  _vrNo("BS","Americas","BSD","10% VAT"),
+  _vrNo("BB","Americas","BBD","17.5% VAT"),
+  _vrNo("BZ","Americas","BZD","12.5% GST"),
+  _vrNo("BO","Americas","BOB","13% VAT"),
+  _vrNo("CL","Americas","CLP","19% VAT","Chile has no general tourist VAT refund on goods, though foreign visitors paying in USD are exempt from VAT on hotel stays."),
+  _vrNo("CO","Americas","COP","19% VAT"),
+  _vrNo("CR","Americas","CRC","13% VAT"),
+  _vrNo("CU","Americas","CUP","No VAT","Cuba has no conventional VAT/refund scheme for visitors; pricing and currency rules change often."),
+  _vrNo("DM","Americas","XCD","15% VAT"),
+  _vrNo("DO","Americas","DOP","18% ITBIS"),
+  _vrNo("EC","Americas","USD","15% VAT"),
+  _vrNo("SV","Americas","USD","13% VAT"),
+  _vrNo("GD","Americas","XCD","15% VAT"),
+  _vrNo("GT","Americas","GTQ","12% VAT"),
+  _vrNo("GY","Americas","GYD","14% VAT"),
+  _vrNo("HT","Americas","HTG","10% TCA"),
+  _vrNo("HN","Americas","HNL","15% VAT"),
+  _vrNo("JM","Americas","JMD","15% GCT"),
+  _vrNo("NI","Americas","NIO","15% VAT"),
+  _vrNo("PA","Americas","PAB","7% ITBMS"),
+  _vrNo("PY","Americas","PYG","10% VAT"),
+  _vrNo("PE","Americas","PEN","18% VAT","Peru's tourist VAT-refund scheme exists only in limited, sporadically-operational form — don't count on it for ordinary purchases."),
+  _vrNo("PR","Americas","USD","11.5% sales tax"),
+  _vrNo("KN","Americas","XCD","17% VAT"),
+  _vrNo("LC","Americas","XCD","12.5% VAT"),
+  _vrNo("VC","Americas","XCD","16% VAT"),
+  _vrNo("SR","Americas","SRD","10% VAT"),
+  _vrNo("TT","Americas","TTD","12.5% VAT"),
+  _vrNo("UY","Americas","UYU","22% VAT"),
+  _vrNo("VE","Americas","VES","16% VAT"),
 ];
 const VR_COUNTRIES = VR_PAYLOAD.map(p => {
   const { cc, id, n, flag, ...rest } = p;
@@ -37903,7 +38081,7 @@ function vrInit(){
   const sel = document.getElementById('vr-country');
   let html = '<option value="">— select a country —</option>';
   VR_REGIONS.forEach(region => {
-    const inR = VR_COUNTRIES.filter(c => c.region === region);
+    const inR = VR_COUNTRIES.filter(c => c.region === region).sort((a,b) => a.n.localeCompare(b.n));
     if (!inR.length) return;
     html += `<optgroup label="${vrEsc(region)}">`;
     inR.forEach(c => {
