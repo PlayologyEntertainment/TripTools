@@ -9223,6 +9223,84 @@ body.no-scroll { overflow: hidden; }
 }
 </style>
 <style>
+  #view-esim .esim-badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:12px;font-weight:700}
+  #view-esim .esim-ok{background:rgba(46,160,67,.14);color:#2ea043}
+  #view-esim .esim-warn{background:rgba(217,138,0,.14);color:#d98a00}
+  #view-esim .esim-bad{background:rgba(207,34,46,.14);color:#cf222e}
+  @media print{ #view-esim .tc-country-caret,#view-esim .tc-drop{display:none!important} #view-esim #esim-empty{display:none!important} }
+</style>
+<div id="view-esim" class="view">
+  <nav class="tool-bar">
+    <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="window.print()">🖨 Print</button>
+  </nav>
+  <div class="ctx-banner" id="ctx-esim"></div>
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>eSIM &amp; Mobile Data</h1>
+    <p class="tool-sub">How to get online in any of the 202 countries — eSIM availability &amp; typical price, network coverage, local SIM rules and the censorship/VPN gotchas worth knowing before you land.</p>
+  </div>
+
+  <div class="tool-body">
+    <div class="fg">
+      <label>Country</label>
+      <div class="tc-country-wrap">
+        <div class="tc-country-input" id="esim-country-disp" onclick="esimOpenPicker()" tabindex="0" role="button" aria-label="Choose country">
+          <span class="tc-country-flag" id="esim-disp-flag">🌐</span>
+          <span class="tc-country-name" id="esim-disp-name">Select a country</span>
+          <span class="tc-country-cur" id="esim-disp-tag"></span>
+          <span class="tc-country-caret">▾</span>
+        </div>
+        <div class="tc-drop" id="esim-country-drop" style="display:none">
+          <div class="tc-drop-search">
+            <input type="search" id="esim-country-search" class="tc-search-input" placeholder="🔍 Search 202 countries…" autocomplete="off" oninput="esimFilterCountries()">
+          </div>
+          <div id="esim-country-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tg-empty" id="esim-empty">
+      <span class="tg-empty-ico">📶</span>
+      Pick a country to see eSIM availability and price, network coverage, local SIM rules and any internet restrictions.
+    </div>
+
+    <div id="esim-content" style="display:none">
+      <div class="dr-hero" id="esim-hero">
+        <div class="dr-hero-flag" id="esim-hero-flag">🌐</div>
+        <div class="dr-hero-meta">
+          <div class="dr-hero-co" id="esim-hero-co"></div>
+          <div class="dr-hero-side">Mobile data &amp; connectivity</div>
+          <div class="dr-hero-sub" id="esim-hero-sub"></div>
+        </div>
+        <div class="dr-hero-ico">📱</div>
+      </div>
+
+      <div class="dr-section">
+        <div class="dr-sec-hdr">eSIM</div>
+        <div class="dr-rows" id="esim-esim"></div>
+      </div>
+      <div class="dr-section">
+        <div class="dr-sec-hdr">Network coverage</div>
+        <div class="dr-rows" id="esim-coverage"></div>
+      </div>
+      <div class="dr-section">
+        <div class="dr-sec-hdr">Local prepaid SIM</div>
+        <div class="dr-rows" id="esim-localsim"></div>
+      </div>
+      <div class="dr-section" id="esim-restrict-sec" style="display:none">
+        <div class="dr-sec-hdr">Internet restrictions</div>
+        <div class="dr-rows" id="esim-restrict"></div>
+      </div>
+    </div>
+
+    <div style="margin-top:16px;padding:12px 16px;background:var(--paper-2);border-left:3px solid var(--yellow);border-radius:var(--r);font-size:13px;color:var(--muted);line-height:1.55">
+      ⚠️ <strong>Prices and rules change — verify before you buy.</strong> eSIM price bands are indicative per-GB tourist rates and vary by plan size and provider. Coverage, SIM-registration rules and internet restrictions change; an eSIM that roams on a foreign network can behave differently from a local SIM (sometimes an advantage for restricted regions). Treat this as planning guidance.
+    </div>
+  </div><!-- /tool-body -->
+</div>
+
+<style>
   #view-holidays .hol-yearbar{display:flex;align-items:center;justify-content:center;gap:18px;margin:4px 0 14px}
   #view-holidays .hol-ystep{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--paper-2);font-size:20px;cursor:pointer;line-height:1;color:var(--ink)}
   #view-holidays .hol-ystep:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
@@ -14532,6 +14610,7 @@ const TOOLS = [
   {id:'unit-conv',     nm:'Universal Unit Converter',   ico:'📏', ph:'destination',on:false,live:true,  ds:'Temp, distance, weight, volume, speed — all traveler conversions.'},
   {id:'phrasebook',    nm:'Language Phrasebook',        ico:'💬', ph:'destination',on:false,live:true,  ds:'Essential travel phrases in 25 languages with pronunciation. Dietary & allergy phrases, tap-to-hear, point-to-show.'},
   {id:'holidays',      nm:'Public Holidays',            ico:'📅', ph:'destination',on:false,live:true, trip:true,  ds:'National public holidays for all 202 countries. Movable feasts (Easter, Eid, Lunar New Year) computed for any year.'},
+  {id:'esim',          nm:'eSIM & Mobile Data',         ico:'📱', ph:'destination',on:false,live:true, trip:true,  ds:'eSIM availability & price, network coverage, local SIM rules and censorship/VPN notes for all 202 countries.'},
   {id:'emergency',     nm:'Emergency Numbers',          ico:'🚨', ph:'destination',on:false,live:true, trip:true,  ds:'Police, fire & ambulance for 150+ countries. Embassy finder & your insurance card, always offline.'},
   {id:'uv-index',      nm:'UV Index & Sun Safety',      ico:'☀️', ph:'destination',on:true, live:true,  ds:'Live UV index, SPF recommendations by skin type.'},
   {id:'altitude',      nm:'Altitude Sickness Guide',    ico:'⛰', ph:'destination',on:false,live:true,  ds:'Enter elevation → risk level + acclimatization timeline.'},
@@ -15636,6 +15715,7 @@ function injectTripCtx(id) {
   if(id==='car-kit')    ckInit();
   if(id==='emergency')  emInit();
   if(id==='holidays')   holInit();
+  if(id==='esim')       esimInit();
   if(id==='timezone')   tzInit();
   if(id==='meeting-tz') mtpInit();
   if(id==='lounge-guide') lgInit();
@@ -39523,6 +39603,282 @@ function holRender(){
   }).join('');
   document.getElementById('hol-list').innerHTML=rows||'<div class="tg-empty">No holiday data for this year.</div>';
   document.getElementById('hol-approx-note').style.display=anyApprox?'':'none';
+}
+
+/* ══════════════════════════════════════════════════════
+   eSIM & MOBILE DATA  (Phase 7 — Domain 3)
+   Per-country connectivity for all 202 countries: eSIM
+   availability & typical tourist price band, urban network
+   generation, local prepaid-SIM rules, main operators, and
+   censorship/VPN caveats. Best-effort, directional — prices
+   and rules change; verify before travel.
+   ══════════════════════════════════════════════════════ */
+const ESIM_DATA = {
+  AD:{e:'y', pr:'$4-6', cv:'4G', sim:'free', op:['Andorra Telecom']},
+  AE:{e:'y', pr:'$6-9', cv:'5G', sim:'reg', op:['Etisalat (e&)','du'], net:'WhatsApp/FaceTime/Skype voice & video calls are blocked on local networks; a roaming eSIM or VPN restores them.'},
+  AF:{e:'n', pr:'—', cv:'3G', sim:'hard', op:['Roshan','MTN/AWCC','Etisalat'], cvn:'Coverage limited; security risks.', net:'Restrictions and shutdowns under Taliban rule.'},
+  AG:{e:'y', pr:'$6-9', cv:'4G', sim:'free', op:['Flow','Digicel']},
+  AL:{e:'y', pr:'$4-6', cv:'4G', sim:'reg', op:['Vodafone','One','Albtelecom']},
+  AM:{e:'y', pr:'$4-7', cv:'4G', sim:'reg', op:['Team (Ucom)','Viva-MTS','Team Telecom']},
+  AO:{e:'y', pr:'$6-10', cv:'4G', sim:'reg', op:['Unitel','Movicel'], cvn:'4G in cities; rural is 2G/3G.'},
+  AR:{e:'y', pr:'$5-8', cv:'4G', sim:'reg', op:['Claro','Movistar','Personal']},
+  AT:{e:'y', pr:'$3-5', cv:'5G', sim:'reg', op:['A1','Magenta','Drei']},
+  AU:{e:'y', pr:'$4-7', cv:'5G', sim:'free', op:['Telstra','Optus','Vodafone'], cvn:'Telstra has by far the widest Outback reach.'},
+  AZ:{e:'y', pr:'$5-8', cv:'4G', sim:'reg', op:['Azercell','Bakcell','Nar'], net:'Some VoIP calling restricted.'},
+  BA:{e:'y', pr:'$4-6', cv:'4G', sim:'reg', op:['BH Telecom','m:tel','HT Eronet']},
+  BB:{e:'y', pr:'$6-9', cv:'4G', sim:'free', op:['Flow','Digicel']},
+  BD:{e:'y', pr:'$5-8', cv:'4G', sim:'reg', op:['Grameenphone','Robi','Banglalink'], cvn:'Rural 3G.', net:'Periodic internet shutdowns.'},
+  BE:{e:'y', pr:'$3-5', cv:'5G', sim:'reg', op:['Proximus','Orange','BASE']},
+  BF:{e:'p', pr:'$6-10', cv:'3G', sim:'reg', op:['Orange','Moov'], cvn:'Limited outside cities; security issues in the north.'},
+  BG:{e:'y', pr:'$4-6', cv:'5G', sim:'reg', op:['A1','Yettel','Vivacom']},
+  BH:{e:'y', pr:'$5-8', cv:'5G', sim:'reg', op:['Batelco','stc','Zain']},
+  BI:{e:'p', pr:'$6-10', cv:'3G', sim:'reg', op:['Econet','Lumitel'], cvn:'Mostly 3G.'},
+  BJ:{e:'y', pr:'$6-10', cv:'4G', sim:'reg', op:['MTN','Moov']},
+  BN:{e:'y', pr:'$5-8', cv:'4G', sim:'reg', op:['DST','imagine','Progresif']},
+  BO:{e:'y', pr:'$5-8', cv:'4G', sim:'reg', op:['Entel','Tigo','Viva'], cvn:'Altiplano/rural patchy.'},
+  BR:{e:'y', pr:'$4-7', cv:'5G', sim:'reg', op:['Vivo','Claro','TIM'], cvn:'Big country — Amazon/rural gaps.'},
+  BS:{e:'y', pr:'$6-9', cv:'4G', sim:'free', op:['BTC','Aliv']},
+  BT:{e:'p', pr:'$6-10', cv:'4G', sim:'reg', op:['B-Mobile','TashiCell'], cvn:'Mountainous terrain leaves gaps.'},
+  BW:{e:'y', pr:'$5-9', cv:'4G', sim:'reg', op:['Mascom','Orange','beMOBILE'], cvn:'Sparse coverage in the Kalahari/rural areas.'},
+  BY:{e:'p', pr:'$5-8', cv:'4G', sim:'reg', op:['A1','MTS','life:)'], net:'Heavy state surveillance; some services blocked — a VPN may be needed and is itself restricted.'},
+  BZ:{e:'y', pr:'$6-9', cv:'4G', sim:'reg', op:['Digi','Smart']},
+  CA:{e:'y', pr:'$4-7', cv:'5G', sim:'free', op:['Rogers','Bell','Telus'], cvn:'Sparse on northern/remote highways.'},
+  CD:{e:'p', pr:'$6-10', cv:'3G', sim:'reg', op:['Vodacom','Airtel','Orange'], cvn:'Vast rural dead zones.'},
+  CF:{e:'n', pr:'—', cv:'2G', sim:'reg', op:['Orange','Telecel'], cvn:'Very limited coverage outside Bangui.'},
+  CG:{e:'p', pr:'$6-10', cv:'3G', sim:'reg', op:['MTN','Airtel']},
+  CH:{e:'y', pr:'$4-6', cv:'5G', sim:'free', op:['Swisscom','Sunrise','Salt']},
+  CI:{e:'y', pr:'$6-10', cv:'4G', sim:'reg', op:['Orange','MTN','Moov']},
+  CL:{e:'y', pr:'$4-7', cv:'5G', sim:'reg', op:['Entel','Movistar','WOM','Claro']},
+  CM:{e:'y', pr:'$6-10', cv:'4G', sim:'reg', op:['MTN','Orange','Camtel'], cvn:'Anglophone-region disruptions.'},
+  CN:{e:'y', pr:'$5-9', cv:'5G', sim:'reg', op:['China Mobile','China Unicom','China Telecom'], net:'Great Firewall blocks Google, WhatsApp, Instagram, etc. A foreign-issued roaming eSIM routes around it; local SIMs do not — bring a VPN set up in advance.'},
+  CO:{e:'y', pr:'$4-7', cv:'4G/5G', sim:'reg', op:['Claro','Movistar','Tigo']},
+  CR:{e:'y', pr:'$5-8', cv:'4G', sim:'reg', op:['Kölbi','Claro','Liberty']},
+  CU:{e:'p', pr:'$8-12', cv:'3G', sim:'hard', op:['Cubacel (ETECSA)'], cvn:'Slow, expensive; Wi-Fi historically via scratch cards.', net:'State-controlled internet; many services restricted. Foreign eSIM support limited.'},
+  CV:{e:'y', pr:'$5-9', cv:'4G', sim:'reg', op:['CVMovel','Unitel T+']},
+  CY:{e:'y', pr:'$4-6', cv:'5G', sim:'reg', op:['Cyta','Epic','PrimeTel']},
+  CZ:{e:'y', pr:'$3-5', cv:'5G', sim:'free', op:['O2','T-Mobile','Vodafone']},
+  DE:{e:'y', pr:'$3-5', cv:'5G', sim:'reg', op:['Telekom','Vodafone','O2']},
+  DJ:{e:'p', pr:'$7-11', cv:'3G', sim:'reg', op:['Djibouti Telecom'], cvn:'Single state operator; pricey.'},
+  DK:{e:'y', pr:'$3-5', cv:'5G', sim:'free', op:['TDC/YouSee','Telia','Telenor','3']},
+  DM:{e:'y', pr:'$6-9', cv:'4G', sim:'free', op:['Flow','Digicel']},
+  DO:{e:'y', pr:'$5-8', cv:'4G', sim:'reg', op:['Claro','Altice','Viva']},
+  DZ:{e:'y', pr:'$6-9', cv:'4G', sim:'reg', op:['Mobilis','Djezzy','Ooredoo'], net:'Some VoIP restricted; periodic exam-season shutdowns.'},
+  EC:{e:'y', pr:'$5-8', cv:'4G', sim:'reg', op:['Claro','Movistar','CNT'], cvn:'Galápagos limited.'},
+  EE:{e:'y', pr:'$3-5', cv:'5G', sim:'reg', op:['Telia','Elisa','Tele2']},
+  EG:{e:'y', pr:'$5-8', cv:'4G', sim:'reg', op:['Vodafone','Orange','Etisalat','WE'], net:'Some VoIP and services periodically restricted; VPNs occasionally throttled.'},
+  ER:{e:'n', pr:'—', cv:'2G', sim:'reg', op:['Eritel'], cvn:'Among the least-connected countries; mobile data barely available.', net:'Heavy state control.'},
+  ES:{e:'y', pr:'$3-5', cv:'5G', sim:'reg', op:['Movistar','Orange','Vodafone']},
+  ET:{e:'p', pr:'$6-10', cv:'4G', sim:'reg', op:['Ethio Telecom','Safaricom'], cvn:'4G in cities only.', net:'Periodic internet shutdowns; some apps restricted.'},
+  FI:{e:'y', pr:'$3-5', cv:'5G', sim:'free', op:['Elisa','Telia','DNA']},
+  FJ:{e:'y', pr:'$6-9', cv:'4G', sim:'reg', op:['Vodafone Fiji','Digicel']},
+  FM:{e:'p', pr:'$8-12', cv:'3G', sim:'reg', op:['FSMTC'], cvn:'Limited to main islands.'},
+  FR:{e:'y', pr:'$3-5', cv:'5G', sim:'free', op:['Orange','SFR','Bouygues','Free']},
+  GA:{e:'y', pr:'$6-10', cv:'4G', sim:'reg', op:['Airtel','Moov']},
+  GB:{e:'y', pr:'$3-5', cv:'5G', sim:'free', op:['EE','O2','Vodafone','Three']},
+  GD:{e:'y', pr:'$6-9', cv:'4G', sim:'free', op:['Flow','Digicel']},
+  GE:{e:'y', pr:'$4-7', cv:'4G', sim:'reg', op:['Magti','Silknet','Cellfie']},
+  GH:{e:'y', pr:'$5-9', cv:'4G', sim:'reg', op:['MTN','Telecel','AirtelTigo']},
+  GM:{e:'y', pr:'$6-10', cv:'3G', sim:'reg', op:['Africell','QCell','Gamcel']},
+  GN:{e:'p', pr:'$6-10', cv:'3G', sim:'reg', op:['Orange','MTN','Cellcom']},
+  GQ:{e:'p', pr:'$7-11', cv:'3G', sim:'reg', op:['Orange','Muni'], cvn:'Limited and expensive.'},
+  GR:{e:'y', pr:'$4-6', cv:'5G', sim:'reg', op:['Cosmote','Vodafone','Nova']},
+  GT:{e:'y', pr:'$5-8', cv:'4G', sim:'reg', op:['Tigo','Claro']},
+  GU:{e:'y', pr:'$5-8', cv:'4G', sim:'free', op:['GTA','Docomo Pacific','IT&E']},
+  GW:{e:'p', pr:'$7-11', cv:'3G', sim:'reg', op:['MTN','Orange']},
+  GY:{e:'y', pr:'$6-10', cv:'4G', sim:'reg', op:['Digicel','GTT'], cvn:'Interior largely uncovered.'},
+  HK:{e:'y', pr:'$4-7', cv:'5G', sim:'free', op:['CSL','3','SmarTone','China Mobile HK'], net:'Open internet (unlike mainland China).'},
+  HN:{e:'y', pr:'$5-8', cv:'4G', sim:'reg', op:['Tigo','Claro']},
+  HR:{e:'y', pr:'$4-6', cv:'5G', sim:'reg', op:['Hrvatski Telekom','A1','Telemach']},
+  HT:{e:'p', pr:'$7-11', cv:'3G', sim:'reg', op:['Digicel','Natcom'], cvn:'Unstable; security issues.'},
+  HU:{e:'y', pr:'$3-5', cv:'5G', sim:'reg', op:['Magyar Telekom','Yettel','One']},
+  ID:{e:'y', pr:'$5-8', cv:'4G', sim:'reg', op:['Telkomsel','Indosat','XL','Smartfren'], cvn:'Strong on Java/Bali; remote islands patchy.'},
+  IE:{e:'y', pr:'$3-5', cv:'5G', sim:'free', op:['Vodafone','Three','Eir']},
+  IL:{e:'y', pr:'$4-7', cv:'5G', sim:'reg', op:['Cellcom','Partner','Pelephone','Hot Mobile']},
+  IN:{e:'y', pr:'$4-7', cv:'4G/5G', sim:'reg', op:['Jio','Airtel','Vi'], cvn:'Cheap data, huge 4G/5G footprint.', net:'Tourist SIM needs passport+photo; activation can take hours. Regional shutdowns occur.'},
+  IQ:{e:'p', pr:'$6-10', cv:'4G', sim:'reg', op:['Asiacell','Zain','Korek'], cvn:'Coverage patchy outside cities.', net:'Periodic internet shutdowns; some services restricted.'},
+  IR:{e:'p', pr:'$8-12', cv:'4G', sim:'reg', op:['MCI (Hamrah-e Avval)','Irancell','RighTel'], net:'Heavy censorship: most foreign apps/sites blocked, VPNs restricted. Foreign-issued eSIMs often will not provision.'},
+  IS:{e:'y', pr:'$4-6', cv:'5G', sim:'free', op:['Síminn','Vodafone','Nova']},
+  IT:{e:'y', pr:'$3-5', cv:'5G', sim:'reg', op:['TIM','Vodafone','WindTre']},
+  JM:{e:'y', pr:'$5-9', cv:'4G', sim:'free', op:['Flow','Digicel']},
+  JO:{e:'y', pr:'$5-8', cv:'4G', sim:'reg', op:['Zain','Orange','Umniah']},
+  JP:{e:'y', pr:'$5-8', cv:'5G', sim:'reg', op:['NTT Docomo','au (KDDI)','SoftBank','Rakuten'], cvn:'Excellent nationwide.'},
+  KE:{e:'y', pr:'$5-8', cv:'4G', sim:'reg', op:['Safaricom','Airtel'], cvn:'Excellent in cities (M-Pesa heartland); rural 3G.'},
+  KG:{e:'y', pr:'$4-7', cv:'4G', sim:'reg', op:['Beeline','O!','MegaCom']},
+  KH:{e:'y', pr:'$5-8', cv:'4G', sim:'reg', op:['Cellcard','Smart','Metfone']},
+  KI:{e:'n', pr:'—', cv:'3G', sim:'reg', op:['ATHKL/Ocean Link'], cvn:'Very limited; mostly Tarawa.'},
+  KM:{e:'p', pr:'$7-11', cv:'3G', sim:'reg', op:['Comores Telecom','Telma']},
+  KN:{e:'y', pr:'$6-9', cv:'4G', sim:'free', op:['Flow','Digicel']},
+  KP:{e:'n', pr:'—', cv:'3G', sim:'hard', op:['Koryolink'], cvn:'Tourists cannot use normal mobile data; foreign phones restricted.', net:'No open internet; foreign SIM/eSIM unsupported.'},
+  KR:{e:'y', pr:'$5-8', cv:'5G', sim:'reg', op:['SKT','KT','LG U+'], cvn:'World-leading 5G.'},
+  KW:{e:'y', pr:'$5-8', cv:'5G', sim:'reg', op:['Zain','stc','Ooredoo']},
+  KZ:{e:'y', pr:'$4-7', cv:'4G', sim:'reg', op:['Kcell','Beeline','Tele2/Altel'], net:'Occasional restrictions during unrest.'},
+  LA:{e:'y', pr:'$5-9', cv:'4G', sim:'reg', op:['Unitel','Lao Telecom','ETL'], cvn:'Rural 3G.'},
+  LB:{e:'y', pr:'$6-10', cv:'4G', sim:'reg', op:['Alfa','touch'], cvn:'Power/network instability causes frequent outages.'},
+  LC:{e:'y', pr:'$6-9', cv:'4G', sim:'free', op:['Flow','Digicel']},
+  LI:{e:'y', pr:'$4-6', cv:'5G', sim:'free', op:['Telecom Liechtenstein','Salt']},
+  LK:{e:'y', pr:'$4-7', cv:'4G', sim:'reg', op:['Dialog','Mobitel','Hutch']},
+  LR:{e:'p', pr:'$6-10', cv:'3G', sim:'reg', op:['Orange','Lonestar/MTN']},
+  LS:{e:'y', pr:'$5-9', cv:'4G', sim:'reg', op:['Vodacom','Econet']},
+  LT:{e:'y', pr:'$3-5', cv:'5G', sim:'reg', op:['Telia','Bite','Tele2']},
+  LU:{e:'y', pr:'$3-5', cv:'5G', sim:'reg', op:['POST','Orange','Tango']},
+  LV:{e:'y', pr:'$3-5', cv:'5G', sim:'reg', op:['LMT','Tele2','Bite']},
+  LY:{e:'p', pr:'$6-10', cv:'3G', sim:'reg', op:['Libyana','Almadar'], cvn:'Coverage limited and unstable outside main cities.'},
+  MA:{e:'y', pr:'$5-8', cv:'4G', sim:'reg', op:['Maroc Telecom','Orange','inwi']},
+  MC:{e:'y', pr:'$4-6', cv:'5G', sim:'free', op:['Monaco Telecom']},
+  MD:{e:'y', pr:'$4-6', cv:'4G', sim:'reg', op:['Orange','Moldcell','Moldtelecom']},
+  ME:{e:'y', pr:'$4-6', cv:'4G', sim:'reg', op:['Crnogorski Telekom','One','m:tel']},
+  MG:{e:'p', pr:'$6-10', cv:'4G', sim:'reg', op:['Telma','Orange','Airtel'], cvn:'4G in cities; vast rural gaps.'},
+  MH:{e:'p', pr:'$8-12', cv:'3G', sim:'reg', op:['MINTA'], cvn:'Limited to Majuro/Ebeye.'},
+  MK:{e:'y', pr:'$4-6', cv:'4G', sim:'reg', op:['A1','Telekom']},
+  ML:{e:'p', pr:'$6-10', cv:'3G', sim:'reg', op:['Orange','Malitel'], cvn:'Security issues limit travel/coverage in north.'},
+  MM:{e:'p', pr:'$6-10', cv:'4G', sim:'reg', op:['MPT','Ooredoo','Atom','Mytel'], cvn:'4G in cities.', net:'Frequent internet shutdowns and platform blocks since 2021; VPN often needed.'},
+  MN:{e:'y', pr:'$5-8', cv:'4G', sim:'reg', op:['Mobicom','Unitel','Skytel'], cvn:'Coverage thins fast outside Ulaanbaatar/steppe.'},
+  MO:{e:'y', pr:'$4-7', cv:'4G', sim:'free', op:['CTM','China Telecom','3','SmarTone'], net:'Open internet.'},
+  MR:{e:'p', pr:'$6-10', cv:'3G', sim:'reg', op:['Mauritel','Chinguitel','Mattel']},
+  MT:{e:'y', pr:'$4-6', cv:'5G', sim:'reg', op:['GO','Epic','Melita']},
+  MU:{e:'y', pr:'$5-8', cv:'4G/5G', sim:'reg', op:['Emtel','my.t','MTML']},
+  MV:{e:'y', pr:'$6-10', cv:'4G', sim:'reg', op:['Dhiraagu','Ooredoo'], cvn:'Resort islands well covered.'},
+  MW:{e:'p', pr:'$6-10', cv:'3G', sim:'reg', op:['TNM','Airtel']},
+  MX:{e:'y', pr:'$4-7', cv:'4G/5G', sim:'reg', op:['Telcel','AT&T','Movistar'], cvn:'Telcel has the widest rural reach.'},
+  MY:{e:'y', pr:'$4-7', cv:'4G/5G', sim:'reg', op:['Maxis','Celcom','Digi','U Mobile']},
+  MZ:{e:'y', pr:'$6-10', cv:'4G', sim:'reg', op:['Vodacom','Tmcel','Movitel']},
+  NA:{e:'y', pr:'$5-9', cv:'4G', sim:'reg', op:['MTC','TN Mobile'], cvn:'Sparse coverage on desert/rural roads.'},
+  NE:{e:'p', pr:'$6-10', cv:'3G', sim:'reg', op:['Airtel','Moov','Niger Telecom'], cvn:'Limited; northern security issues.'},
+  NG:{e:'y', pr:'$5-9', cv:'4G', sim:'reg', op:['MTN','Airtel','Glo','9mobile'], cvn:'Periodic regional restrictions.'},
+  NI:{e:'y', pr:'$5-8', cv:'4G', sim:'reg', op:['Claro','Tigo']},
+  NL:{e:'y', pr:'$3-5', cv:'5G', sim:'free', op:['KPN','Vodafone','Odido']},
+  NO:{e:'y', pr:'$3-5', cv:'5G', sim:'free', op:['Telenor','Telia','Ice']},
+  NP:{e:'y', pr:'$5-9', cv:'4G', sim:'reg', op:['Ncell','Nepal Telecom'], cvn:'Himalayan/trekking regions patchy; some have local 4G.'},
+  NR:{e:'p', pr:'$8-12', cv:'3G', sim:'reg', op:['Digicel'], cvn:'Single small network.'},
+  NZ:{e:'y', pr:'$4-7', cv:'5G', sim:'free', op:['One NZ','Spark','2degrees'], cvn:'Remote South Island areas patchy.'},
+  OM:{e:'y', pr:'$5-8', cv:'5G', sim:'reg', op:['Omantel','Ooredoo','Vodafone'], net:'VoIP calling apps are partly restricted on local networks.'},
+  PA:{e:'y', pr:'$5-8', cv:'4G', sim:'reg', op:['+Móvil','Tigo','Digicel']},
+  PE:{e:'y', pr:'$4-7', cv:'4G', sim:'reg', op:['Claro','Movistar','Entel','Bitel'], cvn:'Andes/Amazon patchy.'},
+  PF:{e:'y', pr:'$6-10', cv:'4G', sim:'reg', op:['Vini','Vodafone','Ora'], cvn:'Outer atolls limited.'},
+  PG:{e:'p', pr:'$7-11', cv:'3G', sim:'reg', op:['Digicel','Vodafone PNG'], cvn:'Highlands/remote largely uncovered.'},
+  PH:{e:'y', pr:'$5-8', cv:'4G', sim:'reg', op:['Globe','Smart','DITO'], cvn:'Thousands of islands — rural coverage varies.'},
+  PK:{e:'y', pr:'$5-8', cv:'4G', sim:'reg', op:['Jazz','Zong','Telenor','Ufone'], net:'Periodic shutdowns; some apps restricted.'},
+  PL:{e:'y', pr:'$3-5', cv:'5G', sim:'reg', op:['Orange','Play','Plus','T-Mobile']},
+  PR:{e:'y', pr:'$4-7', cv:'5G', sim:'free', op:['Claro','Liberty','T-Mobile','AT&T']},
+  PS:{e:'p', pr:'$6-10', cv:'3G', sim:'reg', op:['Jawwal','Ooredoo'], cvn:'4G limited; Israeli networks often used in practice. Gaza service severely disrupted.'},
+  PT:{e:'y', pr:'$3-5', cv:'5G', sim:'reg', op:['MEO','NOS','Vodafone']},
+  PW:{e:'p', pr:'$8-12', cv:'4G', sim:'reg', op:['PNCC (PalauCel)','PT Waves']},
+  PY:{e:'y', pr:'$5-8', cv:'4G', sim:'reg', op:['Tigo','Personal','Claro']},
+  QA:{e:'y', pr:'$6-9', cv:'5G', sim:'reg', op:['Ooredoo','Vodafone'], net:'Some VoIP calling restricted on local networks.'},
+  RO:{e:'y', pr:'$3-5', cv:'5G', sim:'reg', op:['Orange','Vodafone','Digi']},
+  RS:{e:'y', pr:'$4-6', cv:'4G', sim:'reg', op:['MTS','A1','Yettel']},
+  RU:{e:'p', pr:'$5-9', cv:'4G', sim:'reg', op:['MTS','MegaFon','Beeline','Tele2'], net:'Many Western sites/apps blocked; VPNs increasingly throttled. Foreign-card eSIM roaming helps but is not guaranteed.'},
+  RW:{e:'y', pr:'$5-9', cv:'4G', sim:'reg', op:['MTN','Airtel'], cvn:'Good urban 4G.'},
+  SA:{e:'y', pr:'$6-9', cv:'5G', sim:'reg', op:['stc','Mobily','Zain'], net:'Some VoIP historically restricted; mostly eased.'},
+  SB:{e:'p', pr:'$8-12', cv:'3G', sim:'reg', op:['Our Telekom','bmobile'], cvn:'Outer islands largely uncovered.'},
+  SC:{e:'y', pr:'$5-9', cv:'4G', sim:'reg', op:['Airtel','Cable & Wireless']},
+  SD:{e:'p', pr:'$7-11', cv:'3G', sim:'reg', op:['Zain','MTN','Sudani'], cvn:'Conflict-disrupted.', net:'Frequent internet shutdowns.'},
+  SE:{e:'y', pr:'$3-5', cv:'5G', sim:'free', op:['Telia','Tele2','Telenor','3']},
+  SG:{e:'y', pr:'$4-7', cv:'5G', sim:'reg', op:['Singtel','StarHub','M1'], cvn:'Among the best networks worldwide.'},
+  SI:{e:'y', pr:'$4-6', cv:'5G', sim:'reg', op:['Telekom Slovenije','A1','Telemach']},
+  SK:{e:'y', pr:'$3-5', cv:'5G', sim:'reg', op:['Orange','Telekom','O2']},
+  SL:{e:'p', pr:'$6-10', cv:'3G', sim:'reg', op:['Orange','Africell']},
+  SM:{e:'y', pr:'$4-6', cv:'4G', sim:'free', op:['TIM San Marino']},
+  SN:{e:'y', pr:'$6-10', cv:'4G', sim:'reg', op:['Orange','Free','Expresso']},
+  SO:{e:'n', pr:'—', cv:'3G', sim:'reg', op:['Hormuud','Somtel'], cvn:'Coverage limited to cities; security risks.'},
+  SR:{e:'y', pr:'$6-10', cv:'4G', sim:'reg', op:['Telesur','Digicel'], cvn:'Interior largely uncovered.'},
+  SS:{e:'n', pr:'—', cv:'2G', sim:'reg', op:['MTN','Zain'], cvn:'Minimal coverage outside Juba.'},
+  ST:{e:'p', pr:'$7-11', cv:'3G', sim:'reg', op:['CST','Unitel STP']},
+  SV:{e:'y', pr:'$5-8', cv:'4G', sim:'reg', op:['Tigo','Claro','Movistar']},
+  SY:{e:'p', pr:'$7-12', cv:'3G', sim:'reg', op:['Syriatel','MTN Syria'], cvn:'Coverage limited; conflict damage.', net:'Heavy censorship and surveillance.'},
+  SZ:{e:'y', pr:'$5-9', cv:'4G', sim:'reg', op:['MTN','Eswatini Mobile']},
+  TD:{e:'n', pr:'—', cv:'2G', sim:'reg', op:['Airtel','Moov'], cvn:'Among the least-connected; very limited data.'},
+  TG:{e:'y', pr:'$6-10', cv:'4G', sim:'reg', op:['Togocom','Moov']},
+  TH:{e:'y', pr:'$4-7', cv:'5G', sim:'reg', op:['AIS','TrueMove','dtac'], cvn:'Excellent in cities and resorts.'},
+  TJ:{e:'y', pr:'$5-8', cv:'4G', sim:'reg', op:['Tcell','Megafon','Babilon'], net:'Periodic blocks of social apps.'},
+  TL:{e:'p', pr:'$6-10', cv:'4G', sim:'reg', op:['Timor Telecom','Telkomcel','Telemor'], cvn:'4G in Dili; rural limited.'},
+  TM:{e:'p', pr:'$8-12', cv:'3G', sim:'hard', op:['TM CELL (Altyn Asyr)'], cvn:'Slow, limited data.', net:'Among the most censored: most foreign sites/apps blocked, VPNs heavily restricted. Foreign eSIM unlikely to work.'},
+  TN:{e:'y', pr:'$5-8', cv:'4G', sim:'reg', op:['Ooredoo','Tunisie Telecom','Orange']},
+  TO:{e:'y', pr:'$7-11', cv:'4G', sim:'reg', op:['Digicel','TCC']},
+  TR:{e:'y', pr:'$5-8', cv:'4G/5G', sim:'reg', op:['Turkcell','Vodafone','Türk Telekom'], net:'Phones not registered within ~120 days get blocked from local networks (steep fee to register); a roaming eSIM avoids this. Some sites/VoIP periodically restricted.'},
+  TT:{e:'y', pr:'$6-9', cv:'4G', sim:'reg', op:['bmobile','Digicel']},
+  TV:{e:'n', pr:'—', cv:'3G', sim:'reg', op:['Tuvalu Telecom'], cvn:'Single small network; very limited.'},
+  TW:{e:'y', pr:'$4-7', cv:'5G', sim:'free', op:['Chunghwa','Taiwan Mobile','FarEasTone'], cvn:'Excellent and open.'},
+  TZ:{e:'y', pr:'$5-9', cv:'4G', sim:'reg', op:['Vodacom','Airtel','Tigo','Halotel'], cvn:'Rural/safari areas patchy.'},
+  UA:{e:'y', pr:'$4-6', cv:'4G', sim:'reg', op:['Kyivstar','Vodafone UA','lifecell'], cvn:'Coverage disrupted in conflict-affected and front-line areas.'},
+  UG:{e:'y', pr:'$5-9', cv:'4G', sim:'reg', op:['MTN','Airtel'], net:'Social-media tax history; periodic restrictions.'},
+  US:{e:'y', pr:'$4-7', cv:'5G', sim:'free', op:['Verizon','AT&T','T-Mobile'], cvn:'Sparse on remote/rural roads.'},
+  UY:{e:'y', pr:'$5-8', cv:'4G', sim:'reg', op:['Antel','Claro','Movistar']},
+  UZ:{e:'y', pr:'$4-7', cv:'4G', sim:'reg', op:['Beeline','Ucell','UMS/Mobiuz']},
+  VA:{e:'y', pr:'$3-5', cv:'5G', sim:'free', op:['TIM (Italy)']},
+  VC:{e:'y', pr:'$6-9', cv:'4G', sim:'free', op:['Flow','Digicel']},
+  VE:{e:'p', pr:'$7-11', cv:'4G', sim:'reg', op:['Movistar','Digitel','Movilnet'], cvn:'Degraded networks; frequent outages.', net:'Some sites blocked; VPN useful.'},
+  VN:{e:'y', pr:'$4-7', cv:'4G/5G', sim:'reg', op:['Viettel','Vinaphone','Mobifone'], cvn:'Great urban coverage.', net:'Some sites restricted; VPN occasionally useful.'},
+  VU:{e:'y', pr:'$7-11', cv:'4G', sim:'reg', op:['Digicel','Vodafone Vanuatu'], cvn:'Outer islands limited.'},
+  WS:{e:'y', pr:'$7-11', cv:'4G', sim:'reg', op:['Digicel','Vodafone Samoa']},
+  XK:{e:'y', pr:'$4-6', cv:'4G', sim:'reg', op:['Vala','IPKO']},
+  YE:{e:'n', pr:'—', cv:'2G', sim:'hard', op:['YemenMobile','Sabafon'], cvn:'Minimal coverage; conflict-damaged networks.', net:'Frequent shutdowns. Foreign eSIM unsupported.'},
+  ZA:{e:'y', pr:'$4-8', cv:'5G', sim:'reg', op:['Vodacom','MTN','Cell C','Telkom'], cvn:'Good urban 5G; rural varies.'},
+  ZM:{e:'y', pr:'$5-9', cv:'4G', sim:'reg', op:['MTN','Airtel','Zamtel']},
+  ZW:{e:'p', pr:'$6-10', cv:'4G', sim:'reg', op:['Econet','NetOne','Telecel'], cvn:'Expensive data; power-related outages.'},
+};
+const ESIM_KEY='tt_esim';
+let esimState={countryCode:null};
+function esimEsc(s){ return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function esimCountry(){ const c=esimState.countryCode; if(!c||!TT_COUNTRIES[c]) return null; return {c,n:TT_COUNTRIES[c].name,f:TT_COUNTRIES[c].flag}; }
+function esimSave(){ try{ localStorage.setItem(ESIM_KEY,JSON.stringify({countryCode:esimState.countryCode})); }catch(e){} }
+
+const ESIM_EL={y:['✅','Widely available','ok'],p:['⚠️','Limited / unreliable','warn'],n:['⛔','Not available to tourists','bad']};
+const ESIM_SIML={free:['🟢','No registration — buy a prepaid SIM at the airport or phone shops'],reg:['🪪','Passport registration required to buy a local prepaid SIM'],hard:['🔴','Local SIM is impractical or restricted for visitors']};
+
+function esimInit(){
+  let saved=null; try{ saved=JSON.parse(localStorage.getItem(ESIM_KEY)||'null'); }catch(e){}
+  if(saved&&saved.countryCode&&ESIM_DATA[saved.countryCode]){ esimState.countryCode=saved.countryCode; }
+  else { const trip=getActiveTrip(); if(trip&&trip.destination){ try{ const r=resolveDestination(trip.destination); if(r&&r.countryCode&&ESIM_DATA[r.countryCode]) esimState.countryCode=r.countryCode; }catch(_){} } }
+  esimRenderCountryList('');
+  if(esimState.countryCode&&ESIM_DATA[esimState.countryCode]){ esimSelectCountry(esimState.countryCode,false); }
+  else { esimState.countryCode=null; document.getElementById('esim-content').style.display='none'; document.getElementById('esim-empty').style.display=''; }
+  if(!document._esimClickBound){ document.addEventListener('click',esimDocClick); document._esimClickBound=true; }
+}
+function esimOpenPicker(){ const d=document.getElementById('esim-country-drop'); if(d.style.display==='block'){ esimClosePicker(); return; } d.style.display='block'; const s=document.getElementById('esim-country-search'); s.value=''; esimRenderCountryList(''); setTimeout(()=>s.focus(),50); }
+function esimClosePicker(){ document.getElementById('esim-country-drop').style.display='none'; }
+function esimDocClick(e){ const w=document.getElementById('esim-country-disp'),d=document.getElementById('esim-country-drop'); if(!w||!d||d.style.display!=='block') return; if(w.contains(e.target)||d.contains(e.target)) return; esimClosePicker(); }
+function esimFilterCountries(){ esimRenderCountryList((document.getElementById('esim-country-search').value||'').toLowerCase().trim()); }
+function esimRenderCountryList(q){
+  const list=Object.keys(ESIM_DATA).filter(c=>TT_COUNTRIES[c]).map(c=>({c,n:TT_COUNTRIES[c].name,f:TT_COUNTRIES[c].flag}))
+    .filter(co=>!q||co.n.toLowerCase().includes(q)||co.c.toLowerCase().includes(q)).sort((a,b)=>a.n.localeCompare(b.n));
+  const html=list.length? list.map(co=>{ const e=ESIM_DATA[co.c].e; return `<div class="tc-drop-item" onclick="esimSelectCountry('${co.c}')"><span class="tc-drop-flag">${co.f}</span><span class="tc-drop-name">${esimEsc(co.n)}</span><span class="tc-drop-cur">${ESIM_EL[e][0]} eSIM</span></div>`; }).join('')
+    : `<div class="tc-drop-item" style="color:var(--muted);cursor:default">No matches for "${esimEsc(q)}"</div>`;
+  document.getElementById('esim-country-list').innerHTML=html;
+}
+function esimSelectCountry(code,save){ if(save===undefined) save=true; if(!ESIM_DATA[code]) return; esimState.countryCode=code; if(save) esimSave(); esimClosePicker(); esimRender(); }
+function esimRow(ico,label,val){ return `<div class="dr-row"><span class="dr-row-ico">${ico}</span><div class="dr-row-body"><div class="dr-row-lbl">${label}</div><div class="dr-row-val">${val}</div></div></div>`; }
+function esimRender(){
+  const co=esimCountry(); if(!co){ document.getElementById('esim-content').style.display='none'; document.getElementById('esim-empty').style.display=''; return; }
+  const d=ESIM_DATA[co.c];
+  document.getElementById('esim-empty').style.display='none';
+  document.getElementById('esim-content').style.display='';
+  document.getElementById('esim-disp-flag').textContent=co.f;
+  document.getElementById('esim-disp-name').textContent=co.n;
+  document.getElementById('esim-hero-flag').textContent=co.f;
+  document.getElementById('esim-hero-co').textContent=co.n;
+  const el=ESIM_EL[d.e];
+  document.getElementById('esim-hero-sub').innerHTML=`${el[0]} eSIM ${el[1].toLowerCase()}`;
+  // eSIM
+  let esimSec=esimRow('📲','eSIM for tourists',`<span class="esim-badge esim-${el[2]}">${el[0]} ${el[1]}</span>`);
+  if(d.e!=='n'){
+    esimSec+=esimRow('💵','Typical data price',`~${esimEsc(d.pr)} <span style="color:var(--muted)">per GB (tourist eSIM)</span>`);
+    esimSec+=esimRow('🛒','Where to get it','Global apps: <strong>Airalo</strong>, <strong>Holafly</strong>, <strong>aloSIM</strong>, <strong>Saily</strong> — install and activate before you fly.');
+  }
+  document.getElementById('esim-esim').innerHTML=esimSec;
+  // coverage
+  let cov=esimRow('📶','Typical urban network',`<strong>${esimEsc(d.cv)}</strong>`);
+  if(d.cvn) cov+=esimRow('📍','Coverage notes',esimEsc(d.cvn));
+  document.getElementById('esim-coverage').innerHTML=cov;
+  // local SIM
+  const sl=ESIM_SIML[d.sim];
+  let simSec=esimRow(sl[0],'Local prepaid SIM',esimEsc(sl[1]));
+  if(d.op&&d.op.length) simSec+=esimRow('🏢','Main operators',d.op.map(o=>esimEsc(o)).join(' · '));
+  document.getElementById('esim-localsim').innerHTML=simSec;
+  // restrictions
+  const rs=document.getElementById('esim-restrict-sec');
+  if(d.net){ document.getElementById('esim-restrict').innerHTML=esimRow('🚦','Heads up',esimEsc(d.net)); rs.style.display=''; }
+  else rs.style.display='none';
 }
 
 const LP_PHRASES = [
