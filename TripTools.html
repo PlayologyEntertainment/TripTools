@@ -36929,8 +36929,21 @@ const AF_CUR = [
   {c:'PLN',s:'zł', n:'Polish Zloty'},      {c:'TRY',s:'₺',  n:'Turkish Lira'},
   {c:'IDR',s:'Rp', n:'Indonesian Rupiah'}, {c:'PHP',s:'₱',  n:'Philippine Peso'},
   {c:'VND',s:'₫',  n:'Vietnamese Dong'},   {c:'ARS',s:'AR$',n:'Argentine Peso'},
+  /* Coverage fill (Jun 2026) — currencies for the major-destination ATM presets below. */
+  {c:'ISK',s:'kr', n:'Icelandic Króna'},   {c:'CZK',s:'Kč', n:'Czech Koruna'},
+  {c:'HUF',s:'Ft', n:'Hungarian Forint'},  {c:'RON',s:'lei',n:'Romanian Leu'},
+  {c:'SAR',s:'﷼',  n:'Saudi Riyal'},        {c:'QAR',s:'﷼',  n:'Qatari Riyal'},
+  {c:'ILS',s:'₪',  n:'Israeli Shekel'},     {c:'JOD',s:'JD', n:'Jordanian Dinar'},
+  {c:'EGP',s:'E£', n:'Egyptian Pound'},     {c:'MYR',s:'RM', n:'Malaysian Ringgit'},
+  {c:'MOP',s:'MOP$',n:'Macanese Pataca'},   {c:'LKR',s:'₨',  n:'Sri Lankan Rupee'},
+  {c:'NPR',s:'₨',  n:'Nepalese Rupee'},     {c:'MMK',s:'K',  n:'Myanmar Kyat'},
+  {c:'MVR',s:'Rf', n:'Maldivian Rufiyaa'},  {c:'CRC',s:'₡',  n:'Costa Rican Colón'},
+  {c:'COP',s:'COL$',n:'Colombian Peso'},    {c:'PEN',s:'S/', n:'Peruvian Sol'},
+  {c:'DOP',s:'RD$',n:'Dominican Peso'},     {c:'CLP',s:'CLP$',n:'Chilean Peso'},
+  {c:'KES',s:'KSh',n:'Kenyan Shilling'},    {c:'MAD',s:'DH', n:'Moroccan Dirham'},
+  {c:'FJD',s:'FJ$',n:'Fijian Dollar'},
 ];
-const AF_NO_DEC = ['JPY','KRW','VND','IDR','HUF','CLP','ISK'];
+const AF_NO_DEC = ['JPY','KRW','VND','IDR','HUF','CLP','ISK','COP'];
 
 /* Country presets → cash currency + typical local ATM operator surcharge (in cash currency).
    Surcharges are rough, real-world typical values; 0 = local ATMs commonly free of an operator fee. */
@@ -36953,6 +36966,56 @@ const AF_PAYLOAD = [
   {cc:"TR", cur:"TRY", op:0},
   {cc:"AE", cur:"AED", op:0},
   {cc:"PH", cur:"PHP", op:250},
+  /* ── Coverage fill (Jun 2026): major destinations. `op` is the typical LOCAL ATM
+     operator surcharge in the cash currency (0 = bank ATMs commonly add no operator
+     fee; your home-bank fees are modelled separately). Rough, editable, behind the
+     tool's estimate disclaimer; volatile-currency economies are deliberately omitted. ── */
+  // Europe
+  {cc:"FR", cur:"EUR", op:0},
+  {cc:"DE", cur:"EUR", op:0},
+  {cc:"IT", cur:"EUR", op:0},
+  {cc:"ES", cur:"EUR", op:0},
+  {cc:"PT", cur:"EUR", op:0},
+  {cc:"NL", cur:"EUR", op:0},
+  {cc:"GR", cur:"EUR", op:0},
+  {cc:"HR", cur:"EUR", op:0},
+  {cc:"CH", cur:"CHF", op:0},
+  {cc:"SE", cur:"SEK", op:0},
+  {cc:"NO", cur:"NOK", op:0},
+  {cc:"DK", cur:"DKK", op:0},
+  {cc:"IS", cur:"ISK", op:0},
+  {cc:"PL", cur:"PLN", op:0},
+  {cc:"CZ", cur:"CZK", op:0},
+  {cc:"HU", cur:"HUF", op:0},
+  {cc:"RO", cur:"RON", op:0},
+  // Middle East & Africa
+  {cc:"SA", cur:"SAR", op:0},
+  {cc:"QA", cur:"QAR", op:0},
+  {cc:"IL", cur:"ILS", op:0},
+  {cc:"JO", cur:"JOD", op:5},
+  {cc:"EG", cur:"EGP", op:60},
+  {cc:"KE", cur:"KES", op:0},
+  {cc:"MA", cur:"MAD", op:0},
+  // Asia
+  {cc:"SG", cur:"SGD", op:0},
+  {cc:"MY", cur:"MYR", op:0},
+  {cc:"HK", cur:"HKD", op:0},
+  {cc:"TW", cur:"TWD", op:0},
+  {cc:"KR", cur:"KRW", op:3500},
+  {cc:"MO", cur:"MOP", op:0},
+  {cc:"LK", cur:"LKR", op:400},
+  {cc:"NP", cur:"NPR", op:500},
+  {cc:"KH", cur:"USD", op:5},
+  {cc:"MM", cur:"MMK", op:6000},
+  {cc:"MV", cur:"MVR", op:0},
+  // Americas & Oceania
+  {cc:"BR", cur:"BRL", op:0},
+  {cc:"CR", cur:"CRC", op:0},
+  {cc:"CO", cur:"COP", op:0},
+  {cc:"PE", cur:"PEN", op:0},
+  {cc:"CL", cur:"CLP", op:0},
+  {cc:"DO", cur:"DOP", op:200},
+  {cc:"FJ", cur:"FJD", op:0},
 ];
 const AF_COUNTRIES = AF_PAYLOAD.map(p => {
   const { cc, id, n, flag, ...rest } = p;
