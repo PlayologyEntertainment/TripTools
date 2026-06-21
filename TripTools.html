@@ -9222,6 +9222,256 @@ body.no-scroll { overflow: hidden; }
   #view-quiet-hours #qh-tips-body{display:block!important}
 }
 </style>
+<style>
+  #view-safe .safe-badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:12px;font-weight:700}
+  #view-safe .safe-ok{background:rgba(46,160,67,.14);color:#2ea043}
+  #view-safe .safe-warn{background:rgba(217,138,0,.16);color:#d98a00}
+  #view-safe .safe-bad{background:rgba(207,34,46,.14);color:#cf222e}
+  #view-safe .safe-crit{background:rgba(207,34,46,.22);color:#cf222e}
+  #view-safe .dr-hero.safe-hero-ok{border-left:4px solid #2ea043}
+  #view-safe .dr-hero.safe-hero-warn{border-left:4px solid #d98a00}
+  #view-safe .dr-hero.safe-hero-bad{border-left:4px solid #e8590c}
+  #view-safe .dr-hero.safe-hero-crit{border-left:4px solid #cf222e}
+  @media print{ #view-safe .tc-country-caret,#view-safe .tc-drop{display:none!important} #view-safe #safe-empty{display:none!important} }
+</style>
+<div id="view-safe" class="view">
+  <nav class="tool-bar">
+    <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="window.print()">🖨 Print</button>
+  </nav>
+  <div class="ctx-banner" id="ctx-safe"></div>
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>Safety &amp; Advisories</h1>
+    <p class="tool-sub">A quick safety orientation for all 202 countries — overall advisory level, common risks &amp; scams, whether the tap water is safe, solo &amp; women-traveller notes, and LGBTQ+ legal status. Orientation only — always check your government's official advisory.</p>
+  </div>
+
+  <div class="tool-body">
+    <div class="fg">
+      <label>Country</label>
+      <div class="tc-country-wrap">
+        <div class="tc-country-input" id="safe-country-disp" onclick="safeOpenPicker()" tabindex="0" role="button" aria-label="Choose country">
+          <span class="tc-country-flag" id="safe-disp-flag">🌐</span>
+          <span class="tc-country-name" id="safe-disp-name">Select a country</span>
+          <span class="tc-country-cur" id="safe-disp-tag"></span>
+          <span class="tc-country-caret">▾</span>
+        </div>
+        <div class="tc-drop" id="safe-country-drop" style="display:none">
+          <div class="tc-drop-search">
+            <input type="search" id="safe-country-search" class="tc-search-input" placeholder="🔍 Search 202 countries…" autocomplete="off" oninput="safeFilterCountries()">
+          </div>
+          <div id="safe-country-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tg-empty" id="safe-empty">
+      <span class="tg-empty-ico">🛡️</span>
+      Pick a country for a safety snapshot — advisory level, common risks, tap-water safety, solo/women-traveller notes and LGBTQ+ legal status.
+    </div>
+
+    <div id="safe-content" style="display:none">
+      <div class="dr-hero" id="safe-hero">
+        <div class="dr-hero-flag" id="safe-hero-flag">🌐</div>
+        <div class="dr-hero-meta">
+          <div class="dr-hero-co" id="safe-hero-co"></div>
+          <div class="dr-hero-side">Safety snapshot</div>
+          <div class="dr-hero-sub" id="safe-hero-sub"></div>
+        </div>
+        <div class="dr-hero-ico">🛡️</div>
+      </div>
+
+      <div class="dr-section">
+        <div class="dr-sec-hdr">Safety &amp; risks</div>
+        <div class="dr-rows" id="safe-risks"></div>
+      </div>
+      <div class="dr-section">
+        <div class="dr-sec-hdr">Drinking water</div>
+        <div class="dr-rows" id="safe-water"></div>
+      </div>
+      <div class="dr-section">
+        <div class="dr-sec-hdr">Solo &amp; women travellers</div>
+        <div class="dr-rows" id="safe-solo"></div>
+      </div>
+      <div class="dr-section">
+        <div class="dr-sec-hdr">LGBTQ+ travellers</div>
+        <div class="dr-rows" id="safe-lgbt"></div>
+      </div>
+    </div>
+
+    <div style="margin-top:16px;padding:12px 16px;background:var(--paper-2);border-left:3px solid var(--red);border-radius:var(--r);font-size:13px;color:var(--muted);line-height:1.55">
+      ⚠️ <strong>This is orientation, not an official advisory or legal/medical advice.</strong> Security conditions, health risks and laws change quickly and vary within a country. Advisory levels are indicative and may differ from your own government's. Before you travel, check your government's official travel advisory, a travel-health clinic, and — for LGBTQ+ travellers — current local legal guidance.
+    </div>
+  </div><!-- /tool-body -->
+</div>
+
+<style>
+  #view-esim .esim-badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:12px;font-weight:700}
+  #view-esim .esim-ok{background:rgba(46,160,67,.14);color:#2ea043}
+  #view-esim .esim-warn{background:rgba(217,138,0,.14);color:#d98a00}
+  #view-esim .esim-bad{background:rgba(207,34,46,.14);color:#cf222e}
+  @media print{ #view-esim .tc-country-caret,#view-esim .tc-drop{display:none!important} #view-esim #esim-empty{display:none!important} }
+</style>
+<div id="view-esim" class="view">
+  <nav class="tool-bar">
+    <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="window.print()">🖨 Print</button>
+  </nav>
+  <div class="ctx-banner" id="ctx-esim"></div>
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>eSIM &amp; Mobile Data</h1>
+    <p class="tool-sub">How to get online in any of the 202 countries — eSIM availability &amp; typical price, network coverage, local SIM rules and the censorship/VPN gotchas worth knowing before you land.</p>
+  </div>
+
+  <div class="tool-body">
+    <div class="fg">
+      <label>Country</label>
+      <div class="tc-country-wrap">
+        <div class="tc-country-input" id="esim-country-disp" onclick="esimOpenPicker()" tabindex="0" role="button" aria-label="Choose country">
+          <span class="tc-country-flag" id="esim-disp-flag">🌐</span>
+          <span class="tc-country-name" id="esim-disp-name">Select a country</span>
+          <span class="tc-country-cur" id="esim-disp-tag"></span>
+          <span class="tc-country-caret">▾</span>
+        </div>
+        <div class="tc-drop" id="esim-country-drop" style="display:none">
+          <div class="tc-drop-search">
+            <input type="search" id="esim-country-search" class="tc-search-input" placeholder="🔍 Search 202 countries…" autocomplete="off" oninput="esimFilterCountries()">
+          </div>
+          <div id="esim-country-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tg-empty" id="esim-empty">
+      <span class="tg-empty-ico">📶</span>
+      Pick a country to see eSIM availability and price, network coverage, local SIM rules and any internet restrictions.
+    </div>
+
+    <div id="esim-content" style="display:none">
+      <div class="dr-hero" id="esim-hero">
+        <div class="dr-hero-flag" id="esim-hero-flag">🌐</div>
+        <div class="dr-hero-meta">
+          <div class="dr-hero-co" id="esim-hero-co"></div>
+          <div class="dr-hero-side">Mobile data &amp; connectivity</div>
+          <div class="dr-hero-sub" id="esim-hero-sub"></div>
+        </div>
+        <div class="dr-hero-ico">📱</div>
+      </div>
+
+      <div class="dr-section">
+        <div class="dr-sec-hdr">eSIM</div>
+        <div class="dr-rows" id="esim-esim"></div>
+      </div>
+      <div class="dr-section">
+        <div class="dr-sec-hdr">Network coverage</div>
+        <div class="dr-rows" id="esim-coverage"></div>
+      </div>
+      <div class="dr-section">
+        <div class="dr-sec-hdr">Local prepaid SIM</div>
+        <div class="dr-rows" id="esim-localsim"></div>
+      </div>
+      <div class="dr-section" id="esim-restrict-sec" style="display:none">
+        <div class="dr-sec-hdr">Internet restrictions</div>
+        <div class="dr-rows" id="esim-restrict"></div>
+      </div>
+    </div>
+
+    <div style="margin-top:16px;padding:12px 16px;background:var(--paper-2);border-left:3px solid var(--yellow);border-radius:var(--r);font-size:13px;color:var(--muted);line-height:1.55">
+      ⚠️ <strong>Prices and rules change — verify before you buy.</strong> eSIM price bands are indicative per-GB tourist rates and vary by plan size and provider. Coverage, SIM-registration rules and internet restrictions change; an eSIM that roams on a foreign network can behave differently from a local SIM (sometimes an advantage for restricted regions). Treat this as planning guidance.
+    </div>
+  </div><!-- /tool-body -->
+</div>
+
+<style>
+  #view-holidays .hol-yearbar{display:flex;align-items:center;justify-content:center;gap:18px;margin:4px 0 14px}
+  #view-holidays .hol-ystep{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--paper-2);font-size:20px;cursor:pointer;line-height:1;color:var(--ink)}
+  #view-holidays .hol-ystep:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+  #view-holidays .hol-year{font-size:26px;font-weight:800;min-width:84px;text-align:center;letter-spacing:.5px}
+  #view-holidays .hol-row{display:flex;gap:14px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--line)}
+  #view-holidays .hol-row.hol-past{opacity:.5}
+  #view-holidays .hol-row.hol-next{background:rgba(217,138,0,.08);border-left:3px solid var(--accent);border-radius:6px}
+  #view-holidays .hol-date{flex:0 0 50px;text-align:center;line-height:1}
+  #view-holidays .hol-dom{display:block;font-size:22px;font-weight:800;color:var(--accent)}
+  #view-holidays .hol-mon{display:block;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted)}
+  #view-holidays .hol-name{font-weight:600}
+  #view-holidays .hol-meta{font-size:12px;color:var(--muted);margin-top:2px}
+  #view-holidays .hol-approx{color:var(--accent);font-weight:700;cursor:help}
+  @media print{ #view-holidays .hol-yearbar .hol-ystep,#view-holidays .tc-country-caret,#view-holidays .tc-drop{display:none!important} #view-holidays #hol-empty{display:none!important} }
+</style>
+<div id="view-holidays" class="view">
+  <nav class="tool-bar">
+    <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="window.print()">🖨 Print</button>
+  </nav>
+  <div class="ctx-banner" id="ctx-holidays"></div>
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>Public Holidays</h1>
+    <p class="tool-sub">National public holidays for all 202 countries — with movable feasts (Easter, Orthodox Easter, Islamic Eids, Lunar New Year) computed for any year. Plan around bank, office and attraction closures.</p>
+  </div>
+
+  <div class="tool-body">
+    <!-- ── COUNTRY PICKER ── -->
+    <div class="fg">
+      <label>Country</label>
+      <div class="tc-country-wrap">
+        <div class="tc-country-input" id="hol-country-disp" onclick="holOpenPicker()" tabindex="0" role="button" aria-label="Choose country">
+          <span class="tc-country-flag" id="hol-disp-flag">🌐</span>
+          <span class="tc-country-name" id="hol-disp-name">Select a country</span>
+          <span class="tc-country-cur" id="hol-disp-tag"></span>
+          <span class="tc-country-caret">▾</span>
+        </div>
+        <div class="tc-drop" id="hol-country-drop" style="display:none">
+          <div class="tc-drop-search">
+            <input type="search" id="hol-country-search" class="tc-search-input" placeholder="🔍 Search 202 countries…" autocomplete="off" oninput="holFilterCountries()">
+          </div>
+          <div id="hol-country-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── YEAR STEPPER ── -->
+    <div class="hol-yearbar">
+      <button class="hol-ystep" onclick="holStepYear(-1)" aria-label="Previous year">‹</button>
+      <div class="hol-year" id="hol-year">—</div>
+      <button class="hol-ystep" onclick="holStepYear(1)" aria-label="Next year">›</button>
+    </div>
+
+    <!-- Empty prompt -->
+    <div class="tg-empty" id="hol-empty">
+      <span class="tg-empty-ico">📅</span>
+      Pick a country to see its national public holidays for the year — with movable dates (Easter, Eid, Lunar New Year) worked out automatically.
+    </div>
+
+    <!-- ── RESULTS ── -->
+    <div id="hol-content" style="display:none">
+      <div class="dr-hero" id="hol-hero">
+        <div class="dr-hero-flag" id="hol-hero-flag">🌐</div>
+        <div class="dr-hero-meta">
+          <div class="dr-hero-co" id="hol-hero-co"></div>
+          <div class="dr-hero-side">National public holidays</div>
+          <div class="dr-hero-sub" id="hol-hero-sub"></div>
+        </div>
+        <div class="dr-hero-ico">📅</div>
+      </div>
+
+      <div class="dr-section">
+        <div class="dr-rows" id="hol-list"></div>
+      </div>
+
+      <div class="dr-knownote" id="hol-approx-note" style="display:none">
+        <div class="dr-knownote-hd">≈ Approximate dates</div>
+        <div>Holidays marked <span class="hol-approx">≈</span> follow the Islamic, lunar or Hebrew calendar and are computed by approximation — actual observance can shift ±1–2 days (often by moon sighting). Confirm before booking around them.</div>
+      </div>
+    </div>
+
+    <div style="margin-top:16px;padding:12px 16px;background:var(--paper-2);border-left:3px solid var(--yellow);border-radius:var(--r);font-size:13px;color:var(--muted);line-height:1.55">
+      ⚠️ <strong>Verify dates locally before relying on them.</strong> Public holidays change by law, region and religious observance, and many countries add a "substitute" day when a holiday falls on a weekend (not shown here). Regional/state holidays and one-off declarations are not included. Treat this as directional planning guidance.
+    </div>
+  </div><!-- /tool-body -->
+</div>
+
 <div id="view-quiet-hours" class="view">
   <nav class="tool-bar">
     <button class="back-btn" onclick="showHub()">← TripTools</button>
@@ -14442,6 +14692,9 @@ const TOOLS = [
   {id:'jet-lag',       nm:'Jet Lag Calculator',         ico:'😴', ph:'destination',on:false,live:true,  ds:'Pre-travel adjustment schedule + post-arrival recovery plan.'},
   {id:'unit-conv',     nm:'Universal Unit Converter',   ico:'📏', ph:'destination',on:false,live:true,  ds:'Temp, distance, weight, volume, speed — all traveler conversions.'},
   {id:'phrasebook',    nm:'Language Phrasebook',        ico:'💬', ph:'destination',on:false,live:true,  ds:'Essential travel phrases in 25 languages with pronunciation. Dietary & allergy phrases, tap-to-hear, point-to-show.'},
+  {id:'holidays',      nm:'Public Holidays',            ico:'📅', ph:'destination',on:false,live:true, trip:true,  ds:'National public holidays for all 202 countries. Movable feasts (Easter, Eid, Lunar New Year) computed for any year.'},
+  {id:'esim',          nm:'eSIM & Mobile Data',         ico:'📱', ph:'destination',on:false,live:true, trip:true,  ds:'eSIM availability & price, network coverage, local SIM rules and censorship/VPN notes for all 202 countries.'},
+  {id:'safe',          nm:'Safety & Advisories',        ico:'🛡', ph:'destination',on:false,live:true, trip:true,  ds:'Advisory level, common risks, tap-water safety, solo/women & LGBTQ+ traveller notes for all 202 countries.'},
   {id:'emergency',     nm:'Emergency Numbers',          ico:'🚨', ph:'destination',on:false,live:true, trip:true,  ds:'Police, fire & ambulance for 150+ countries. Embassy finder & your insurance card, always offline.'},
   {id:'uv-index',      nm:'UV Index & Sun Safety',      ico:'☀️', ph:'destination',on:true, live:true,  ds:'Live UV index, SPF recommendations by skin type.'},
   {id:'altitude',      nm:'Altitude Sickness Guide',    ico:'⛰', ph:'destination',on:false,live:true,  ds:'Enter elevation → risk level + acclimatization timeline.'},
@@ -14513,213 +14766,213 @@ const CURRENCIES = ["AED","ARS","AUD","BRL","CAD","CHF","CLP","CNY","EUR","GBP",
    ════════════════════════════════════════════════════════════════════ */
 const TT_COUNTRIES = {
   // NORTHAMERICA
-  AG:{name:'Antigua & Barbuda', flag:'🇦🇬', iso3:'ATG', continent:'northamerica', currency:'XCD', calling:'1-268'},
-  BS:{name:'Bahamas', flag:'🇧🇸', iso3:'BHS', continent:'northamerica', currency:'BSD', calling:'1-242'},
-  BB:{name:'Barbados', flag:'🇧🇧', iso3:'BRB', continent:'northamerica', currency:'BBD', calling:'1-246'},
-  BZ:{name:'Belize', flag:'🇧🇿', iso3:'BLZ', continent:'northamerica', currency:'BZD', calling:'501'},
-  CA:{name:'Canada', flag:'🇨🇦', iso3:'CAN', continent:'northamerica', currency:'CAD', calling:'1'},
-  CR:{name:'Costa Rica', flag:'🇨🇷', iso3:'CRI', continent:'northamerica', currency:'CRC', calling:'506'},
-  CU:{name:'Cuba', flag:'🇨🇺', iso3:'CUB', continent:'northamerica', currency:'CUP', calling:'53'},
-  DM:{name:'Dominica', flag:'🇩🇲', iso3:'DMA', continent:'northamerica', currency:'XCD', calling:'1-767'},
-  DO:{name:'Dominican Republic', flag:'🇩🇴', iso3:'DOM', continent:'northamerica', currency:'DOP', calling:'1-809'},
-  SV:{name:'El Salvador', flag:'🇸🇻', iso3:'SLV', continent:'northamerica', currency:'USD', calling:'503'},
-  GD:{name:'Grenada', flag:'🇬🇩', iso3:'GRD', continent:'northamerica', currency:'XCD', calling:'1-473'},
-  GT:{name:'Guatemala', flag:'🇬🇹', iso3:'GTM', continent:'northamerica', currency:'GTQ', calling:'502'},
-  HT:{name:'Haiti', flag:'🇭🇹', iso3:'HTI', continent:'northamerica', currency:'HTG', calling:'509'},
-  HN:{name:'Honduras', flag:'🇭🇳', iso3:'HND', continent:'northamerica', currency:'HNL', calling:'504'},
-  JM:{name:'Jamaica', flag:'🇯🇲', iso3:'JAM', continent:'northamerica', currency:'JMD', calling:'1-876'},
-  MX:{name:'Mexico', flag:'🇲🇽', iso3:'MEX', continent:'northamerica', currency:'MXN', calling:'52'},
-  NI:{name:'Nicaragua', flag:'🇳🇮', iso3:'NIC', continent:'northamerica', currency:'NIO', calling:'505'},
-  PA:{name:'Panama', flag:'🇵🇦', iso3:'PAN', continent:'northamerica', currency:'PAB', calling:'507'},
-  PR:{name:'Puerto Rico', flag:'🇵🇷', iso3:'PRI', continent:'northamerica', currency:'USD', calling:'1-787'},
-  KN:{name:'St. Kitts & Nevis', flag:'🇰🇳', iso3:'KNA', continent:'northamerica', currency:'XCD', calling:'1-869'},
-  LC:{name:'St. Lucia', flag:'🇱🇨', iso3:'LCA', continent:'northamerica', currency:'XCD', calling:'1-758'},
-  VC:{name:'St. Vincent & Grenadines', flag:'🇻🇨', iso3:'VCT', continent:'northamerica', currency:'XCD', calling:'1-784'},
-  TT:{name:'Trinidad & Tobago', flag:'🇹🇹', iso3:'TTO', continent:'northamerica', currency:'TTD', calling:'1-868'},
-  US:{name:'United States', flag:'🇺🇸', iso3:'USA', continent:'northamerica', currency:'USD', calling:'1', aliases:['United States','USA','America']},
+  AG:{name:'Antigua & Barbuda', flag:'🇦🇬', iso3:'ATG', continent:'northamerica', currency:'XCD', calling:'1-268', langs:['English']},
+  BS:{name:'Bahamas', flag:'🇧🇸', iso3:'BHS', continent:'northamerica', currency:'BSD', calling:'1-242', langs:['English']},
+  BB:{name:'Barbados', flag:'🇧🇧', iso3:'BRB', continent:'northamerica', currency:'BBD', calling:'1-246', langs:['English']},
+  BZ:{name:'Belize', flag:'🇧🇿', iso3:'BLZ', continent:'northamerica', currency:'BZD', calling:'501', langs:['English','Spanish']},
+  CA:{name:'Canada', flag:'🇨🇦', iso3:'CAN', continent:'northamerica', currency:'CAD', calling:'1', langs:['English','French']},
+  CR:{name:'Costa Rica', flag:'🇨🇷', iso3:'CRI', continent:'northamerica', currency:'CRC', calling:'506', langs:['Spanish'], pb:'es'},
+  CU:{name:'Cuba', flag:'🇨🇺', iso3:'CUB', continent:'northamerica', currency:'CUP', calling:'53', langs:['Spanish'], pb:'es'},
+  DM:{name:'Dominica', flag:'🇩🇲', iso3:'DMA', continent:'northamerica', currency:'XCD', calling:'1-767', langs:['English']},
+  DO:{name:'Dominican Republic', flag:'🇩🇴', iso3:'DOM', continent:'northamerica', currency:'DOP', calling:'1-809', langs:['Spanish'], pb:'es'},
+  SV:{name:'El Salvador', flag:'🇸🇻', iso3:'SLV', continent:'northamerica', currency:'USD', calling:'503', langs:['Spanish'], pb:'es'},
+  GD:{name:'Grenada', flag:'🇬🇩', iso3:'GRD', continent:'northamerica', currency:'XCD', calling:'1-473', langs:['English']},
+  GT:{name:'Guatemala', flag:'🇬🇹', iso3:'GTM', continent:'northamerica', currency:'GTQ', calling:'502', langs:['Spanish'], pb:'es'},
+  HT:{name:'Haiti', flag:'🇭🇹', iso3:'HTI', continent:'northamerica', currency:'HTG', calling:'509', langs:['Haitian Creole','French'], pb:'fr'},
+  HN:{name:'Honduras', flag:'🇭🇳', iso3:'HND', continent:'northamerica', currency:'HNL', calling:'504', langs:['Spanish'], pb:'es'},
+  JM:{name:'Jamaica', flag:'🇯🇲', iso3:'JAM', continent:'northamerica', currency:'JMD', calling:'1-876', langs:['English']},
+  MX:{name:'Mexico', flag:'🇲🇽', iso3:'MEX', continent:'northamerica', currency:'MXN', calling:'52', langs:['Spanish'], pb:'es'},
+  NI:{name:'Nicaragua', flag:'🇳🇮', iso3:'NIC', continent:'northamerica', currency:'NIO', calling:'505', langs:['Spanish'], pb:'es'},
+  PA:{name:'Panama', flag:'🇵🇦', iso3:'PAN', continent:'northamerica', currency:'PAB', calling:'507', langs:['Spanish'], pb:'es'},
+  PR:{name:'Puerto Rico', flag:'🇵🇷', iso3:'PRI', continent:'northamerica', currency:'USD', calling:'1-787', langs:['Spanish','English'], pb:'es'},
+  KN:{name:'St. Kitts & Nevis', flag:'🇰🇳', iso3:'KNA', continent:'northamerica', currency:'XCD', calling:'1-869', langs:['English']},
+  LC:{name:'St. Lucia', flag:'🇱🇨', iso3:'LCA', continent:'northamerica', currency:'XCD', calling:'1-758', langs:['English']},
+  VC:{name:'St. Vincent & Grenadines', flag:'🇻🇨', iso3:'VCT', continent:'northamerica', currency:'XCD', calling:'1-784', langs:['English']},
+  TT:{name:'Trinidad & Tobago', flag:'🇹🇹', iso3:'TTO', continent:'northamerica', currency:'TTD', calling:'1-868', langs:['English']},
+  US:{name:'United States', flag:'🇺🇸', iso3:'USA', continent:'northamerica', currency:'USD', calling:'1', aliases:['United States','USA','America'], langs:['English']},
   // SOUTHAMERICA
-  AR:{name:'Argentina', flag:'🇦🇷', iso3:'ARG', continent:'southamerica', currency:'ARS', calling:'54'},
-  BO:{name:'Bolivia', flag:'🇧🇴', iso3:'BOL', continent:'southamerica', currency:'BOB', calling:'591', aliases:['Bolivia']},
-  BR:{name:'Brazil', flag:'🇧🇷', iso3:'BRA', continent:'southamerica', currency:'BRL', calling:'55'},
-  CL:{name:'Chile', flag:'🇨🇱', iso3:'CHL', continent:'southamerica', currency:'CLP', calling:'56'},
-  CO:{name:'Colombia', flag:'🇨🇴', iso3:'COL', continent:'southamerica', currency:'COP', calling:'57'},
-  EC:{name:'Ecuador', flag:'🇪🇨', iso3:'ECU', continent:'southamerica', currency:'USD', calling:'593'},
-  GY:{name:'Guyana', flag:'🇬🇾', iso3:'GUY', continent:'southamerica', currency:'GYD', calling:'592'},
-  PY:{name:'Paraguay', flag:'🇵🇾', iso3:'PRY', continent:'southamerica', currency:'PYG', calling:'595'},
-  PE:{name:'Peru', flag:'🇵🇪', iso3:'PER', continent:'southamerica', currency:'PEN', calling:'51'},
-  SR:{name:'Suriname', flag:'🇸🇷', iso3:'SUR', continent:'southamerica', currency:'SRD', calling:'597'},
-  UY:{name:'Uruguay', flag:'🇺🇾', iso3:'URY', continent:'southamerica', currency:'UYU', calling:'598'},
-  VE:{name:'Venezuela', flag:'🇻🇪', iso3:'VEN', continent:'southamerica', currency:'VES', calling:'58', aliases:['Venezuela']},
+  AR:{name:'Argentina', flag:'🇦🇷', iso3:'ARG', continent:'southamerica', currency:'ARS', calling:'54', langs:['Spanish'], pb:'es'},
+  BO:{name:'Bolivia', flag:'🇧🇴', iso3:'BOL', continent:'southamerica', currency:'BOB', calling:'591', aliases:['Bolivia'], langs:['Spanish','Quechua','Aymara'], pb:'es'},
+  BR:{name:'Brazil', flag:'🇧🇷', iso3:'BRA', continent:'southamerica', currency:'BRL', calling:'55', langs:['Portuguese'], pb:'pt'},
+  CL:{name:'Chile', flag:'🇨🇱', iso3:'CHL', continent:'southamerica', currency:'CLP', calling:'56', langs:['Spanish'], pb:'es'},
+  CO:{name:'Colombia', flag:'🇨🇴', iso3:'COL', continent:'southamerica', currency:'COP', calling:'57', langs:['Spanish'], pb:'es'},
+  EC:{name:'Ecuador', flag:'🇪🇨', iso3:'ECU', continent:'southamerica', currency:'USD', calling:'593', langs:['Spanish'], pb:'es'},
+  GY:{name:'Guyana', flag:'🇬🇾', iso3:'GUY', continent:'southamerica', currency:'GYD', calling:'592', langs:['English']},
+  PY:{name:'Paraguay', flag:'🇵🇾', iso3:'PRY', continent:'southamerica', currency:'PYG', calling:'595', langs:['Spanish','Guarani'], pb:'es'},
+  PE:{name:'Peru', flag:'🇵🇪', iso3:'PER', continent:'southamerica', currency:'PEN', calling:'51', langs:['Spanish','Quechua'], pb:'es'},
+  SR:{name:'Suriname', flag:'🇸🇷', iso3:'SUR', continent:'southamerica', currency:'SRD', calling:'597', langs:['Dutch'], pb:'nl'},
+  UY:{name:'Uruguay', flag:'🇺🇾', iso3:'URY', continent:'southamerica', currency:'UYU', calling:'598', langs:['Spanish'], pb:'es'},
+  VE:{name:'Venezuela', flag:'🇻🇪', iso3:'VEN', continent:'southamerica', currency:'VES', calling:'58', aliases:['Venezuela'], langs:['Spanish'], pb:'es'},
   // EUROPE
-  AL:{name:'Albania', flag:'🇦🇱', iso3:'ALB', continent:'europe', currency:'ALL', calling:'355'},
-  AD:{name:'Andorra', flag:'🇦🇩', iso3:'AND', continent:'europe', currency:'EUR', calling:'376'},
-  AT:{name:'Austria', flag:'🇦🇹', iso3:'AUT', continent:'europe', currency:'EUR', calling:'43'},
-  BY:{name:'Belarus', flag:'🇧🇾', iso3:'BLR', continent:'europe', currency:'BYN', calling:'375'},
-  BE:{name:'Belgium', flag:'🇧🇪', iso3:'BEL', continent:'europe', currency:'EUR', calling:'32'},
-  BA:{name:'Bosnia & Herzegovina', flag:'🇧🇦', iso3:'BIH', continent:'europe', currency:'BAM', calling:'387'},
-  BG:{name:'Bulgaria', flag:'🇧🇬', iso3:'BGR', continent:'europe', currency:'BGN', calling:'359'},
-  HR:{name:'Croatia', flag:'🇭🇷', iso3:'HRV', continent:'europe', currency:'EUR', calling:'385'},
-  CZ:{name:'Czechia', flag:'🇨🇿', iso3:'CZE', continent:'europe', currency:'CZK', calling:'420', aliases:['Czech Republic','Czechia']},
-  DK:{name:'Denmark', flag:'🇩🇰', iso3:'DNK', continent:'europe', currency:'DKK', calling:'45'},
-  EE:{name:'Estonia', flag:'🇪🇪', iso3:'EST', continent:'europe', currency:'EUR', calling:'372'},
-  FI:{name:'Finland', flag:'🇫🇮', iso3:'FIN', continent:'europe', currency:'EUR', calling:'358'},
-  FR:{name:'France', flag:'🇫🇷', iso3:'FRA', continent:'europe', currency:'EUR', calling:'33'},
-  DE:{name:'Germany', flag:'🇩🇪', iso3:'DEU', continent:'europe', currency:'EUR', calling:'49'},
-  GR:{name:'Greece', flag:'🇬🇷', iso3:'GRC', continent:'europe', currency:'EUR', calling:'30'},
-  HU:{name:'Hungary', flag:'🇭🇺', iso3:'HUN', continent:'europe', currency:'HUF', calling:'36'},
-  IS:{name:'Iceland', flag:'🇮🇸', iso3:'ISL', continent:'europe', currency:'ISK', calling:'354'},
-  IE:{name:'Ireland', flag:'🇮🇪', iso3:'IRL', continent:'europe', currency:'EUR', calling:'353'},
-  IT:{name:'Italy', flag:'🇮🇹', iso3:'ITA', continent:'europe', currency:'EUR', calling:'39'},
-  XK:{name:'Kosovo', flag:'🇽🇰', iso3:'XKX', continent:'europe', currency:'EUR', calling:'383', aliases:['Kosovo']},
-  LV:{name:'Latvia', flag:'🇱🇻', iso3:'LVA', continent:'europe', currency:'EUR', calling:'371'},
-  LI:{name:'Liechtenstein', flag:'🇱🇮', iso3:'LIE', continent:'europe', currency:'CHF', calling:'423'},
-  LT:{name:'Lithuania', flag:'🇱🇹', iso3:'LTU', continent:'europe', currency:'EUR', calling:'370'},
-  LU:{name:'Luxembourg', flag:'🇱🇺', iso3:'LUX', continent:'europe', currency:'EUR', calling:'352'},
-  MT:{name:'Malta', flag:'🇲🇹', iso3:'MLT', continent:'europe', currency:'EUR', calling:'356'},
-  MD:{name:'Moldova', flag:'🇲🇩', iso3:'MDA', continent:'europe', currency:'MDL', calling:'373', aliases:['Moldova']},
-  MC:{name:'Monaco', flag:'🇲🇨', iso3:'MCO', continent:'europe', currency:'EUR', calling:'377'},
-  ME:{name:'Montenegro', flag:'🇲🇪', iso3:'MNE', continent:'europe', currency:'EUR', calling:'382'},
-  NL:{name:'Netherlands', flag:'🇳🇱', iso3:'NLD', continent:'europe', currency:'EUR', calling:'31', aliases:['Netherlands','Holland']},
-  MK:{name:'North Macedonia', flag:'🇲🇰', iso3:'MKD', continent:'europe', currency:'MKD', calling:'389', aliases:['North Macedonia','Macedonia']},
-  NO:{name:'Norway', flag:'🇳🇴', iso3:'NOR', continent:'europe', currency:'NOK', calling:'47'},
-  PL:{name:'Poland', flag:'🇵🇱', iso3:'POL', continent:'europe', currency:'PLN', calling:'48'},
-  PT:{name:'Portugal', flag:'🇵🇹', iso3:'PRT', continent:'europe', currency:'EUR', calling:'351'},
-  RO:{name:'Romania', flag:'🇷🇴', iso3:'ROU', continent:'europe', currency:'RON', calling:'40'},
-  RU:{name:'Russia', flag:'🇷🇺', iso3:'RUS', continent:'europe', currency:'RUB', calling:'7', aliases:['Russia','Russian Federation']},
-  SM:{name:'San Marino', flag:'🇸🇲', iso3:'SMR', continent:'europe', currency:'EUR', calling:'378'},
-  RS:{name:'Serbia', flag:'🇷🇸', iso3:'SRB', continent:'europe', currency:'RSD', calling:'381'},
-  SK:{name:'Slovakia', flag:'🇸🇰', iso3:'SVK', continent:'europe', currency:'EUR', calling:'421'},
-  SI:{name:'Slovenia', flag:'🇸🇮', iso3:'SVN', continent:'europe', currency:'EUR', calling:'386'},
-  ES:{name:'Spain', flag:'🇪🇸', iso3:'ESP', continent:'europe', currency:'EUR', calling:'34'},
-  SE:{name:'Sweden', flag:'🇸🇪', iso3:'SWE', continent:'europe', currency:'SEK', calling:'46'},
-  CH:{name:'Switzerland', flag:'🇨🇭', iso3:'CHE', continent:'europe', currency:'CHF', calling:'41'},
-  UA:{name:'Ukraine', flag:'🇺🇦', iso3:'UKR', continent:'europe', currency:'UAH', calling:'380'},
-  GB:{name:'United Kingdom', flag:'🇬🇧', iso3:'GBR', continent:'europe', currency:'GBP', calling:'44', aliases:['United Kingdom','UK','Britain','England','Scotland','Wales','Northern Ireland']},
-  VA:{name:'Vatican City', flag:'🇻🇦', iso3:'VAT', continent:'europe', currency:'EUR', calling:'379', aliases:['Vatican','Vatican City','Holy See']},
+  AL:{name:'Albania', flag:'🇦🇱', iso3:'ALB', continent:'europe', currency:'ALL', calling:'355', langs:['Albanian']},
+  AD:{name:'Andorra', flag:'🇦🇩', iso3:'AND', continent:'europe', currency:'EUR', calling:'376', langs:['Catalan','Spanish','French'], pb:'es'},
+  AT:{name:'Austria', flag:'🇦🇹', iso3:'AUT', continent:'europe', currency:'EUR', calling:'43', langs:['German'], pb:'de'},
+  BY:{name:'Belarus', flag:'🇧🇾', iso3:'BLR', continent:'europe', currency:'BYN', calling:'375', langs:['Belarusian','Russian'], pb:'ru'},
+  BE:{name:'Belgium', flag:'🇧🇪', iso3:'BEL', continent:'europe', currency:'EUR', calling:'32', langs:['Dutch','French','German'], pb:'fr'},
+  BA:{name:'Bosnia & Herzegovina', flag:'🇧🇦', iso3:'BIH', continent:'europe', currency:'BAM', calling:'387', langs:['Bosnian','Croatian','Serbian'], pb:'hr'},
+  BG:{name:'Bulgaria', flag:'🇧🇬', iso3:'BGR', continent:'europe', currency:'BGN', calling:'359', langs:['Bulgarian']},
+  HR:{name:'Croatia', flag:'🇭🇷', iso3:'HRV', continent:'europe', currency:'EUR', calling:'385', langs:['Croatian'], pb:'hr'},
+  CZ:{name:'Czechia', flag:'🇨🇿', iso3:'CZE', continent:'europe', currency:'CZK', calling:'420', aliases:['Czech Republic','Czechia'], langs:['Czech'], pb:'cs'},
+  DK:{name:'Denmark', flag:'🇩🇰', iso3:'DNK', continent:'europe', currency:'DKK', calling:'45', langs:['Danish']},
+  EE:{name:'Estonia', flag:'🇪🇪', iso3:'EST', continent:'europe', currency:'EUR', calling:'372', langs:['Estonian']},
+  FI:{name:'Finland', flag:'🇫🇮', iso3:'FIN', continent:'europe', currency:'EUR', calling:'358', langs:['Finnish','Swedish']},
+  FR:{name:'France', flag:'🇫🇷', iso3:'FRA', continent:'europe', currency:'EUR', calling:'33', langs:['French'], pb:'fr'},
+  DE:{name:'Germany', flag:'🇩🇪', iso3:'DEU', continent:'europe', currency:'EUR', calling:'49', langs:['German'], pb:'de'},
+  GR:{name:'Greece', flag:'🇬🇷', iso3:'GRC', continent:'europe', currency:'EUR', calling:'30', langs:['Greek'], pb:'el'},
+  HU:{name:'Hungary', flag:'🇭🇺', iso3:'HUN', continent:'europe', currency:'HUF', calling:'36', langs:['Hungarian'], pb:'hu'},
+  IS:{name:'Iceland', flag:'🇮🇸', iso3:'ISL', continent:'europe', currency:'ISK', calling:'354', langs:['Icelandic']},
+  IE:{name:'Ireland', flag:'🇮🇪', iso3:'IRL', continent:'europe', currency:'EUR', calling:'353', langs:['English','Irish']},
+  IT:{name:'Italy', flag:'🇮🇹', iso3:'ITA', continent:'europe', currency:'EUR', calling:'39', langs:['Italian'], pb:'it'},
+  XK:{name:'Kosovo', flag:'🇽🇰', iso3:'XKX', continent:'europe', currency:'EUR', calling:'383', aliases:['Kosovo'], langs:['Albanian','Serbian']},
+  LV:{name:'Latvia', flag:'🇱🇻', iso3:'LVA', continent:'europe', currency:'EUR', calling:'371', langs:['Latvian']},
+  LI:{name:'Liechtenstein', flag:'🇱🇮', iso3:'LIE', continent:'europe', currency:'CHF', calling:'423', langs:['German'], pb:'de'},
+  LT:{name:'Lithuania', flag:'🇱🇹', iso3:'LTU', continent:'europe', currency:'EUR', calling:'370', langs:['Lithuanian']},
+  LU:{name:'Luxembourg', flag:'🇱🇺', iso3:'LUX', continent:'europe', currency:'EUR', calling:'352', langs:['Luxembourgish','French','German'], pb:'fr'},
+  MT:{name:'Malta', flag:'🇲🇹', iso3:'MLT', continent:'europe', currency:'EUR', calling:'356', langs:['Maltese','English']},
+  MD:{name:'Moldova', flag:'🇲🇩', iso3:'MDA', continent:'europe', currency:'MDL', calling:'373', aliases:['Moldova'], langs:['Romanian']},
+  MC:{name:'Monaco', flag:'🇲🇨', iso3:'MCO', continent:'europe', currency:'EUR', calling:'377', langs:['French'], pb:'fr'},
+  ME:{name:'Montenegro', flag:'🇲🇪', iso3:'MNE', continent:'europe', currency:'EUR', calling:'382', langs:['Montenegrin','Serbian'], pb:'hr'},
+  NL:{name:'Netherlands', flag:'🇳🇱', iso3:'NLD', continent:'europe', currency:'EUR', calling:'31', aliases:['Netherlands','Holland'], langs:['Dutch'], pb:'nl'},
+  MK:{name:'North Macedonia', flag:'🇲🇰', iso3:'MKD', continent:'europe', currency:'MKD', calling:'389', aliases:['North Macedonia','Macedonia'], langs:['Macedonian']},
+  NO:{name:'Norway', flag:'🇳🇴', iso3:'NOR', continent:'europe', currency:'NOK', calling:'47', langs:['Norwegian']},
+  PL:{name:'Poland', flag:'🇵🇱', iso3:'POL', continent:'europe', currency:'PLN', calling:'48', langs:['Polish'], pb:'pl'},
+  PT:{name:'Portugal', flag:'🇵🇹', iso3:'PRT', continent:'europe', currency:'EUR', calling:'351', langs:['Portuguese'], pb:'pt'},
+  RO:{name:'Romania', flag:'🇷🇴', iso3:'ROU', continent:'europe', currency:'RON', calling:'40', langs:['Romanian']},
+  RU:{name:'Russia', flag:'🇷🇺', iso3:'RUS', continent:'europe', currency:'RUB', calling:'7', aliases:['Russia','Russian Federation'], langs:['Russian'], pb:'ru'},
+  SM:{name:'San Marino', flag:'🇸🇲', iso3:'SMR', continent:'europe', currency:'EUR', calling:'378', langs:['Italian'], pb:'it'},
+  RS:{name:'Serbia', flag:'🇷🇸', iso3:'SRB', continent:'europe', currency:'RSD', calling:'381', langs:['Serbian'], pb:'hr'},
+  SK:{name:'Slovakia', flag:'🇸🇰', iso3:'SVK', continent:'europe', currency:'EUR', calling:'421', langs:['Slovak'], pb:'cs'},
+  SI:{name:'Slovenia', flag:'🇸🇮', iso3:'SVN', continent:'europe', currency:'EUR', calling:'386', langs:['Slovene']},
+  ES:{name:'Spain', flag:'🇪🇸', iso3:'ESP', continent:'europe', currency:'EUR', calling:'34', langs:['Spanish'], pb:'es'},
+  SE:{name:'Sweden', flag:'🇸🇪', iso3:'SWE', continent:'europe', currency:'SEK', calling:'46', langs:['Swedish'], pb:'sv'},
+  CH:{name:'Switzerland', flag:'🇨🇭', iso3:'CHE', continent:'europe', currency:'CHF', calling:'41', langs:['German','French','Italian','Romansh'], pb:'de'},
+  UA:{name:'Ukraine', flag:'🇺🇦', iso3:'UKR', continent:'europe', currency:'UAH', calling:'380', langs:['Ukrainian','Russian']},
+  GB:{name:'United Kingdom', flag:'🇬🇧', iso3:'GBR', continent:'europe', currency:'GBP', calling:'44', aliases:['United Kingdom','UK','Britain','England','Scotland','Wales','Northern Ireland'], langs:['English']},
+  VA:{name:'Vatican City', flag:'🇻🇦', iso3:'VAT', continent:'europe', currency:'EUR', calling:'379', aliases:['Vatican','Vatican City','Holy See'], langs:['Italian','Latin'], pb:'it'},
   // ASIA
-  AF:{name:'Afghanistan', flag:'🇦🇫', iso3:'AFG', continent:'asia', currency:'AFN', calling:'93'},
-  AM:{name:'Armenia', flag:'🇦🇲', iso3:'ARM', continent:'asia', currency:'AMD', calling:'374'},
-  AZ:{name:'Azerbaijan', flag:'🇦🇿', iso3:'AZE', continent:'asia', currency:'AZN', calling:'994'},
-  BH:{name:'Bahrain', flag:'🇧🇭', iso3:'BHR', continent:'asia', currency:'BHD', calling:'973'},
-  BD:{name:'Bangladesh', flag:'🇧🇩', iso3:'BGD', continent:'asia', currency:'BDT', calling:'880'},
-  BT:{name:'Bhutan', flag:'🇧🇹', iso3:'BTN', continent:'asia', currency:'BTN', calling:'975'},
-  BN:{name:'Brunei', flag:'🇧🇳', iso3:'BRN', continent:'asia', currency:'BND', calling:'673'},
-  KH:{name:'Cambodia', flag:'🇰🇭', iso3:'KHM', continent:'asia', currency:'KHR', calling:'855'},
-  CN:{name:'China', flag:'🇨🇳', iso3:'CHN', continent:'asia', currency:'CNY', calling:'86'},
-  CY:{name:'Cyprus', flag:'🇨🇾', iso3:'CYP', continent:'asia', currency:'EUR', calling:'357'},
-  GE:{name:'Georgia', flag:'🇬🇪', iso3:'GEO', continent:'asia', currency:'GEL', calling:'995'},
-  HK:{name:'Hong Kong', flag:'🇭🇰', iso3:'HKG', continent:'asia', currency:'HKD', calling:'852', aliases:['Hong Kong']},
-  IN:{name:'India', flag:'🇮🇳', iso3:'IND', continent:'asia', currency:'INR', calling:'91'},
-  ID:{name:'Indonesia', flag:'🇮🇩', iso3:'IDN', continent:'asia', currency:'IDR', calling:'62'},
-  IR:{name:'Iran', flag:'🇮🇷', iso3:'IRN', continent:'asia', currency:'IRR', calling:'98', aliases:['Iran']},
-  IQ:{name:'Iraq', flag:'🇮🇶', iso3:'IRQ', continent:'asia', currency:'IQD', calling:'964'},
-  IL:{name:'Israel', flag:'🇮🇱', iso3:'ISR', continent:'asia', currency:'ILS', calling:'972'},
-  JP:{name:'Japan', flag:'🇯🇵', iso3:'JPN', continent:'asia', currency:'JPY', calling:'81'},
-  JO:{name:'Jordan', flag:'🇯🇴', iso3:'JOR', continent:'asia', currency:'JOD', calling:'962'},
-  KZ:{name:'Kazakhstan', flag:'🇰🇿', iso3:'KAZ', continent:'asia', currency:'KZT', calling:'7'},
-  KW:{name:'Kuwait', flag:'🇰🇼', iso3:'KWT', continent:'asia', currency:'KWD', calling:'965'},
-  KG:{name:'Kyrgyzstan', flag:'🇰🇬', iso3:'KGZ', continent:'asia', currency:'KGS', calling:'996'},
-  LA:{name:'Laos', flag:'🇱🇦', iso3:'LAO', continent:'asia', currency:'LAK', calling:'856', aliases:['Laos']},
-  LB:{name:'Lebanon', flag:'🇱🇧', iso3:'LBN', continent:'asia', currency:'LBP', calling:'961'},
-  MO:{name:'Macau', flag:'🇲🇴', iso3:'MAC', continent:'asia', currency:'MOP', calling:'853', aliases:['Macau','Macao']},
-  MY:{name:'Malaysia', flag:'🇲🇾', iso3:'MYS', continent:'asia', currency:'MYR', calling:'60'},
-  MV:{name:'Maldives', flag:'🇲🇻', iso3:'MDV', continent:'asia', currency:'MVR', calling:'960'},
-  MN:{name:'Mongolia', flag:'🇲🇳', iso3:'MNG', continent:'asia', currency:'MNT', calling:'976'},
-  MM:{name:'Myanmar', flag:'🇲🇲', iso3:'MMR', continent:'asia', currency:'MMK', calling:'95', aliases:['Myanmar','Burma']},
-  NP:{name:'Nepal', flag:'🇳🇵', iso3:'NPL', continent:'asia', currency:'NPR', calling:'977'},
-  KP:{name:'North Korea', flag:'🇰🇵', iso3:'PRK', continent:'asia', currency:'KPW', calling:'850', aliases:['North Korea']},
-  OM:{name:'Oman', flag:'🇴🇲', iso3:'OMN', continent:'asia', currency:'OMR', calling:'968'},
-  PK:{name:'Pakistan', flag:'🇵🇰', iso3:'PAK', continent:'asia', currency:'PKR', calling:'92'},
-  PS:{name:'Palestine', flag:'🇵🇸', iso3:'PSE', continent:'asia', currency:'ILS', calling:'970'},
-  PH:{name:'Philippines', flag:'🇵🇭', iso3:'PHL', continent:'asia', currency:'PHP', calling:'63'},
-  QA:{name:'Qatar', flag:'🇶🇦', iso3:'QAT', continent:'asia', currency:'QAR', calling:'974'},
-  SA:{name:'Saudi Arabia', flag:'🇸🇦', iso3:'SAU', continent:'asia', currency:'SAR', calling:'966'},
-  SG:{name:'Singapore', flag:'🇸🇬', iso3:'SGP', continent:'asia', currency:'SGD', calling:'65'},
-  KR:{name:'South Korea', flag:'🇰🇷', iso3:'KOR', continent:'asia', currency:'KRW', calling:'82', aliases:['South Korea','Korea','Republic of Korea']},
-  LK:{name:'Sri Lanka', flag:'🇱🇰', iso3:'LKA', continent:'asia', currency:'LKR', calling:'94'},
-  SY:{name:'Syria', flag:'🇸🇾', iso3:'SYR', continent:'asia', currency:'SYP', calling:'963', aliases:['Syria']},
-  TW:{name:'Taiwan', flag:'🇹🇼', iso3:'TWN', continent:'asia', currency:'TWD', calling:'886', aliases:['Taiwan']},
-  TJ:{name:'Tajikistan', flag:'🇹🇯', iso3:'TJK', continent:'asia', currency:'TJS', calling:'992'},
-  TH:{name:'Thailand', flag:'🇹🇭', iso3:'THA', continent:'asia', currency:'THB', calling:'66'},
-  TL:{name:'Timor-Leste', flag:'🇹🇱', iso3:'TLS', continent:'asia', currency:'USD', calling:'670', aliases:['Timor-Leste','East Timor']},
-  TR:{name:'Turkey', flag:'🇹🇷', iso3:'TUR', continent:'asia', currency:'TRY', calling:'90'},
-  TM:{name:'Turkmenistan', flag:'🇹🇲', iso3:'TKM', continent:'asia', currency:'TMT', calling:'993'},
-  AE:{name:'United Arab Emirates', flag:'🇦🇪', iso3:'ARE', continent:'asia', currency:'AED', calling:'971', aliases:['UAE','United Arab Emirates','Dubai','Abu Dhabi']},
-  UZ:{name:'Uzbekistan', flag:'🇺🇿', iso3:'UZB', continent:'asia', currency:'UZS', calling:'998'},
-  VN:{name:'Vietnam', flag:'🇻🇳', iso3:'VNM', continent:'asia', currency:'VND', calling:'84', aliases:['Vietnam','Viet Nam']},
-  YE:{name:'Yemen', flag:'🇾🇪', iso3:'YEM', continent:'asia', currency:'YER', calling:'967'},
+  AF:{name:'Afghanistan', flag:'🇦🇫', iso3:'AFG', continent:'asia', currency:'AFN', calling:'93', langs:['Dari','Pashto']},
+  AM:{name:'Armenia', flag:'🇦🇲', iso3:'ARM', continent:'asia', currency:'AMD', calling:'374', langs:['Armenian']},
+  AZ:{name:'Azerbaijan', flag:'🇦🇿', iso3:'AZE', continent:'asia', currency:'AZN', calling:'994', langs:['Azerbaijani'], pb:'tr'},
+  BH:{name:'Bahrain', flag:'🇧🇭', iso3:'BHR', continent:'asia', currency:'BHD', calling:'973', langs:['Arabic'], pb:'ar'},
+  BD:{name:'Bangladesh', flag:'🇧🇩', iso3:'BGD', continent:'asia', currency:'BDT', calling:'880', langs:['Bengali']},
+  BT:{name:'Bhutan', flag:'🇧🇹', iso3:'BTN', continent:'asia', currency:'BTN', calling:'975', langs:['Dzongkha']},
+  BN:{name:'Brunei', flag:'🇧🇳', iso3:'BRN', continent:'asia', currency:'BND', calling:'673', langs:['Malay'], pb:'id'},
+  KH:{name:'Cambodia', flag:'🇰🇭', iso3:'KHM', continent:'asia', currency:'KHR', calling:'855', langs:['Khmer']},
+  CN:{name:'China', flag:'🇨🇳', iso3:'CHN', continent:'asia', currency:'CNY', calling:'86', langs:['Mandarin Chinese'], pb:'zh'},
+  CY:{name:'Cyprus', flag:'🇨🇾', iso3:'CYP', continent:'asia', currency:'EUR', calling:'357', langs:['Greek','Turkish'], pb:'el'},
+  GE:{name:'Georgia', flag:'🇬🇪', iso3:'GEO', continent:'asia', currency:'GEL', calling:'995', langs:['Georgian']},
+  HK:{name:'Hong Kong', flag:'🇭🇰', iso3:'HKG', continent:'asia', currency:'HKD', calling:'852', aliases:['Hong Kong'], langs:['Cantonese','English','Mandarin Chinese'], pb:'zh'},
+  IN:{name:'India', flag:'🇮🇳', iso3:'IND', continent:'asia', currency:'INR', calling:'91', langs:['Hindi','English'], pb:'hi'},
+  ID:{name:'Indonesia', flag:'🇮🇩', iso3:'IDN', continent:'asia', currency:'IDR', calling:'62', langs:['Indonesian'], pb:'id'},
+  IR:{name:'Iran', flag:'🇮🇷', iso3:'IRN', continent:'asia', currency:'IRR', calling:'98', aliases:['Iran'], langs:['Persian (Farsi)']},
+  IQ:{name:'Iraq', flag:'🇮🇶', iso3:'IRQ', continent:'asia', currency:'IQD', calling:'964', langs:['Arabic','Kurdish'], pb:'ar'},
+  IL:{name:'Israel', flag:'🇮🇱', iso3:'ISR', continent:'asia', currency:'ILS', calling:'972', langs:['Hebrew','Arabic'], pb:'he'},
+  JP:{name:'Japan', flag:'🇯🇵', iso3:'JPN', continent:'asia', currency:'JPY', calling:'81', langs:['Japanese'], pb:'ja'},
+  JO:{name:'Jordan', flag:'🇯🇴', iso3:'JOR', continent:'asia', currency:'JOD', calling:'962', langs:['Arabic'], pb:'ar'},
+  KZ:{name:'Kazakhstan', flag:'🇰🇿', iso3:'KAZ', continent:'asia', currency:'KZT', calling:'7', langs:['Kazakh','Russian'], pb:'ru'},
+  KW:{name:'Kuwait', flag:'🇰🇼', iso3:'KWT', continent:'asia', currency:'KWD', calling:'965', langs:['Arabic'], pb:'ar'},
+  KG:{name:'Kyrgyzstan', flag:'🇰🇬', iso3:'KGZ', continent:'asia', currency:'KGS', calling:'996', langs:['Kyrgyz','Russian'], pb:'ru'},
+  LA:{name:'Laos', flag:'🇱🇦', iso3:'LAO', continent:'asia', currency:'LAK', calling:'856', aliases:['Laos'], langs:['Lao']},
+  LB:{name:'Lebanon', flag:'🇱🇧', iso3:'LBN', continent:'asia', currency:'LBP', calling:'961', langs:['Arabic','French'], pb:'ar'},
+  MO:{name:'Macau', flag:'🇲🇴', iso3:'MAC', continent:'asia', currency:'MOP', calling:'853', aliases:['Macau','Macao'], langs:['Cantonese','Portuguese','Mandarin Chinese'], pb:'zh'},
+  MY:{name:'Malaysia', flag:'🇲🇾', iso3:'MYS', continent:'asia', currency:'MYR', calling:'60', langs:['Malay'], pb:'id'},
+  MV:{name:'Maldives', flag:'🇲🇻', iso3:'MDV', continent:'asia', currency:'MVR', calling:'960', langs:['Dhivehi']},
+  MN:{name:'Mongolia', flag:'🇲🇳', iso3:'MNG', continent:'asia', currency:'MNT', calling:'976', langs:['Mongolian']},
+  MM:{name:'Myanmar', flag:'🇲🇲', iso3:'MMR', continent:'asia', currency:'MMK', calling:'95', aliases:['Myanmar','Burma'], langs:['Burmese']},
+  NP:{name:'Nepal', flag:'🇳🇵', iso3:'NPL', continent:'asia', currency:'NPR', calling:'977', langs:['Nepali']},
+  KP:{name:'North Korea', flag:'🇰🇵', iso3:'PRK', continent:'asia', currency:'KPW', calling:'850', aliases:['North Korea'], langs:['Korean'], pb:'ko'},
+  OM:{name:'Oman', flag:'🇴🇲', iso3:'OMN', continent:'asia', currency:'OMR', calling:'968', langs:['Arabic'], pb:'ar'},
+  PK:{name:'Pakistan', flag:'🇵🇰', iso3:'PAK', continent:'asia', currency:'PKR', calling:'92', langs:['Urdu','English'], pb:'hi'},
+  PS:{name:'Palestine', flag:'🇵🇸', iso3:'PSE', continent:'asia', currency:'ILS', calling:'970', langs:['Arabic'], pb:'ar'},
+  PH:{name:'Philippines', flag:'🇵🇭', iso3:'PHL', continent:'asia', currency:'PHP', calling:'63', langs:['Filipino','English'], pb:'fil'},
+  QA:{name:'Qatar', flag:'🇶🇦', iso3:'QAT', continent:'asia', currency:'QAR', calling:'974', langs:['Arabic'], pb:'ar'},
+  SA:{name:'Saudi Arabia', flag:'🇸🇦', iso3:'SAU', continent:'asia', currency:'SAR', calling:'966', langs:['Arabic'], pb:'ar'},
+  SG:{name:'Singapore', flag:'🇸🇬', iso3:'SGP', continent:'asia', currency:'SGD', calling:'65', langs:['English','Malay','Mandarin Chinese','Tamil']},
+  KR:{name:'South Korea', flag:'🇰🇷', iso3:'KOR', continent:'asia', currency:'KRW', calling:'82', aliases:['South Korea','Korea','Republic of Korea'], langs:['Korean'], pb:'ko'},
+  LK:{name:'Sri Lanka', flag:'🇱🇰', iso3:'LKA', continent:'asia', currency:'LKR', calling:'94', langs:['Sinhala','Tamil']},
+  SY:{name:'Syria', flag:'🇸🇾', iso3:'SYR', continent:'asia', currency:'SYP', calling:'963', aliases:['Syria'], langs:['Arabic'], pb:'ar'},
+  TW:{name:'Taiwan', flag:'🇹🇼', iso3:'TWN', continent:'asia', currency:'TWD', calling:'886', aliases:['Taiwan'], langs:['Mandarin Chinese'], pb:'zh'},
+  TJ:{name:'Tajikistan', flag:'🇹🇯', iso3:'TJK', continent:'asia', currency:'TJS', calling:'992', langs:['Tajik','Russian'], pb:'ru'},
+  TH:{name:'Thailand', flag:'🇹🇭', iso3:'THA', continent:'asia', currency:'THB', calling:'66', langs:['Thai'], pb:'th'},
+  TL:{name:'Timor-Leste', flag:'🇹🇱', iso3:'TLS', continent:'asia', currency:'USD', calling:'670', aliases:['Timor-Leste','East Timor'], langs:['Tetum','Portuguese'], pb:'pt'},
+  TR:{name:'Turkey', flag:'🇹🇷', iso3:'TUR', continent:'asia', currency:'TRY', calling:'90', langs:['Turkish'], pb:'tr'},
+  TM:{name:'Turkmenistan', flag:'🇹🇲', iso3:'TKM', continent:'asia', currency:'TMT', calling:'993', langs:['Turkmen','Russian'], pb:'tr'},
+  AE:{name:'United Arab Emirates', flag:'🇦🇪', iso3:'ARE', continent:'asia', currency:'AED', calling:'971', aliases:['UAE','United Arab Emirates','Dubai','Abu Dhabi'], langs:['Arabic'], pb:'ar'},
+  UZ:{name:'Uzbekistan', flag:'🇺🇿', iso3:'UZB', continent:'asia', currency:'UZS', calling:'998', langs:['Uzbek','Russian'], pb:'ru'},
+  VN:{name:'Vietnam', flag:'🇻🇳', iso3:'VNM', continent:'asia', currency:'VND', calling:'84', aliases:['Vietnam','Viet Nam'], langs:['Vietnamese'], pb:'vi'},
+  YE:{name:'Yemen', flag:'🇾🇪', iso3:'YEM', continent:'asia', currency:'YER', calling:'967', langs:['Arabic'], pb:'ar'},
   // OCEANIA
-  AU:{name:'Australia', flag:'🇦🇺', iso3:'AUS', continent:'oceania', currency:'AUD', calling:'61'},
-  FJ:{name:'Fiji', flag:'🇫🇯', iso3:'FJI', continent:'oceania', currency:'FJD', calling:'679'},
-  KI:{name:'Kiribati', flag:'🇰🇮', iso3:'KIR', continent:'oceania', currency:'AUD', calling:'686'},
-  MH:{name:'Marshall Islands', flag:'🇲🇭', iso3:'MHL', continent:'oceania', currency:'USD', calling:'692'},
-  FM:{name:'Micronesia', flag:'🇫🇲', iso3:'FSM', continent:'oceania', currency:'USD', calling:'691'},
-  NR:{name:'Nauru', flag:'🇳🇷', iso3:'NRU', continent:'oceania', currency:'AUD', calling:'674'},
-  NZ:{name:'New Zealand', flag:'🇳🇿', iso3:'NZL', continent:'oceania', currency:'NZD', calling:'64'},
-  PF:{name:'French Polynesia', flag:'🇵🇫', iso3:'PYF', continent:'oceania', currency:'XPF', calling:'689', aliases:['Tahiti','Bora Bora']},
-  GU:{name:'Guam', flag:'🇬🇺', iso3:'GUM', continent:'oceania', currency:'USD', calling:'1-671'},
-  PW:{name:'Palau', flag:'🇵🇼', iso3:'PLW', continent:'oceania', currency:'USD', calling:'680'},
-  PG:{name:'Papua New Guinea', flag:'🇵🇬', iso3:'PNG', continent:'oceania', currency:'PGK', calling:'675'},
-  WS:{name:'Samoa', flag:'🇼🇸', iso3:'WSM', continent:'oceania', currency:'WST', calling:'685'},
-  SB:{name:'Solomon Islands', flag:'🇸🇧', iso3:'SLB', continent:'oceania', currency:'SBD', calling:'677'},
-  TO:{name:'Tonga', flag:'🇹🇴', iso3:'TON', continent:'oceania', currency:'TOP', calling:'676'},
-  TV:{name:'Tuvalu', flag:'🇹🇻', iso3:'TUV', continent:'oceania', currency:'AUD', calling:'688'},
-  VU:{name:'Vanuatu', flag:'🇻🇺', iso3:'VUT', continent:'oceania', currency:'VUV', calling:'678'},
+  AU:{name:'Australia', flag:'🇦🇺', iso3:'AUS', continent:'oceania', currency:'AUD', calling:'61', langs:['English']},
+  FJ:{name:'Fiji', flag:'🇫🇯', iso3:'FJI', continent:'oceania', currency:'FJD', calling:'679', langs:['English','Fijian','Fiji Hindi']},
+  KI:{name:'Kiribati', flag:'🇰🇮', iso3:'KIR', continent:'oceania', currency:'AUD', calling:'686', langs:['English','Gilbertese']},
+  MH:{name:'Marshall Islands', flag:'🇲🇭', iso3:'MHL', continent:'oceania', currency:'USD', calling:'692', langs:['English','Marshallese']},
+  FM:{name:'Micronesia', flag:'🇫🇲', iso3:'FSM', continent:'oceania', currency:'USD', calling:'691', langs:['English']},
+  NR:{name:'Nauru', flag:'🇳🇷', iso3:'NRU', continent:'oceania', currency:'AUD', calling:'674', langs:['Nauruan','English']},
+  NZ:{name:'New Zealand', flag:'🇳🇿', iso3:'NZL', continent:'oceania', currency:'NZD', calling:'64', langs:['English','Maori']},
+  PF:{name:'French Polynesia', flag:'🇵🇫', iso3:'PYF', continent:'oceania', currency:'XPF', calling:'689', aliases:['Tahiti','Bora Bora'], langs:['French','Tahitian'], pb:'fr'},
+  GU:{name:'Guam', flag:'🇬🇺', iso3:'GUM', continent:'oceania', currency:'USD', calling:'1-671', langs:['English','Chamorro']},
+  PW:{name:'Palau', flag:'🇵🇼', iso3:'PLW', continent:'oceania', currency:'USD', calling:'680', langs:['English','Palauan']},
+  PG:{name:'Papua New Guinea', flag:'🇵🇬', iso3:'PNG', continent:'oceania', currency:'PGK', calling:'675', langs:['English','Tok Pisin','Hiri Motu']},
+  WS:{name:'Samoa', flag:'🇼🇸', iso3:'WSM', continent:'oceania', currency:'WST', calling:'685', langs:['Samoan','English']},
+  SB:{name:'Solomon Islands', flag:'🇸🇧', iso3:'SLB', continent:'oceania', currency:'SBD', calling:'677', langs:['English']},
+  TO:{name:'Tonga', flag:'🇹🇴', iso3:'TON', continent:'oceania', currency:'TOP', calling:'676', langs:['Tongan','English']},
+  TV:{name:'Tuvalu', flag:'🇹🇻', iso3:'TUV', continent:'oceania', currency:'AUD', calling:'688', langs:['Tuvaluan','English']},
+  VU:{name:'Vanuatu', flag:'🇻🇺', iso3:'VUT', continent:'oceania', currency:'VUV', calling:'678', langs:['Bislama','English','French']},
   // AFRICA
-  DZ:{name:'Algeria', flag:'🇩🇿', iso3:'DZA', continent:'africa', currency:'DZD', calling:'213'},
-  AO:{name:'Angola', flag:'🇦🇴', iso3:'AGO', continent:'africa', currency:'AOA', calling:'244'},
-  BJ:{name:'Benin', flag:'🇧🇯', iso3:'BEN', continent:'africa', currency:'XOF', calling:'229'},
-  BW:{name:'Botswana', flag:'🇧🇼', iso3:'BWA', continent:'africa', currency:'BWP', calling:'267'},
-  BF:{name:'Burkina Faso', flag:'🇧🇫', iso3:'BFA', continent:'africa', currency:'XOF', calling:'226'},
-  BI:{name:'Burundi', flag:'🇧🇮', iso3:'BDI', continent:'africa', currency:'BIF', calling:'257'},
-  CM:{name:'Cameroon', flag:'🇨🇲', iso3:'CMR', continent:'africa', currency:'XAF', calling:'237'},
-  CV:{name:'Cape Verde', flag:'🇨🇻', iso3:'CPV', continent:'africa', currency:'CVE', calling:'238'},
-  CF:{name:'Central African Republic', flag:'🇨🇫', iso3:'CAF', continent:'africa', currency:'XAF', calling:'236'},
-  TD:{name:'Chad', flag:'🇹🇩', iso3:'TCD', continent:'africa', currency:'XAF', calling:'235'},
-  KM:{name:'Comoros', flag:'🇰🇲', iso3:'COM', continent:'africa', currency:'KMF', calling:'269'},
-  CI:{name:'Côte d\\', flag:'🇨🇮', iso3:'CIV', continent:'africa', currency:'XOF', calling:'225', aliases:['Cote d\'Ivoire','Ivory Coast']},
-  CD:{name:'DR Congo', flag:'🇨🇩', iso3:'COD', continent:'africa', currency:'CDF', calling:'243', aliases:['DR Congo','Democratic Republic of the Congo','Congo-Kinshasa']},
-  DJ:{name:'Djibouti', flag:'🇩🇯', iso3:'DJI', continent:'africa', currency:'DJF', calling:'253'},
-  EG:{name:'Egypt', flag:'🇪🇬', iso3:'EGY', continent:'africa', currency:'EGP', calling:'20'},
-  GQ:{name:'Equatorial Guinea', flag:'🇬🇶', iso3:'GNQ', continent:'africa', currency:'XAF', calling:'240'},
-  ER:{name:'Eritrea', flag:'🇪🇷', iso3:'ERI', continent:'africa', currency:'ERN', calling:'291'},
-  SZ:{name:'Eswatini', flag:'🇸🇿', iso3:'SWZ', continent:'africa', currency:'SZL', calling:'268', aliases:['Eswatini','Swaziland']},
-  ET:{name:'Ethiopia', flag:'🇪🇹', iso3:'ETH', continent:'africa', currency:'ETB', calling:'251'},
-  GA:{name:'Gabon', flag:'🇬🇦', iso3:'GAB', continent:'africa', currency:'XAF', calling:'241'},
-  GM:{name:'Gambia', flag:'🇬🇲', iso3:'GMB', continent:'africa', currency:'GMD', calling:'220'},
-  GH:{name:'Ghana', flag:'🇬🇭', iso3:'GHA', continent:'africa', currency:'GHS', calling:'233'},
-  GN:{name:'Guinea', flag:'🇬🇳', iso3:'GIN', continent:'africa', currency:'GNF', calling:'224'},
-  GW:{name:'Guinea-Bissau', flag:'🇬🇼', iso3:'GNB', continent:'africa', currency:'XOF', calling:'245'},
-  KE:{name:'Kenya', flag:'🇰🇪', iso3:'KEN', continent:'africa', currency:'KES', calling:'254'},
-  LS:{name:'Lesotho', flag:'🇱🇸', iso3:'LSO', continent:'africa', currency:'LSL', calling:'266'},
-  LR:{name:'Liberia', flag:'🇱🇷', iso3:'LBR', continent:'africa', currency:'LRD', calling:'231'},
-  LY:{name:'Libya', flag:'🇱🇾', iso3:'LBY', continent:'africa', currency:'LYD', calling:'218'},
-  MG:{name:'Madagascar', flag:'🇲🇬', iso3:'MDG', continent:'africa', currency:'MGA', calling:'261'},
-  MW:{name:'Malawi', flag:'🇲🇼', iso3:'MWI', continent:'africa', currency:'MWK', calling:'265'},
-  ML:{name:'Mali', flag:'🇲🇱', iso3:'MLI', continent:'africa', currency:'XOF', calling:'223'},
-  MR:{name:'Mauritania', flag:'🇲🇷', iso3:'MRT', continent:'africa', currency:'MRU', calling:'222'},
-  MU:{name:'Mauritius', flag:'🇲🇺', iso3:'MUS', continent:'africa', currency:'MUR', calling:'230'},
-  MA:{name:'Morocco', flag:'🇲🇦', iso3:'MAR', continent:'africa', currency:'MAD', calling:'212'},
-  MZ:{name:'Mozambique', flag:'🇲🇿', iso3:'MOZ', continent:'africa', currency:'MZN', calling:'258'},
-  NA:{name:'Namibia', flag:'🇳🇦', iso3:'NAM', continent:'africa', currency:'NAD', calling:'264'},
-  NE:{name:'Niger', flag:'🇳🇪', iso3:'NER', continent:'africa', currency:'XOF', calling:'227'},
-  NG:{name:'Nigeria', flag:'🇳🇬', iso3:'NGA', continent:'africa', currency:'NGN', calling:'234'},
-  CG:{name:'Rep. of Congo', flag:'🇨🇬', iso3:'COG', continent:'africa', currency:'XAF', calling:'242', aliases:['Congo','Congo-Brazzaville']},
-  RW:{name:'Rwanda', flag:'🇷🇼', iso3:'RWA', continent:'africa', currency:'RWF', calling:'250'},
-  SN:{name:'Senegal', flag:'🇸🇳', iso3:'SEN', continent:'africa', currency:'XOF', calling:'221'},
-  SC:{name:'Seychelles', flag:'🇸🇨', iso3:'SYC', continent:'africa', currency:'SCR', calling:'248'},
-  SL:{name:'Sierra Leone', flag:'🇸🇱', iso3:'SLE', continent:'africa', currency:'SLE', calling:'232'},
-  SO:{name:'Somalia', flag:'🇸🇴', iso3:'SOM', continent:'africa', currency:'SOS', calling:'252'},
-  ZA:{name:'South Africa', flag:'🇿🇦', iso3:'ZAF', continent:'africa', currency:'ZAR', calling:'27'},
-  SS:{name:'South Sudan', flag:'🇸🇸', iso3:'SSD', continent:'africa', currency:'SSP', calling:'211'},
-  SD:{name:'Sudan', flag:'🇸🇩', iso3:'SDN', continent:'africa', currency:'SDG', calling:'249'},
-  ST:{name:'São Tomé & Príncipe', flag:'🇸🇹', iso3:'STP', continent:'africa', currency:'STN', calling:'239'},
-  TZ:{name:'Tanzania', flag:'🇹🇿', iso3:'TZA', continent:'africa', currency:'TZS', calling:'255', aliases:['Tanzania']},
-  TG:{name:'Togo', flag:'🇹🇬', iso3:'TGO', continent:'africa', currency:'XOF', calling:'228'},
-  TN:{name:'Tunisia', flag:'🇹🇳', iso3:'TUN', continent:'africa', currency:'TND', calling:'216'},
-  UG:{name:'Uganda', flag:'🇺🇬', iso3:'UGA', continent:'africa', currency:'UGX', calling:'256'},
-  ZM:{name:'Zambia', flag:'🇿🇲', iso3:'ZMB', continent:'africa', currency:'ZMW', calling:'260'},
-  ZW:{name:'Zimbabwe', flag:'🇿🇼', iso3:'ZWE', continent:'africa', currency:'ZWL', calling:'263'},
+  DZ:{name:'Algeria', flag:'🇩🇿', iso3:'DZA', continent:'africa', currency:'DZD', calling:'213', langs:['Arabic','Berber','French'], pb:'ar'},
+  AO:{name:'Angola', flag:'🇦🇴', iso3:'AGO', continent:'africa', currency:'AOA', calling:'244', langs:['Portuguese'], pb:'pt'},
+  BJ:{name:'Benin', flag:'🇧🇯', iso3:'BEN', continent:'africa', currency:'XOF', calling:'229', langs:['French'], pb:'fr'},
+  BW:{name:'Botswana', flag:'🇧🇼', iso3:'BWA', continent:'africa', currency:'BWP', calling:'267', langs:['English','Tswana']},
+  BF:{name:'Burkina Faso', flag:'🇧🇫', iso3:'BFA', continent:'africa', currency:'XOF', calling:'226', langs:['French'], pb:'fr'},
+  BI:{name:'Burundi', flag:'🇧🇮', iso3:'BDI', continent:'africa', currency:'BIF', calling:'257', langs:['Kirundi','French'], pb:'fr'},
+  CM:{name:'Cameroon', flag:'🇨🇲', iso3:'CMR', continent:'africa', currency:'XAF', calling:'237', langs:['French','English'], pb:'fr'},
+  CV:{name:'Cape Verde', flag:'🇨🇻', iso3:'CPV', continent:'africa', currency:'CVE', calling:'238', langs:['Portuguese'], pb:'pt'},
+  CF:{name:'Central African Republic', flag:'🇨🇫', iso3:'CAF', continent:'africa', currency:'XAF', calling:'236', langs:['French','Sango'], pb:'fr'},
+  TD:{name:'Chad', flag:'🇹🇩', iso3:'TCD', continent:'africa', currency:'XAF', calling:'235', langs:['French','Arabic'], pb:'fr'},
+  KM:{name:'Comoros', flag:'🇰🇲', iso3:'COM', continent:'africa', currency:'KMF', calling:'269', langs:['Comorian','Arabic','French'], pb:'fr'},
+  CI:{name:'Côte d\\', flag:'🇨🇮', iso3:'CIV', continent:'africa', currency:'XOF', calling:'225', aliases:['Cote d\'Ivoire','Ivory Coast'], langs:['French'], pb:'fr'},
+  CD:{name:'DR Congo', flag:'🇨🇩', iso3:'COD', continent:'africa', currency:'CDF', calling:'243', aliases:['DR Congo','Democratic Republic of the Congo','Congo-Kinshasa'], langs:['French'], pb:'fr'},
+  DJ:{name:'Djibouti', flag:'🇩🇯', iso3:'DJI', continent:'africa', currency:'DJF', calling:'253', langs:['French','Arabic'], pb:'fr'},
+  EG:{name:'Egypt', flag:'🇪🇬', iso3:'EGY', continent:'africa', currency:'EGP', calling:'20', langs:['Arabic'], pb:'ar'},
+  GQ:{name:'Equatorial Guinea', flag:'🇬🇶', iso3:'GNQ', continent:'africa', currency:'XAF', calling:'240', langs:['Spanish','French','Portuguese'], pb:'es'},
+  ER:{name:'Eritrea', flag:'🇪🇷', iso3:'ERI', continent:'africa', currency:'ERN', calling:'291', langs:['Tigrinya','Arabic','English']},
+  SZ:{name:'Eswatini', flag:'🇸🇿', iso3:'SWZ', continent:'africa', currency:'SZL', calling:'268', aliases:['Eswatini','Swaziland'], langs:['Swazi','English']},
+  ET:{name:'Ethiopia', flag:'🇪🇹', iso3:'ETH', continent:'africa', currency:'ETB', calling:'251', langs:['Amharic']},
+  GA:{name:'Gabon', flag:'🇬🇦', iso3:'GAB', continent:'africa', currency:'XAF', calling:'241', langs:['French'], pb:'fr'},
+  GM:{name:'Gambia', flag:'🇬🇲', iso3:'GMB', continent:'africa', currency:'GMD', calling:'220', langs:['English']},
+  GH:{name:'Ghana', flag:'🇬🇭', iso3:'GHA', continent:'africa', currency:'GHS', calling:'233', langs:['English']},
+  GN:{name:'Guinea', flag:'🇬🇳', iso3:'GIN', continent:'africa', currency:'GNF', calling:'224', langs:['French'], pb:'fr'},
+  GW:{name:'Guinea-Bissau', flag:'🇬🇼', iso3:'GNB', continent:'africa', currency:'XOF', calling:'245', langs:['Portuguese'], pb:'pt'},
+  KE:{name:'Kenya', flag:'🇰🇪', iso3:'KEN', continent:'africa', currency:'KES', calling:'254', langs:['Swahili','English'], pb:'sw'},
+  LS:{name:'Lesotho', flag:'🇱🇸', iso3:'LSO', continent:'africa', currency:'LSL', calling:'266', langs:['Sesotho','English']},
+  LR:{name:'Liberia', flag:'🇱🇷', iso3:'LBR', continent:'africa', currency:'LRD', calling:'231', langs:['English']},
+  LY:{name:'Libya', flag:'🇱🇾', iso3:'LBY', continent:'africa', currency:'LYD', calling:'218', langs:['Arabic'], pb:'ar'},
+  MG:{name:'Madagascar', flag:'🇲🇬', iso3:'MDG', continent:'africa', currency:'MGA', calling:'261', langs:['Malagasy','French'], pb:'fr'},
+  MW:{name:'Malawi', flag:'🇲🇼', iso3:'MWI', continent:'africa', currency:'MWK', calling:'265', langs:['Chichewa','English']},
+  ML:{name:'Mali', flag:'🇲🇱', iso3:'MLI', continent:'africa', currency:'XOF', calling:'223', langs:['French','Bambara'], pb:'fr'},
+  MR:{name:'Mauritania', flag:'🇲🇷', iso3:'MRT', continent:'africa', currency:'MRU', calling:'222', langs:['Arabic'], pb:'ar'},
+  MU:{name:'Mauritius', flag:'🇲🇺', iso3:'MUS', continent:'africa', currency:'MUR', calling:'230', langs:['English','French','Mauritian Creole'], pb:'fr'},
+  MA:{name:'Morocco', flag:'🇲🇦', iso3:'MAR', continent:'africa', currency:'MAD', calling:'212', langs:['Arabic','Berber','French'], pb:'ar'},
+  MZ:{name:'Mozambique', flag:'🇲🇿', iso3:'MOZ', continent:'africa', currency:'MZN', calling:'258', langs:['Portuguese'], pb:'pt'},
+  NA:{name:'Namibia', flag:'🇳🇦', iso3:'NAM', continent:'africa', currency:'NAD', calling:'264', langs:['English']},
+  NE:{name:'Niger', flag:'🇳🇪', iso3:'NER', continent:'africa', currency:'XOF', calling:'227', langs:['French'], pb:'fr'},
+  NG:{name:'Nigeria', flag:'🇳🇬', iso3:'NGA', continent:'africa', currency:'NGN', calling:'234', langs:['English']},
+  CG:{name:'Rep. of Congo', flag:'🇨🇬', iso3:'COG', continent:'africa', currency:'XAF', calling:'242', aliases:['Congo','Congo-Brazzaville'], langs:['French'], pb:'fr'},
+  RW:{name:'Rwanda', flag:'🇷🇼', iso3:'RWA', continent:'africa', currency:'RWF', calling:'250', langs:['Kinyarwanda','French','English','Swahili'], pb:'fr'},
+  SN:{name:'Senegal', flag:'🇸🇳', iso3:'SEN', continent:'africa', currency:'XOF', calling:'221', langs:['French','Wolof'], pb:'fr'},
+  SC:{name:'Seychelles', flag:'🇸🇨', iso3:'SYC', continent:'africa', currency:'SCR', calling:'248', langs:['Seychellois Creole','English','French'], pb:'fr'},
+  SL:{name:'Sierra Leone', flag:'🇸🇱', iso3:'SLE', continent:'africa', currency:'SLE', calling:'232', langs:['English']},
+  SO:{name:'Somalia', flag:'🇸🇴', iso3:'SOM', continent:'africa', currency:'SOS', calling:'252', langs:['Somali','Arabic']},
+  ZA:{name:'South Africa', flag:'🇿🇦', iso3:'ZAF', continent:'africa', currency:'ZAR', calling:'27', langs:['English','Afrikaans','Zulu','Xhosa']},
+  SS:{name:'South Sudan', flag:'🇸🇸', iso3:'SSD', continent:'africa', currency:'SSP', calling:'211', langs:['English','Arabic']},
+  SD:{name:'Sudan', flag:'🇸🇩', iso3:'SDN', continent:'africa', currency:'SDG', calling:'249', langs:['Arabic','English'], pb:'ar'},
+  ST:{name:'São Tomé & Príncipe', flag:'🇸🇹', iso3:'STP', continent:'africa', currency:'STN', calling:'239', langs:['Portuguese'], pb:'pt'},
+  TZ:{name:'Tanzania', flag:'🇹🇿', iso3:'TZA', continent:'africa', currency:'TZS', calling:'255', aliases:['Tanzania'], langs:['Swahili','English'], pb:'sw'},
+  TG:{name:'Togo', flag:'🇹🇬', iso3:'TGO', continent:'africa', currency:'XOF', calling:'228', langs:['French'], pb:'fr'},
+  TN:{name:'Tunisia', flag:'🇹🇳', iso3:'TUN', continent:'africa', currency:'TND', calling:'216', langs:['Arabic','French'], pb:'ar'},
+  UG:{name:'Uganda', flag:'🇺🇬', iso3:'UGA', continent:'africa', currency:'UGX', calling:'256', langs:['English','Swahili']},
+  ZM:{name:'Zambia', flag:'🇿🇲', iso3:'ZMB', continent:'africa', currency:'ZMW', calling:'260', langs:['English']},
+  ZW:{name:'Zimbabwe', flag:'🇿🇼', iso3:'ZWE', continent:'africa', currency:'ZWL', calling:'263', langs:['English','Shona','Ndebele']},
 };
 
 /* Lookup helper: code -> registry entry (case-insensitive). */
@@ -14850,6 +15103,17 @@ function ttCountriesSelfCheck(){
     const badCur = Object.keys(TT_COUNTRIES).filter(c => TT_COUNTRIES[c].currency && !fx.has(TT_COUNTRIES[c].currency));
     if (noCur.length) console.warn('[TT_COUNTRIES] countries missing currency:', noCur);
     if (badCur.length) console.warn('[TT_COUNTRIES] currency codes not in FX_ALL_CURRENCIES:', badCur.map(c => c + ':' + TT_COUNTRIES[c].currency));
+  } catch(e){}
+  // Languages referential integrity (Phase 7): every country has at least one language;
+  // any phrasebook code (pb) must resolve to a real Language Phrasebook entry.
+  try {
+    const pbSet = (typeof LP_LANGS !== 'undefined') ? new Set(LP_LANGS.map(l => l.code)) : null;
+    const noLang = Object.keys(TT_COUNTRIES).filter(c => !TT_COUNTRIES[c].langs || !TT_COUNTRIES[c].langs.length);
+    if (noLang.length) console.warn('[TT_COUNTRIES] countries missing langs:', noLang);
+    if (pbSet){
+      const badPb = Object.keys(TT_COUNTRIES).filter(c => TT_COUNTRIES[c].pb && !pbSet.has(TT_COUNTRIES[c].pb));
+      if (badPb.length) console.warn('[TT_COUNTRIES] pb codes with no phrasebook entry:', badPb.map(c => c + ':' + TT_COUNTRIES[c].pb));
+    }
   } catch(e){}
   const srcs = Object.keys(missing);
   if (srcs.length) console.warn('[TT_COUNTRIES] codes missing from registry:', missing);
@@ -15534,6 +15798,9 @@ function injectTripCtx(id) {
   if(id==='luggage-wt') lwcInit();
   if(id==='car-kit')    ckInit();
   if(id==='emergency')  emInit();
+  if(id==='holidays')   holInit();
+  if(id==='esim')       esimInit();
+  if(id==='safe')       safeInit();
   if(id==='timezone')   tzInit();
   if(id==='meeting-tz') mtpInit();
   if(id==='lounge-guide') lgInit();
@@ -39038,6 +39305,942 @@ const LP_CATS = [
   {id:'eat',  n:'Eating, dietary & allergies'},
   {id:'help', n:'Emergencies, shopping & numbers'},
 ];
+/* ══════════════════════════════════════════════════════
+   PUBLIC HOLIDAYS  (Phase 7 — Domain 2)
+   National public holidays for all 202 countries. Movable
+   feasts (Easter, Orthodox Easter, Islamic Eids, Chinese
+   New Year, nth-weekday holidays) are computed in-app for
+   any year. Islamic & lunar dates are tabular/astronomical
+   approximations — actual observance may shift ±1–2 days
+   (moon sighting) and substitute "observed" days when a
+   holiday lands on a weekend are not shown. Best-effort,
+   directional planning data; confirm locally for any year.
+   ══════════════════════════════════════════════════════ */
+function holEaster(y){
+  const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),
+    g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,
+    l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),
+    mo=Math.floor((h+l-7*m+114)/31),da=((h+l-7*m+114)%31)+1;
+  return new Date(y,mo-1,da);
+}
+function holOrthodoxEaster(y){
+  const a=y%4,b=y%7,c=y%19,d=(19*c+15)%30,e=(2*a+4*b-d+34)%7,
+    mo=Math.floor((d+e+114)/31),da=((d+e+114)%31)+1;
+  const j=new Date(Date.UTC(y,mo-1,da)); j.setUTCDate(j.getUTCDate()+13);
+  return new Date(j.getUTCFullYear(),j.getUTCMonth(),j.getUTCDate());
+}
+function holNthWeekday(y,m,wd,nth){
+  if(nth>0){ const first=new Date(y,m-1,1); const shift=(wd-first.getDay()+7)%7;
+    return new Date(y,m-1,1+shift+(nth-1)*7); }
+  const last=new Date(y,m,0); const shift=(last.getDay()-wd+7)%7;
+  return new Date(y,m-1,last.getDate()-shift);
+}
+function holJdToGregorian(jd){
+  let l=jd+68569; const n=Math.floor(4*l/146097); l=l-Math.floor((146097*n+3)/4);
+  const i=Math.floor(4000*(l+1)/1461001); l=l-Math.floor(1461*i/4)+31;
+  const j=Math.floor(80*l/2447); const day=l-Math.floor(2447*j/80); l=Math.floor(j/11);
+  const month=j+2-12*l; const year=100*(n-49)+i+l;
+  return new Date(year,month-1,day);
+}
+function holHijriToGregorian(hy,hm,hd){
+  const jd=Math.floor((11*hy+3)/30)+354*hy+30*hm-Math.floor((hm-1)/2)+hd+1948440-385;
+  return holJdToGregorian(jd);
+}
+function holHijriDates(y,hm,hd){
+  const out=[]; const hyA=Math.floor((y-622)*33/32);
+  for(let hy=hyA-1;hy<=hyA+1;hy++){ const g=holHijriToGregorian(hy,hm,hd); if(g.getFullYear()===y) out.push(g); }
+  return out;
+}
+/* Chinese New Year (first day) by year — astronomical dates, [month,day]. */
+const HOL_CNY={2024:[2,10],2025:[1,29],2026:[2,17],2027:[2,6],2028:[1,26],2029:[2,13],2030:[2,3],2031:[1,23],2032:[2,11],2033:[1,31],2034:[2,19],2035:[2,8]};
+
+/* Israel follows the Hebrew calendar; key holidays by Gregorian year [month,day,name]. */
+const HOL_IL={
+ 2024:[[4,23,'Passover (Pesach) I'],[4,29,'Passover VII'],[5,14,'Independence Day'],[6,12,'Shavuot'],[10,3,'Rosh Hashanah'],[10,12,'Yom Kippur'],[10,17,'Sukkot I'],[10,24,'Simchat Torah']],
+ 2025:[[4,13,'Passover (Pesach) I'],[4,19,'Passover VII'],[5,1,'Independence Day'],[6,2,'Shavuot'],[9,23,'Rosh Hashanah'],[10,2,'Yom Kippur'],[10,7,'Sukkot I'],[10,14,'Simchat Torah']],
+ 2026:[[4,2,'Passover (Pesach) I'],[4,8,'Passover VII'],[4,22,'Independence Day'],[5,22,'Shavuot'],[9,12,'Rosh Hashanah'],[9,21,'Yom Kippur'],[9,26,'Sukkot I'],[10,3,'Simchat Torah']],
+ 2027:[[4,22,'Passover (Pesach) I'],[4,28,'Passover VII'],[5,12,'Independence Day'],[6,11,'Shavuot'],[10,2,'Rosh Hashanah'],[10,11,'Yom Kippur'],[10,16,'Sukkot I'],[10,23,'Simchat Torah']],
+ 2028:[[4,11,'Passover (Pesach) I'],[4,17,'Passover VII'],[5,2,'Independence Day'],[5,31,'Shavuot'],[9,21,'Rosh Hashanah'],[9,30,'Yom Kippur'],[10,5,'Sukkot I'],[10,12,'Simchat Torah']],
+ 2029:[[3,31,'Passover (Pesach) I'],[4,6,'Passover VII'],[4,19,'Independence Day'],[5,20,'Shavuot'],[9,10,'Rosh Hashanah'],[9,19,'Yom Kippur'],[9,24,'Sukkot I'],[10,1,'Simchat Torah']],
+ 2030:[[4,18,'Passover (Pesach) I'],[4,24,'Passover VII'],[5,8,'Independence Day'],[6,7,'Shavuot'],[9,28,'Rosh Hashanah'],[10,7,'Yom Kippur'],[10,12,'Sukkot I'],[10,19,'Simchat Torah']],
+};
+
+/* Rule builders: f=fixed, e=Western-Easter offset, oe=Orthodox-Easter offset,
+   h=Islamic (Hijri month/day), nw=nth weekday, cny=Chinese New Year (+offset). */
+const _hf=(n,m,d)=>({n,t:'f',m,d});
+const _he=(n,o)=>({n,t:'e',o});
+const _ho=(n,o)=>({n,t:'oe',o});
+const _hh=(n,hm,hd)=>({n,t:'h',hm,hd});
+const _hn=(n,m,wd,nth)=>({n,t:'nw',m,wd,nth});
+const _hc=(n,o)=>({n,t:'cny',o:o||0});
+const _ha=(n,m,d)=>({n,t:'fa',m,d}); // fixed date but lunar/movable in reality → flagged approximate
+
+/* Shared bundles */
+const H_NY=_hf("New Year's Day",1,1), H_XMAS=_hf('Christmas Day',12,25), H_BOX=_hf('Boxing Day',12,26),
+  H_LAB=_hf('Labour Day / May Day',5,1), H_GF=_he('Good Friday',-2), H_EM=_he('Easter Monday',1),
+  H_ES=_he('Easter Sunday',0), H_ASC=_he('Ascension Day',39), H_WHIT=_he('Whit Monday',50),
+  H_CORPUS=_he('Corpus Christi',60), H_ASSUM=_hf('Assumption of Mary',8,15),
+  H_ALLS=_hf("All Saints' Day",11,1), H_IMMAC=_hf('Immaculate Conception',12,8), H_XEVE=_hf('Christmas Eve',12,24);
+const HB_WCHR=[H_NY,H_GF,H_EM,H_LAB,H_XMAS,H_BOX];               // generic Western Christian + May Day
+const HB_CATH=[H_NY,H_GF,H_ES,H_EM,H_LAB,H_ASSUM,H_ALLS,H_XMAS]; // Catholic Europe/LatAm core
+const HB_ORTH=[H_NY,_hf('Orthodox Christmas',1,7),_ho('Orthodox Good Friday',-2),_ho('Orthodox Easter',0),_ho('Orthodox Easter Monday',1),H_LAB,H_XMAS];
+const HB_ISL=[_hh('Eid al-Fitr',10,1),_hh('Eid al-Adha',12,10),_hh('Islamic New Year',1,1),_hh("Prophet's Birthday (Mawlid)",3,12)];
+const HB_LATAM=[H_NY,H_GF,H_ES,H_LAB,H_XMAS];
+
+const HOL_DATA = {
+  // ── Europe ──
+  AD:[H_NY,_hf('Epiphany',1,6),H_GF,H_EM,H_LAB,_hf('Constitution Day',3,14),H_ASSUM,_hf('Our Lady of Meritxell',9,8),H_ALLS,H_IMMAC,H_XMAS],
+  AL:[H_NY,_hf('Summer Day',3,14),H_GF,H_EM,H_LAB,_hh('Eid al-Fitr',10,1),_hh('Eid al-Adha',12,10),_hf('Mother Teresa Day',9,5),_hf('Independence Day',11,28),_hf('Liberation Day',11,29),H_XMAS],
+  AT:[H_NY,_hf('Epiphany',1,6),H_EM,H_LAB,H_ASC,H_WHIT,H_CORPUS,H_ASSUM,_hf('National Day',10,26),H_ALLS,H_IMMAC,H_XMAS,H_BOX],
+  BA:[H_NY,_hf('Orthodox Christmas',1,7),H_LAB,_hh('Eid al-Fitr',10,1),_hh('Eid al-Adha',12,10),_ho('Orthodox Easter',0),H_GF,H_EM,H_XMAS],
+  BE:[H_NY,H_EM,H_LAB,H_ASC,H_WHIT,_hf('National Day',7,21),H_ASSUM,H_ALLS,_hf('Armistice Day',11,11),H_XMAS],
+  BG:[H_NY,_hf('Liberation Day',3,3),_ho('Orthodox Good Friday',-2),_ho('Orthodox Easter',0),_ho('Orthodox Easter Monday',1),H_LAB,_hf('St George / Army Day',5,6),_hf('Culture & Literacy Day',5,24),_hf('Unification Day',9,6),_hf('Independence Day',9,22),H_XMAS,H_BOX],
+  BY:[H_NY,_hf('Orthodox Christmas',1,7),_hf("Women's Day",3,8),_ho('Radunitsa',9),H_LAB,_hf('Victory Day',5,9),_hf('Independence Day',7,3),_hf('October Revolution Day',11,7),H_XMAS],
+  CH:[H_NY,H_GF,H_EM,H_ASC,H_WHIT,_hf('Swiss National Day',8,1),H_XMAS,H_BOX],
+  CY:[H_NY,_hf('Epiphany',1,6),_ho('Green Monday',-48),_hf('Greek Independence Day',3,25),_hf('Cyprus National Day',4,1),_ho('Orthodox Good Friday',-2),_ho('Orthodox Easter Monday',1),H_LAB,_ho('Whit Monday (Orthodox)',50),_hf('Assumption',8,15),_hf('Cyprus Independence Day',10,1),_hf('Ochi Day',10,28),H_XMAS,H_BOX],
+  CZ:[H_NY,H_GF,H_EM,H_LAB,_hf('Liberation Day',5,8),_hf('Cyril & Methodius',7,5),_hf('Jan Hus Day',7,6),_hf('Statehood Day',9,28),_hf('Independence Day',10,28),_hf('Freedom & Democracy Day',11,17),H_XEVE,H_XMAS,H_BOX],
+  DE:[H_NY,H_GF,H_EM,H_LAB,H_ASC,H_WHIT,_hf('German Unity Day',10,3),H_XMAS,H_BOX],
+  DK:[H_NY,_he('Maundy Thursday',-3),H_GF,H_ES,H_EM,H_ASC,H_WHIT,_hf('Constitution Day',6,5),H_XMAS,H_BOX],
+  EE:[H_NY,_hf('Independence Day',2,24),H_GF,H_ES,H_LAB,H_WHIT,_hf('Victory Day',6,23),_hf('Midsummer Day',6,24),_hf('Restoration of Independence',8,20),H_XMAS,H_BOX],
+  ES:[H_NY,_hf('Epiphany',1,6),H_GF,H_LAB,H_ASSUM,_hf('National Day',10,12),H_ALLS,_hf('Constitution Day',12,6),H_IMMAC,H_XMAS],
+  FI:[H_NY,_hf('Epiphany',1,6),H_GF,H_ES,H_EM,H_LAB,H_ASC,_hf('Midsummer Eve',6,20),_hf('Independence Day',12,6),H_XEVE,H_XMAS,H_BOX],
+  FR:[H_NY,H_GF,H_EM,H_LAB,_hf('Victory in Europe Day',5,8),H_ASC,H_WHIT,_hf('Bastille Day',7,14),H_ASSUM,H_ALLS,_hf('Armistice Day',11,11),H_XMAS],
+  GB:[H_NY,H_GF,H_EM,_hn('Early May Bank Holiday',5,1,1),_hn('Spring Bank Holiday',5,1,-1),_hn('Summer Bank Holiday',8,1,-1),H_XMAS,H_BOX],
+  GR:[H_NY,_hf('Epiphany',1,6),_ho('Clean Monday',-48),_hf('Independence Day',3,25),_ho('Orthodox Good Friday',-2),_ho('Orthodox Easter',0),_ho('Orthodox Easter Monday',1),H_LAB,_ho('Whit Monday (Orthodox)',50),H_ASSUM,_hf('Ochi Day',10,28),H_XMAS,H_BOX],
+  HR:[H_NY,_hf('Epiphany',1,6),H_EM,H_LAB,_hf('Statehood Day',5,30),H_CORPUS,_hf('Anti-Fascist Struggle Day',6,22),_hf('Victory & Homeland Thanksgiving',8,5),H_ASSUM,H_ALLS,_hf('Remembrance Day',11,18),H_XMAS,H_BOX],
+  HU:[H_NY,_hf('Revolution Day 1848',3,15),H_GF,H_EM,H_LAB,H_WHIT,_hf('State Foundation Day',8,20),_hf('Republic Day 1956',10,23),H_ALLS,H_XMAS,H_BOX],
+  IE:[H_NY,_hf("St Brigid's Day",2,1),_hf("St Patrick's Day",3,17),H_EM,_hn('May Bank Holiday',5,1,1),_hn('June Bank Holiday',6,1,1),_hn('August Bank Holiday',8,1,1),_hn('October Bank Holiday',10,1,-1),H_XMAS,H_BOX],
+  IS:[H_NY,_he('Maundy Thursday',-3),H_GF,H_ES,H_EM,_hf('First Day of Summer',4,18),H_LAB,H_ASC,H_WHIT,_hf('National Day',6,17),_hn('Commerce Day',8,1,1),H_XEVE,H_XMAS,H_BOX],
+  IT:[H_NY,_hf('Epiphany',1,6),H_ES,H_EM,_hf('Liberation Day',4,25),H_LAB,_hf('Republic Day',6,2),H_ASSUM,H_ALLS,H_IMMAC,H_XMAS,_hf("St Stephen's Day",12,26)],
+  LI:[H_NY,_hf('Epiphany',1,6),_hf('Candlemas',2,2),H_GF,H_EM,H_LAB,H_ASC,H_WHIT,H_CORPUS,_hf('National Day',8,15),H_ALLS,H_IMMAC,H_XMAS,H_BOX],
+  LT:[H_NY,_hf('Independence Day',2,16),_hf('Restoration of Independence',3,11),H_ES,H_EM,H_LAB,_hf('Midsummer / St John',6,24),_hf('Statehood Day',7,6),H_ASSUM,H_ALLS,H_XMAS,H_BOX],
+  LU:[H_NY,H_EM,H_LAB,_hf('Europe Day',5,9),H_ASC,H_WHIT,_hf('National Day',6,23),H_ASSUM,H_ALLS,H_XMAS,H_BOX],
+  LV:[H_NY,H_GF,H_ES,H_EM,H_LAB,_hf('Midsummer Eve',6,23),_hf('Midsummer Day',6,24),_hf('Proclamation of Republic',11,18),H_XEVE,H_XMAS,H_BOX,_hf("New Year's Eve",12,31)],
+  MC:[H_NY,_hf('Saint Dévote',1,27),H_EM,H_LAB,H_ASC,H_WHIT,H_CORPUS,H_ASSUM,H_ALLS,_hf('National Day',11,19),H_IMMAC,H_XMAS],
+  MD:[H_NY,_hf('Orthodox Christmas',1,7),_ho('Orthodox Easter',0),_ho('Orthodox Easter Monday',1),H_LAB,_hf('Victory Day',5,9),_hf('Independence Day',8,27),_hf('Language Day',8,31),H_XMAS],
+  ME:[H_NY,_ho('Orthodox Good Friday',-2),_ho('Orthodox Easter',0),_ho('Orthodox Easter Monday',1),H_LAB,_hf('Independence Day',5,21),_hf('Statehood Day',7,13),H_XMAS],
+  MK:[H_NY,_hf('Orthodox Christmas',1,7),_ho('Orthodox Easter Monday',1),H_LAB,_hh('Eid al-Fitr',10,1),_hf('Sts Cyril & Methodius',5,24),_hf('Republic Day',8,2),_hf('Independence Day',9,8),_hf('Revolution Day',10,11),H_XMAS],
+  MT:[H_NY,_hf('St Paul Shipwreck',2,10),_hf('St Joseph',3,19),H_GF,_hf('Freedom Day',3,31),H_LAB,_hf('Sette Giugno',6,7),_hf('Sts Peter & Paul',6,29),H_ASSUM,_hf('Victory Day',9,8),_hf('Independence Day',9,21),H_IMMAC,_hf('Republic Day',12,13),H_XMAS],
+  NL:[H_NY,H_GF,H_ES,H_EM,_hf("King's Day",4,27),_hf('Liberation Day',5,5),H_ASC,H_WHIT,H_XMAS,H_BOX],
+  NO:[H_NY,_he('Maundy Thursday',-3),H_GF,H_ES,H_EM,H_LAB,_hf('Constitution Day',5,17),H_ASC,H_WHIT,H_XMAS,H_BOX],
+  PL:[H_NY,_hf('Epiphany',1,6),H_ES,H_EM,H_LAB,_hf('Constitution Day',5,3),H_WHIT,H_CORPUS,H_ASSUM,H_ALLS,_hf('Independence Day',11,11),H_XMAS,H_BOX],
+  PT:[H_NY,H_GF,H_ES,_hf('Freedom Day',4,25),H_LAB,H_CORPUS,_hf('Portugal Day',6,10),H_ASSUM,_hf('Republic Day',10,5),H_ALLS,_hf('Restoration of Independence',12,1),H_IMMAC,H_XMAS],
+  RO:[H_NY,_hf('Day after New Year',1,2),_hf('Union Day',1,24),_ho('Orthodox Good Friday',-2),_ho('Orthodox Easter',0),_ho('Orthodox Easter Monday',1),H_LAB,_hf("Children's Day",6,1),_ho('Whit Monday (Orthodox)',50),H_ASSUM,_hf('St Andrew',11,30),_hf('National Day',12,1),H_XMAS,H_BOX],
+  RS:[H_NY,_hf('Orthodox Christmas',1,7),_hf('Statehood Day',2,15),H_GF,_ho('Orthodox Easter',0),_ho('Orthodox Easter Monday',1),H_LAB,_hf('Armistice Day',11,11),H_XMAS],
+  RU:[H_NY,_hf('Orthodox Christmas',1,7),_hf('Defender of the Fatherland',2,23),_hf("Women's Day",3,8),_hf('Spring & Labour Day',5,1),_hf('Victory Day',5,9),_hf('Russia Day',6,12),_hf('Unity Day',11,4)],
+  SE:[H_NY,_hf('Epiphany',1,6),H_GF,H_ES,H_EM,H_LAB,H_ASC,_hf('National Day',6,6),_hf('Midsummer Eve',6,21),H_XMAS,H_BOX],
+  SI:[H_NY,_hf('Day after New Year',1,2),_hf('Prešeren Day',2,8),H_EM,_hf('Day of Uprising',4,27),H_LAB,_hf('Labour Day II',5,2),_hf('Statehood Day',6,25),H_ASSUM,_hf('Reformation Day',10,31),H_ALLS,H_XMAS,_hf('Independence & Unity Day',12,26)],
+  SK:[H_NY,_hf('Epiphany',1,6),H_GF,H_EM,H_LAB,_hf('Liberation Day',5,8),_hf('Cyril & Methodius',7,5),_hf('National Uprising',8,29),_hf('Constitution Day',9,1),_hf('Our Lady of Sorrows',9,15),H_ALLS,_hf('Freedom & Democracy',11,17),H_XEVE,H_XMAS,H_BOX],
+  SM:[H_NY,_hf('Epiphany',1,6),_hf('St Agatha / Liberation',2,5),H_EM,_hf('Anniversary of Arengo',3,25),H_LAB,H_CORPUS,_hf('Fall of Fascism',7,28),H_ASSUM,_hf('Republic Foundation',9,3),H_ALLS,H_IMMAC,H_XMAS,_hf("St Stephen's Day",12,26)],
+  UA:[H_NY,_hf('Christmas (Dec 25)',12,25),_ho('Orthodox Easter',0),H_LAB,_hf('Victory over Nazism Day',5,8),_hf('Constitution Day',6,28),_hf('Statehood Day',7,15),_hf('Independence Day',8,24),_hf('Defenders Day',10,1)],
+  VA:[H_NY,_hf('Epiphany',1,6),_hf('St Joseph',3,19),H_GF,H_ES,H_EM,_hf('St Joseph the Worker',5,1),_hf('Sts Peter & Paul',6,29),H_ASSUM,H_ALLS,H_IMMAC,H_XMAS,_hf("St Stephen's Day",12,26)],
+  XK:[H_NY,_hf('Day after New Year',1,2),_hf('Independence Day',2,17),_hf('Constitution Day',4,9),_hh('Eid al-Fitr',10,1),_hh('Eid al-Adha',12,10),H_LAB,_hf('Europe Day',5,9),_ho('Orthodox Easter',0),H_GF,H_XMAS],
+
+  // ── Middle East & North Africa (Islamic) ──
+  TR:[H_NY,_hf('National Sovereignty & Children\'s Day',4,23),_hf('Labour & Solidarity Day',5,1),_hf('Commemoration of Atatürk, Youth & Sports Day',5,19),_hh('Ramazan Bayramı (Eid al-Fitr)',10,1),_hh('Kurban Bayramı (Eid al-Adha)',12,10),_hf('Democracy & National Unity Day',7,15),_hf('Victory Day',8,30),_hf('Republic Day',10,29)],
+  AE:[H_NY,_hh('Eid al-Fitr',10,1),_hh('Arafat Day',12,9),_hh('Eid al-Adha',12,10),_hh('Islamic New Year',1,1),_hh("Prophet's Birthday",3,12),_hf('Commemoration Day',12,1),_hf('National Day',12,2)],
+  BH:[H_NY,...HB_ISL,H_LAB,_hh('Ashura',1,10),_hf('National Day',12,16)],
+  EG:[H_NY,_hf('Coptic Christmas',1,7),_hf('Revolution Day Jan25',1,25),_ho('Sham El-Nessim',1),_hf('Sinai Liberation Day',4,25),H_LAB,...HB_ISL,_hh('Ashura',1,10),_hf('Revolution Day Jul23',7,23),_hf('Armed Forces Day',10,6)],
+  IL:'__IL_TABLE__',
+  IQ:[H_NY,_hf('Army Day',1,6),...HB_ISL,_hh('Ashura',1,10),H_LAB,_hf('Republic Day',7,14),_hf('Independence Day',10,3)],
+  IR:[_hf('Nowruz (Persian New Year)',3,20),_ha('Nowruz Holiday',3,21),_hf('Islamic Republic Day',4,1),_hf('Nature Day (Sizdah Bedar)',4,2),...HB_ISL],
+  JO:[H_NY,...HB_ISL,_hh('Ashura',1,10),_hf('Labour Day',5,1),_hf('Independence Day',5,25),H_XMAS],
+  KW:[H_NY,...HB_ISL,_hh('Israa & Miraj',7,27),_hf('National Day',2,25),_hf('Liberation Day',2,26)],
+  LB:[H_NY,_hf('St Maron',2,9),...HB_ISL,_hh('Ashura',1,10),H_GF,_ho('Orthodox Good Friday',-2),H_ES,H_LAB,_hf('Martyrs Day',5,6),_hf('Resistance & Liberation Day',5,25),H_ASSUM,_hf('Independence Day',11,22),H_XMAS],
+  LY:[H_NY,...HB_ISL,_hh('Ashura',1,10),H_LAB,_hf('Martyrs Day',9,16),_hf('Liberation Day',10,23),_hf('Independence Day',12,24)],
+  MA:[H_NY,_hf('Independence Manifesto',1,11),...HB_ISL,_hh('Islamic New Year',1,1),H_LAB,_hf('Throne Day',7,30),_hf('Oued Ed-Dahab Day',8,14),_hf('Revolution Day',8,20),_hf("Youth Day",8,21),_hf('Green March',11,6),_hf('Independence Day',11,18)],
+  OM:[H_NY,...HB_ISL,_hh('Israa & Miraj',7,27),_hf('Renaissance Day',7,23),_hf('National Day',11,18)],
+  PS:[H_NY,...HB_ISL,_hf('Coptic/Orthodox Christmas',1,7),H_ES,_hf('Independence Day',11,15),H_XMAS],
+  QA:[...HB_ISL,_hf('National Sports Day',2,11),_hf('National Day',12,18)],
+  SA:[...HB_ISL,_hf('Foundation Day',2,22),_hf('National Day',9,23)],
+  SY:[H_NY,...HB_ISL,_hf('Revolution Day',3,8),_hf('Mother’s Day',3,21),_ho('Orthodox Easter',0),H_ES,H_LAB,_hf('Martyrs Day',5,6),_hf('Independence Day',4,17),H_XMAS],
+  TN:[H_NY,_hf('Independence Day',3,20),_hf('Martyrs Day',4,9),H_LAB,...HB_ISL,_hf('Republic Day',7,25),_hf("Women's Day",8,13),_hf('Evacuation Day',10,15),_hf('Revolution Day',12,17)],
+  YE:[H_NY,...HB_ISL,_hh('Ashura',1,10),H_LAB,_hf('Unity Day',5,22),_hf('Revolution Day',9,26),_hf('Liberation Day',11,30)],
+
+  // ── Sub-Saharan Africa ──
+  AO:[H_NY,_hf('Liberation Movement Day',2,4),_hf('Carnival',-47),_hf("Women's Day",3,8),_hf('Peace Day',4,4),H_GF,H_LAB,_hf('National Heroes Day',9,17),H_ALLS,_hf('Independence Day',11,11),H_XMAS],
+  BF:[H_NY,_hf('Revolution Day',1,3),H_EM,H_LAB,H_ASC,...HB_ISL,_hf('Independence Day',8,5),H_ASSUM,H_ALLS,_hf('Martyrs Day',10,31),_hf('Proclamation of Republic',12,11),H_XMAS],
+  BI:[H_NY,_hf('Unity Day',2,5),_hf('Rwagasore Day',10,13),_hf('Ndadaye Day',10,21),H_GF,H_EM,H_ASC,H_LAB,...HB_ISL,_hf('Independence Day',7,1),H_ASSUM,H_ALLS,H_XMAS],
+  BJ:[H_NY,_hf('Vodun Festival',1,10),...HB_ISL,H_EM,H_LAB,H_ASC,H_WHIT,_hf('Independence Day',8,1),H_ASSUM,H_ALLS,H_XMAS],
+  BW:[H_NY,_hf('Day after New Year',1,2),H_GF,H_EM,H_LAB,H_ASC,_hf('Sir Seretse Khama Day',7,1),_hn("President's Day",7,3,3),_hf('Botswana Day',9,30),H_XMAS,H_BOX],
+  CD:[H_NY,_hf('Martyrs of Independence',1,4),_hf('Heroes Day (Kabila)',1,16),_hf('Heroes Day (Lumumba)',1,17),H_LAB,_hf('Liberation Day',5,17),_hf('Independence Day',6,30),_hf('Parents Day',8,1),H_XMAS],
+  CF:[H_NY,_hf('Barthélemy Boganda Day',3,29),H_EM,H_LAB,H_ASC,H_WHIT,_hf('General Prayer Day',6,30),_hf('Independence Day',8,13),H_ASSUM,H_ALLS,_hf('Republic Day',12,1),H_XMAS],
+  CG:[H_NY,H_EM,H_LAB,H_ASC,H_WHIT,_hf('Reconciliation Day',6,10),_hf('Independence Day',8,15),H_ALLS,_hf('Republic Day',11,28),H_XMAS],
+  CI:[H_NY,...HB_ISL,H_EM,H_LAB,H_ASC,H_WHIT,_hf('Independence Day',8,7),H_ASSUM,H_ALLS,_hf('National Peace Day',11,15),H_XMAS],
+  CM:[H_NY,_hf('Youth Day',2,11),H_GF,H_EM,H_LAB,H_ASC,...HB_ISL,_hf('National Day',5,20),H_ASSUM,H_XMAS],
+  CV:[H_NY,_hf('Democracy Day',1,13),_hf('Heroes Day',1,20),H_GF,H_LAB,_hf("Children's Day",6,1),_hf('Independence Day',7,5),H_ASSUM,H_ALLS,H_XMAS],
+  DJ:[H_NY,...HB_ISL,_hh('Israa & Miraj',7,27),H_LAB,_hf('Independence Day',6,27),_hh('Ashura',1,10)],
+  DZ:[H_NY,_hf('Amazigh New Year',1,12),...HB_ISL,_hh('Ashura',1,10),H_LAB,_hf('Independence Day',7,5),_hf('Revolution Day',11,1)],
+  ER:[H_NY,_hf('Orthodox Christmas',1,7),_hf('Epiphany (Timket)',1,19),...HB_ISL,_ho('Orthodox Easter',0),H_GF,H_LAB,_hf('Independence Day',5,24),_hf('Martyrs Day',6,20),_hf('Revolution Day',9,1),H_XMAS],
+  ET:[_hf('Ethiopian Christmas (Genna)',1,7),_hf('Epiphany (Timket)',1,19),_hf('Adwa Victory Day',3,2),_ho('Ethiopian Good Friday',-2),_ho('Ethiopian Easter (Fasika)',0),H_LAB,_hf('Patriots Victory Day',5,5),_hf('Downfall of Derg',5,28),...HB_ISL,_hf('Enkutatash (New Year)',9,11),_hf('Meskel',9,27)],
+  GA:[H_NY,H_EM,H_LAB,...HB_ISL,_hf('Independence Day',8,17),H_ASSUM,H_ALLS,H_XMAS],
+  GH:[H_NY,_hf('Constitution Day',1,7),_hf('Independence Day',3,6),H_GF,H_EM,H_LAB,...HB_ISL,_hf('Founders Day',8,4),_hf('Kwame Nkrumah Day',9,21),_hn('Farmers Day',12,5,1),H_XMAS,H_BOX],
+  GM:[H_NY,_hf('Independence Day',2,18),H_GF,H_LAB,...HB_ISL,H_ASSUM,_hf('Revolution Day',7,22),H_XMAS],
+  GN:[H_NY,...HB_ISL,H_EM,H_LAB,_hf('Independence Day',10,2),H_ALLS,H_XMAS],
+  GQ:[H_NY,H_GF,H_LAB,_hf('Independence Day',10,12),_hf('Armed Forces Day',8,3),_hf('Constitution Day',8,15),_hf("President's Birthday",6,5),H_CORPUS,H_IMMAC,H_XMAS],
+  GW:[H_NY,_hf('Heroes Day',1,20),...HB_ISL,H_LAB,_hf('Independence Day',9,24),H_XMAS],
+  KE:[H_NY,H_GF,H_EM,H_LAB,_hf('Madaraka Day',6,1),...[_hh('Eid al-Fitr',10,1),_hh('Eid al-Adha',12,10)],_hf('Huduma Day',10,10),_hf('Mashujaa Day',10,20),_hf('Jamhuri Day',12,12),H_XMAS,H_BOX],
+  KM:[H_NY,...HB_ISL,_hh('Ashura',1,10),_hf('Independence Day',7,6),_hf('Maore Day',11,12)],
+  LR:[H_NY,_hf('Armed Forces Day',2,11),_hf('Decoration Day',-1),_hf('Unification Day',5,14),_hf('Independence Day',7,26),_hf('Flag Day',8,24),_hn('Thanksgiving',11,4,1),H_XMAS],
+  LS:[H_NY,_hf('Moshoeshoe Day',3,11),H_GF,H_EM,H_ASC,H_LAB,_hf("King's Birthday",7,17),_hf('Independence Day',10,4),H_XMAS,H_BOX],
+  MG:[H_NY,H_EM,H_LAB,H_ASC,H_WHIT,_hf('Martyrs Day',3,29),_hf('Independence Day',6,26),H_ASSUM,H_ALLS,H_XMAS],
+  ML:[H_NY,_hf('Army Day',1,20),...HB_ISL,H_EM,H_LAB,_hf('Africa Day',5,25),_hf('Independence Day',9,22),H_XMAS],
+  MR:[H_NY,...HB_ISL,_hh('Ashura',1,10),H_LAB,_hf('Africa Day',5,25),_hf('Independence Day',11,28)],
+  MU:[H_NY,_hf('Day after New Year',1,2),_hc('Chinese Spring Festival'),_ha('Thaipoosam Cavadee',2,4),_ha('Maha Shivaratree',2,26),_hf('Abolition of Slavery',2,1),_hf('National Day',3,12),...HB_ISL,H_LAB,_ha('Ganesh Chaturthi',9,7),_ha('Diwali',11,1),_hf('Arrival of Indentured Labourers',11,2),H_XMAS],
+  MW:[H_NY,_hf('John Chilembwe Day',1,15),_hf('Martyrs Day',3,3),H_GF,H_EM,H_LAB,_hf('Kamuzu Day',5,14),_hf('Independence Day',7,6),_hf('Mothers Day',10,15),H_XMAS,H_BOX],
+  MZ:[H_NY,_hf('Heroes Day',2,3),_hf("Women's Day",4,7),H_LAB,_hf('Independence Day',6,25),_hf('Victory Day',9,7),_hf('Armed Forces Day',9,25),_hf('Peace & Reconciliation',10,4),H_XMAS],
+  NA:[H_NY,_hf('Independence Day',3,21),H_GF,H_EM,H_LAB,_hf('Cassinga Day',5,4),H_ASC,_hf('Africa Day',5,25),_hf('Heroes Day',8,26),_hf('Human Rights Day',12,10),H_XMAS,H_BOX],
+  NE:[H_NY,_hf('Concord Day',4,24),H_EM,H_LAB,...HB_ISL,_hf('Independence Day',8,3),_hf('Republic Day',12,18),H_XMAS],
+  NG:[H_NY,H_GF,H_EM,H_LAB,_hf('Democracy Day',6,12),...HB_ISL,_hf('Independence Day',10,1),H_XMAS,H_BOX],
+  RW:[H_NY,_hf('Day after New Year',1,2),_hf('Heroes Day',2,1),H_GF,H_EM,_hf('Genocide Memorial Day',4,7),H_LAB,_hf('Independence Day',7,1),_hf('Liberation Day',7,4),...[_hh('Eid al-Fitr',10,1)],_hf('Umuganura Day',8,2),_hf('Assumption',8,15),H_XMAS,H_BOX],
+  SC:[H_NY,_hf('Day after New Year',1,2),H_GF,H_ES,H_EM,H_CORPUS,H_LAB,_hf('Constitution Day',6,18),_hf('Independence Day',6,29),H_ASSUM,H_ALLS,H_IMMAC,H_XMAS],
+  SD:[H_NY,...HB_ISL,_hh('Ashura',1,10),_hf('Independence Day',1,1),H_XMAS],
+  SL:[H_NY,...HB_ISL,H_GF,H_EM,_hf('Independence Day',4,27),H_LAB,H_XMAS,H_BOX],
+  SN:[H_NY,...HB_ISL,H_EM,H_LAB,H_ASC,H_WHIT,_hf('Independence Day',4,4),H_ASSUM,H_ALLS,_hf('Grand Magal of Touba',2,5),H_XMAS],
+  SO:[H_NY,...HB_ISL,_hh('Ashura',1,10),H_LAB,_hf('Independence Day (North)',6,26),_hf('Republic Day',7,1)],
+  SS:[H_NY,_hf('Peace Agreement Day',1,9),H_GF,H_EM,_hf('SPLA Day',5,16),_hf('Independence Day',7,9),_hf('Martyrs Day',7,30),H_XMAS],
+  ST:[H_NY,_hf('King Amador Day',1,4),_hf('Martyrs Day',2,3),H_LAB,_hf('Independence Day',7,12),_hf('Armed Forces Day',9,6),_hf('Agricultural Reform Day',9,30),H_XMAS],
+  SZ:[H_NY,H_GF,H_EM,H_ASC,_hf("King Mswati III Birthday",4,19),_hf('National Flag Day',4,25),H_LAB,_hf("King Sobhuza Birthday",7,22),_hf('Umhlanga (Reed Dance)',9,1),_hf('Independence Day',9,6),H_XMAS,H_BOX],
+  TD:[H_NY,...HB_ISL,H_EM,H_LAB,_hf('Independence Day',8,11),H_ALLS,_hf('Republic Day',11,28),_hf('Freedom & Democracy Day',12,1),H_XMAS],
+  TG:[H_NY,...HB_ISL,H_EM,_hf('Independence Day',4,27),H_LAB,H_ASC,H_WHIT,_hf('Martyrs Day',6,21),H_ASSUM,H_ALLS,H_XMAS],
+  TZ:[H_NY,_hf('Zanzibar Revolution Day',1,12),H_GF,H_EM,_hf('Karume Day',4,7),_hf('Union Day',4,26),H_LAB,...HB_ISL,_hf('Saba Saba',7,7),_hf('Nane Nane (Farmers)',8,8),_hf('Nyerere Day',10,14),_hf('Independence Day',12,9),H_XMAS,H_BOX],
+  UG:[H_NY,_hf('NRM Liberation Day',1,26),H_GF,H_EM,_hf("Women's Day",3,8),H_LAB,...HB_ISL,_hf('Martyrs Day',6,3),_hf('Heroes Day',6,9),_hf('Independence Day',10,9),H_XMAS,H_BOX],
+  ZA:[H_NY,_hf('Human Rights Day',3,21),H_GF,_hf('Family Day',1),_hf('Freedom Day',4,27),H_LAB,_hf('Youth Day',6,16),_hf("National Women's Day",8,9),_hf('Heritage Day',9,24),_hf('Day of Reconciliation',12,16),H_XMAS,_hf('Day of Goodwill',12,26)],
+  ZM:[H_NY,_hf('International Women’s Day',3,8),_hf('Youth Day',3,12),H_GF,H_EM,_hf('Labour Day',5,1),_hf('Africa Freedom Day',5,25),_hn('Heroes Day',7,1,1),_hn('Unity Day',7,1,2),_hn('Farmers Day',8,1,1),_hf('National Prayer Day',10,18),_hf('Independence Day',10,24),H_XMAS],
+  ZW:[H_NY,_hf('Robert Mugabe Youth Day',2,21),H_GF,H_ES,H_EM,_hf('Independence Day',4,18),H_LAB,_hf('Africa Day',5,25),_hn('Heroes Day',8,1,2),_hn('Defence Forces Day',8,1,2),_hf('Unity Day',12,22),H_XMAS,H_BOX],
+
+  // ── Asia ──
+  AF:[_hf('Nowruz',3,21),...HB_ISL,_hh('Ashura',1,10),_hf('Independence Day',8,19)],
+  AM:[H_NY,_hf('Day after New Year',1,2),_hf('Orthodox Christmas',1,6),_hf('Army Day',1,28),_hf("Women's Day",3,8),_hf('Genocide Remembrance Day',4,24),H_LAB,_hf('Victory & Peace Day',5,9),_hf('Republic Day',5,28),_hf('Constitution Day',7,5),_hf('Independence Day',9,21),H_XMAS],
+  AZ:[H_NY,_hf('Day after New Year',1,2),_hf("Women's Day",3,8),_hf('Nowruz',3,20),...HB_ISL,_hf('Victory Day',5,9),_hf('Republic Day',5,28),_hf('Armed Forces Day',6,26),_hf('Independence Day',10,18),_hf('Flag Day',11,9),_hf('Constitution Day',11,12),_hf('Solidarity Day',12,31)],
+  BD:[_hf('International Mother Language Day',2,21),_hf('Independence Day',3,26),_ha('Bengali New Year',4,14),H_LAB,...HB_ISL,_hh('Ashura',1,10),_hf('National Mourning Day',8,15),_ha('Durga Puja',10,1),_hf('Victory Day',12,16),H_XMAS],
+  BN:[H_NY,_hc('Chinese New Year'),...HB_ISL,_hh('Israa & Miraj',7,27),_hh('First Day of Ramadan',9,1),_hh('Revelation of Quran',9,17),_hf('National Day',2,23),_hf('Armed Forces Day',5,31),_hf("Sultan's Birthday",7,15),H_XMAS],
+  BT:[H_NY,_ha('Traditional New Year (Losar)',3,2),_hf("King's Birthday",2,21),_hf('Coronation Day',11,1),_ha('Birth of Guru Rinpoche',7,6),_ha('Blessed Rainy Day',9,23),_ha('Dashain',10,1),_hf('National Day',12,17)],
+  CN:[H_NY,_hc('Chinese New Year',-1),_hc('Chinese New Year'),_hc('Chinese New Year',1),_hc('Chinese New Year',2),_ha('Qingming Festival',4,4),H_LAB,_ha('Dragon Boat Festival',6,10),_ha('Mid-Autumn Festival',9,17),_hf('National Day',10,1),_hf('National Day Golden Week',10,2),_ha('National Day Holiday',10,3)],
+  GE:[H_NY,_hf('Day after New Year',1,2),_hf('Orthodox Christmas',1,7),_hf('Epiphany',1,19),_ho('Orthodox Good Friday',-2),_ho('Orthodox Easter',0),_ho('Orthodox Easter Monday',1),_hf('Mother’s Day',3,3),_hf("Women's Day",3,8),_hf('National Unity Day',4,9),_hf('Victory Day',5,9),_hf('St Andrew',5,12),_hf('Independence Day',5,26),_ha('Mariamoba',8,28),_ha('Svetitskhovloba',10,14),_hf('St George Day',11,23)],
+  HK:[H_NY,_hc('Chinese New Year'),_hc('Chinese New Year',1),_hc('Chinese New Year',2),H_GF,_he('Holy Saturday',-1),H_EM,_ha('Ching Ming',4,4),H_LAB,_ha('Buddha’s Birthday',5,15),_ha('Dragon Boat Festival',6,10),_hf('HKSAR Establishment Day',7,1),_ha('Day after Mid-Autumn',9,18),_hf('National Day',10,1),_ha('Chung Yeung',10,11),H_XMAS,_hf('First Weekday after Christmas',12,26)],
+  ID:[H_NY,_hc('Chinese New Year'),...HB_ISL,_hh('Israa & Miraj',7,27),_hf('Nyepi (Bali New Year)',3,29),H_GF,_ha('Buddha’s Birthday (Vesak)',5,23),H_ASC,_hf('Pancasila Day',6,1),_hf('Independence Day',8,17),H_XMAS],
+  IN:[_hf('Republic Day',1,26),...HB_ISL,_hf('Independence Day',8,15),_hf('Gandhi Jayanti',10,2),_ha('Diwali',11,1),_ha('Holi',3,25),H_XMAS],
+  JP:[H_NY,_hn('Coming of Age Day',1,2,2),_hf('National Foundation Day',2,11),_hf("Emperor's Birthday",2,23),_hf('Vernal Equinox',3,20),_hf('Showa Day',4,29),_hf('Constitution Day',5,3),_hf('Greenery Day',5,4),_hf("Children's Day",5,5),_hn('Marine Day',7,1,3),_hf('Mountain Day',8,11),_hn('Respect for the Aged Day',9,1,3),_hf('Autumnal Equinox',9,23),_hn('Sports Day',10,1,2),_hf('Culture Day',11,3),_hf('Labour Thanksgiving',11,23)],
+  KG:[H_NY,_hf('Orthodox Christmas',1,7),_hf('Fatherland Defender Day',2,23),_hf("Women's Day",3,8),_hf('Nowruz',3,21),...HB_ISL,_hf('Day of People’s Revolution',4,7),_hf('Labour Day',5,1),_hf('Constitution Day',5,5),_hf('Victory Day',5,9),_hf('Independence Day',8,31)],
+  KH:[H_NY,_hf('Victory over Genocide',1,7),_ha('Khmer New Year',4,14),_ha('Visak Bochea',5,15),_hf('Royal Ploughing',5,16),_hf("King's Birthday",5,14),H_LAB,_hf("Queen Mother's Birthday",6,18),_hf('Constitution Day',9,24),_ha('Pchum Ben',9,30),_hf('Coronation Day',10,29),_hf('Independence Day',11,9),_hf('Water Festival',11,14)],
+  KP:[H_NY,_hf('Day of the Shining Star',2,16),_hf('Day of the Sun',4,15),_hf('Army Foundation Day',4,25),H_LAB,_hf('Liberation Day',8,15),_hf('Republic Foundation Day',9,9),_hf('Party Foundation Day',10,10)],
+  KR:[H_NY,_hc('Seollal (Lunar NY)',-1),_hc('Seollal (Lunar NY)'),_hc('Seollal (Lunar NY)',1),_hf('Independence Movement Day',3,1),_hf("Children's Day",5,5),_ha('Buddha’s Birthday',5,15),_hf('Memorial Day',6,6),_hf('Liberation Day',8,15),_ha('Chuseok',9,16),_ha('Chuseok Holiday',9,17),_hf('National Foundation Day',10,3),_hf('Hangeul Day',10,9),H_XMAS],
+  KZ:[H_NY,_hf('Day after New Year',1,2),_hf('Orthodox Christmas',1,7),_hf("Women's Day",3,8),_hf('Nauryz',3,21),_ha('Nauryz Holiday',3,22),_hf('Unity Day',5,1),_hf('Defender of the Fatherland',5,7),_hf('Victory Day',5,9),_hf('Capital Day',7,6),_hf('Constitution Day',8,30),_hf('Republic Day',10,25),_hf('Independence Day',12,16)],
+  LA:[H_NY,_ha('Lao New Year (Pi Mai)',4,14),H_LAB,_hf('Lao National Day',12,2)],
+  LK:[H_NY,_ha('Tamil Thai Pongal',1,14),_hf('Independence Day',2,4),_ha('Maha Sivarathri',2,26),...HB_ISL,_ha('Sinhala & Tamil New Year',4,14),H_GF,_ha('Vesak Poya',5,12),_hf('May Day',5,1),_ha('Deepavali',10,31),H_XMAS],
+  MM:[H_NY,_hf('Independence Day',1,4),_hf('Union Day',2,12),_hf('Peasants Day',3,2),_hf('Armed Forces Day',3,27),_ha('Thingyan (Water Festival)',4,13),_ha('Burmese New Year',4,17),H_LAB,_ha('Full Moon of Kason',5,15),_hf('Martyrs Day',7,19),_ha('Thadingyut',10,17),H_XMAS],
+  MN:[H_NY,_ha('Lunar New Year (Tsagaan Sar)',3,1),_hf("Women's Day",3,8),_hf("Children's Day",6,1),_hf('Naadam Festival',7,11),_ha('Naadam Holiday',7,12),_hf('Genghis Khan Day',11,8),_hf('Independence/Republic Day',12,29)],
+  MO:[H_NY,_hc('Chinese New Year'),_hc('Chinese New Year',1),_hc('Chinese New Year',2),H_GF,_he('Holy Saturday',-1),_ha('Ching Ming',4,4),H_LAB,_ha('Buddha’s Birthday',5,15),_ha('Dragon Boat Festival',6,10),_ha('Mid-Autumn Holiday',9,18),_hf('National Day (PRC)',10,1),_ha('Chung Yeung',10,11),_hf('MSAR Establishment Day',12,20),H_XMAS,H_BOX],
+  MV:[H_NY,...HB_ISL,_hf('Independence Day',7,26),_hf('Victory Day',11,3),_hf('Republic Day',11,11),_hf('National Day',9,16)],
+  MY:[H_NY,_hc('Chinese New Year'),_hc('Chinese New Year',1),...HB_ISL,_hh('Awal Muharram',1,1),_ha('Wesak Day',5,22),_hf('Labour Day',5,1),_hf("King's Birthday",6,2),_hf('National Day (Merdeka)',8,31),_hf('Malaysia Day',9,16),_ha('Deepavali',10,31),H_XMAS],
+  NP:[_hf('Prithvi Jayanti',1,11),_ha('Maghe Sankranti',1,15),_hf('Democracy Day',2,19),_ha('Maha Shivaratri',2,26),_ha('Holi',3,25),_ha('Nepali New Year',4,13),H_LAB,_ha('Buddha Jayanti',5,12),_hf('Republic Day',5,29),_ha('Dashain',10,1),_ha('Tihar (Diwali)',11,1),_hf('Constitution Day',9,19)],
+  PH:[H_NY,_hf('EDSA Revolution',2,25),H_GF,_he('Maundy Thursday',-3),_hf('Day of Valor',4,9),H_LAB,...[_hh('Eid al-Fitr',10,1),_hh('Eid al-Adha',12,10)],_hf('Independence Day',6,12),_hf('Ninoy Aquino Day',8,21),_hn('National Heroes Day',8,1,-1),_hf('All Saints Day',11,1),_hf('Bonifacio Day',11,30),H_XMAS,_hf('Rizal Day',12,30)],
+  PK:[_hf('Kashmir Day',2,5),_hf('Pakistan Day',3,23),...HB_ISL,_hh('Ashura',1,10),H_LAB,_hf('Independence Day',8,14),_hf('Iqbal Day',11,9),_hf('Quaid-e-Azam Day',12,25)],
+  SG:[H_NY,_hc('Chinese New Year'),_hc('Chinese New Year',1),H_GF,...[_hh('Hari Raya Puasa',10,1),_hh('Hari Raya Haji',12,10)],_hf('Labour Day',5,1),_ha('Vesak Day',5,22),_hf('National Day',8,9),_ha('Deepavali',10,31),H_XMAS],
+  TH:[H_NY,_ha('Makha Bucha',2,24),_hf('Chakri Day',4,6),_ha('Songkran',4,13),_ha('Songkran Holiday',4,14),_ha('Songkran Holiday',4,15),H_LAB,_hf('Coronation Day',5,4),_ha('Visakha Bucha',5,22),_hf("Queen's Birthday",6,3),_ha('Asalha Bucha',7,20),_hf("King's Birthday",7,28),_hf('Mother’s Day',8,12),_hf('Chulalongkorn Day',10,23),_hf('Father’s Day',12,5),_hf('Constitution Day',12,10)],
+  TJ:[H_NY,_hf("Women's Day",3,8),_hf('Nowruz',3,21),_ha('Nowruz Holiday',3,22),...[_hh('Eid al-Fitr',10,1),_hh('Eid al-Adha',12,10)],H_LAB,_hf('Victory Day',5,9),_hf('National Unity Day',6,27),_hf('Independence Day',9,9),_hf('Constitution Day',11,6)],
+  TL:[H_NY,...HB_ISL,H_GF,_hf('Restoration of Independence',5,20),H_CORPUS,_hf('Popular Consultation Day',8,30),H_ASSUM,H_ALLS,_hf('National Heroes Day',12,7),H_IMMAC,_hf('Proclamation of Independence',11,28),H_XMAS],
+  TM:[H_NY,_hf('Defender of the Fatherland',1,27),_hf("Women's Day",3,8),_hf('Nowruz',3,21),_ha('Nowruz Holiday',3,22),...[_hh('Eid al-Fitr',10,1),_hh('Eid al-Adha',12,10)],_hf('Victory Day',5,9),_hf('Constitution & Revival Day',5,18),_hf('Independence Day',9,27),_hf('Neutrality Day',12,12)],
+  TW:[H_NY,_hc('Chinese New Year',-1),_hc('Chinese New Year'),_hc('Chinese New Year',1),_hc('Chinese New Year',2),_hf('Peace Memorial Day',2,28),_hf('Children’s & Tomb-Sweeping Day',4,4),_ha('Dragon Boat Festival',6,10),_ha('Mid-Autumn Festival',9,17),_hf('National Day (Double Ten)',10,10)],
+  UZ:[H_NY,_hf("Women's Day",3,8),_hf('Nowruz',3,21),...[_hh('Eid al-Fitr',10,1),_hh('Eid al-Adha',12,10)],_hf('Victory Day',5,9),_hf('Independence Day',9,1),_hf("Teacher's Day",10,1),_hf('Constitution Day',12,8)],
+  VN:[H_NY,_hc('Tết (Lunar NY)',-1),_hc('Tết (Lunar NY)'),_hc('Tết (Lunar NY)',1),_hc('Tết (Lunar NY)',2),_hf('Hung Kings Festival',4,18),_hf('Reunification Day',4,30),_hf('Labour Day',5,1),_hf('National Day',9,2)],
+
+  // ── Americas ──
+  AG:[H_NY,H_GF,H_EM,H_LAB,H_WHIT,_hn('Carnival Monday',8,1,1),_hf('Independence Day',11,1),_hf('VC Bird Day',12,9),H_XMAS,H_BOX],
+  AR:[H_NY,_hf('Carnival Monday',-48),_hf('Carnival Tuesday',-47),_hf('Day of Remembrance for Truth & Justice',3,24),_hf('Malvinas Day',4,2),H_GF,H_LAB,_hf('Revolution Day',5,25),_hf('Flag Day',6,20),_hf('Independence Day',7,9),_hf('San Martín Day',8,17),_hf('Day of Respect for Cultural Diversity',10,12),_hf('Sovereignty Day',11,20),H_IMMAC,H_XMAS],
+  BB:[H_NY,_hf('Errol Barrow Day',1,21),H_GF,H_EM,H_LAB,H_WHIT,_hf('Emancipation Day',8,1),_hf('Kadooment Day',8,5),_hf('Independence Day',11,30),H_XMAS,H_BOX],
+  BO:[H_NY,_hf('Plurinational State Day',1,22),_hf('Carnival Monday',-48),_hf('Carnival Tuesday',-47),H_GF,H_LAB,H_CORPUS,_hf('Andean New Year',6,21),_hf('Independence Day',8,6),H_ALLS,H_XMAS],
+  BR:[H_NY,_hf('Carnival Monday',-48),_hf('Carnival Tuesday',-47),H_GF,_hf('Tiradentes Day',4,21),H_LAB,H_CORPUS,_hf('Independence Day',9,7),_hf('Our Lady of Aparecida',10,12),_hf("All Souls' Day",11,2),_hf('Republic Proclamation',11,15),_hf('Black Awareness Day',11,20),H_XMAS],
+  BS:[H_NY,_hf('Majority Rule Day',1,10),H_GF,H_EM,H_WHIT,_hf('Randol Fawkes Labour Day',6,7),_hf('Emancipation Day',8,5),_hf('Independence Day',7,10),_hf('National Heroes Day',10,14),H_XMAS,H_BOX],
+  BZ:[H_NY,_hf('George Price Day',1,15),_hf('National Heroes Day',3,9),H_GF,_he('Holy Saturday',-1),H_EM,H_LAB,_hf('Emancipation Day',8,1),_hf('St George’s Caye Day',9,10),_hf('Independence Day',9,21),_hf('Indigenous Peoples Day',10,12),_hf('Garifuna Settlement Day',11,19),H_XMAS,H_BOX],
+  CA:[H_NY,H_GF,_hn('Victoria Day',5,1,-2),_hf('Canada Day',7,1),_hn('Labour Day',9,1,1),_hf('National Day for Truth & Reconciliation',9,30),_hn('Thanksgiving',10,1,2),_hf('Remembrance Day',11,11),H_XMAS,H_BOX],
+  CL:[H_NY,H_GF,_he('Holy Saturday',-1),H_LAB,_hf('Navy Day',5,21),_hf('Saints Peter & Paul',6,29),_hf('Our Lady of Mount Carmel',7,16),H_ASSUM,_hf('Independence Day',9,18),_hf('Army Day',9,19),_hf('Columbus Day',10,12),_hf('Reformation Day',10,31),H_ALLS,H_IMMAC,H_XMAS],
+  CO:[H_NY,_hf('Epiphany',1,8),_hf('St Joseph',3,25),_he('Maundy Thursday',-3),H_GF,H_LAB,_he('Ascension (obs)',43),_he('Corpus Christi (obs)',64),_he('Sacred Heart',71),_hf('Saints Peter & Paul',7,1),_hf('Independence Day',7,20),_hf('Battle of Boyacá',8,7),_hf('Assumption (obs)',8,19),_hf('Columbus Day (obs)',10,14),_hf('All Saints (obs)',11,4),_hf('Independence of Cartagena',11,18),H_IMMAC,H_XMAS],
+  CR:[H_NY,H_GF,_he('Maundy Thursday',-3),_hf('Juan Santamaría Day',4,11),H_LAB,_hf('Annexation of Nicoya',7,25),_hf('Our Lady of the Angels',8,2),_hf('Mother’s Day',8,15),_hf('Independence Day',9,15),_hf('Army Abolition Day',12,1),H_XMAS],
+  CU:[H_NY,_hf('Liberation Day',1,1),_hf('Victory Day',1,2),H_GF,H_LAB,_hf('Revolution Day',7,25),_hf('Assault of Moncada',7,26),_hf('Day after Moncada',7,27),_hf('Independence Wars Day',10,10),H_XMAS],
+  DM:[H_NY,_hf('Carnival Monday',-48),_hf('Carnival Tuesday',-47),H_GF,H_EM,H_WHIT,_hf('Emancipation Day',8,5),_hf('Independence Day',11,3),_hf('Community Service Day',11,4),H_XMAS,H_BOX],
+  DO:[H_NY,_hf('Epiphany',1,6),_hf('Our Lady of Altagracia',1,21),_hf('Duarte Day',1,26),_hf('Independence Day',2,27),H_GF,H_LAB,H_CORPUS,_hf('Restoration Day',8,16),_hf('Our Lady of Mercedes',9,24),_hf('Constitution Day',11,6),H_XMAS],
+  EC:[H_NY,_hf('Carnival Monday',-48),_hf('Carnival Tuesday',-47),H_GF,H_LAB,_hf('Battle of Pichincha',5,24),_hf('Independence of Quito',8,10),_hf('Independence of Guayaquil',10,9),_hf('All Souls Day',11,2),_hf('Independence of Cuenca',11,3),H_XMAS],
+  GD:[H_NY,_hf('Independence Day',2,7),H_GF,H_EM,H_LAB,H_WHIT,H_CORPUS,_hf('Emancipation Day',8,5),_hf('Carnival Monday',8,12),_hf('Thanksgiving Day',10,25),H_XMAS,H_BOX],
+  GT:[H_NY,_he('Maundy Thursday',-3),H_GF,_he('Holy Saturday',-1),H_LAB,_hf('Army Day',6,30),_hf('Independence Day',9,15),_hf('Revolution Day',10,20),_hf('All Saints Day',11,1),H_XMAS],
+  GY:[H_NY,_hf('Republic Day (Mashramani)',2,23),_ha('Holi (Phagwah)',3,25),H_GF,H_EM,...[_hh('Eid al-Adha',12,10)],_hf('Labour Day',5,1),_hf('Arrival Day',5,5),_hf('Independence Day',5,26),_hf('CARICOM Day',7,1),_hf('Emancipation Day',8,1),_ha('Diwali',11,1),H_XMAS,H_BOX],
+  HN:[H_NY,_he('Maundy Thursday',-3),H_GF,_he('Holy Saturday',-1),_hf('Pan-American Day',4,14),H_LAB,_hf('Independence Day',9,15),_hf('Morazán/Heroes Day',10,3),_hf('Columbus Day',10,12),_hf('Army Day',10,21),H_XMAS],
+  HT:[H_NY,_hf('Ancestry Day',1,2),_hf('Carnival',-48),_hf('Carnival Tuesday',-47),H_GF,_hf('Pan-American Day',4,14),_hf('Labour & Agriculture Day',5,1),_hf('Flag Day',5,18),H_CORPUS,_hf('Battle of Vertières',11,18),H_XMAS],
+  JM:[H_NY,_hf('Ash Wednesday',-46),H_GF,H_EM,H_LAB,_hf('Emancipation Day',8,1),_hf('Independence Day',8,6),_hn('National Heroes Day',10,1,3),H_XMAS,H_BOX],
+  KN:[H_NY,_hf('Carnival Day',1,2),H_GF,H_EM,H_LAB,H_WHIT,_hf('Emancipation Day',8,5),_hf('Culturama Day',8,6),_hf('National Heroes Day',9,16),_hf('Independence Day',9,19),H_XMAS,H_BOX],
+  LC:[H_NY,_hf('Day after New Year',1,2),_hf('Independence Day',2,22),H_GF,H_EM,H_LAB,H_WHIT,H_CORPUS,_hf('Emancipation Day',8,1),_hf('Thanksgiving Day',10,7),_hf('National Day',12,13),H_XMAS,H_BOX],
+  MX:[H_NY,_hn('Constitution Day',2,1,1),_hn('Benito Juárez Day',3,1,3),H_LAB,_hf('Independence Day',9,16),_hn('Revolution Day',11,1,3),H_XMAS],
+  NI:[H_NY,_he('Maundy Thursday',-3),H_GF,H_LAB,_hf('Revolution Day',7,19),_hf('Battle of San Jacinto',9,14),_hf('Independence Day',9,15),H_IMMAC,H_XMAS],
+  PA:[H_NY,_hf('Martyrs Day',1,9),_hf('Carnival Monday',-48),_hf('Carnival Tuesday',-47),H_GF,H_LAB,_hf('Separation from Colombia',11,3),_hf('Colón Day',11,5),_hf('First Call for Independence',11,10),_hf('Independence from Spain',11,28),_hf('Mother’s Day',12,8),H_XMAS],
+  PE:[H_NY,_he('Maundy Thursday',-3),H_GF,H_LAB,_hf('Saints Peter & Paul',6,29),_hf('Battle of Junín',8,6),_hf('Independence Day',7,28),_hf('Day after Independence',7,29),_hf('Santa Rosa de Lima',8,30),_hf('Battle of Angamos',10,8),H_ALLS,H_IMMAC,_hf('Battle of Ayacucho',12,9),H_XMAS],
+  PR:[H_NY,_hf('Three Kings Day',1,6),_hn('Birthday of Eugenio M. de Hostos',1,1,2),_hn("Washington's Birthday",2,1,3),_hf('Emancipation Day',3,22),H_GF,_hn('Memorial Day',5,1,-1),_hf('US Independence Day',7,4),_hf('Constitution Day',7,25),_hn('Labor Day',9,1,1),_hf('Columbus Day',10,12),_hf('Veterans Day',11,11),_hn('Thanksgiving',11,4,4),H_XMAS],
+  PY:[H_NY,_hf('Heroes Day',3,1),_he('Maundy Thursday',-3),H_GF,H_LAB,_hf('Independence Day',5,14),_hf('Day after Independence',5,15),_hf('Chaco Armistice',6,12),_hf('Founding of Asunción',8,15),_hf('Boqueron Battle Victory',9,29),H_IMMAC,H_XMAS],
+  SR:[H_NY,_hc('Chinese New Year'),_hf('Day of the Revolution',2,25),_ha('Holi Phagwa',3,25),H_GF,H_EM,...[_hh('Eid al-Fitr',10,1)],H_LAB,_hf('Indigenous Peoples Day',8,9),_hf('Day of Freedom & Liberation',7,1),_hf('Maroon Day',10,10),_hf('Independence Day',11,25),_ha('Diwali',11,1),H_XMAS,H_BOX],
+  SV:[H_NY,_he('Maundy Thursday',-3),H_GF,_he('Holy Saturday',-1),H_LAB,_hf('Mother’s Day',5,10),_hf("Father's Day",6,17),_hf('August Festivals (El Salvador del Mundo)',8,6),_hf('Independence Day',9,15),H_ALLS,_hf('Day of the Dead',11,2),H_XMAS],
+  TT:[H_NY,_hf('Carnival Monday',-48),_hf('Carnival Tuesday',-47),_hf('Spiritual Baptist Liberation Day',3,30),H_GF,H_EM,_hf('Indian Arrival Day',5,30),H_CORPUS,_hf('Labour Day',6,19),_hf('African Emancipation Day',8,1),_hf('Independence Day',8,31),_hf('Republic Day',9,24),_ha('Divali',11,1),...[_hh('Eid-ul-Fitr',10,1)],H_XMAS,H_BOX],
+  US:[H_NY,_hn('Martin Luther King Jr. Day',1,1,3),_hn("Presidents' Day",2,1,3),_hn('Memorial Day',5,1,-1),_hf('Juneteenth',6,19),_hf('Independence Day',7,4),_hn('Labor Day',9,1,1),_hn('Columbus Day',10,1,2),_hf('Veterans Day',11,11),_hn('Thanksgiving',11,4,4),H_XMAS],
+  UY:[H_NY,_hf('Epiphany',1,6),_hf('Carnival Monday',-48),_hf('Carnival Tuesday',-47),H_GF,_hf('Landing of the 33 Patriots',4,19),H_LAB,_hf('Battle of Las Piedras',5,18),_hf('Birth of Artigas',6,19),_hf('Constitution Day',7,18),_hf('Independence Day',8,25),_hf('Day of the Race',10,12),_hf('All Souls Day',11,2),H_XMAS],
+  VC:[H_NY,_hf('National Heroes Day',3,14),H_GF,H_EM,H_WHIT,_hf('Carnival Monday',7,8),_hf('Carnival Tuesday',7,9),_hf('Emancipation Day',8,1),_hf('Independence Day',10,27),H_XMAS,H_BOX],
+  VE:[H_NY,_hf('Carnival Monday',-48),_hf('Carnival Tuesday',-47),_he('Maundy Thursday',-3),H_GF,_hf('Declaration of Independence',4,19),H_LAB,_hf('Battle of Carabobo',6,24),_hf('Independence Day',7,5),_hf('Birth of Bolívar',7,24),_hf('Indigenous Resistance Day',10,12),H_XMAS],
+
+  // ── Oceania ──
+  AU:[H_NY,_hf('Australia Day',1,26),H_GF,_he('Holy Saturday',-1),H_EM,_hf('Anzac Day',4,25),_hf("King's Birthday (most states)",6,10),H_XMAS,H_BOX],
+  FJ:[H_NY,H_GF,_he('Holy Saturday',-1),H_EM,...[_hh('Prophet Mohammed Birthday',3,12)],_hf('Ratu Sukuna Day',5,27),_hf('Constitution Day',9,7),_hf('Fiji Day',10,10),_ha('Diwali',11,1),H_XMAS,H_BOX],
+  FM:[H_NY,_hf('FSM Culture Day',3,31),_hf('Micronesia Day',5,10),_hf('Independence Day',11,3),_hf('FSM Constitution Day',5,10),H_XMAS],
+  GU:[H_NY,_hn('Martin Luther King Jr. Day',1,1,3),_hn("Presidents' Day",2,1,3),_hf('Guam History & Chamorro Heritage Day',3,7),H_GF,_hn('Memorial Day',5,1,-1),_hf('US Independence Day',7,4),_hf('Liberation Day',7,21),_hn('Labor Day',9,1,1),_hf('All Souls Day',11,2),_hf('Veterans Day',11,11),_hn('Thanksgiving',11,4,4),_hf('Lady of Camarin Day',12,8),H_XMAS],
+  KI:[H_NY,H_GF,_he('Holy Saturday',-1),H_EM,_hf('National Health Day',4,8),_hf("Women's Day",3,8),_hf('Gospel Day',7,11),_hf('Independence Day',7,12),_hf('Youth Day',8,7),_hf('Human Rights Day',12,10),H_XMAS,H_BOX],
+  MH:[H_NY,_hf('Nuclear Victims Day',3,1),_hf('Fishermen’s Day',7,1),_hf('Rijerbal (Labour) Day',9,2),_hf('Manit (Culture) Day',9,27),_hf('President’s Day',11,17),_hf('Gospel Day',12,6),H_XMAS],
+  NR:[H_NY,_hf('Independence Day',1,31),H_GF,_he('Holy Saturday',-1),H_EM,_hf('Constitution Day',5,17),_hf('RONPHOS Handover',7,1),_hf('National Youth Day',9,25),_hf('Angam Day',10,26),H_XMAS,H_BOX],
+  NZ:[H_NY,_hf('Day after New Year',1,2),_hf('Waitangi Day',2,6),H_GF,H_EM,_hf('Anzac Day',4,25),_hn("King's Birthday",6,1,1),_hf('Matariki',6,28),_hn('Labour Day',10,1,4),H_XMAS,H_BOX],
+  PG:[H_NY,H_GF,_he('Holy Saturday',-1),H_EM,_hf("Queen's Birthday",6,10),_hf('Remembrance Day',7,23),_hf('National Repentance Day',8,26),_hf('Independence Day',9,16),H_XMAS,H_BOX],
+  PF:[H_NY,H_EM,H_LAB,_hf('Victory in Europe Day',5,8),H_ASC,H_WHIT,_hf('Internal Autonomy Day',6,29),_hf('Bastille Day',7,14),H_ASSUM,H_ALLS,_hf('Armistice Day',11,11),H_XMAS],
+  PW:[H_NY,_hf('Youth Day',3,15),_hf('Senior Citizens Day',5,5),_hf('Constitution Day',7,9),_hn('Labour Day',9,1,1),_hf('Independence Day',10,1),_hf('United Nations Day',10,24),_hn('Thanksgiving',11,4,4),H_XMAS],
+  SB:[H_NY,H_GF,_he('Holy Saturday',-1),H_EM,H_WHIT,_hf("Queen's Birthday",6,14),_hf('Independence Day',7,7),H_XMAS,H_BOX],
+  TO:[H_NY,H_GF,H_EM,_hf('Anzac Day',4,25),_hf('Crown Prince Birthday',7,12),_hf("King's Birthday",7,4),_hf('Constitution Day',11,4),_hf('King Tupou I Day',12,4),H_XMAS,H_BOX],
+  TV:[H_NY,H_GF,H_EM,_hf('Commonwealth Day',3,11),_hf('Gospel Day',5,12),_hf("King's Birthday",6,10),_hf('National Children’s Day',8,5),_hf('Tuvalu Day',10,1),_hf('Day after Tuvalu Day',10,2),H_XMAS,H_BOX],
+  VU:[H_NY,_hf('Father Lini Day',2,21),_hf('Custom Chiefs Day',3,5),H_GF,H_EM,H_LAB,H_ASC,_hf('Independence Day',7,30),H_ASSUM,_hf('Constitution Day',10,5),_hf('Unity Day',11,29),H_XMAS,_hf('Family Day',12,26)],
+  WS:[H_NY,_hf('Day after New Year',1,2),H_GF,_he('Holy Saturday',-1),H_EM,_hf('Mother’s Day (obs)',5,13),_hf('Independence Day',6,1),_hf('Father’s Day (obs)',8,12),_hf('White Sunday (obs)',10,14),H_XMAS,H_BOX],
+};
+
+/* Drop the placeholder undefined keys (those countries are defined elsewhere above). */
+Object.keys(HOL_DATA).forEach(k=>{ if(!HOL_DATA[k]) delete HOL_DATA[k]; });
+
+/* ── compute & render ── */
+function holResolveRule(r,y){
+  switch(r.t){
+    case 'f':  return [new Date(y,r.m-1,r.d)];
+    case 'fa': return [new Date(y,r.m-1,r.d)];
+    case 'nw': return [holNthWeekday(y,r.m,r.wd,r.nth)];
+    case 'e':  { const d=holEaster(y); d.setDate(d.getDate()+r.o); return [d]; }
+    case 'oe': { const d=holOrthodoxEaster(y); d.setDate(d.getDate()+r.o); return [d]; }
+    case 'h':  return holHijriDates(y,r.hm,r.hd);
+    case 'cny':{ const t=HOL_CNY[y]; if(!t) return []; const d=new Date(y,t[0]-1,t[1]); if(r.o) d.setDate(d.getDate()+r.o); return [d]; }
+  }
+  return [];
+}
+function holComputeDates(code,y){
+  const out=[];
+  if(code==='IL'){ (HOL_IL[y]||[]).forEach(t=>out.push({date:new Date(y,t[0]-1,t[1]),name:t[2],approx:true})); out.sort((a,b)=>a.date-b.date); return out; }
+  const rules=HOL_DATA[code]||[];
+  rules.forEach(r=>{ holResolveRule(r,y).forEach(d=>{ if(d && d.getFullYear()===y) out.push({date:d,name:r.n,approx:(r.t==='h'||r.t==='cny'||r.t==='fa')}); }); });
+  out.sort((a,b)=>a.date-b.date);
+  return out;
+}
+
+const HOL_KEY='tt_hol';
+let holState={countryCode:null, year:(new Date()).getFullYear()};
+function holEsc(s){ return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function holCountry(){ const c=holState.countryCode; if(!c||!TT_COUNTRIES[c]) return null; return {c,n:TT_COUNTRIES[c].name,f:TT_COUNTRIES[c].flag}; }
+function holSave(){ try{ localStorage.setItem(HOL_KEY,JSON.stringify({countryCode:holState.countryCode})); }catch(e){} }
+
+function holInit(){
+  let saved=null; try{ saved=JSON.parse(localStorage.getItem(HOL_KEY)||'null'); }catch(e){}
+  if(saved&&saved.countryCode&&HOL_DATA[saved.countryCode]){ holState.countryCode=saved.countryCode; }
+  else { const trip=getActiveTrip(); if(trip&&trip.destination){ try{ const r=resolveDestination(trip.destination); if(r&&r.countryCode&&HOL_DATA[r.countryCode]) holState.countryCode=r.countryCode; }catch(_){} } }
+  holState.year=(new Date()).getFullYear();
+  const ys=document.getElementById('hol-year'); if(ys) ys.textContent=holState.year;
+  holRenderCountryList('');
+  if(holState.countryCode&&HOL_DATA[holState.countryCode]){ holSelectCountry(holState.countryCode,false); }
+  else { holState.countryCode=null; document.getElementById('hol-content').style.display='none'; document.getElementById('hol-empty').style.display=''; }
+  if(!document._holClickBound){ document.addEventListener('click',holDocClick); document._holClickBound=true; }
+}
+function holOpenPicker(){ const d=document.getElementById('hol-country-drop'); if(d.style.display==='block'){ holClosePicker(); return; } d.style.display='block'; const s=document.getElementById('hol-country-search'); s.value=''; holRenderCountryList(''); setTimeout(()=>s.focus(),50); }
+function holClosePicker(){ document.getElementById('hol-country-drop').style.display='none'; }
+function holDocClick(e){ const w=document.getElementById('hol-country-disp'),d=document.getElementById('hol-country-drop'); if(!w||!d||d.style.display!=='block') return; if(w.contains(e.target)||d.contains(e.target)) return; holClosePicker(); }
+function holFilterCountries(){ holRenderCountryList((document.getElementById('hol-country-search').value||'').toLowerCase().trim()); }
+function holRenderCountryList(q){
+  const list=Object.keys(HOL_DATA).filter(c=>TT_COUNTRIES[c]).map(c=>({c,n:TT_COUNTRIES[c].name,f:TT_COUNTRIES[c].flag}))
+    .filter(co=>!q||co.n.toLowerCase().includes(q)||co.c.toLowerCase().includes(q)).sort((a,b)=>a.n.localeCompare(b.n));
+  const html=list.length? list.map(co=>`<div class="tc-drop-item" onclick="holSelectCountry('${co.c}')"><span class="tc-drop-flag">${co.f}</span><span class="tc-drop-name">${holEsc(co.n)}</span><span class="tc-drop-cur">${holComputeDates(co.c,holState.year).length} days</span></div>`).join('')
+    : `<div class="tc-drop-item" style="color:var(--muted);cursor:default">No matches for "${holEsc(q)}"</div>`;
+  document.getElementById('hol-country-list').innerHTML=html;
+}
+function holSelectCountry(code,save){ if(save===undefined) save=true; if(!HOL_DATA[code]) return; holState.countryCode=code; if(save) holSave(); holClosePicker(); holRender(); }
+function holStepYear(delta){ const ny=holState.year+delta; if(ny<1971||ny>2099) return; holState.year=ny; const ys=document.getElementById('hol-year'); if(ys) ys.textContent=ny; holRenderCountryList((document.getElementById('hol-country-search')||{}).value?(document.getElementById('hol-country-search').value||'').toLowerCase().trim():''); if(holState.countryCode) holRender(); }
+
+function holRender(){
+  const co=holCountry(); if(!co){ document.getElementById('hol-content').style.display='none'; document.getElementById('hol-empty').style.display=''; return; }
+  document.getElementById('hol-empty').style.display='none';
+  document.getElementById('hol-content').style.display='';
+  document.getElementById('hol-disp-flag').textContent=co.f;
+  document.getElementById('hol-disp-name').textContent=co.n;
+  document.getElementById('hol-hero-flag').textContent=co.f;
+  document.getElementById('hol-hero-co').textContent=co.n;
+  const dates=holComputeDates(co.c,holState.year);
+  document.getElementById('hol-hero-sub').textContent=dates.length+' national public holidays in '+holState.year;
+  const today=new Date(); today.setHours(0,0,0,0);
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const wdays=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  let nextIdx=dates.findIndex(d=>d.date>=today && d.date.getFullYear()===holState.year);
+  let anyApprox=false;
+  const rows=dates.map((d,i)=>{
+    if(d.approx) anyApprox=true;
+    const isNext=(i===nextIdx);
+    const isPast=d.date<today;
+    const dd=d.date.getDate(), mm=months[d.date.getMonth()], wd=wdays[d.date.getDay()];
+    const daysAway=Math.round((d.date-today)/864e5);
+    let away=''; if(d.date.getFullYear()===holState.year){ if(daysAway===0) away='today'; else if(daysAway>0) away='in '+daysAway+' day'+(daysAway===1?'':'s'); else away=Math.abs(daysAway)+' day'+(daysAway===-1?'':'s')+' ago'; }
+    return `<div class="hol-row${isNext?' hol-next':''}${isPast?' hol-past':''}">
+      <div class="hol-date"><span class="hol-dom">${dd}</span><span class="hol-mon">${mm}</span></div>
+      <div class="hol-info"><div class="hol-name">${holEsc(d.name)}${d.approx?' <span class="hol-approx" title="Lunar/Islamic date — may shift ±1–2 days">≈</span>':''}</div><div class="hol-meta">${wd}${away?' · '+away:''}${isNext?' · next up':''}</div></div>
+    </div>`;
+  }).join('');
+  document.getElementById('hol-list').innerHTML=rows||'<div class="tg-empty">No holiday data for this year.</div>';
+  document.getElementById('hol-approx-note').style.display=anyApprox?'':'none';
+}
+
+/* ══════════════════════════════════════════════════════
+   eSIM & MOBILE DATA  (Phase 7 — Domain 3)
+   Per-country connectivity for all 202 countries: eSIM
+   availability & typical tourist price band, urban network
+   generation, local prepaid-SIM rules, main operators, and
+   censorship/VPN caveats. Best-effort, directional — prices
+   and rules change; verify before travel.
+   ══════════════════════════════════════════════════════ */
+const ESIM_DATA = {
+  AD:{e:'y', pr:'$4-6', cv:'4G', sim:'free', op:['Andorra Telecom']},
+  AE:{e:'y', pr:'$6-9', cv:'5G', sim:'reg', op:['Etisalat (e&)','du'], net:'WhatsApp/FaceTime/Skype voice & video calls are blocked on local networks; a roaming eSIM or VPN restores them.'},
+  AF:{e:'n', pr:'—', cv:'3G', sim:'hard', op:['Roshan','MTN/AWCC','Etisalat'], cvn:'Coverage limited; security risks.', net:'Restrictions and shutdowns under Taliban rule.'},
+  AG:{e:'y', pr:'$6-9', cv:'4G', sim:'free', op:['Flow','Digicel']},
+  AL:{e:'y', pr:'$4-6', cv:'4G', sim:'reg', op:['Vodafone','One','Albtelecom']},
+  AM:{e:'y', pr:'$4-7', cv:'4G', sim:'reg', op:['Team (Ucom)','Viva-MTS','Team Telecom']},
+  AO:{e:'y', pr:'$6-10', cv:'4G', sim:'reg', op:['Unitel','Movicel'], cvn:'4G in cities; rural is 2G/3G.'},
+  AR:{e:'y', pr:'$5-8', cv:'4G', sim:'reg', op:['Claro','Movistar','Personal']},
+  AT:{e:'y', pr:'$3-5', cv:'5G', sim:'reg', op:['A1','Magenta','Drei']},
+  AU:{e:'y', pr:'$4-7', cv:'5G', sim:'free', op:['Telstra','Optus','Vodafone'], cvn:'Telstra has by far the widest Outback reach.'},
+  AZ:{e:'y', pr:'$5-8', cv:'4G', sim:'reg', op:['Azercell','Bakcell','Nar'], net:'Some VoIP calling restricted.'},
+  BA:{e:'y', pr:'$4-6', cv:'4G', sim:'reg', op:['BH Telecom','m:tel','HT Eronet']},
+  BB:{e:'y', pr:'$6-9', cv:'4G', sim:'free', op:['Flow','Digicel']},
+  BD:{e:'y', pr:'$5-8', cv:'4G', sim:'reg', op:['Grameenphone','Robi','Banglalink'], cvn:'Rural 3G.', net:'Periodic internet shutdowns.'},
+  BE:{e:'y', pr:'$3-5', cv:'5G', sim:'reg', op:['Proximus','Orange','BASE']},
+  BF:{e:'p', pr:'$6-10', cv:'3G', sim:'reg', op:['Orange','Moov'], cvn:'Limited outside cities; security issues in the north.'},
+  BG:{e:'y', pr:'$4-6', cv:'5G', sim:'reg', op:['A1','Yettel','Vivacom']},
+  BH:{e:'y', pr:'$5-8', cv:'5G', sim:'reg', op:['Batelco','stc','Zain']},
+  BI:{e:'p', pr:'$6-10', cv:'3G', sim:'reg', op:['Econet','Lumitel'], cvn:'Mostly 3G.'},
+  BJ:{e:'y', pr:'$6-10', cv:'4G', sim:'reg', op:['MTN','Moov']},
+  BN:{e:'y', pr:'$5-8', cv:'4G', sim:'reg', op:['DST','imagine','Progresif']},
+  BO:{e:'y', pr:'$5-8', cv:'4G', sim:'reg', op:['Entel','Tigo','Viva'], cvn:'Altiplano/rural patchy.'},
+  BR:{e:'y', pr:'$4-7', cv:'5G', sim:'reg', op:['Vivo','Claro','TIM'], cvn:'Big country — Amazon/rural gaps.'},
+  BS:{e:'y', pr:'$6-9', cv:'4G', sim:'free', op:['BTC','Aliv']},
+  BT:{e:'p', pr:'$6-10', cv:'4G', sim:'reg', op:['B-Mobile','TashiCell'], cvn:'Mountainous terrain leaves gaps.'},
+  BW:{e:'y', pr:'$5-9', cv:'4G', sim:'reg', op:['Mascom','Orange','beMOBILE'], cvn:'Sparse coverage in the Kalahari/rural areas.'},
+  BY:{e:'p', pr:'$5-8', cv:'4G', sim:'reg', op:['A1','MTS','life:)'], net:'Heavy state surveillance; some services blocked — a VPN may be needed and is itself restricted.'},
+  BZ:{e:'y', pr:'$6-9', cv:'4G', sim:'reg', op:['Digi','Smart']},
+  CA:{e:'y', pr:'$4-7', cv:'5G', sim:'free', op:['Rogers','Bell','Telus'], cvn:'Sparse on northern/remote highways.'},
+  CD:{e:'p', pr:'$6-10', cv:'3G', sim:'reg', op:['Vodacom','Airtel','Orange'], cvn:'Vast rural dead zones.'},
+  CF:{e:'n', pr:'—', cv:'2G', sim:'reg', op:['Orange','Telecel'], cvn:'Very limited coverage outside Bangui.'},
+  CG:{e:'p', pr:'$6-10', cv:'3G', sim:'reg', op:['MTN','Airtel']},
+  CH:{e:'y', pr:'$4-6', cv:'5G', sim:'free', op:['Swisscom','Sunrise','Salt']},
+  CI:{e:'y', pr:'$6-10', cv:'4G', sim:'reg', op:['Orange','MTN','Moov']},
+  CL:{e:'y', pr:'$4-7', cv:'5G', sim:'reg', op:['Entel','Movistar','WOM','Claro']},
+  CM:{e:'y', pr:'$6-10', cv:'4G', sim:'reg', op:['MTN','Orange','Camtel'], cvn:'Anglophone-region disruptions.'},
+  CN:{e:'y', pr:'$5-9', cv:'5G', sim:'reg', op:['China Mobile','China Unicom','China Telecom'], net:'Great Firewall blocks Google, WhatsApp, Instagram, etc. A foreign-issued roaming eSIM routes around it; local SIMs do not — bring a VPN set up in advance.'},
+  CO:{e:'y', pr:'$4-7', cv:'4G/5G', sim:'reg', op:['Claro','Movistar','Tigo']},
+  CR:{e:'y', pr:'$5-8', cv:'4G', sim:'reg', op:['Kölbi','Claro','Liberty']},
+  CU:{e:'p', pr:'$8-12', cv:'3G', sim:'hard', op:['Cubacel (ETECSA)'], cvn:'Slow, expensive; Wi-Fi historically via scratch cards.', net:'State-controlled internet; many services restricted. Foreign eSIM support limited.'},
+  CV:{e:'y', pr:'$5-9', cv:'4G', sim:'reg', op:['CVMovel','Unitel T+']},
+  CY:{e:'y', pr:'$4-6', cv:'5G', sim:'reg', op:['Cyta','Epic','PrimeTel']},
+  CZ:{e:'y', pr:'$3-5', cv:'5G', sim:'free', op:['O2','T-Mobile','Vodafone']},
+  DE:{e:'y', pr:'$3-5', cv:'5G', sim:'reg', op:['Telekom','Vodafone','O2']},
+  DJ:{e:'p', pr:'$7-11', cv:'3G', sim:'reg', op:['Djibouti Telecom'], cvn:'Single state operator; pricey.'},
+  DK:{e:'y', pr:'$3-5', cv:'5G', sim:'free', op:['TDC/YouSee','Telia','Telenor','3']},
+  DM:{e:'y', pr:'$6-9', cv:'4G', sim:'free', op:['Flow','Digicel']},
+  DO:{e:'y', pr:'$5-8', cv:'4G', sim:'reg', op:['Claro','Altice','Viva']},
+  DZ:{e:'y', pr:'$6-9', cv:'4G', sim:'reg', op:['Mobilis','Djezzy','Ooredoo'], net:'Some VoIP restricted; periodic exam-season shutdowns.'},
+  EC:{e:'y', pr:'$5-8', cv:'4G', sim:'reg', op:['Claro','Movistar','CNT'], cvn:'Galápagos limited.'},
+  EE:{e:'y', pr:'$3-5', cv:'5G', sim:'reg', op:['Telia','Elisa','Tele2']},
+  EG:{e:'y', pr:'$5-8', cv:'4G', sim:'reg', op:['Vodafone','Orange','Etisalat','WE'], net:'Some VoIP and services periodically restricted; VPNs occasionally throttled.'},
+  ER:{e:'n', pr:'—', cv:'2G', sim:'reg', op:['Eritel'], cvn:'Among the least-connected countries; mobile data barely available.', net:'Heavy state control.'},
+  ES:{e:'y', pr:'$3-5', cv:'5G', sim:'reg', op:['Movistar','Orange','Vodafone']},
+  ET:{e:'p', pr:'$6-10', cv:'4G', sim:'reg', op:['Ethio Telecom','Safaricom'], cvn:'4G in cities only.', net:'Periodic internet shutdowns; some apps restricted.'},
+  FI:{e:'y', pr:'$3-5', cv:'5G', sim:'free', op:['Elisa','Telia','DNA']},
+  FJ:{e:'y', pr:'$6-9', cv:'4G', sim:'reg', op:['Vodafone Fiji','Digicel']},
+  FM:{e:'p', pr:'$8-12', cv:'3G', sim:'reg', op:['FSMTC'], cvn:'Limited to main islands.'},
+  FR:{e:'y', pr:'$3-5', cv:'5G', sim:'free', op:['Orange','SFR','Bouygues','Free']},
+  GA:{e:'y', pr:'$6-10', cv:'4G', sim:'reg', op:['Airtel','Moov']},
+  GB:{e:'y', pr:'$3-5', cv:'5G', sim:'free', op:['EE','O2','Vodafone','Three']},
+  GD:{e:'y', pr:'$6-9', cv:'4G', sim:'free', op:['Flow','Digicel']},
+  GE:{e:'y', pr:'$4-7', cv:'4G', sim:'reg', op:['Magti','Silknet','Cellfie']},
+  GH:{e:'y', pr:'$5-9', cv:'4G', sim:'reg', op:['MTN','Telecel','AirtelTigo']},
+  GM:{e:'y', pr:'$6-10', cv:'3G', sim:'reg', op:['Africell','QCell','Gamcel']},
+  GN:{e:'p', pr:'$6-10', cv:'3G', sim:'reg', op:['Orange','MTN','Cellcom']},
+  GQ:{e:'p', pr:'$7-11', cv:'3G', sim:'reg', op:['Orange','Muni'], cvn:'Limited and expensive.'},
+  GR:{e:'y', pr:'$4-6', cv:'5G', sim:'reg', op:['Cosmote','Vodafone','Nova']},
+  GT:{e:'y', pr:'$5-8', cv:'4G', sim:'reg', op:['Tigo','Claro']},
+  GU:{e:'y', pr:'$5-8', cv:'4G', sim:'free', op:['GTA','Docomo Pacific','IT&E']},
+  GW:{e:'p', pr:'$7-11', cv:'3G', sim:'reg', op:['MTN','Orange']},
+  GY:{e:'y', pr:'$6-10', cv:'4G', sim:'reg', op:['Digicel','GTT'], cvn:'Interior largely uncovered.'},
+  HK:{e:'y', pr:'$4-7', cv:'5G', sim:'free', op:['CSL','3','SmarTone','China Mobile HK'], net:'Open internet (unlike mainland China).'},
+  HN:{e:'y', pr:'$5-8', cv:'4G', sim:'reg', op:['Tigo','Claro']},
+  HR:{e:'y', pr:'$4-6', cv:'5G', sim:'reg', op:['Hrvatski Telekom','A1','Telemach']},
+  HT:{e:'p', pr:'$7-11', cv:'3G', sim:'reg', op:['Digicel','Natcom'], cvn:'Unstable; security issues.'},
+  HU:{e:'y', pr:'$3-5', cv:'5G', sim:'reg', op:['Magyar Telekom','Yettel','One']},
+  ID:{e:'y', pr:'$5-8', cv:'4G', sim:'reg', op:['Telkomsel','Indosat','XL','Smartfren'], cvn:'Strong on Java/Bali; remote islands patchy.'},
+  IE:{e:'y', pr:'$3-5', cv:'5G', sim:'free', op:['Vodafone','Three','Eir']},
+  IL:{e:'y', pr:'$4-7', cv:'5G', sim:'reg', op:['Cellcom','Partner','Pelephone','Hot Mobile']},
+  IN:{e:'y', pr:'$4-7', cv:'4G/5G', sim:'reg', op:['Jio','Airtel','Vi'], cvn:'Cheap data, huge 4G/5G footprint.', net:'Tourist SIM needs passport+photo; activation can take hours. Regional shutdowns occur.'},
+  IQ:{e:'p', pr:'$6-10', cv:'4G', sim:'reg', op:['Asiacell','Zain','Korek'], cvn:'Coverage patchy outside cities.', net:'Periodic internet shutdowns; some services restricted.'},
+  IR:{e:'p', pr:'$8-12', cv:'4G', sim:'reg', op:['MCI (Hamrah-e Avval)','Irancell','RighTel'], net:'Heavy censorship: most foreign apps/sites blocked, VPNs restricted. Foreign-issued eSIMs often will not provision.'},
+  IS:{e:'y', pr:'$4-6', cv:'5G', sim:'free', op:['Síminn','Vodafone','Nova']},
+  IT:{e:'y', pr:'$3-5', cv:'5G', sim:'reg', op:['TIM','Vodafone','WindTre']},
+  JM:{e:'y', pr:'$5-9', cv:'4G', sim:'free', op:['Flow','Digicel']},
+  JO:{e:'y', pr:'$5-8', cv:'4G', sim:'reg', op:['Zain','Orange','Umniah']},
+  JP:{e:'y', pr:'$5-8', cv:'5G', sim:'reg', op:['NTT Docomo','au (KDDI)','SoftBank','Rakuten'], cvn:'Excellent nationwide.'},
+  KE:{e:'y', pr:'$5-8', cv:'4G', sim:'reg', op:['Safaricom','Airtel'], cvn:'Excellent in cities (M-Pesa heartland); rural 3G.'},
+  KG:{e:'y', pr:'$4-7', cv:'4G', sim:'reg', op:['Beeline','O!','MegaCom']},
+  KH:{e:'y', pr:'$5-8', cv:'4G', sim:'reg', op:['Cellcard','Smart','Metfone']},
+  KI:{e:'n', pr:'—', cv:'3G', sim:'reg', op:['ATHKL/Ocean Link'], cvn:'Very limited; mostly Tarawa.'},
+  KM:{e:'p', pr:'$7-11', cv:'3G', sim:'reg', op:['Comores Telecom','Telma']},
+  KN:{e:'y', pr:'$6-9', cv:'4G', sim:'free', op:['Flow','Digicel']},
+  KP:{e:'n', pr:'—', cv:'3G', sim:'hard', op:['Koryolink'], cvn:'Tourists cannot use normal mobile data; foreign phones restricted.', net:'No open internet; foreign SIM/eSIM unsupported.'},
+  KR:{e:'y', pr:'$5-8', cv:'5G', sim:'reg', op:['SKT','KT','LG U+'], cvn:'World-leading 5G.'},
+  KW:{e:'y', pr:'$5-8', cv:'5G', sim:'reg', op:['Zain','stc','Ooredoo']},
+  KZ:{e:'y', pr:'$4-7', cv:'4G', sim:'reg', op:['Kcell','Beeline','Tele2/Altel'], net:'Occasional restrictions during unrest.'},
+  LA:{e:'y', pr:'$5-9', cv:'4G', sim:'reg', op:['Unitel','Lao Telecom','ETL'], cvn:'Rural 3G.'},
+  LB:{e:'y', pr:'$6-10', cv:'4G', sim:'reg', op:['Alfa','touch'], cvn:'Power/network instability causes frequent outages.'},
+  LC:{e:'y', pr:'$6-9', cv:'4G', sim:'free', op:['Flow','Digicel']},
+  LI:{e:'y', pr:'$4-6', cv:'5G', sim:'free', op:['Telecom Liechtenstein','Salt']},
+  LK:{e:'y', pr:'$4-7', cv:'4G', sim:'reg', op:['Dialog','Mobitel','Hutch']},
+  LR:{e:'p', pr:'$6-10', cv:'3G', sim:'reg', op:['Orange','Lonestar/MTN']},
+  LS:{e:'y', pr:'$5-9', cv:'4G', sim:'reg', op:['Vodacom','Econet']},
+  LT:{e:'y', pr:'$3-5', cv:'5G', sim:'reg', op:['Telia','Bite','Tele2']},
+  LU:{e:'y', pr:'$3-5', cv:'5G', sim:'reg', op:['POST','Orange','Tango']},
+  LV:{e:'y', pr:'$3-5', cv:'5G', sim:'reg', op:['LMT','Tele2','Bite']},
+  LY:{e:'p', pr:'$6-10', cv:'3G', sim:'reg', op:['Libyana','Almadar'], cvn:'Coverage limited and unstable outside main cities.'},
+  MA:{e:'y', pr:'$5-8', cv:'4G', sim:'reg', op:['Maroc Telecom','Orange','inwi']},
+  MC:{e:'y', pr:'$4-6', cv:'5G', sim:'free', op:['Monaco Telecom']},
+  MD:{e:'y', pr:'$4-6', cv:'4G', sim:'reg', op:['Orange','Moldcell','Moldtelecom']},
+  ME:{e:'y', pr:'$4-6', cv:'4G', sim:'reg', op:['Crnogorski Telekom','One','m:tel']},
+  MG:{e:'p', pr:'$6-10', cv:'4G', sim:'reg', op:['Telma','Orange','Airtel'], cvn:'4G in cities; vast rural gaps.'},
+  MH:{e:'p', pr:'$8-12', cv:'3G', sim:'reg', op:['MINTA'], cvn:'Limited to Majuro/Ebeye.'},
+  MK:{e:'y', pr:'$4-6', cv:'4G', sim:'reg', op:['A1','Telekom']},
+  ML:{e:'p', pr:'$6-10', cv:'3G', sim:'reg', op:['Orange','Malitel'], cvn:'Security issues limit travel/coverage in north.'},
+  MM:{e:'p', pr:'$6-10', cv:'4G', sim:'reg', op:['MPT','Ooredoo','Atom','Mytel'], cvn:'4G in cities.', net:'Frequent internet shutdowns and platform blocks since 2021; VPN often needed.'},
+  MN:{e:'y', pr:'$5-8', cv:'4G', sim:'reg', op:['Mobicom','Unitel','Skytel'], cvn:'Coverage thins fast outside Ulaanbaatar/steppe.'},
+  MO:{e:'y', pr:'$4-7', cv:'4G', sim:'free', op:['CTM','China Telecom','3','SmarTone'], net:'Open internet.'},
+  MR:{e:'p', pr:'$6-10', cv:'3G', sim:'reg', op:['Mauritel','Chinguitel','Mattel']},
+  MT:{e:'y', pr:'$4-6', cv:'5G', sim:'reg', op:['GO','Epic','Melita']},
+  MU:{e:'y', pr:'$5-8', cv:'4G/5G', sim:'reg', op:['Emtel','my.t','MTML']},
+  MV:{e:'y', pr:'$6-10', cv:'4G', sim:'reg', op:['Dhiraagu','Ooredoo'], cvn:'Resort islands well covered.'},
+  MW:{e:'p', pr:'$6-10', cv:'3G', sim:'reg', op:['TNM','Airtel']},
+  MX:{e:'y', pr:'$4-7', cv:'4G/5G', sim:'reg', op:['Telcel','AT&T','Movistar'], cvn:'Telcel has the widest rural reach.'},
+  MY:{e:'y', pr:'$4-7', cv:'4G/5G', sim:'reg', op:['Maxis','Celcom','Digi','U Mobile']},
+  MZ:{e:'y', pr:'$6-10', cv:'4G', sim:'reg', op:['Vodacom','Tmcel','Movitel']},
+  NA:{e:'y', pr:'$5-9', cv:'4G', sim:'reg', op:['MTC','TN Mobile'], cvn:'Sparse coverage on desert/rural roads.'},
+  NE:{e:'p', pr:'$6-10', cv:'3G', sim:'reg', op:['Airtel','Moov','Niger Telecom'], cvn:'Limited; northern security issues.'},
+  NG:{e:'y', pr:'$5-9', cv:'4G', sim:'reg', op:['MTN','Airtel','Glo','9mobile'], cvn:'Periodic regional restrictions.'},
+  NI:{e:'y', pr:'$5-8', cv:'4G', sim:'reg', op:['Claro','Tigo']},
+  NL:{e:'y', pr:'$3-5', cv:'5G', sim:'free', op:['KPN','Vodafone','Odido']},
+  NO:{e:'y', pr:'$3-5', cv:'5G', sim:'free', op:['Telenor','Telia','Ice']},
+  NP:{e:'y', pr:'$5-9', cv:'4G', sim:'reg', op:['Ncell','Nepal Telecom'], cvn:'Himalayan/trekking regions patchy; some have local 4G.'},
+  NR:{e:'p', pr:'$8-12', cv:'3G', sim:'reg', op:['Digicel'], cvn:'Single small network.'},
+  NZ:{e:'y', pr:'$4-7', cv:'5G', sim:'free', op:['One NZ','Spark','2degrees'], cvn:'Remote South Island areas patchy.'},
+  OM:{e:'y', pr:'$5-8', cv:'5G', sim:'reg', op:['Omantel','Ooredoo','Vodafone'], net:'VoIP calling apps are partly restricted on local networks.'},
+  PA:{e:'y', pr:'$5-8', cv:'4G', sim:'reg', op:['+Móvil','Tigo','Digicel']},
+  PE:{e:'y', pr:'$4-7', cv:'4G', sim:'reg', op:['Claro','Movistar','Entel','Bitel'], cvn:'Andes/Amazon patchy.'},
+  PF:{e:'y', pr:'$6-10', cv:'4G', sim:'reg', op:['Vini','Vodafone','Ora'], cvn:'Outer atolls limited.'},
+  PG:{e:'p', pr:'$7-11', cv:'3G', sim:'reg', op:['Digicel','Vodafone PNG'], cvn:'Highlands/remote largely uncovered.'},
+  PH:{e:'y', pr:'$5-8', cv:'4G', sim:'reg', op:['Globe','Smart','DITO'], cvn:'Thousands of islands — rural coverage varies.'},
+  PK:{e:'y', pr:'$5-8', cv:'4G', sim:'reg', op:['Jazz','Zong','Telenor','Ufone'], net:'Periodic shutdowns; some apps restricted.'},
+  PL:{e:'y', pr:'$3-5', cv:'5G', sim:'reg', op:['Orange','Play','Plus','T-Mobile']},
+  PR:{e:'y', pr:'$4-7', cv:'5G', sim:'free', op:['Claro','Liberty','T-Mobile','AT&T']},
+  PS:{e:'p', pr:'$6-10', cv:'3G', sim:'reg', op:['Jawwal','Ooredoo'], cvn:'4G limited; Israeli networks often used in practice. Gaza service severely disrupted.'},
+  PT:{e:'y', pr:'$3-5', cv:'5G', sim:'reg', op:['MEO','NOS','Vodafone']},
+  PW:{e:'p', pr:'$8-12', cv:'4G', sim:'reg', op:['PNCC (PalauCel)','PT Waves']},
+  PY:{e:'y', pr:'$5-8', cv:'4G', sim:'reg', op:['Tigo','Personal','Claro']},
+  QA:{e:'y', pr:'$6-9', cv:'5G', sim:'reg', op:['Ooredoo','Vodafone'], net:'Some VoIP calling restricted on local networks.'},
+  RO:{e:'y', pr:'$3-5', cv:'5G', sim:'reg', op:['Orange','Vodafone','Digi']},
+  RS:{e:'y', pr:'$4-6', cv:'4G', sim:'reg', op:['MTS','A1','Yettel']},
+  RU:{e:'p', pr:'$5-9', cv:'4G', sim:'reg', op:['MTS','MegaFon','Beeline','Tele2'], net:'Many Western sites/apps blocked; VPNs increasingly throttled. Foreign-card eSIM roaming helps but is not guaranteed.'},
+  RW:{e:'y', pr:'$5-9', cv:'4G', sim:'reg', op:['MTN','Airtel'], cvn:'Good urban 4G.'},
+  SA:{e:'y', pr:'$6-9', cv:'5G', sim:'reg', op:['stc','Mobily','Zain'], net:'Some VoIP historically restricted; mostly eased.'},
+  SB:{e:'p', pr:'$8-12', cv:'3G', sim:'reg', op:['Our Telekom','bmobile'], cvn:'Outer islands largely uncovered.'},
+  SC:{e:'y', pr:'$5-9', cv:'4G', sim:'reg', op:['Airtel','Cable & Wireless']},
+  SD:{e:'p', pr:'$7-11', cv:'3G', sim:'reg', op:['Zain','MTN','Sudani'], cvn:'Conflict-disrupted.', net:'Frequent internet shutdowns.'},
+  SE:{e:'y', pr:'$3-5', cv:'5G', sim:'free', op:['Telia','Tele2','Telenor','3']},
+  SG:{e:'y', pr:'$4-7', cv:'5G', sim:'reg', op:['Singtel','StarHub','M1'], cvn:'Among the best networks worldwide.'},
+  SI:{e:'y', pr:'$4-6', cv:'5G', sim:'reg', op:['Telekom Slovenije','A1','Telemach']},
+  SK:{e:'y', pr:'$3-5', cv:'5G', sim:'reg', op:['Orange','Telekom','O2']},
+  SL:{e:'p', pr:'$6-10', cv:'3G', sim:'reg', op:['Orange','Africell']},
+  SM:{e:'y', pr:'$4-6', cv:'4G', sim:'free', op:['TIM San Marino']},
+  SN:{e:'y', pr:'$6-10', cv:'4G', sim:'reg', op:['Orange','Free','Expresso']},
+  SO:{e:'n', pr:'—', cv:'3G', sim:'reg', op:['Hormuud','Somtel'], cvn:'Coverage limited to cities; security risks.'},
+  SR:{e:'y', pr:'$6-10', cv:'4G', sim:'reg', op:['Telesur','Digicel'], cvn:'Interior largely uncovered.'},
+  SS:{e:'n', pr:'—', cv:'2G', sim:'reg', op:['MTN','Zain'], cvn:'Minimal coverage outside Juba.'},
+  ST:{e:'p', pr:'$7-11', cv:'3G', sim:'reg', op:['CST','Unitel STP']},
+  SV:{e:'y', pr:'$5-8', cv:'4G', sim:'reg', op:['Tigo','Claro','Movistar']},
+  SY:{e:'p', pr:'$7-12', cv:'3G', sim:'reg', op:['Syriatel','MTN Syria'], cvn:'Coverage limited; conflict damage.', net:'Heavy censorship and surveillance.'},
+  SZ:{e:'y', pr:'$5-9', cv:'4G', sim:'reg', op:['MTN','Eswatini Mobile']},
+  TD:{e:'n', pr:'—', cv:'2G', sim:'reg', op:['Airtel','Moov'], cvn:'Among the least-connected; very limited data.'},
+  TG:{e:'y', pr:'$6-10', cv:'4G', sim:'reg', op:['Togocom','Moov']},
+  TH:{e:'y', pr:'$4-7', cv:'5G', sim:'reg', op:['AIS','TrueMove','dtac'], cvn:'Excellent in cities and resorts.'},
+  TJ:{e:'y', pr:'$5-8', cv:'4G', sim:'reg', op:['Tcell','Megafon','Babilon'], net:'Periodic blocks of social apps.'},
+  TL:{e:'p', pr:'$6-10', cv:'4G', sim:'reg', op:['Timor Telecom','Telkomcel','Telemor'], cvn:'4G in Dili; rural limited.'},
+  TM:{e:'p', pr:'$8-12', cv:'3G', sim:'hard', op:['TM CELL (Altyn Asyr)'], cvn:'Slow, limited data.', net:'Among the most censored: most foreign sites/apps blocked, VPNs heavily restricted. Foreign eSIM unlikely to work.'},
+  TN:{e:'y', pr:'$5-8', cv:'4G', sim:'reg', op:['Ooredoo','Tunisie Telecom','Orange']},
+  TO:{e:'y', pr:'$7-11', cv:'4G', sim:'reg', op:['Digicel','TCC']},
+  TR:{e:'y', pr:'$5-8', cv:'4G/5G', sim:'reg', op:['Turkcell','Vodafone','Türk Telekom'], net:'Phones not registered within ~120 days get blocked from local networks (steep fee to register); a roaming eSIM avoids this. Some sites/VoIP periodically restricted.'},
+  TT:{e:'y', pr:'$6-9', cv:'4G', sim:'reg', op:['bmobile','Digicel']},
+  TV:{e:'n', pr:'—', cv:'3G', sim:'reg', op:['Tuvalu Telecom'], cvn:'Single small network; very limited.'},
+  TW:{e:'y', pr:'$4-7', cv:'5G', sim:'free', op:['Chunghwa','Taiwan Mobile','FarEasTone'], cvn:'Excellent and open.'},
+  TZ:{e:'y', pr:'$5-9', cv:'4G', sim:'reg', op:['Vodacom','Airtel','Tigo','Halotel'], cvn:'Rural/safari areas patchy.'},
+  UA:{e:'y', pr:'$4-6', cv:'4G', sim:'reg', op:['Kyivstar','Vodafone UA','lifecell'], cvn:'Coverage disrupted in conflict-affected and front-line areas.'},
+  UG:{e:'y', pr:'$5-9', cv:'4G', sim:'reg', op:['MTN','Airtel'], net:'Social-media tax history; periodic restrictions.'},
+  US:{e:'y', pr:'$4-7', cv:'5G', sim:'free', op:['Verizon','AT&T','T-Mobile'], cvn:'Sparse on remote/rural roads.'},
+  UY:{e:'y', pr:'$5-8', cv:'4G', sim:'reg', op:['Antel','Claro','Movistar']},
+  UZ:{e:'y', pr:'$4-7', cv:'4G', sim:'reg', op:['Beeline','Ucell','UMS/Mobiuz']},
+  VA:{e:'y', pr:'$3-5', cv:'5G', sim:'free', op:['TIM (Italy)']},
+  VC:{e:'y', pr:'$6-9', cv:'4G', sim:'free', op:['Flow','Digicel']},
+  VE:{e:'p', pr:'$7-11', cv:'4G', sim:'reg', op:['Movistar','Digitel','Movilnet'], cvn:'Degraded networks; frequent outages.', net:'Some sites blocked; VPN useful.'},
+  VN:{e:'y', pr:'$4-7', cv:'4G/5G', sim:'reg', op:['Viettel','Vinaphone','Mobifone'], cvn:'Great urban coverage.', net:'Some sites restricted; VPN occasionally useful.'},
+  VU:{e:'y', pr:'$7-11', cv:'4G', sim:'reg', op:['Digicel','Vodafone Vanuatu'], cvn:'Outer islands limited.'},
+  WS:{e:'y', pr:'$7-11', cv:'4G', sim:'reg', op:['Digicel','Vodafone Samoa']},
+  XK:{e:'y', pr:'$4-6', cv:'4G', sim:'reg', op:['Vala','IPKO']},
+  YE:{e:'n', pr:'—', cv:'2G', sim:'hard', op:['YemenMobile','Sabafon'], cvn:'Minimal coverage; conflict-damaged networks.', net:'Frequent shutdowns. Foreign eSIM unsupported.'},
+  ZA:{e:'y', pr:'$4-8', cv:'5G', sim:'reg', op:['Vodacom','MTN','Cell C','Telkom'], cvn:'Good urban 5G; rural varies.'},
+  ZM:{e:'y', pr:'$5-9', cv:'4G', sim:'reg', op:['MTN','Airtel','Zamtel']},
+  ZW:{e:'p', pr:'$6-10', cv:'4G', sim:'reg', op:['Econet','NetOne','Telecel'], cvn:'Expensive data; power-related outages.'},
+};
+const ESIM_KEY='tt_esim';
+let esimState={countryCode:null};
+function esimEsc(s){ return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function esimCountry(){ const c=esimState.countryCode; if(!c||!TT_COUNTRIES[c]) return null; return {c,n:TT_COUNTRIES[c].name,f:TT_COUNTRIES[c].flag}; }
+function esimSave(){ try{ localStorage.setItem(ESIM_KEY,JSON.stringify({countryCode:esimState.countryCode})); }catch(e){} }
+
+const ESIM_EL={y:['✅','Widely available','ok'],p:['⚠️','Limited / unreliable','warn'],n:['⛔','Not available to tourists','bad']};
+const ESIM_SIML={free:['🟢','No registration — buy a prepaid SIM at the airport or phone shops'],reg:['🪪','Passport registration required to buy a local prepaid SIM'],hard:['🔴','Local SIM is impractical or restricted for visitors']};
+
+function esimInit(){
+  let saved=null; try{ saved=JSON.parse(localStorage.getItem(ESIM_KEY)||'null'); }catch(e){}
+  if(saved&&saved.countryCode&&ESIM_DATA[saved.countryCode]){ esimState.countryCode=saved.countryCode; }
+  else { const trip=getActiveTrip(); if(trip&&trip.destination){ try{ const r=resolveDestination(trip.destination); if(r&&r.countryCode&&ESIM_DATA[r.countryCode]) esimState.countryCode=r.countryCode; }catch(_){} } }
+  esimRenderCountryList('');
+  if(esimState.countryCode&&ESIM_DATA[esimState.countryCode]){ esimSelectCountry(esimState.countryCode,false); }
+  else { esimState.countryCode=null; document.getElementById('esim-content').style.display='none'; document.getElementById('esim-empty').style.display=''; }
+  if(!document._esimClickBound){ document.addEventListener('click',esimDocClick); document._esimClickBound=true; }
+}
+function esimOpenPicker(){ const d=document.getElementById('esim-country-drop'); if(d.style.display==='block'){ esimClosePicker(); return; } d.style.display='block'; const s=document.getElementById('esim-country-search'); s.value=''; esimRenderCountryList(''); setTimeout(()=>s.focus(),50); }
+function esimClosePicker(){ document.getElementById('esim-country-drop').style.display='none'; }
+function esimDocClick(e){ const w=document.getElementById('esim-country-disp'),d=document.getElementById('esim-country-drop'); if(!w||!d||d.style.display!=='block') return; if(w.contains(e.target)||d.contains(e.target)) return; esimClosePicker(); }
+function esimFilterCountries(){ esimRenderCountryList((document.getElementById('esim-country-search').value||'').toLowerCase().trim()); }
+function esimRenderCountryList(q){
+  const list=Object.keys(ESIM_DATA).filter(c=>TT_COUNTRIES[c]).map(c=>({c,n:TT_COUNTRIES[c].name,f:TT_COUNTRIES[c].flag}))
+    .filter(co=>!q||co.n.toLowerCase().includes(q)||co.c.toLowerCase().includes(q)).sort((a,b)=>a.n.localeCompare(b.n));
+  const html=list.length? list.map(co=>{ const e=ESIM_DATA[co.c].e; return `<div class="tc-drop-item" onclick="esimSelectCountry('${co.c}')"><span class="tc-drop-flag">${co.f}</span><span class="tc-drop-name">${esimEsc(co.n)}</span><span class="tc-drop-cur">${ESIM_EL[e][0]} eSIM</span></div>`; }).join('')
+    : `<div class="tc-drop-item" style="color:var(--muted);cursor:default">No matches for "${esimEsc(q)}"</div>`;
+  document.getElementById('esim-country-list').innerHTML=html;
+}
+function esimSelectCountry(code,save){ if(save===undefined) save=true; if(!ESIM_DATA[code]) return; esimState.countryCode=code; if(save) esimSave(); esimClosePicker(); esimRender(); }
+function esimRow(ico,label,val){ return `<div class="dr-row"><span class="dr-row-ico">${ico}</span><div class="dr-row-body"><div class="dr-row-lbl">${label}</div><div class="dr-row-val">${val}</div></div></div>`; }
+function esimRender(){
+  const co=esimCountry(); if(!co){ document.getElementById('esim-content').style.display='none'; document.getElementById('esim-empty').style.display=''; return; }
+  const d=ESIM_DATA[co.c];
+  document.getElementById('esim-empty').style.display='none';
+  document.getElementById('esim-content').style.display='';
+  document.getElementById('esim-disp-flag').textContent=co.f;
+  document.getElementById('esim-disp-name').textContent=co.n;
+  document.getElementById('esim-hero-flag').textContent=co.f;
+  document.getElementById('esim-hero-co').textContent=co.n;
+  const el=ESIM_EL[d.e];
+  document.getElementById('esim-hero-sub').innerHTML=`${el[0]} eSIM ${el[1].toLowerCase()}`;
+  // eSIM
+  let esimSec=esimRow('📲','eSIM for tourists',`<span class="esim-badge esim-${el[2]}">${el[0]} ${el[1]}</span>`);
+  if(d.e!=='n'){
+    esimSec+=esimRow('💵','Typical data price',`~${esimEsc(d.pr)} <span style="color:var(--muted)">per GB (tourist eSIM)</span>`);
+    esimSec+=esimRow('🛒','Where to get it','Global apps: <strong>Airalo</strong>, <strong>Holafly</strong>, <strong>aloSIM</strong>, <strong>Saily</strong> — install and activate before you fly.');
+  }
+  document.getElementById('esim-esim').innerHTML=esimSec;
+  // coverage
+  let cov=esimRow('📶','Typical urban network',`<strong>${esimEsc(d.cv)}</strong>`);
+  if(d.cvn) cov+=esimRow('📍','Coverage notes',esimEsc(d.cvn));
+  document.getElementById('esim-coverage').innerHTML=cov;
+  // local SIM
+  const sl=ESIM_SIML[d.sim];
+  let simSec=esimRow(sl[0],'Local prepaid SIM',esimEsc(sl[1]));
+  if(d.op&&d.op.length) simSec+=esimRow('🏢','Main operators',d.op.map(o=>esimEsc(o)).join(' · '));
+  document.getElementById('esim-localsim').innerHTML=simSec;
+  // restrictions
+  const rs=document.getElementById('esim-restrict-sec');
+  if(d.net){ document.getElementById('esim-restrict').innerHTML=esimRow('🚦','Heads up',esimEsc(d.net)); rs.style.display=''; }
+  else rs.style.display='none';
+}
+
+/* ══════════════════════════════════════════════════════
+   SAFETY & ADVISORIES  (Phase 7 — Domain 4)
+   Per-country orientation for all 202 countries: an overall
+   advisory level, common risks/scams, tap-water potability,
+   solo/female-traveller notes and LGBTQ+ legal/social status.
+   This is BEST-EFFORT, directional planning data — NOT an
+   official government travel advisory or legal/medical advice.
+   Conditions and laws change; always check your government's
+   advisory and a travel clinic before you go.
+   ══════════════════════════════════════════════════════ */
+const SAFE_DATA = {
+  AD:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  AE:{lvl:2, r:'Very low street crime; strict laws on drugs, public behaviour & medications.', w:'caution', s:'Comfortable & low-harassment for women by regional standards.', g:'illegal', gn:'Same-sex acts illegal; public affection & related content can be prosecuted — be very discreet.'},
+  AF:{lvl:4, r:'War, terrorism, kidnapping; arbitrary detention under Taliban. Do not travel.', w:'unsafe', s:'Severe restrictions on women — effectively barred from public life.', g:'illegal', gn:'Same-sex acts punishable by death — extreme danger.'},
+  AG:{lvl:1, r:'Petty theft; otherwise calm.', w:'caution', s:'Comfortable for women.', g:'legal', gn:'Decriminalised 2022.'},
+  AL:{lvl:2, r:'Petty crime; some unexploded-ordnance areas rurally.', w:'caution', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'legal', gn:'Legal but socially conservative — be discreet.'},
+  AM:{lvl:1, r:'Petty crime; avoid the Azerbaijan border (Nagorno-Karabakh).', w:'caution', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'discreet', gn:'Legal but very conservative — be discreet.'},
+  AO:{lvl:2, r:'Street crime in Luanda; landmines in some rural areas.', w:'unsafe', s:'Take usual urban caution.', g:'legal', gn:'Decriminalised 2021; social attitudes conservative.'},
+  AR:{lvl:1, r:'Pickpocketing & "mustard"/distraction scams in Buenos Aires.', w:'safe', s:'Manageable; usual urban caution.', g:'open', gn:'Marriage equality (2010); among Latin America\'s most progressive.'},
+  AT:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  AU:{lvl:1, r:'Low crime; sun/surf, wildlife & remote-outback hazards.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open', gn:'Marriage equality (2017); very tolerant.'},
+  AZ:{lvl:2, r:'Petty crime; avoid the Armenia border & Nagorno-Karabakh.', w:'caution', s:'Usual caution; dress modestly outside Baku.', g:'restrict', gn:'Legal but reports of crackdowns — be very discreet.'},
+  BA:{lvl:2, r:'Petty crime; landmines remain in marked rural areas — stay on paths.', w:'caution', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'discreet', gn:'Legal but socially conservative.'},
+  BB:{lvl:1, r:'Petty crime; otherwise calm.', w:'safe', s:'Comfortable for women.', g:'legal', gn:'Decriminalised 2022.'},
+  BD:{lvl:3, r:'Petty & some violent crime; terrorism risk; political unrest & strikes (hartals).', w:'unsafe', s:'Significant harassment; dress conservatively.', g:'illegal', gn:'Same-sex acts illegal (colonial-era law).'},
+  BE:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  BF:{lvl:4, r:'Terrorism & kidnapping across much of the country. Do not travel to most areas.', w:'unsafe', s:'Extreme caution.', g:'legal', gn:'Legal but socially conservative.'},
+  BG:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'caution', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'legal', gn:'Legal but limited recognition; conservative attitudes.'},
+  BH:{lvl:2, r:'Low crime; occasional political demonstrations.', w:'caution', s:'Relatively comfortable for women regionally.', g:'illegal', gn:'Same-sex relations not criminalised the same way as neighbours but social/legal risk remains — be discreet.'},
+  BI:{lvl:3, r:'Political instability; petty & violent crime.', w:'unsafe', s:'Exercise heightened caution.', g:'illegal', gn:'Same-sex acts illegal.'},
+  BJ:{lvl:2, r:'Petty crime; terrorism risk in the far north.', w:'unsafe', s:'Take usual caution.', g:'legal', gn:'Legal but conservative.'},
+  BN:{lvl:2, r:'Very low crime; strict Sharia-based laws on conduct, alcohol & dress.', w:'caution', s:'Comfortable & low-crime; dress modestly.', g:'illegal', gn:'Sharia penal code allows death by stoning for same-sex acts — extreme danger.'},
+  BO:{lvl:2, r:'Petty crime; "fake police" scams; altitude; roadblocks/protests.', w:'unsafe', s:'Usual caution; dress modestly in highlands.', g:'legal', gn:'Civil unions; conservative socially.'},
+  BR:{lvl:2, r:'Urban violent crime, robbery & express kidnapping; favela risk; beach theft.', w:'caution', s:'Avoid displaying valuables; reputable transport at night.', g:'open', gn:'Marriage equality; vibrant scene but high anti-LGBTQ+ violence in places.'},
+  BS:{lvl:2, r:'Some violent crime in parts of Nassau/Freeport; resorts safer.', w:'safe', s:'Usual caution.', g:'legal', gn:'Legal; conservative socially.'},
+  BT:{lvl:1, r:'Very low crime; altitude & trekking hazards.', w:'caution', s:'One of Asia\'s safest for women.', g:'legal', gn:'Decriminalised 2021.'},
+  BW:{lvl:1, r:'Low crime; wildlife hazards on self-drives.', w:'caution', s:'Among the safer countries in the region for women.', g:'legal', gn:'Decriminalised 2019.'},
+  BY:{lvl:3, r:'Authoritarian state; risk of arbitrary detention. Avoid protests.', w:'caution', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'discreet', gn:'Legal but heavy social/state hostility.'},
+  BZ:{lvl:3, r:'High violent-crime rate (esp. south-side Belize City); reefs/diving risks.', w:'unsafe', s:'Heightened caution; reputable transport.', g:'legal', gn:'Decriminalised 2016.'},
+  CA:{lvl:1, r:'Low crime; wildlife & remote-weather hazards.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open', gn:'Marriage equality; very tolerant.'},
+  CD:{lvl:4, r:'Armed conflict in the east; kidnapping, disease (incl. Ebola flare-ups).', w:'unsafe', s:'Extreme caution.', g:'legal', gn:'Legal but conservative.'},
+  CF:{lvl:4, r:'Armed conflict, kidnapping. Do not travel.', w:'unsafe', s:'Extreme risk.', g:'legal', gn:'Legal but conservative.'},
+  CG:{lvl:3, r:'Street crime; some unrest in the Pool region.', w:'unsafe', s:'Heightened caution.', g:'legal', gn:'Legal but conservative.'},
+  CH:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  CI:{lvl:2, r:'Petty & some violent crime; terrorism risk in the north.', w:'unsafe', s:'Usual urban caution.', g:'legal', gn:'Legal but socially conservative.'},
+  CL:{lvl:1, r:'Petty crime & some violent street crime in Santiago; protest disruption.', w:'safe', s:'Among the easier in the region for women.', g:'open', gn:'Marriage equality (2022); relatively tolerant.'},
+  CM:{lvl:3, r:'Terrorism (Far North), separatist violence (Anglophone NW/SW), kidnapping.', w:'unsafe', s:'Heightened caution.', g:'illegal', gn:'Same-sex acts illegal & actively prosecuted.'},
+  CN:{lvl:2, r:'Low street crime; arbitrary detention & exit-ban risk; heavy surveillance; avoid protests.', w:'unsafe', s:'Generally safe for women; usual big-city caution.', g:'discreet', gn:'Legal but no recognition; censorship of LGBTQ+ content — be discreet.'},
+  CO:{lvl:3, r:'Improving but real risks: robbery, "scopolamine" drugging, some guerrilla/cartel areas.', w:'unsafe', s:'Use reputable transport; avoid solo night travel & dating-app meetups with strangers.', g:'legal', gn:'Marriage equality (2016); cities tolerant.'},
+  CR:{lvl:2, r:'Petty theft (esp. from cars/beaches); riptides; otherwise stable.', w:'caution', s:'Among the easier in the region for women.', g:'open', gn:'Marriage equality (2020); the most LGBTQ+-friendly in Central America.'},
+  CU:{lvl:2, r:'Petty crime & scams; shortages of food/medicine/cash.', w:'caution', s:'Manageable; usual caution.', g:'legal', gn:'Marriage equality (2022).'},
+  CV:{lvl:1, r:'Petty crime in towns.', w:'caution', s:'Among the easier African destinations for women.', g:'legal', gn:'Decriminalised; relatively tolerant.'},
+  CY:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'caution', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'legal'},
+  CZ:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  DE:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  DJ:{lvl:2, r:'Low-level crime; terrorism risk; avoid Eritrea/Somalia borders.', w:'unsafe', s:'Dress modestly.', g:'legal', gn:'Not criminalised but socially conservative.'},
+  DK:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  DM:{lvl:1, r:'Petty theft; otherwise calm.', w:'caution', s:'Comfortable for women.', g:'illegal', gn:'Male same-sex acts technically illegal (challenged in courts).'},
+  DO:{lvl:2, r:'Petty & some violent crime; resort-area scams.', w:'caution', s:'Usual caution; harassment occurs.', g:'restrict', gn:'Legal but no recognition; conservative.'},
+  DZ:{lvl:3, r:'Terrorism risk; avoid border regions & the Sahara interior.', w:'unsafe', s:'Harassment occurs; dress modestly.', g:'illegal', gn:'Same-sex acts illegal.'},
+  EC:{lvl:3, r:'Rising violent crime & gang activity (esp. Guayaquil/coast); express kidnapping.', w:'unsafe', s:'Heightened caution; reputable transport.', g:'open', gn:'Marriage equality (2019).'},
+  EE:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  EG:{lvl:3, r:'Petty scams & persistent touts; terrorism risk; avoid Sinai interior & Western Desert.', w:'unsafe', s:'Significant harassment reported; dress modestly, prefer reputable transport.', g:'illegal', gn:'Prosecuted under "debauchery" laws — be very discreet.'},
+  ER:{lvl:3, r:'Authoritarian state; arbitrary detention; border-area risk.', w:'unsafe', s:'Significant restrictions.', g:'illegal', gn:'Same-sex acts illegal.'},
+  ES:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  ET:{lvl:3, r:'Armed conflict & unrest in several regions (Tigray, Amhara, Oromia).', w:'unsafe', s:'Heightened caution.', g:'illegal', gn:'Same-sex acts illegal & socially taboo.'},
+  FI:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  FJ:{lvl:1, r:'Petty theft; cyclones; reef/current hazards.', w:'caution', s:'Generally easy for women; usual caution.', g:'legal', gn:'Decriminalised 2010; conservative socially.'},
+  FM:{lvl:1, r:'Low crime; remote services.', w:'caution', s:'Generally safe.', g:'legal', gn:'Mostly legal (varies by state); conservative.'},
+  FR:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  GA:{lvl:2, r:'Street crime in Libreville.', w:'unsafe', s:'Usual caution.', g:'legal', gn:'Legal but conservative.'},
+  GB:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  GD:{lvl:1, r:'Petty theft; otherwise calm.', w:'caution', s:'Comfortable for women.', g:'illegal', gn:'Male same-sex acts technically illegal (not enforced).'},
+  GE:{lvl:1, r:'Petty crime; avoid breakaway Abkhazia & South Ossetia.', w:'caution', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'discreet', gn:'Legal but Pride has faced violence — be very discreet.'},
+  GH:{lvl:1, r:'Petty crime; generally welcoming.', w:'unsafe', s:'Among the easier West African countries for women.', g:'illegal', gn:'Same-sex acts illegal; harsh new bill — be very discreet.'},
+  GM:{lvl:2, r:'Petty crime; "bumster" touts on beaches.', w:'unsafe', s:'Harassment by touts; otherwise manageable.', g:'illegal', gn:'Same-sex acts illegal.'},
+  GN:{lvl:3, r:'Political unrest; petty & violent crime.', w:'unsafe', s:'Heightened caution.', g:'illegal', gn:'Same-sex acts illegal.'},
+  GQ:{lvl:3, r:'Heavy security presence; arbitrary detention; photography restrictions.', w:'unsafe', s:'Heightened caution.', g:'legal', gn:'Legal but extremely conservative.'},
+  GR:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  GT:{lvl:3, r:'Violent crime & gang activity; express kidnapping; volcano/road hazards.', w:'unsafe', s:'Heightened caution; reputable transport.', g:'legal', gn:'Legal but no recognition; conservative.'},
+  GU:{lvl:1, r:'Low crime (US territory).', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open', gn:'US law — marriage equality.'},
+  GW:{lvl:3, r:'Political instability; drug-trafficking crime.', w:'unsafe', s:'Heightened caution.', g:'legal', gn:'Legal but conservative.'},
+  GY:{lvl:2, r:'Petty & some violent crime in Georgetown; interior remote.', w:'unsafe', s:'Usual caution.', g:'illegal', gn:'Male same-sex acts technically illegal (not enforced) — discretion advised.'},
+  HK:{lvl:1, r:'Low street crime; avoid protests; national-security law caution.', w:'safe', s:'Very safe for women, incl. at night.', g:'legal', gn:'Legal; partnerships partly recognised; relatively tolerant.'},
+  HN:{lvl:3, r:'Among the region\'s highest violent-crime rates; gangs; express kidnapping.', w:'unsafe', s:'Heightened caution; reputable transport.', g:'restrict', gn:'Legal but constitutional same-sex marriage ban; high anti-LGBTQ+ violence.'},
+  HR:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'legal', gn:'Same-sex partnerships recognised; smaller towns more conservative.'},
+  HT:{lvl:4, r:'Gang control of much of Port-au-Prince; kidnapping, violent crime. Do not travel.', w:'unsafe', s:'Extreme risk.', g:'legal', gn:'No specific criminal law but deeply hostile socially.'},
+  HU:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'legal', gn:'Legal but recent laws restrict LGBTQ+ "promotion"; discretion in public.'},
+  ID:{lvl:2, r:'Petty crime & scams (esp. Bali); terrorism risk; volcanoes; Papua unrest.', w:'caution', s:'Manageable; dress modestly, esp. outside Bali.', g:'restrict', gn:'Legal nationally except Aceh (Sharia); new code & social hostility — be discreet.'},
+  IE:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  IL:{lvl:3, r:'Conflict & rocket risk; checkpoints; situation can change fast. Avoid Gaza vicinity.', w:'safe', s:'Generally manageable outside conflict areas.', g:'open', gn:'Tel Aviv is a regional LGBTQ+ hub; far more open than neighbours.'},
+  IN:{lvl:2, r:'Scams & petty crime; significant reports of harassment/assault of women; road risks.', w:'unsafe', s:'Notable harassment risk; avoid solo travel after dark, use reputable transport.', g:'legal', gn:'Decriminalised 2018; no marriage; acceptance varies widely.'},
+  IQ:{lvl:4, r:'Terrorism, armed conflict, kidnapping risk. Most governments advise against travel.', w:'unsafe', s:'Very challenging; extreme caution.', g:'illegal', gn:'Severe legal & social danger — same-sex acts effectively criminalised.'},
+  IR:{lvl:4, r:'Risk of arbitrary detention (esp. dual-nationals); avoid borders & protests.', w:'unsafe', s:'Strict dress code (hijab) enforced; significant restrictions on women.', g:'illegal', gn:'Same-sex acts punishable by death — extreme danger.'},
+  IS:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  IT:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  JM:{lvl:2, r:'High violent-crime rate in areas; resort zones safer; scams.', w:'caution', s:'Harassment occurs; usual caution.', g:'illegal', gn:'Male same-sex acts illegal; strong social hostility — be very discreet.'},
+  JO:{lvl:2, r:'Low crime; terrorism risk; avoid Syria/Iraq border areas.', w:'caution', s:'Among the easier MENA countries for women; dress modestly.', g:'discreet', gn:'Not explicitly criminalised but socially taboo — be very discreet.'},
+  JP:{lvl:1, r:'Extremely low crime.', w:'safe', s:'One of the safest countries for solo & women travellers.', g:'legal', gn:'Legal; growing partnership recognition; discreet but tolerant.'},
+  KE:{lvl:2, r:'Terrorism risk (esp. near Somalia); urban & matatu crime; safari road risks.', w:'unsafe', s:'Harassment occurs; reputable transport advised.', g:'illegal', gn:'Same-sex acts illegal — be very discreet.'},
+  KG:{lvl:2, r:'Petty crime; some border-area & protest risk.', w:'caution', s:'Usual caution; dress modestly rurally.', g:'discreet', gn:'Legal but conservative; anti-LGBTQ+ legislation — be very discreet.'},
+  KH:{lvl:2, r:'Petty crime, bag-snatching & scams; rural landmine legacy.', w:'unsafe', s:'Usual caution.', g:'legal', gn:'Legal; relatively tolerant by regional standards; no recognition.'},
+  KI:{lvl:1, r:'Very low crime; remote; climate-exposed.', w:'unsafe', s:'Very safe; small community.', g:'legal', gn:'Decriminalised; conservative.'},
+  KM:{lvl:2, r:'Petty crime; limited services.', w:'unsafe', s:'Dress modestly.', g:'illegal', gn:'Same-sex acts illegal.'},
+  KN:{lvl:1, r:'Petty theft; otherwise calm.', w:'caution', s:'Comfortable for women.', g:'legal', gn:'Decriminalised 2022.'},
+  KP:{lvl:4, r:'Risk of arbitrary arrest & long detention; no consular access for some. Do not travel.', w:'unsafe', s:'Tightly controlled, escorted travel only.', g:'restrict', gn:'No legal recognition; tightly controlled society.'},
+  KR:{lvl:1, r:'Very low crime.', w:'safe', s:'Very safe for women, incl. at night.', g:'discreet', gn:'Legal but no recognition; socially conservative — discretion common.'},
+  KW:{lvl:2, r:'Low crime; strict laws on alcohol, drugs & public conduct.', w:'caution', s:'Relatively comfortable for women regionally.', g:'illegal', gn:'Same-sex acts illegal — be very discreet.'},
+  KZ:{lvl:2, r:'Petty crime; usual urban caution.', w:'caution', s:'Usual caution; dress modestly outside cities.', g:'discreet', gn:'Legal but conservative — be discreet.'},
+  LA:{lvl:2, r:'Petty crime; UXO (unexploded ordnance) off-path in rural areas.', w:'unsafe', s:'Manageable; usual caution.', g:'legal', gn:'Legal; generally low-key tolerance; no recognition.'},
+  LB:{lvl:3, r:'Economic collapse, fuel/power shortages; conflict risk near the south & Hezbollah areas.', w:'unsafe', s:'Beirut relatively relaxed; exercise caution amid instability.', g:'restrict', gn:'Article 534 used against LGBTQ+; rising crackdowns — be very discreet.'},
+  LC:{lvl:1, r:'Petty theft; some crime in parts of Castries.', w:'caution', s:'Comfortable for women.', g:'restrict', gn:'Male same-sex acts technically illegal (not enforced).'},
+  LI:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  LK:{lvl:1, r:'Petty crime & scams; past terrorism; monsoon/sea hazards.', w:'unsafe', s:'Some harassment; otherwise manageable.', g:'illegal', gn:'Same-sex acts technically illegal (rarely enforced) — be discreet.'},
+  LR:{lvl:3, r:'Street & violent crime; weak services.', w:'unsafe', s:'Heightened caution.', g:'illegal', gn:'Same-sex acts illegal.'},
+  LS:{lvl:2, r:'Urban crime; mountain weather hazards.', w:'caution', s:'Usual caution.', g:'legal', gn:'Decriminalised; conservative.'},
+  LT:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  LU:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  LV:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  LY:{lvl:4, r:'Armed conflict, kidnapping, militias. Most governments advise against all travel.', w:'unsafe', s:'Extreme risk.', g:'illegal', gn:'Same-sex acts illegal; extreme danger.'},
+  MA:{lvl:2, r:'Tourist scams & aggressive touts in medinas; pickpocketing.', w:'caution', s:'Harassment common; dress modestly, use reputable guides.', g:'illegal', gn:'Same-sex acts illegal (Art. 489) — be very discreet.'},
+  MC:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  MD:{lvl:2, r:'Petty crime; avoid the breakaway Transnistria region.', w:'caution', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'discreet', gn:'Legal but conservative.'},
+  ME:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'caution', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'discreet', gn:'Legal but conservative; discretion advised.'},
+  MG:{lvl:2, r:'Petty crime; periodic unrest; cyclone season.', w:'unsafe', s:'Usual caution.', g:'legal', gn:'Legal but conservative.'},
+  MH:{lvl:1, r:'Low crime; remote; climate-exposed.', w:'caution', s:'Generally safe.', g:'legal', gn:'Legal; conservative.'},
+  MK:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'caution', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'discreet', gn:'Legal but conservative.'},
+  ML:{lvl:4, r:'Terrorism & kidnapping across much of the country. Do not travel to most areas.', w:'unsafe', s:'Extreme caution.', g:'legal', gn:'Legal but conservative.'},
+  MM:{lvl:4, r:'Civil war, conflict, arbitrary detention, landmines. Do not travel.', w:'unsafe', s:'Extreme caution.', g:'illegal', gn:'Same-sex acts illegal (colonial-era law).'},
+  MN:{lvl:2, r:'Petty crime in UB (esp. pickpocketing); extreme weather; remote travel risks.', w:'caution', s:'Usual caution.', g:'legal', gn:'Legal; capital more tolerant; conservative rurally.'},
+  MO:{lvl:1, r:'Low street crime.', w:'safe', s:'Very safe for women.', g:'discreet', gn:'Legal but no recognition; conservative.'},
+  MR:{lvl:3, r:'Terrorism & kidnapping risk; desert hazards.', w:'unsafe', s:'Dress modestly; heightened caution.', g:'illegal', gn:'Same-sex acts can carry the death penalty — extreme danger.'},
+  MT:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  MU:{lvl:1, r:'Petty crime; generally relaxed.', w:'caution', s:'Among the easier African destinations for women.', g:'restrict', gn:'Decriminalised 2023; attitudes still conservative.'},
+  MV:{lvl:1, r:'Low crime on resort islands; strict laws on inhabited islands.', w:'safe', s:'Resorts very comfortable; modesty rules on local islands.', g:'illegal', gn:'Same-sex acts illegal under Sharia (resorts insulated) — be very discreet.'},
+  MW:{lvl:2, r:'Petty crime; fuel shortages.', w:'unsafe', s:'Usual caution.', g:'illegal', gn:'Same-sex acts illegal (enforcement varies).'},
+  MX:{lvl:3, r:'Cartel-related violence in some states; express kidnapping; scams. Resorts safer.', w:'unsafe', s:'Use reputable transport; avoid isolated areas at night.', g:'legal', gn:'Marriage equality nationwide (2022); big cities tolerant, rural conservative.'},
+  MY:{lvl:2, r:'Petty crime & scams; some terrorism/kidnapping risk off east Sabah.', w:'caution', s:'Manageable; dress modestly.', g:'illegal', gn:'Same-sex acts illegal (federal & Sharia) — be very discreet.'},
+  MZ:{lvl:3, r:'Terrorism in Cabo Delgado (north); urban crime; some landmine legacy.', w:'unsafe', s:'Heightened caution.', g:'legal', gn:'Decriminalised 2015; conservative.'},
+  NA:{lvl:1, r:'Petty crime; long remote drives & wildlife hazards.', w:'caution', s:'Among the safer countries in the region for women.', g:'restrict', gn:'Decriminalised 2024; attitudes conservative.'},
+  NE:{lvl:4, r:'Terrorism & kidnapping; coup-related instability. Do not travel to most areas.', w:'unsafe', s:'Extreme caution.', g:'legal', gn:'Legal but conservative.'},
+  NG:{lvl:3, r:'Kidnapping, terrorism (north/northeast), violent crime, scams.', w:'unsafe', s:'Significant harassment risk; heightened caution.', g:'illegal', gn:'Same-sex acts illegal; death penalty in northern Sharia states — extreme danger.'},
+  NI:{lvl:3, r:'Political repression & arbitrary detention; petty crime.', w:'unsafe', s:'Usual caution amid instability.', g:'legal', gn:'Legal but no recognition.'},
+  NL:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  NO:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  NP:{lvl:2, r:'Petty crime & trekking scams; altitude & trail hazards; earthquakes.', w:'unsafe', s:'Generally manageable; usual caution on treks.', g:'legal', gn:'Among Asia\'s most progressive; third gender recognised; court-backed same-sex marriage.'},
+  NR:{lvl:1, r:'Very low crime; very limited services.', w:'caution', s:'Very safe; small community.', g:'legal', gn:'Decriminalised 2016.'},
+  NZ:{lvl:1, r:'Low crime; outdoor/adventure & weather hazards.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open', gn:'Marriage equality (2013); very tolerant.'},
+  OM:{lvl:1, r:'Very low crime; strict public-conduct & drug laws.', w:'caution', s:'One of the more comfortable Gulf states for women.', g:'illegal', gn:'Same-sex acts illegal — be very discreet.'},
+  PA:{lvl:1, r:'Petty crime; avoid the Darién Gap (Colombia border).', w:'caution', s:'Among the easier in the region for women.', g:'legal', gn:'Marriage equality recognised via courts (2020s); Panama City tolerant.'},
+  PE:{lvl:2, r:'Petty crime, express kidnapping & scams; altitude; protest disruption.', w:'unsafe', s:'Usual caution; reputable transport on night travel.', g:'restrict', gn:'Legal but no recognition; conservative.'},
+  PF:{lvl:1, r:'Petty theft; lagoon/ocean hazards.', w:'caution', s:'Generally easy for women.', g:'open', gn:'French law — marriage equality.'},
+  PG:{lvl:3, r:'High violent-crime rate ("raskol" gangs); tribal clashes; carjacking.', w:'unsafe', s:'Significant risk; avoid solo travel, use trusted hosts.', g:'illegal', gn:'Same-sex acts illegal — be very discreet.'},
+  PH:{lvl:2, r:'Petty & some violent crime; terrorism/kidnapping risk in parts of Mindanao; typhoons.', w:'unsafe', s:'Usual caution.', g:'legal', gn:'Legal & relatively tolerant; no marriage; Catholic conservatism.'},
+  PK:{lvl:3, r:'Terrorism, kidnapping, sectarian violence; avoid border regions.', w:'unsafe', s:'Significant restrictions; dress conservatively, heightened caution.', g:'illegal', gn:'Same-sex acts illegal (incl. Sharia provisions) — be very discreet.'},
+  PL:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  PR:{lvl:2, r:'Petty & some violent crime; otherwise US-standard.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open', gn:'US law — marriage equality.'},
+  PS:{lvl:4, r:'Conflict zone (esp. Gaza); checkpoints, military operations.', w:'unsafe', s:'Conflict conditions; extreme caution.', g:'restrict', gn:'Criminalised in Gaza; West Bank socially hostile.'},
+  PT:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  PW:{lvl:1, r:'Low crime; dive/reef hazards.', w:'safe', s:'Generally safe for women.', g:'legal', gn:'Decriminalised 2014.'},
+  PY:{lvl:1, r:'Petty crime; some northern-border (EPP) risk.', w:'unsafe', s:'Usual caution.', g:'restrict', gn:'Legal but constitutional marriage ban; conservative.'},
+  QA:{lvl:1, r:'Very low crime; strict laws on alcohol, dress & public conduct.', w:'caution', s:'Comfortable & low-harassment for women regionally.', g:'illegal', gn:'Same-sex acts illegal — be very discreet (despite event-time leniency).'},
+  RO:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'caution', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'legal'},
+  RS:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'caution', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'discreet', gn:'Legal; Pride has faced hostility — discretion outside Belgrade.'},
+  RU:{lvl:3, r:'Risk of arbitrary detention; dual-nationals at risk; avoid border/southern regions.', w:'caution', s:'Solo travellers face scrutiny; women take usual caution.', g:'restrict', gn:'"LGBT movement" branded extremist (2023); serious legal & social risk — be very discreet.'},
+  RW:{lvl:1, r:'Low crime; one of the safest in the region.', w:'caution', s:'Among the safest African countries for women.', g:'legal', gn:'Not criminalised but socially conservative.'},
+  SA:{lvl:3, r:'Strict laws; terrorism risk; avoid Yemen border. Public conduct heavily regulated.', w:'caution', s:'Rules have eased (no abaya mandate) but harassment & guardianship norms persist.', g:'illegal', gn:'Same-sex acts can carry severe penalties incl. death — extreme danger.'},
+  SB:{lvl:2, r:'Petty crime; occasional unrest in Honiara; remote services.', w:'unsafe', s:'Usual caution.', g:'illegal', gn:'Same-sex acts illegal (rarely enforced).'},
+  SC:{lvl:1, r:'Petty crime; otherwise calm.', w:'caution', s:'Comfortable for women.', g:'legal', gn:'Decriminalised 2016.'},
+  SD:{lvl:4, r:'Civil war, violent crime, collapse of services. Do not travel.', w:'unsafe', s:'Extreme risk.', g:'illegal', gn:'Same-sex acts illegal; severe penalties.'},
+  SE:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  SG:{lvl:1, r:'Extremely low crime; strict laws & fines (drugs carry the death penalty).', w:'safe', s:'One of the safest countries for women.', g:'legal', gn:'Decriminalised 2022; no marriage; generally discreet.'},
+  SI:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  SK:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  SL:{lvl:2, r:'Petty crime; weak services.', w:'unsafe', s:'Usual caution.', g:'illegal', gn:'Same-sex acts illegal (rarely enforced).'},
+  SM:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  SN:{lvl:2, r:'Petty crime; some tension in Casamance (south).', w:'unsafe', s:'Manageable; usual caution.', g:'illegal', gn:'Same-sex acts illegal — be very discreet.'},
+  SO:{lvl:4, r:'Terrorism, kidnapping, armed conflict, piracy. Do not travel.', w:'unsafe', s:'Extreme risk.', g:'illegal', gn:'Same-sex acts can carry the death penalty — extreme danger.'},
+  SR:{lvl:2, r:'Petty crime in Paramaribo; interior remote.', w:'unsafe', s:'Usual caution.', g:'legal', gn:'Decriminalised; conservative.'},
+  SS:{lvl:4, r:'Armed conflict, violent crime, kidnapping. Do not travel.', w:'unsafe', s:'Extreme risk.', g:'illegal', gn:'Same-sex acts illegal.'},
+  ST:{lvl:1, r:'Petty crime; calm.', w:'unsafe', s:'Usual caution.', g:'legal', gn:'Decriminalised 2012.'},
+  SV:{lvl:2, r:'Gang violence much reduced under the security crackdown; petty crime remains.', w:'unsafe', s:'Usual caution.', g:'legal', gn:'Legal but no recognition; conservative.'},
+  SY:{lvl:4, r:'Active conflict, terrorism, kidnapping, landmines. Do not travel.', w:'unsafe', s:'Extreme risk.', g:'illegal', gn:'Same-sex acts illegal; extreme danger.'},
+  SZ:{lvl:2, r:'Petty crime; periodic political unrest.', w:'caution', s:'Usual caution.', g:'illegal', gn:'Same-sex acts technically illegal; rarely enforced.'},
+  TD:{lvl:4, r:'Terrorism, kidnapping, unrest. Do not travel to most areas.', w:'unsafe', s:'Extreme caution.', g:'illegal', gn:'Same-sex acts illegal.'},
+  TG:{lvl:2, r:'Petty crime; terrorism risk in the far north.', w:'unsafe', s:'Usual caution.', g:'illegal', gn:'Same-sex acts illegal.'},
+  TH:{lvl:1, r:'Scams, bag-snatching & drink-spiking in nightlife; road-accident risk is high.', w:'unsafe', s:'Generally easy for solo & women travellers; usual nightlife caution.', g:'open', gn:'Legalised same-sex marriage (2025); very welcoming.'},
+  TJ:{lvl:2, r:'Petty crime; avoid the Afghanistan border & Gorno-Badakhshan.', w:'caution', s:'Dress modestly; usual caution.', g:'restrict', gn:'Decriminalised but authorities keep an LGBTQ+ "registry" — be very discreet.'},
+  TL:{lvl:2, r:'Petty crime; limited medical facilities.', w:'unsafe', s:'Usual caution.', g:'legal', gn:'Legal; generally tolerant; no recognition.'},
+  TM:{lvl:3, r:'Authoritarian state; heavy surveillance; arbitrary detention risk.', w:'unsafe', s:'Significant restrictions.', g:'illegal', gn:'Male same-sex acts illegal — extreme danger.'},
+  TN:{lvl:2, r:'Petty crime & scams; terrorism risk; avoid the Libya/Algeria border & southern desert.', w:'caution', s:'Manageable in the north; harassment occurs — dress modestly.', g:'illegal', gn:'Same-sex acts illegal (Art. 230); forced anal exams reported — be very discreet.'},
+  TO:{lvl:1, r:'Petty theft; strict Sunday observance.', w:'caution', s:'Generally easy; dress modestly.', g:'illegal', gn:'Male same-sex acts technically illegal (not enforced).'},
+  TR:{lvl:2, r:'Petty scams in tourist areas; avoid the Syria/Iraq border southeast.', w:'caution', s:'Generally manageable; women face some harassment — dress modestly at sites.', g:'restrict', gn:'Legal but no recognition; rising hostility — be discreet.'},
+  TT:{lvl:2, r:'Violent crime in parts of Port of Spain; scams; Carnival caution.', w:'caution', s:'Usual caution; harassment occurs.', g:'legal', gn:'Decriminalised 2018 (court).'},
+  TV:{lvl:1, r:'Very low crime; remote; climate-exposed.', w:'safe', s:'Very safe; small community.', g:'illegal', gn:'Male same-sex acts technically illegal (not enforced).'},
+  TW:{lvl:1, r:'Very low crime.', w:'safe', s:'One of Asia\'s safest for women.', g:'open', gn:'First in Asia to legalise same-sex marriage (2019); very tolerant.'},
+  TZ:{lvl:2, r:'Petty crime; terrorism risk; safari/road hazards; Zanzibar dress norms.', w:'unsafe', s:'Dress modestly (esp. Zanzibar); usual caution.', g:'illegal', gn:'Same-sex acts illegal; harsh penalties — be very discreet.'},
+  UA:{lvl:4, r:'Active war: martial law, missile strikes, mined areas. Most governments advise against travel.', w:'unsafe', s:'Wartime conditions; exercise extreme caution.', g:'legal', gn:'Legal; wartime conditions override day-to-day concerns.'},
+  UG:{lvl:3, r:'Petty & violent crime; terrorism risk.', w:'unsafe', s:'Heightened caution.', g:'illegal', gn:'2023 Anti-Homosexuality Act incl. death penalty for "aggravated" cases — extreme danger.'},
+  US:{lvl:2, r:'Generally safe; firearm prevalence & higher violent-crime pockets in some cities.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open', gn:'Legal nationwide incl. marriage; acceptance varies by region.'},
+  UY:{lvl:1, r:'Petty crime in Montevideo; among the safest in South America.', w:'safe', s:'Among the easiest in the region for women.', g:'open', gn:'Marriage equality (2013); the most progressive in the region.'},
+  UZ:{lvl:2, r:'Petty crime; usual urban caution.', w:'caution', s:'Dress modestly; usual caution.', g:'illegal', gn:'Male same-sex acts criminalised — be very discreet.'},
+  VA:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  VC:{lvl:1, r:'Petty theft; otherwise calm.', w:'caution', s:'Comfortable for women.', g:'illegal', gn:'Male same-sex acts technically illegal (not enforced).'},
+  VE:{lvl:4, r:'Violent crime, express kidnapping, shortages, instability. Do not travel.', w:'unsafe', s:'Extreme caution.', g:'legal', gn:'No recognition; some social tolerance in Caracas.'},
+  VN:{lvl:1, r:'Petty crime, bag-snatching & scams; heavy traffic.', w:'unsafe', s:'Generally manageable for women; usual caution.', g:'legal', gn:'Not criminalised; increasingly tolerant; no marriage.'},
+  VU:{lvl:1, r:'Petty theft; cyclones; volcano/reef hazards.', w:'caution', s:'Generally easy for women.', g:'legal', gn:'Legal; conservative socially.'},
+  WS:{lvl:1, r:'Petty theft; cyclones.', w:'caution', s:'Generally easy; dress modestly (Sunday observance).', g:'illegal', gn:'Male same-sex acts technically illegal (not enforced).'},
+  XK:{lvl:2, r:'Petty crime; some inter-ethnic tension in the north.', w:'caution', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'discreet', gn:'Legal but very conservative — be discreet.'},
+  YE:{lvl:4, r:'War, terrorism, kidnapping, cholera, landmines. Do not travel.', w:'unsafe', s:'Extreme risk.', g:'illegal', gn:'Same-sex acts punishable by death — extreme danger.'},
+  ZA:{lvl:2, r:'High violent-crime rates; carjacking & muggings; avoid isolated areas.', w:'caution', s:'Real risk of crime; avoid walking alone at night, use reputable transport.', g:'open', gn:'Marriage equality; most progressive in Africa, though rural hostility exists.'},
+  ZM:{lvl:1, r:'Petty crime; otherwise calm.', w:'unsafe', s:'Usual caution.', g:'illegal', gn:'Same-sex acts illegal (enforcement varies).'},
+  ZW:{lvl:2, r:'Petty crime; fuel/cash shortages; avoid political gatherings.', w:'unsafe', s:'Usual caution.', g:'illegal', gn:'Male same-sex acts illegal — be very discreet.'},
+};
+const SAFE_KEY='tt_safe';
+let safeState={countryCode:null};
+function safeEsc(s){ return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function safeCountry(){ const c=safeState.countryCode; if(!c||!TT_COUNTRIES[c]) return null; return {c,n:TT_COUNTRIES[c].name,f:TT_COUNTRIES[c].flag}; }
+function safeSave(){ try{ localStorage.setItem(SAFE_KEY,JSON.stringify({countryCode:safeState.countryCode})); }catch(e){} }
+
+const SAFE_LVL={1:['Exercise normal precautions','ok','🟢'],2:['Exercise increased caution','warn','🟡'],3:['Reconsider travel','bad','🟠'],4:['Avoid all / non-essential travel','crit','🔴']};
+const SAFE_W={safe:['🚰','Tap water is generally safe to drink'],caution:['⚠️','Tap water is risky for visitors — bottled or filtered is safer'],unsafe:['🚱','Do not drink the tap water — use bottled or purified']};
+const SAFE_G={open:['🏳️‍🌈','Legal & broadly accepted','ok'],legal:['✅','Legal — social acceptance varies','ok'],discreet:['🤫','Legal, but discretion advised','warn'],restrict:['⚠️','Hostile or at-risk — be very discreet','warn'],illegal:['⛔','Same-sex relations are criminalised','bad']};
+
+function safeInit(){
+  let saved=null; try{ saved=JSON.parse(localStorage.getItem(SAFE_KEY)||'null'); }catch(e){}
+  if(saved&&saved.countryCode&&SAFE_DATA[saved.countryCode]){ safeState.countryCode=saved.countryCode; }
+  else { const trip=getActiveTrip(); if(trip&&trip.destination){ try{ const r=resolveDestination(trip.destination); if(r&&r.countryCode&&SAFE_DATA[r.countryCode]) safeState.countryCode=r.countryCode; }catch(_){} } }
+  safeRenderCountryList('');
+  if(safeState.countryCode&&SAFE_DATA[safeState.countryCode]){ safeSelectCountry(safeState.countryCode,false); }
+  else { safeState.countryCode=null; document.getElementById('safe-content').style.display='none'; document.getElementById('safe-empty').style.display=''; }
+  if(!document._safeClickBound){ document.addEventListener('click',safeDocClick); document._safeClickBound=true; }
+}
+function safeOpenPicker(){ const d=document.getElementById('safe-country-drop'); if(d.style.display==='block'){ safeClosePicker(); return; } d.style.display='block'; const s=document.getElementById('safe-country-search'); s.value=''; safeRenderCountryList(''); setTimeout(()=>s.focus(),50); }
+function safeClosePicker(){ document.getElementById('safe-country-drop').style.display='none'; }
+function safeDocClick(e){ const w=document.getElementById('safe-country-disp'),d=document.getElementById('safe-country-drop'); if(!w||!d||d.style.display!=='block') return; if(w.contains(e.target)||d.contains(e.target)) return; safeClosePicker(); }
+function safeFilterCountries(){ safeRenderCountryList((document.getElementById('safe-country-search').value||'').toLowerCase().trim()); }
+function safeRenderCountryList(q){
+  const list=Object.keys(SAFE_DATA).filter(c=>TT_COUNTRIES[c]).map(c=>({c,n:TT_COUNTRIES[c].name,f:TT_COUNTRIES[c].flag}))
+    .filter(co=>!q||co.n.toLowerCase().includes(q)||co.c.toLowerCase().includes(q)).sort((a,b)=>a.n.localeCompare(b.n));
+  const html=list.length? list.map(co=>{ const lv=SAFE_DATA[co.c].lvl; return `<div class="tc-drop-item" onclick="safeSelectCountry('${co.c}')"><span class="tc-drop-flag">${co.f}</span><span class="tc-drop-name">${safeEsc(co.n)}</span><span class="tc-drop-cur">${SAFE_LVL[lv][2]} L${lv}</span></div>`; }).join('')
+    : `<div class="tc-drop-item" style="color:var(--muted);cursor:default">No matches for "${safeEsc(q)}"</div>`;
+  document.getElementById('safe-country-list').innerHTML=html;
+}
+function safeSelectCountry(code,save){ if(save===undefined) save=true; if(!SAFE_DATA[code]) return; safeState.countryCode=code; if(save) safeSave(); safeClosePicker(); safeRender(); }
+function safeRow(ico,label,val){ return `<div class="dr-row"><span class="dr-row-ico">${ico}</span><div class="dr-row-body"><div class="dr-row-lbl">${label}</div><div class="dr-row-val">${val}</div></div></div>`; }
+function safeRender(){
+  const co=safeCountry(); if(!co){ document.getElementById('safe-content').style.display='none'; document.getElementById('safe-empty').style.display=''; return; }
+  const d=SAFE_DATA[co.c];
+  document.getElementById('safe-empty').style.display='none';
+  document.getElementById('safe-content').style.display='';
+  document.getElementById('safe-disp-flag').textContent=co.f;
+  document.getElementById('safe-disp-name').textContent=co.n;
+  document.getElementById('safe-hero-flag').textContent=co.f;
+  document.getElementById('safe-hero-co').textContent=co.n;
+  const lv=SAFE_LVL[d.lvl];
+  const hero=document.getElementById('safe-hero');
+  hero.className='dr-hero safe-hero-'+lv[1];
+  document.getElementById('safe-hero-sub').innerHTML=`${lv[2]} <strong>Level ${d.lvl}</strong> — ${lv[0]}`;
+  // safety & risks
+  document.getElementById('safe-risks').innerHTML=
+    safeRow(lv[2],'Overall advisory',`<span class="safe-badge safe-${lv[1]}">Level ${d.lvl} · ${lv[0]}</span>`)
+    + safeRow('⚠️','Common risks & scams',safeEsc(d.r));
+  // water
+  const w=SAFE_W[d.w];
+  document.getElementById('safe-water').innerHTML=safeRow(w[0],'Drinking water',safeEsc(w[1]));
+  // solo
+  document.getElementById('safe-solo').innerHTML=safeRow('🧍','Solo & women travellers',safeEsc(d.s));
+  // lgbt
+  const g=SAFE_G[d.g];
+  let lg=safeRow(g[0],'Legal & social status',`<span class="safe-badge safe-${g[2]}">${g[1]}</span>`);
+  if(d.gn) lg+=safeRow('ℹ️','Note',safeEsc(d.gn));
+  document.getElementById('safe-lgbt').innerHTML=lg;
+}
+
 const LP_PHRASES = [
   {id:'hello',     cat:'ess', en:'Hello'},
   {id:'bye',       cat:'ess', en:'Goodbye'},
@@ -39248,6 +40451,17 @@ function lpFavKey(id){ return lpLang + ':' + id; }
 
 /* Map an active-trip destination string to a language code. */
 function lpLangForDest(dest){
+  // Phase 7: prefer the shared resolver → registry phrasebook code (covers all 202
+  // countries, alias- and bare-city-aware). Fall back to the legacy string map so
+  // there is no regression for anything the resolver can't place.
+  try {
+    if (typeof resolveDestination === 'function' && typeof TT_COUNTRIES !== 'undefined'){
+      const r = resolveDestination(dest);
+      if (r && r.countryCode && TT_COUNTRIES[r.countryCode] && TT_COUNTRIES[r.countryCode].pb){
+        return TT_COUNTRIES[r.countryCode].pb;
+      }
+    }
+  } catch(_){}
   const d = (dest || '').toLowerCase();
   const map = [
     ['mexico','es'],['spain','es'],['argentin','es'],['peru','es'],['chile','es'],['colombia','es'],['cuba','es'],['costa rica','es'],['madrid','es'],['barcelona','es'],
