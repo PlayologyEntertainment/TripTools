@@ -39352,7 +39352,61 @@ function holHijriDates(y,hm,hd){
   return out;
 }
 /* Chinese New Year (first day) by year — astronomical dates, [month,day]. */
-const HOL_CNY={2024:[2,10],2025:[1,29],2026:[2,17],2027:[2,6],2028:[1,26],2029:[2,13],2030:[2,3],2031:[1,23],2032:[2,11],2033:[1,31],2034:[2,19],2035:[2,8]};
+const HOL_CNY={2024:[2,10],2025:[1,29],2026:[2,17],2027:[2,6],2028:[1,26],2029:[2,13],2030:[2,3],2031:[1,23],2032:[2,11],2033:[1,31],2034:[2,19],2035:[2,8],2036:[1,28],2037:[2,15],2038:[2,4],2039:[1,24],2040:[2,12]};
+
+/* Lunar-festival engine (Phase 7 refresh) — Meeus ch.49 Moon phases → festival
+   dates for any year. Hindu/Buddhist festivals are lunisolar; these are computed
+   to ±1–2 days of local panchang (which is sunrise/locale-specific and can differ
+   by country/tradition), so they keep the ≈ "approximate" marker. */
+function holPhaseJDE(k){
+  const R=Math.PI/180, T=k/1236.85;
+  let jde=2451550.09766+29.530588861*k+0.00015437*T*T-0.000000150*T*T*T+0.00000000073*T*T*T*T;
+  const E=1-0.002516*T-0.0000074*T*T;
+  const M=(2.5534+29.10535670*k-0.0000014*T*T-0.00000011*T*T*T)*R;
+  const Mp=(201.5643+385.81693528*k+0.0107582*T*T+0.00001238*T*T*T-0.000000058*T*T*T*T)*R;
+  const F=(160.7108+390.67050284*k-0.0016118*T*T-0.00000227*T*T*T+0.000000011*T*T*T*T)*R;
+  const Om=(124.7746-1.56375588*k+0.0020672*T*T+0.00000215*T*T*T)*R;
+  const isNew=Math.abs(k-Math.round(k))<0.25; let c=0;
+  if(isNew){ c+=-0.40720*Math.sin(Mp)+0.17241*E*Math.sin(M)+0.01608*Math.sin(2*Mp)+0.01039*Math.sin(2*F)+0.00739*E*Math.sin(Mp-M)-0.00514*E*Math.sin(Mp+M)+0.00208*E*E*Math.sin(2*M); }
+  else { c+=-0.40614*Math.sin(Mp)+0.17302*E*Math.sin(M)+0.01614*Math.sin(2*Mp)+0.01043*Math.sin(2*F)+0.00734*E*Math.sin(Mp-M)-0.00515*E*Math.sin(Mp+M)+0.00209*E*E*Math.sin(2*M); }
+  c+=-0.00111*Math.sin(Mp-2*F)-0.00057*Math.sin(Mp+2*F)+0.00056*E*Math.sin(2*Mp+M)-0.00042*Math.sin(3*Mp)+0.00042*E*Math.sin(M+2*F)+0.00038*E*Math.sin(M-2*F)-0.00024*E*Math.sin(2*Mp-M)-0.00017*Math.sin(Om)-0.00007*Math.sin(Mp+2*M)+0.00004*Math.sin(2*Mp-2*F)+0.00004*Math.sin(3*M)+0.00003*Math.sin(Mp+M-2*F)+0.00003*Math.sin(2*Mp+2*F)-0.00003*Math.sin(Mp+M+2*F)+0.00003*Math.sin(Mp-M+2*F)-0.00002*Math.sin(Mp-M-2*F)-0.00002*Math.sin(3*Mp+M)+0.00002*Math.sin(4*Mp);
+  jde+=c;
+  const A=[[299.77,0.107408,-0.009173,0.000325],[251.88,0.016321,0,0.000165],[251.83,26.651886,0,0.000164],[349.42,36.412478,0,0.000126],[84.66,18.206239,0,0.000110],[141.74,53.303771,0,0.000062],[207.14,2.453732,0,0.000060],[154.84,7.306860,0,0.000056],[34.52,27.261239,0,0.000047],[207.19,0.121824,0,0.000042],[291.34,1.844379,0,0.000040],[161.72,24.198154,0,0.000037],[239.56,25.513099,0,0.000035],[331.55,3.592518,0,0.000023]];
+  for(const a of A) jde+=a[3]*Math.sin((a[0]+a[1]*k+a[2]*T*T)*R);
+  return jde;
+}
+function holJdToCal(jd){
+  const z=Math.floor(jd+0.5), f=jd+0.5-z; let A=z;
+  if(z>=2299161){const al=Math.floor((z-1867216.25)/36524.25);A=z+1+al-Math.floor(al/4);}
+  const B=A+1524,C=Math.floor((B-122.1)/365.25),Dd=Math.floor(365.25*C),Ee=Math.floor((B-Dd)/30.6001);
+  const day=B-Dd-Math.floor(30.6001*Ee)+f, month=Ee<14?Ee-1:Ee-13, year=month>2?C-4716:C-4715;
+  return {y:year,m:month,d:Math.floor(day)};
+}
+/* Date (local midnight) of the new/full moon whose India-time civil date lands in the window. */
+function holMoonInWindow(year,m1,d1,m2,d2,phase){
+  const kBase=Math.round((year-2000)*12.3685);
+  for(let dk=-3;dk<=14;dk++){
+    const k=phase==='full'?(kBase+dk+0.5):(kBase+dk);
+    const cal=holJdToCal(holPhaseJDE(k)+5.5/24);            // IST civil date
+    const di=new Date(cal.y,cal.m-1,cal.d);
+    if(di>=new Date(year,m1-1,d1) && di<=new Date(year,m2-1,d2)) return di;
+  }
+  return null;
+}
+function holLunarFest(fest,y){
+  const A=(d,n)=>{ const x=new Date(d); x.setDate(x.getDate()+n); return x; };
+  switch(fest){
+    case 'diwali':     return holMoonInWindow(y,10,13,11,14,'new');
+    case 'holi':       { const fm=holMoonInWindow(y,2,25,3,31,'full'); return fm?A(fm,1):null; }
+    case 'shivaratri': { const nm=holMoonInWindow(y,2,14,3,12,'new');  return nm?A(nm,-1):null; }
+    case 'vesak':      return holMoonInWindow(y,4,25,5,24,'full');
+    case 'ganesh':     { const nm=holMoonInWindow(y,8,15,9,16,'new');  return nm?A(nm,4):null; }
+    case 'dussehra':   { const nm=holMoonInWindow(y,9,14,10,12,'new'); return nm?A(nm,10):null; }
+    case 'midautumn':  return holMoonInWindow(y,9,8,10,8,'full');
+  }
+  return null;
+}
+
 
 /* Israel follows the Hebrew calendar; key holidays by Gregorian year [month,day,name]. */
 const HOL_IL={
@@ -39363,6 +39417,16 @@ const HOL_IL={
  2028:[[4,11,'Passover (Pesach) I'],[4,17,'Passover VII'],[5,2,'Independence Day'],[5,31,'Shavuot'],[9,21,'Rosh Hashanah'],[9,30,'Yom Kippur'],[10,5,'Sukkot I'],[10,12,'Simchat Torah']],
  2029:[[3,31,'Passover (Pesach) I'],[4,6,'Passover VII'],[4,19,'Independence Day'],[5,20,'Shavuot'],[9,10,'Rosh Hashanah'],[9,19,'Yom Kippur'],[9,24,'Sukkot I'],[10,1,'Simchat Torah']],
  2030:[[4,18,'Passover (Pesach) I'],[4,24,'Passover VII'],[5,8,'Independence Day'],[6,7,'Shavuot'],[9,28,'Rosh Hashanah'],[10,7,'Yom Kippur'],[10,12,'Sukkot I'],[10,19,'Simchat Torah']],
+ 2031:[[4,8,'Passover (Pesach) I'],[4,14,'Passover VII'],[4,29,'Independence Day'],[5,28,'Shavuot'],[9,18,'Rosh Hashanah'],[9,27,'Yom Kippur'],[10,2,'Sukkot I'],[10,9,'Simchat Torah']],
+ 2032:[[3,27,'Passover (Pesach) I'],[4,2,'Passover VII'],[4,15,'Independence Day'],[5,16,'Shavuot'],[9,6,'Rosh Hashanah'],[9,15,'Yom Kippur'],[9,20,'Sukkot I'],[9,27,'Simchat Torah']],
+ 2033:[[4,14,'Passover (Pesach) I'],[4,20,'Passover VII'],[5,4,'Independence Day'],[6,3,'Shavuot'],[9,24,'Rosh Hashanah'],[10,3,'Yom Kippur'],[10,8,'Sukkot I'],[10,15,'Simchat Torah']],
+ 2034:[[4,4,'Passover (Pesach) I'],[4,10,'Passover VII'],[4,25,'Independence Day'],[5,24,'Shavuot'],[9,14,'Rosh Hashanah'],[9,23,'Yom Kippur'],[9,28,'Sukkot I'],[10,5,'Simchat Torah']],
+ 2035:[[4,24,'Passover (Pesach) I'],[4,30,'Passover VII'],[5,15,'Independence Day'],[6,13,'Shavuot'],[10,4,'Rosh Hashanah'],[10,13,'Yom Kippur'],[10,18,'Sukkot I'],[10,25,'Simchat Torah']],
+ 2036:[[4,12,'Passover (Pesach) I'],[4,18,'Passover VII'],[5,1,'Independence Day'],[6,1,'Shavuot'],[9,22,'Rosh Hashanah'],[10,1,'Yom Kippur'],[10,6,'Sukkot I'],[10,13,'Simchat Torah']],
+ 2037:[[3,31,'Passover (Pesach) I'],[4,6,'Passover VII'],[4,21,'Independence Day'],[5,20,'Shavuot'],[9,10,'Rosh Hashanah'],[9,19,'Yom Kippur'],[9,24,'Sukkot I'],[10,1,'Simchat Torah']],
+ 2038:[[4,20,'Passover (Pesach) I'],[4,26,'Passover VII'],[5,11,'Independence Day'],[6,9,'Shavuot'],[9,30,'Rosh Hashanah'],[10,9,'Yom Kippur'],[10,14,'Sukkot I'],[10,21,'Simchat Torah']],
+ 2039:[[4,9,'Passover (Pesach) I'],[4,15,'Passover VII'],[4,28,'Independence Day'],[5,29,'Shavuot'],[9,19,'Rosh Hashanah'],[9,28,'Yom Kippur'],[10,3,'Sukkot I'],[10,10,'Simchat Torah']],
+ 2040:[[3,29,'Passover (Pesach) I'],[4,4,'Passover VII'],[4,18,'Independence Day'],[5,18,'Shavuot'],[9,8,'Rosh Hashanah'],[9,17,'Yom Kippur'],[9,22,'Sukkot I'],[9,29,'Simchat Torah']],
 };
 
 /* Rule builders: f=fixed, e=Western-Easter offset, oe=Orthodox-Easter offset,
@@ -39374,6 +39438,7 @@ const _hh=(n,hm,hd)=>({n,t:'h',hm,hd});
 const _hn=(n,m,wd,nth)=>({n,t:'nw',m,wd,nth});
 const _hc=(n,o)=>({n,t:'cny',o:o||0});
 const _ha=(n,m,d)=>({n,t:'fa',m,d}); // fixed date but lunar/movable in reality → flagged approximate
+const _hl=(n,fest,o)=>({n,t:'lun',fest,o:o||0}); // computed lunisolar festival
 
 /* Shared bundles */
 const H_NY=_hf("New Year's Day",1,1), H_XMAS=_hf('Christmas Day',12,25), H_BOX=_hf('Boxing Day',12,26),
@@ -39486,7 +39551,7 @@ const HOL_DATA = {
   MG:[H_NY,H_EM,H_LAB,H_ASC,H_WHIT,_hf('Martyrs Day',3,29),_hf('Independence Day',6,26),H_ASSUM,H_ALLS,H_XMAS],
   ML:[H_NY,_hf('Army Day',1,20),...HB_ISL,H_EM,H_LAB,_hf('Africa Day',5,25),_hf('Independence Day',9,22),H_XMAS],
   MR:[H_NY,...HB_ISL,_hh('Ashura',1,10),H_LAB,_hf('Africa Day',5,25),_hf('Independence Day',11,28)],
-  MU:[H_NY,_hf('Day after New Year',1,2),_hc('Chinese Spring Festival'),_ha('Thaipoosam Cavadee',2,4),_ha('Maha Shivaratree',2,26),_hf('Abolition of Slavery',2,1),_hf('National Day',3,12),...HB_ISL,H_LAB,_ha('Ganesh Chaturthi',9,7),_ha('Diwali',11,1),_hf('Arrival of Indentured Labourers',11,2),H_XMAS],
+  MU:[H_NY,_hf('Day after New Year',1,2),_hc('Chinese Spring Festival'),_ha('Thaipoosam Cavadee',2,4),_hl('Maha Shivaratree','shivaratri'),_hf('Abolition of Slavery',2,1),_hf('National Day',3,12),...HB_ISL,H_LAB,_hl('Ganesh Chaturthi','ganesh'),_hl('Diwali','diwali'),_hf('Arrival of Indentured Labourers',11,2),H_XMAS],
   MW:[H_NY,_hf('John Chilembwe Day',1,15),_hf('Martyrs Day',3,3),H_GF,H_EM,H_LAB,_hf('Kamuzu Day',5,14),_hf('Independence Day',7,6),_hf('Mothers Day',10,15),H_XMAS,H_BOX],
   MZ:[H_NY,_hf('Heroes Day',2,3),_hf("Women's Day",4,7),H_LAB,_hf('Independence Day',6,25),_hf('Victory Day',9,7),_hf('Armed Forces Day',9,25),_hf('Peace & Reconciliation',10,4),H_XMAS],
   NA:[H_NY,_hf('Independence Day',3,21),H_GF,H_EM,H_LAB,_hf('Cassinga Day',5,4),H_ASC,_hf('Africa Day',5,25),_hf('Heroes Day',8,26),_hf('Human Rights Day',12,10),H_XMAS,H_BOX],
@@ -39513,36 +39578,36 @@ const HOL_DATA = {
   AF:[_hf('Nowruz',3,21),...HB_ISL,_hh('Ashura',1,10),_hf('Independence Day',8,19)],
   AM:[H_NY,_hf('Day after New Year',1,2),_hf('Orthodox Christmas',1,6),_hf('Army Day',1,28),_hf("Women's Day",3,8),_hf('Genocide Remembrance Day',4,24),H_LAB,_hf('Victory & Peace Day',5,9),_hf('Republic Day',5,28),_hf('Constitution Day',7,5),_hf('Independence Day',9,21),H_XMAS],
   AZ:[H_NY,_hf('Day after New Year',1,2),_hf("Women's Day",3,8),_hf('Nowruz',3,20),...HB_ISL,_hf('Victory Day',5,9),_hf('Republic Day',5,28),_hf('Armed Forces Day',6,26),_hf('Independence Day',10,18),_hf('Flag Day',11,9),_hf('Constitution Day',11,12),_hf('Solidarity Day',12,31)],
-  BD:[_hf('International Mother Language Day',2,21),_hf('Independence Day',3,26),_ha('Bengali New Year',4,14),H_LAB,...HB_ISL,_hh('Ashura',1,10),_hf('National Mourning Day',8,15),_ha('Durga Puja',10,1),_hf('Victory Day',12,16),H_XMAS],
+  BD:[_hf('International Mother Language Day',2,21),_hf('Independence Day',3,26),_ha('Bengali New Year',4,14),H_LAB,...HB_ISL,_hh('Ashura',1,10),_hf('National Mourning Day',8,15),_hl('Durga Puja','dussehra'),_hf('Victory Day',12,16),H_XMAS],
   BN:[H_NY,_hc('Chinese New Year'),...HB_ISL,_hh('Israa & Miraj',7,27),_hh('First Day of Ramadan',9,1),_hh('Revelation of Quran',9,17),_hf('National Day',2,23),_hf('Armed Forces Day',5,31),_hf("Sultan's Birthday",7,15),H_XMAS],
-  BT:[H_NY,_ha('Traditional New Year (Losar)',3,2),_hf("King's Birthday",2,21),_hf('Coronation Day',11,1),_ha('Birth of Guru Rinpoche',7,6),_ha('Blessed Rainy Day',9,23),_ha('Dashain',10,1),_hf('National Day',12,17)],
-  CN:[H_NY,_hc('Chinese New Year',-1),_hc('Chinese New Year'),_hc('Chinese New Year',1),_hc('Chinese New Year',2),_ha('Qingming Festival',4,4),H_LAB,_ha('Dragon Boat Festival',6,10),_ha('Mid-Autumn Festival',9,17),_hf('National Day',10,1),_hf('National Day Golden Week',10,2),_ha('National Day Holiday',10,3)],
+  BT:[H_NY,_ha('Traditional New Year (Losar)',3,2),_hf("King's Birthday",2,21),_hf('Coronation Day',11,1),_ha('Birth of Guru Rinpoche',7,6),_ha('Blessed Rainy Day',9,23),_hl('Dashain','dussehra'),_hf('National Day',12,17)],
+  CN:[H_NY,_hc('Chinese New Year',-1),_hc('Chinese New Year'),_hc('Chinese New Year',1),_hc('Chinese New Year',2),_ha('Qingming Festival',4,4),H_LAB,_ha('Dragon Boat Festival',6,10),_hl('Mid-Autumn Festival','midautumn'),_hf('National Day',10,1),_hf('National Day Golden Week',10,2),_ha('National Day Holiday',10,3)],
   GE:[H_NY,_hf('Day after New Year',1,2),_hf('Orthodox Christmas',1,7),_hf('Epiphany',1,19),_ho('Orthodox Good Friday',-2),_ho('Orthodox Easter',0),_ho('Orthodox Easter Monday',1),_hf('Mother’s Day',3,3),_hf("Women's Day",3,8),_hf('National Unity Day',4,9),_hf('Victory Day',5,9),_hf('St Andrew',5,12),_hf('Independence Day',5,26),_ha('Mariamoba',8,28),_ha('Svetitskhovloba',10,14),_hf('St George Day',11,23)],
-  HK:[H_NY,_hc('Chinese New Year'),_hc('Chinese New Year',1),_hc('Chinese New Year',2),H_GF,_he('Holy Saturday',-1),H_EM,_ha('Ching Ming',4,4),H_LAB,_ha('Buddha’s Birthday',5,15),_ha('Dragon Boat Festival',6,10),_hf('HKSAR Establishment Day',7,1),_ha('Day after Mid-Autumn',9,18),_hf('National Day',10,1),_ha('Chung Yeung',10,11),H_XMAS,_hf('First Weekday after Christmas',12,26)],
-  ID:[H_NY,_hc('Chinese New Year'),...HB_ISL,_hh('Israa & Miraj',7,27),_hf('Nyepi (Bali New Year)',3,29),H_GF,_ha('Buddha’s Birthday (Vesak)',5,23),H_ASC,_hf('Pancasila Day',6,1),_hf('Independence Day',8,17),H_XMAS],
-  IN:[_hf('Republic Day',1,26),...HB_ISL,_hf('Independence Day',8,15),_hf('Gandhi Jayanti',10,2),_ha('Diwali',11,1),_ha('Holi',3,25),H_XMAS],
+  HK:[H_NY,_hc('Chinese New Year'),_hc('Chinese New Year',1),_hc('Chinese New Year',2),H_GF,_he('Holy Saturday',-1),H_EM,_ha('Ching Ming',4,4),H_LAB,_ha('Buddha’s Birthday',5,15),_ha('Dragon Boat Festival',6,10),_hf('HKSAR Establishment Day',7,1),_hl('Day after Mid-Autumn','midautumn',1),_hf('National Day',10,1),_ha('Chung Yeung',10,11),H_XMAS,_hf('First Weekday after Christmas',12,26)],
+  ID:[H_NY,_hc('Chinese New Year'),...HB_ISL,_hh('Israa & Miraj',7,27),_hf('Nyepi (Bali New Year)',3,29),H_GF,_hl('Buddha’s Birthday (Vesak)','vesak'),H_ASC,_hf('Pancasila Day',6,1),_hf('Independence Day',8,17),H_XMAS],
+  IN:[_hf('Republic Day',1,26),...HB_ISL,_hf('Independence Day',8,15),_hf('Gandhi Jayanti',10,2),_hl('Diwali','diwali'),_hl('Holi','holi'),H_XMAS],
   JP:[H_NY,_hn('Coming of Age Day',1,2,2),_hf('National Foundation Day',2,11),_hf("Emperor's Birthday",2,23),_hf('Vernal Equinox',3,20),_hf('Showa Day',4,29),_hf('Constitution Day',5,3),_hf('Greenery Day',5,4),_hf("Children's Day",5,5),_hn('Marine Day',7,1,3),_hf('Mountain Day',8,11),_hn('Respect for the Aged Day',9,1,3),_hf('Autumnal Equinox',9,23),_hn('Sports Day',10,1,2),_hf('Culture Day',11,3),_hf('Labour Thanksgiving',11,23)],
   KG:[H_NY,_hf('Orthodox Christmas',1,7),_hf('Fatherland Defender Day',2,23),_hf("Women's Day",3,8),_hf('Nowruz',3,21),...HB_ISL,_hf('Day of People’s Revolution',4,7),_hf('Labour Day',5,1),_hf('Constitution Day',5,5),_hf('Victory Day',5,9),_hf('Independence Day',8,31)],
-  KH:[H_NY,_hf('Victory over Genocide',1,7),_ha('Khmer New Year',4,14),_ha('Visak Bochea',5,15),_hf('Royal Ploughing',5,16),_hf("King's Birthday",5,14),H_LAB,_hf("Queen Mother's Birthday",6,18),_hf('Constitution Day',9,24),_ha('Pchum Ben',9,30),_hf('Coronation Day',10,29),_hf('Independence Day',11,9),_hf('Water Festival',11,14)],
+  KH:[H_NY,_hf('Victory over Genocide',1,7),_ha('Khmer New Year',4,14),_hl('Visak Bochea','vesak'),_hf('Royal Ploughing',5,16),_hf("King's Birthday",5,14),H_LAB,_hf("Queen Mother's Birthday",6,18),_hf('Constitution Day',9,24),_ha('Pchum Ben',9,30),_hf('Coronation Day',10,29),_hf('Independence Day',11,9),_hf('Water Festival',11,14)],
   KP:[H_NY,_hf('Day of the Shining Star',2,16),_hf('Day of the Sun',4,15),_hf('Army Foundation Day',4,25),H_LAB,_hf('Liberation Day',8,15),_hf('Republic Foundation Day',9,9),_hf('Party Foundation Day',10,10)],
-  KR:[H_NY,_hc('Seollal (Lunar NY)',-1),_hc('Seollal (Lunar NY)'),_hc('Seollal (Lunar NY)',1),_hf('Independence Movement Day',3,1),_hf("Children's Day",5,5),_ha('Buddha’s Birthday',5,15),_hf('Memorial Day',6,6),_hf('Liberation Day',8,15),_ha('Chuseok',9,16),_ha('Chuseok Holiday',9,17),_hf('National Foundation Day',10,3),_hf('Hangeul Day',10,9),H_XMAS],
+  KR:[H_NY,_hc('Seollal (Lunar NY)',-1),_hc('Seollal (Lunar NY)'),_hc('Seollal (Lunar NY)',1),_hf('Independence Movement Day',3,1),_hf("Children's Day",5,5),_ha('Buddha’s Birthday',5,15),_hf('Memorial Day',6,6),_hf('Liberation Day',8,15),_hl('Chuseok','midautumn'),_hl('Chuseok Holiday','midautumn',1),_hf('National Foundation Day',10,3),_hf('Hangeul Day',10,9),H_XMAS],
   KZ:[H_NY,_hf('Day after New Year',1,2),_hf('Orthodox Christmas',1,7),_hf("Women's Day",3,8),_hf('Nauryz',3,21),_ha('Nauryz Holiday',3,22),_hf('Unity Day',5,1),_hf('Defender of the Fatherland',5,7),_hf('Victory Day',5,9),_hf('Capital Day',7,6),_hf('Constitution Day',8,30),_hf('Republic Day',10,25),_hf('Independence Day',12,16)],
   LA:[H_NY,_ha('Lao New Year (Pi Mai)',4,14),H_LAB,_hf('Lao National Day',12,2)],
-  LK:[H_NY,_ha('Tamil Thai Pongal',1,14),_hf('Independence Day',2,4),_ha('Maha Sivarathri',2,26),...HB_ISL,_ha('Sinhala & Tamil New Year',4,14),H_GF,_ha('Vesak Poya',5,12),_hf('May Day',5,1),_ha('Deepavali',10,31),H_XMAS],
+  LK:[H_NY,_ha('Tamil Thai Pongal',1,14),_hf('Independence Day',2,4),_hl('Maha Sivarathri','shivaratri'),...HB_ISL,_ha('Sinhala & Tamil New Year',4,14),H_GF,_hl('Vesak Poya','vesak'),_hf('May Day',5,1),_hl('Deepavali','diwali'),H_XMAS],
   MM:[H_NY,_hf('Independence Day',1,4),_hf('Union Day',2,12),_hf('Peasants Day',3,2),_hf('Armed Forces Day',3,27),_ha('Thingyan (Water Festival)',4,13),_ha('Burmese New Year',4,17),H_LAB,_ha('Full Moon of Kason',5,15),_hf('Martyrs Day',7,19),_ha('Thadingyut',10,17),H_XMAS],
   MN:[H_NY,_ha('Lunar New Year (Tsagaan Sar)',3,1),_hf("Women's Day",3,8),_hf("Children's Day",6,1),_hf('Naadam Festival',7,11),_ha('Naadam Holiday',7,12),_hf('Genghis Khan Day',11,8),_hf('Independence/Republic Day',12,29)],
-  MO:[H_NY,_hc('Chinese New Year'),_hc('Chinese New Year',1),_hc('Chinese New Year',2),H_GF,_he('Holy Saturday',-1),_ha('Ching Ming',4,4),H_LAB,_ha('Buddha’s Birthday',5,15),_ha('Dragon Boat Festival',6,10),_ha('Mid-Autumn Holiday',9,18),_hf('National Day (PRC)',10,1),_ha('Chung Yeung',10,11),_hf('MSAR Establishment Day',12,20),H_XMAS,H_BOX],
+  MO:[H_NY,_hc('Chinese New Year'),_hc('Chinese New Year',1),_hc('Chinese New Year',2),H_GF,_he('Holy Saturday',-1),_ha('Ching Ming',4,4),H_LAB,_ha('Buddha’s Birthday',5,15),_ha('Dragon Boat Festival',6,10),_hl('Mid-Autumn Holiday','midautumn',1),_hf('National Day (PRC)',10,1),_ha('Chung Yeung',10,11),_hf('MSAR Establishment Day',12,20),H_XMAS,H_BOX],
   MV:[H_NY,...HB_ISL,_hf('Independence Day',7,26),_hf('Victory Day',11,3),_hf('Republic Day',11,11),_hf('National Day',9,16)],
-  MY:[H_NY,_hc('Chinese New Year'),_hc('Chinese New Year',1),...HB_ISL,_hh('Awal Muharram',1,1),_ha('Wesak Day',5,22),_hf('Labour Day',5,1),_hf("King's Birthday",6,2),_hf('National Day (Merdeka)',8,31),_hf('Malaysia Day',9,16),_ha('Deepavali',10,31),H_XMAS],
-  NP:[_hf('Prithvi Jayanti',1,11),_ha('Maghe Sankranti',1,15),_hf('Democracy Day',2,19),_ha('Maha Shivaratri',2,26),_ha('Holi',3,25),_ha('Nepali New Year',4,13),H_LAB,_ha('Buddha Jayanti',5,12),_hf('Republic Day',5,29),_ha('Dashain',10,1),_ha('Tihar (Diwali)',11,1),_hf('Constitution Day',9,19)],
+  MY:[H_NY,_hc('Chinese New Year'),_hc('Chinese New Year',1),...HB_ISL,_hh('Awal Muharram',1,1),_hl('Wesak Day','vesak'),_hf('Labour Day',5,1),_hf("King's Birthday",6,2),_hf('National Day (Merdeka)',8,31),_hf('Malaysia Day',9,16),_hl('Deepavali','diwali'),H_XMAS],
+  NP:[_hf('Prithvi Jayanti',1,11),_ha('Maghe Sankranti',1,15),_hf('Democracy Day',2,19),_hl('Maha Shivaratri','shivaratri'),_hl('Holi','holi'),_ha('Nepali New Year',4,13),H_LAB,_hl('Buddha Jayanti','vesak'),_hf('Republic Day',5,29),_hl('Dashain','dussehra'),_hl('Tihar (Diwali)','diwali'),_hf('Constitution Day',9,19)],
   PH:[H_NY,_hf('EDSA Revolution',2,25),H_GF,_he('Maundy Thursday',-3),_hf('Day of Valor',4,9),H_LAB,...[_hh('Eid al-Fitr',10,1),_hh('Eid al-Adha',12,10)],_hf('Independence Day',6,12),_hf('Ninoy Aquino Day',8,21),_hn('National Heroes Day',8,1,-1),_hf('All Saints Day',11,1),_hf('Bonifacio Day',11,30),H_XMAS,_hf('Rizal Day',12,30)],
   PK:[_hf('Kashmir Day',2,5),_hf('Pakistan Day',3,23),...HB_ISL,_hh('Ashura',1,10),H_LAB,_hf('Independence Day',8,14),_hf('Iqbal Day',11,9),_hf('Quaid-e-Azam Day',12,25)],
-  SG:[H_NY,_hc('Chinese New Year'),_hc('Chinese New Year',1),H_GF,...[_hh('Hari Raya Puasa',10,1),_hh('Hari Raya Haji',12,10)],_hf('Labour Day',5,1),_ha('Vesak Day',5,22),_hf('National Day',8,9),_ha('Deepavali',10,31),H_XMAS],
-  TH:[H_NY,_ha('Makha Bucha',2,24),_hf('Chakri Day',4,6),_ha('Songkran',4,13),_ha('Songkran Holiday',4,14),_ha('Songkran Holiday',4,15),H_LAB,_hf('Coronation Day',5,4),_ha('Visakha Bucha',5,22),_hf("Queen's Birthday",6,3),_ha('Asalha Bucha',7,20),_hf("King's Birthday",7,28),_hf('Mother’s Day',8,12),_hf('Chulalongkorn Day',10,23),_hf('Father’s Day',12,5),_hf('Constitution Day',12,10)],
+  SG:[H_NY,_hc('Chinese New Year'),_hc('Chinese New Year',1),H_GF,...[_hh('Hari Raya Puasa',10,1),_hh('Hari Raya Haji',12,10)],_hf('Labour Day',5,1),_hl('Vesak Day','vesak'),_hf('National Day',8,9),_hl('Deepavali','diwali'),H_XMAS],
+  TH:[H_NY,_ha('Makha Bucha',2,24),_hf('Chakri Day',4,6),_ha('Songkran',4,13),_ha('Songkran Holiday',4,14),_ha('Songkran Holiday',4,15),H_LAB,_hf('Coronation Day',5,4),_hl('Visakha Bucha','vesak'),_hf("Queen's Birthday",6,3),_ha('Asalha Bucha',7,20),_hf("King's Birthday",7,28),_hf('Mother’s Day',8,12),_hf('Chulalongkorn Day',10,23),_hf('Father’s Day',12,5),_hf('Constitution Day',12,10)],
   TJ:[H_NY,_hf("Women's Day",3,8),_hf('Nowruz',3,21),_ha('Nowruz Holiday',3,22),...[_hh('Eid al-Fitr',10,1),_hh('Eid al-Adha',12,10)],H_LAB,_hf('Victory Day',5,9),_hf('National Unity Day',6,27),_hf('Independence Day',9,9),_hf('Constitution Day',11,6)],
   TL:[H_NY,...HB_ISL,H_GF,_hf('Restoration of Independence',5,20),H_CORPUS,_hf('Popular Consultation Day',8,30),H_ASSUM,H_ALLS,_hf('National Heroes Day',12,7),H_IMMAC,_hf('Proclamation of Independence',11,28),H_XMAS],
   TM:[H_NY,_hf('Defender of the Fatherland',1,27),_hf("Women's Day",3,8),_hf('Nowruz',3,21),_ha('Nowruz Holiday',3,22),...[_hh('Eid al-Fitr',10,1),_hh('Eid al-Adha',12,10)],_hf('Victory Day',5,9),_hf('Constitution & Revival Day',5,18),_hf('Independence Day',9,27),_hf('Neutrality Day',12,12)],
-  TW:[H_NY,_hc('Chinese New Year',-1),_hc('Chinese New Year'),_hc('Chinese New Year',1),_hc('Chinese New Year',2),_hf('Peace Memorial Day',2,28),_hf('Children’s & Tomb-Sweeping Day',4,4),_ha('Dragon Boat Festival',6,10),_ha('Mid-Autumn Festival',9,17),_hf('National Day (Double Ten)',10,10)],
+  TW:[H_NY,_hc('Chinese New Year',-1),_hc('Chinese New Year'),_hc('Chinese New Year',1),_hc('Chinese New Year',2),_hf('Peace Memorial Day',2,28),_hf('Children’s & Tomb-Sweeping Day',4,4),_ha('Dragon Boat Festival',6,10),_hl('Mid-Autumn Festival','midautumn'),_hf('National Day (Double Ten)',10,10)],
   UZ:[H_NY,_hf("Women's Day",3,8),_hf('Nowruz',3,21),...[_hh('Eid al-Fitr',10,1),_hh('Eid al-Adha',12,10)],_hf('Victory Day',5,9),_hf('Independence Day',9,1),_hf("Teacher's Day",10,1),_hf('Constitution Day',12,8)],
   VN:[H_NY,_hc('Tết (Lunar NY)',-1),_hc('Tết (Lunar NY)'),_hc('Tết (Lunar NY)',1),_hc('Tết (Lunar NY)',2),_hf('Hung Kings Festival',4,18),_hf('Reunification Day',4,30),_hf('Labour Day',5,1),_hf('National Day',9,2)],
 
@@ -39564,7 +39629,7 @@ const HOL_DATA = {
   EC:[H_NY,_hf('Carnival Monday',-48),_hf('Carnival Tuesday',-47),H_GF,H_LAB,_hf('Battle of Pichincha',5,24),_hf('Independence of Quito',8,10),_hf('Independence of Guayaquil',10,9),_hf('All Souls Day',11,2),_hf('Independence of Cuenca',11,3),H_XMAS],
   GD:[H_NY,_hf('Independence Day',2,7),H_GF,H_EM,H_LAB,H_WHIT,H_CORPUS,_hf('Emancipation Day',8,5),_hf('Carnival Monday',8,12),_hf('Thanksgiving Day',10,25),H_XMAS,H_BOX],
   GT:[H_NY,_he('Maundy Thursday',-3),H_GF,_he('Holy Saturday',-1),H_LAB,_hf('Army Day',6,30),_hf('Independence Day',9,15),_hf('Revolution Day',10,20),_hf('All Saints Day',11,1),H_XMAS],
-  GY:[H_NY,_hf('Republic Day (Mashramani)',2,23),_ha('Holi (Phagwah)',3,25),H_GF,H_EM,...[_hh('Eid al-Adha',12,10)],_hf('Labour Day',5,1),_hf('Arrival Day',5,5),_hf('Independence Day',5,26),_hf('CARICOM Day',7,1),_hf('Emancipation Day',8,1),_ha('Diwali',11,1),H_XMAS,H_BOX],
+  GY:[H_NY,_hf('Republic Day (Mashramani)',2,23),_hl('Holi (Phagwah)','holi'),H_GF,H_EM,...[_hh('Eid al-Adha',12,10)],_hf('Labour Day',5,1),_hf('Arrival Day',5,5),_hf('Independence Day',5,26),_hf('CARICOM Day',7,1),_hf('Emancipation Day',8,1),_hl('Diwali','diwali'),H_XMAS,H_BOX],
   HN:[H_NY,_he('Maundy Thursday',-3),H_GF,_he('Holy Saturday',-1),_hf('Pan-American Day',4,14),H_LAB,_hf('Independence Day',9,15),_hf('Morazán/Heroes Day',10,3),_hf('Columbus Day',10,12),_hf('Army Day',10,21),H_XMAS],
   HT:[H_NY,_hf('Ancestry Day',1,2),_hf('Carnival',-48),_hf('Carnival Tuesday',-47),H_GF,_hf('Pan-American Day',4,14),_hf('Labour & Agriculture Day',5,1),_hf('Flag Day',5,18),H_CORPUS,_hf('Battle of Vertières',11,18),H_XMAS],
   JM:[H_NY,_hf('Ash Wednesday',-46),H_GF,H_EM,H_LAB,_hf('Emancipation Day',8,1),_hf('Independence Day',8,6),_hn('National Heroes Day',10,1,3),H_XMAS,H_BOX],
@@ -39576,9 +39641,9 @@ const HOL_DATA = {
   PE:[H_NY,_he('Maundy Thursday',-3),H_GF,H_LAB,_hf('Saints Peter & Paul',6,29),_hf('Battle of Junín',8,6),_hf('Independence Day',7,28),_hf('Day after Independence',7,29),_hf('Santa Rosa de Lima',8,30),_hf('Battle of Angamos',10,8),H_ALLS,H_IMMAC,_hf('Battle of Ayacucho',12,9),H_XMAS],
   PR:[H_NY,_hf('Three Kings Day',1,6),_hn('Birthday of Eugenio M. de Hostos',1,1,2),_hn("Washington's Birthday",2,1,3),_hf('Emancipation Day',3,22),H_GF,_hn('Memorial Day',5,1,-1),_hf('US Independence Day',7,4),_hf('Constitution Day',7,25),_hn('Labor Day',9,1,1),_hf('Columbus Day',10,12),_hf('Veterans Day',11,11),_hn('Thanksgiving',11,4,4),H_XMAS],
   PY:[H_NY,_hf('Heroes Day',3,1),_he('Maundy Thursday',-3),H_GF,H_LAB,_hf('Independence Day',5,14),_hf('Day after Independence',5,15),_hf('Chaco Armistice',6,12),_hf('Founding of Asunción',8,15),_hf('Boqueron Battle Victory',9,29),H_IMMAC,H_XMAS],
-  SR:[H_NY,_hc('Chinese New Year'),_hf('Day of the Revolution',2,25),_ha('Holi Phagwa',3,25),H_GF,H_EM,...[_hh('Eid al-Fitr',10,1)],H_LAB,_hf('Indigenous Peoples Day',8,9),_hf('Day of Freedom & Liberation',7,1),_hf('Maroon Day',10,10),_hf('Independence Day',11,25),_ha('Diwali',11,1),H_XMAS,H_BOX],
+  SR:[H_NY,_hc('Chinese New Year'),_hf('Day of the Revolution',2,25),_hl('Holi Phagwa','holi'),H_GF,H_EM,...[_hh('Eid al-Fitr',10,1)],H_LAB,_hf('Indigenous Peoples Day',8,9),_hf('Day of Freedom & Liberation',7,1),_hf('Maroon Day',10,10),_hf('Independence Day',11,25),_hl('Diwali','diwali'),H_XMAS,H_BOX],
   SV:[H_NY,_he('Maundy Thursday',-3),H_GF,_he('Holy Saturday',-1),H_LAB,_hf('Mother’s Day',5,10),_hf("Father's Day",6,17),_hf('August Festivals (El Salvador del Mundo)',8,6),_hf('Independence Day',9,15),H_ALLS,_hf('Day of the Dead',11,2),H_XMAS],
-  TT:[H_NY,_hf('Carnival Monday',-48),_hf('Carnival Tuesday',-47),_hf('Spiritual Baptist Liberation Day',3,30),H_GF,H_EM,_hf('Indian Arrival Day',5,30),H_CORPUS,_hf('Labour Day',6,19),_hf('African Emancipation Day',8,1),_hf('Independence Day',8,31),_hf('Republic Day',9,24),_ha('Divali',11,1),...[_hh('Eid-ul-Fitr',10,1)],H_XMAS,H_BOX],
+  TT:[H_NY,_hf('Carnival Monday',-48),_hf('Carnival Tuesday',-47),_hf('Spiritual Baptist Liberation Day',3,30),H_GF,H_EM,_hf('Indian Arrival Day',5,30),H_CORPUS,_hf('Labour Day',6,19),_hf('African Emancipation Day',8,1),_hf('Independence Day',8,31),_hf('Republic Day',9,24),_hl('Divali','diwali'),...[_hh('Eid-ul-Fitr',10,1)],H_XMAS,H_BOX],
   US:[H_NY,_hn('Martin Luther King Jr. Day',1,1,3),_hn("Presidents' Day",2,1,3),_hn('Memorial Day',5,1,-1),_hf('Juneteenth',6,19),_hf('Independence Day',7,4),_hn('Labor Day',9,1,1),_hn('Columbus Day',10,1,2),_hf('Veterans Day',11,11),_hn('Thanksgiving',11,4,4),H_XMAS],
   UY:[H_NY,_hf('Epiphany',1,6),_hf('Carnival Monday',-48),_hf('Carnival Tuesday',-47),H_GF,_hf('Landing of the 33 Patriots',4,19),H_LAB,_hf('Battle of Las Piedras',5,18),_hf('Birth of Artigas',6,19),_hf('Constitution Day',7,18),_hf('Independence Day',8,25),_hf('Day of the Race',10,12),_hf('All Souls Day',11,2),H_XMAS],
   VC:[H_NY,_hf('National Heroes Day',3,14),H_GF,H_EM,H_WHIT,_hf('Carnival Monday',7,8),_hf('Carnival Tuesday',7,9),_hf('Emancipation Day',8,1),_hf('Independence Day',10,27),H_XMAS,H_BOX],
@@ -39586,7 +39651,7 @@ const HOL_DATA = {
 
   // ── Oceania ──
   AU:[H_NY,_hf('Australia Day',1,26),H_GF,_he('Holy Saturday',-1),H_EM,_hf('Anzac Day',4,25),_hf("King's Birthday (most states)",6,10),H_XMAS,H_BOX],
-  FJ:[H_NY,H_GF,_he('Holy Saturday',-1),H_EM,...[_hh('Prophet Mohammed Birthday',3,12)],_hf('Ratu Sukuna Day',5,27),_hf('Constitution Day',9,7),_hf('Fiji Day',10,10),_ha('Diwali',11,1),H_XMAS,H_BOX],
+  FJ:[H_NY,H_GF,_he('Holy Saturday',-1),H_EM,...[_hh('Prophet Mohammed Birthday',3,12)],_hf('Ratu Sukuna Day',5,27),_hf('Constitution Day',9,7),_hf('Fiji Day',10,10),_hl('Diwali','diwali'),H_XMAS,H_BOX],
   FM:[H_NY,_hf('FSM Culture Day',3,31),_hf('Micronesia Day',5,10),_hf('Independence Day',11,3),_hf('FSM Constitution Day',5,10),H_XMAS],
   GU:[H_NY,_hn('Martin Luther King Jr. Day',1,1,3),_hn("Presidents' Day",2,1,3),_hf('Guam History & Chamorro Heritage Day',3,7),H_GF,_hn('Memorial Day',5,1,-1),_hf('US Independence Day',7,4),_hf('Liberation Day',7,21),_hn('Labor Day',9,1,1),_hf('All Souls Day',11,2),_hf('Veterans Day',11,11),_hn('Thanksgiving',11,4,4),_hf('Lady of Camarin Day',12,8),H_XMAS],
   KI:[H_NY,H_GF,_he('Holy Saturday',-1),H_EM,_hf('National Health Day',4,8),_hf("Women's Day",3,8),_hf('Gospel Day',7,11),_hf('Independence Day',7,12),_hf('Youth Day',8,7),_hf('Human Rights Day',12,10),H_XMAS,H_BOX],
@@ -39611,6 +39676,7 @@ function holResolveRule(r,y){
   switch(r.t){
     case 'f':  return [new Date(y,r.m-1,r.d)];
     case 'fa': return [new Date(y,r.m-1,r.d)];
+    case 'lun':{ const d=holLunarFest(r.fest,y); if(!d) return []; if(r.o) d.setDate(d.getDate()+r.o); return [d]; }
     case 'nw': return [holNthWeekday(y,r.m,r.wd,r.nth)];
     case 'e':  { const d=holEaster(y); d.setDate(d.getDate()+r.o); return [d]; }
     case 'oe': { const d=holOrthodoxEaster(y); d.setDate(d.getDate()+r.o); return [d]; }
@@ -39623,7 +39689,7 @@ function holComputeDates(code,y){
   const out=[];
   if(code==='IL'){ (HOL_IL[y]||[]).forEach(t=>out.push({date:new Date(y,t[0]-1,t[1]),name:t[2],approx:true})); out.sort((a,b)=>a.date-b.date); return out; }
   const rules=HOL_DATA[code]||[];
-  rules.forEach(r=>{ holResolveRule(r,y).forEach(d=>{ if(d && d.getFullYear()===y) out.push({date:d,name:r.n,approx:(r.t==='h'||r.t==='cny'||r.t==='fa')}); }); });
+  rules.forEach(r=>{ holResolveRule(r,y).forEach(d=>{ if(d && d.getFullYear()===y) out.push({date:d,name:r.n,approx:(r.t==='h'||r.t==='cny'||r.t==='fa'||r.t==='lun')}); }); });
   out.sort((a,b)=>a.date-b.date);
   return out;
 }
