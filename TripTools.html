@@ -9223,6 +9223,89 @@ body.no-scroll { overflow: hidden; }
 }
 </style>
 <style>
+  #view-safe .safe-badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:12px;font-weight:700}
+  #view-safe .safe-ok{background:rgba(46,160,67,.14);color:#2ea043}
+  #view-safe .safe-warn{background:rgba(217,138,0,.16);color:#d98a00}
+  #view-safe .safe-bad{background:rgba(207,34,46,.14);color:#cf222e}
+  #view-safe .safe-crit{background:rgba(207,34,46,.22);color:#cf222e}
+  #view-safe .dr-hero.safe-hero-ok{border-left:4px solid #2ea043}
+  #view-safe .dr-hero.safe-hero-warn{border-left:4px solid #d98a00}
+  #view-safe .dr-hero.safe-hero-bad{border-left:4px solid #e8590c}
+  #view-safe .dr-hero.safe-hero-crit{border-left:4px solid #cf222e}
+  @media print{ #view-safe .tc-country-caret,#view-safe .tc-drop{display:none!important} #view-safe #safe-empty{display:none!important} }
+</style>
+<div id="view-safe" class="view">
+  <nav class="tool-bar">
+    <button class="back-btn" onclick="showHub()">← TripTools</button>
+    <button class="print-btn" onclick="window.print()">🖨 Print</button>
+  </nav>
+  <div class="ctx-banner" id="ctx-safe"></div>
+  <div class="tool-hdr">
+    <div class="conn-bdg bdg-off">✈️ Works Offline</div>
+    <h1>Safety &amp; Advisories</h1>
+    <p class="tool-sub">A quick safety orientation for all 202 countries — overall advisory level, common risks &amp; scams, whether the tap water is safe, solo &amp; women-traveller notes, and LGBTQ+ legal status. Orientation only — always check your government's official advisory.</p>
+  </div>
+
+  <div class="tool-body">
+    <div class="fg">
+      <label>Country</label>
+      <div class="tc-country-wrap">
+        <div class="tc-country-input" id="safe-country-disp" onclick="safeOpenPicker()" tabindex="0" role="button" aria-label="Choose country">
+          <span class="tc-country-flag" id="safe-disp-flag">🌐</span>
+          <span class="tc-country-name" id="safe-disp-name">Select a country</span>
+          <span class="tc-country-cur" id="safe-disp-tag"></span>
+          <span class="tc-country-caret">▾</span>
+        </div>
+        <div class="tc-drop" id="safe-country-drop" style="display:none">
+          <div class="tc-drop-search">
+            <input type="search" id="safe-country-search" class="tc-search-input" placeholder="🔍 Search 202 countries…" autocomplete="off" oninput="safeFilterCountries()">
+          </div>
+          <div id="safe-country-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tg-empty" id="safe-empty">
+      <span class="tg-empty-ico">🛡️</span>
+      Pick a country for a safety snapshot — advisory level, common risks, tap-water safety, solo/women-traveller notes and LGBTQ+ legal status.
+    </div>
+
+    <div id="safe-content" style="display:none">
+      <div class="dr-hero" id="safe-hero">
+        <div class="dr-hero-flag" id="safe-hero-flag">🌐</div>
+        <div class="dr-hero-meta">
+          <div class="dr-hero-co" id="safe-hero-co"></div>
+          <div class="dr-hero-side">Safety snapshot</div>
+          <div class="dr-hero-sub" id="safe-hero-sub"></div>
+        </div>
+        <div class="dr-hero-ico">🛡️</div>
+      </div>
+
+      <div class="dr-section">
+        <div class="dr-sec-hdr">Safety &amp; risks</div>
+        <div class="dr-rows" id="safe-risks"></div>
+      </div>
+      <div class="dr-section">
+        <div class="dr-sec-hdr">Drinking water</div>
+        <div class="dr-rows" id="safe-water"></div>
+      </div>
+      <div class="dr-section">
+        <div class="dr-sec-hdr">Solo &amp; women travellers</div>
+        <div class="dr-rows" id="safe-solo"></div>
+      </div>
+      <div class="dr-section">
+        <div class="dr-sec-hdr">LGBTQ+ travellers</div>
+        <div class="dr-rows" id="safe-lgbt"></div>
+      </div>
+    </div>
+
+    <div style="margin-top:16px;padding:12px 16px;background:var(--paper-2);border-left:3px solid var(--red);border-radius:var(--r);font-size:13px;color:var(--muted);line-height:1.55">
+      ⚠️ <strong>This is orientation, not an official advisory or legal/medical advice.</strong> Security conditions, health risks and laws change quickly and vary within a country. Advisory levels are indicative and may differ from your own government's. Before you travel, check your government's official travel advisory, a travel-health clinic, and — for LGBTQ+ travellers — current local legal guidance.
+    </div>
+  </div><!-- /tool-body -->
+</div>
+
+<style>
   #view-esim .esim-badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:12px;font-weight:700}
   #view-esim .esim-ok{background:rgba(46,160,67,.14);color:#2ea043}
   #view-esim .esim-warn{background:rgba(217,138,0,.14);color:#d98a00}
@@ -14611,6 +14694,7 @@ const TOOLS = [
   {id:'phrasebook',    nm:'Language Phrasebook',        ico:'💬', ph:'destination',on:false,live:true,  ds:'Essential travel phrases in 25 languages with pronunciation. Dietary & allergy phrases, tap-to-hear, point-to-show.'},
   {id:'holidays',      nm:'Public Holidays',            ico:'📅', ph:'destination',on:false,live:true, trip:true,  ds:'National public holidays for all 202 countries. Movable feasts (Easter, Eid, Lunar New Year) computed for any year.'},
   {id:'esim',          nm:'eSIM & Mobile Data',         ico:'📱', ph:'destination',on:false,live:true, trip:true,  ds:'eSIM availability & price, network coverage, local SIM rules and censorship/VPN notes for all 202 countries.'},
+  {id:'safe',          nm:'Safety & Advisories',        ico:'🛡', ph:'destination',on:false,live:true, trip:true,  ds:'Advisory level, common risks, tap-water safety, solo/women & LGBTQ+ traveller notes for all 202 countries.'},
   {id:'emergency',     nm:'Emergency Numbers',          ico:'🚨', ph:'destination',on:false,live:true, trip:true,  ds:'Police, fire & ambulance for 150+ countries. Embassy finder & your insurance card, always offline.'},
   {id:'uv-index',      nm:'UV Index & Sun Safety',      ico:'☀️', ph:'destination',on:true, live:true,  ds:'Live UV index, SPF recommendations by skin type.'},
   {id:'altitude',      nm:'Altitude Sickness Guide',    ico:'⛰', ph:'destination',on:false,live:true,  ds:'Enter elevation → risk level + acclimatization timeline.'},
@@ -15716,6 +15800,7 @@ function injectTripCtx(id) {
   if(id==='emergency')  emInit();
   if(id==='holidays')   holInit();
   if(id==='esim')       esimInit();
+  if(id==='safe')       safeInit();
   if(id==='timezone')   tzInit();
   if(id==='meeting-tz') mtpInit();
   if(id==='lounge-guide') lgInit();
@@ -39879,6 +39964,281 @@ function esimRender(){
   const rs=document.getElementById('esim-restrict-sec');
   if(d.net){ document.getElementById('esim-restrict').innerHTML=esimRow('🚦','Heads up',esimEsc(d.net)); rs.style.display=''; }
   else rs.style.display='none';
+}
+
+/* ══════════════════════════════════════════════════════
+   SAFETY & ADVISORIES  (Phase 7 — Domain 4)
+   Per-country orientation for all 202 countries: an overall
+   advisory level, common risks/scams, tap-water potability,
+   solo/female-traveller notes and LGBTQ+ legal/social status.
+   This is BEST-EFFORT, directional planning data — NOT an
+   official government travel advisory or legal/medical advice.
+   Conditions and laws change; always check your government's
+   advisory and a travel clinic before you go.
+   ══════════════════════════════════════════════════════ */
+const SAFE_DATA = {
+  AD:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  AE:{lvl:2, r:'Very low street crime; strict laws on drugs, public behaviour & medications.', w:'caution', s:'Comfortable & low-harassment for women by regional standards.', g:'illegal', gn:'Same-sex acts illegal; public affection & related content can be prosecuted — be very discreet.'},
+  AF:{lvl:4, r:'War, terrorism, kidnapping; arbitrary detention under Taliban. Do not travel.', w:'unsafe', s:'Severe restrictions on women — effectively barred from public life.', g:'illegal', gn:'Same-sex acts punishable by death — extreme danger.'},
+  AG:{lvl:1, r:'Petty theft; otherwise calm.', w:'caution', s:'Comfortable for women.', g:'legal', gn:'Decriminalised 2022.'},
+  AL:{lvl:2, r:'Petty crime; some unexploded-ordnance areas rurally.', w:'caution', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'legal', gn:'Legal but socially conservative — be discreet.'},
+  AM:{lvl:1, r:'Petty crime; avoid the Azerbaijan border (Nagorno-Karabakh).', w:'caution', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'discreet', gn:'Legal but very conservative — be discreet.'},
+  AO:{lvl:2, r:'Street crime in Luanda; landmines in some rural areas.', w:'unsafe', s:'Take usual urban caution.', g:'legal', gn:'Decriminalised 2021; social attitudes conservative.'},
+  AR:{lvl:1, r:'Pickpocketing & "mustard"/distraction scams in Buenos Aires.', w:'safe', s:'Manageable; usual urban caution.', g:'open', gn:'Marriage equality (2010); among Latin America\'s most progressive.'},
+  AT:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  AU:{lvl:1, r:'Low crime; sun/surf, wildlife & remote-outback hazards.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open', gn:'Marriage equality (2017); very tolerant.'},
+  AZ:{lvl:2, r:'Petty crime; avoid the Armenia border & Nagorno-Karabakh.', w:'caution', s:'Usual caution; dress modestly outside Baku.', g:'restrict', gn:'Legal but reports of crackdowns — be very discreet.'},
+  BA:{lvl:2, r:'Petty crime; landmines remain in marked rural areas — stay on paths.', w:'caution', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'discreet', gn:'Legal but socially conservative.'},
+  BB:{lvl:1, r:'Petty crime; otherwise calm.', w:'safe', s:'Comfortable for women.', g:'legal', gn:'Decriminalised 2022.'},
+  BD:{lvl:3, r:'Petty & some violent crime; terrorism risk; political unrest & strikes (hartals).', w:'unsafe', s:'Significant harassment; dress conservatively.', g:'illegal', gn:'Same-sex acts illegal (colonial-era law).'},
+  BE:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  BF:{lvl:4, r:'Terrorism & kidnapping across much of the country. Do not travel to most areas.', w:'unsafe', s:'Extreme caution.', g:'legal', gn:'Legal but socially conservative.'},
+  BG:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'caution', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'legal', gn:'Legal but limited recognition; conservative attitudes.'},
+  BH:{lvl:2, r:'Low crime; occasional political demonstrations.', w:'caution', s:'Relatively comfortable for women regionally.', g:'illegal', gn:'Same-sex relations not criminalised the same way as neighbours but social/legal risk remains — be discreet.'},
+  BI:{lvl:3, r:'Political instability; petty & violent crime.', w:'unsafe', s:'Exercise heightened caution.', g:'illegal', gn:'Same-sex acts illegal.'},
+  BJ:{lvl:2, r:'Petty crime; terrorism risk in the far north.', w:'unsafe', s:'Take usual caution.', g:'legal', gn:'Legal but conservative.'},
+  BN:{lvl:2, r:'Very low crime; strict Sharia-based laws on conduct, alcohol & dress.', w:'caution', s:'Comfortable & low-crime; dress modestly.', g:'illegal', gn:'Sharia penal code allows death by stoning for same-sex acts — extreme danger.'},
+  BO:{lvl:2, r:'Petty crime; "fake police" scams; altitude; roadblocks/protests.', w:'unsafe', s:'Usual caution; dress modestly in highlands.', g:'legal', gn:'Civil unions; conservative socially.'},
+  BR:{lvl:2, r:'Urban violent crime, robbery & express kidnapping; favela risk; beach theft.', w:'caution', s:'Avoid displaying valuables; reputable transport at night.', g:'open', gn:'Marriage equality; vibrant scene but high anti-LGBTQ+ violence in places.'},
+  BS:{lvl:2, r:'Some violent crime in parts of Nassau/Freeport; resorts safer.', w:'safe', s:'Usual caution.', g:'legal', gn:'Legal; conservative socially.'},
+  BT:{lvl:1, r:'Very low crime; altitude & trekking hazards.', w:'caution', s:'One of Asia\'s safest for women.', g:'legal', gn:'Decriminalised 2021.'},
+  BW:{lvl:1, r:'Low crime; wildlife hazards on self-drives.', w:'caution', s:'Among the safer countries in the region for women.', g:'legal', gn:'Decriminalised 2019.'},
+  BY:{lvl:3, r:'Authoritarian state; risk of arbitrary detention. Avoid protests.', w:'caution', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'discreet', gn:'Legal but heavy social/state hostility.'},
+  BZ:{lvl:3, r:'High violent-crime rate (esp. south-side Belize City); reefs/diving risks.', w:'unsafe', s:'Heightened caution; reputable transport.', g:'legal', gn:'Decriminalised 2016.'},
+  CA:{lvl:1, r:'Low crime; wildlife & remote-weather hazards.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open', gn:'Marriage equality; very tolerant.'},
+  CD:{lvl:4, r:'Armed conflict in the east; kidnapping, disease (incl. Ebola flare-ups).', w:'unsafe', s:'Extreme caution.', g:'legal', gn:'Legal but conservative.'},
+  CF:{lvl:4, r:'Armed conflict, kidnapping. Do not travel.', w:'unsafe', s:'Extreme risk.', g:'legal', gn:'Legal but conservative.'},
+  CG:{lvl:3, r:'Street crime; some unrest in the Pool region.', w:'unsafe', s:'Heightened caution.', g:'legal', gn:'Legal but conservative.'},
+  CH:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  CI:{lvl:2, r:'Petty & some violent crime; terrorism risk in the north.', w:'unsafe', s:'Usual urban caution.', g:'legal', gn:'Legal but socially conservative.'},
+  CL:{lvl:1, r:'Petty crime & some violent street crime in Santiago; protest disruption.', w:'safe', s:'Among the easier in the region for women.', g:'open', gn:'Marriage equality (2022); relatively tolerant.'},
+  CM:{lvl:3, r:'Terrorism (Far North), separatist violence (Anglophone NW/SW), kidnapping.', w:'unsafe', s:'Heightened caution.', g:'illegal', gn:'Same-sex acts illegal & actively prosecuted.'},
+  CN:{lvl:2, r:'Low street crime; arbitrary detention & exit-ban risk; heavy surveillance; avoid protests.', w:'unsafe', s:'Generally safe for women; usual big-city caution.', g:'discreet', gn:'Legal but no recognition; censorship of LGBTQ+ content — be discreet.'},
+  CO:{lvl:3, r:'Improving but real risks: robbery, "scopolamine" drugging, some guerrilla/cartel areas.', w:'unsafe', s:'Use reputable transport; avoid solo night travel & dating-app meetups with strangers.', g:'legal', gn:'Marriage equality (2016); cities tolerant.'},
+  CR:{lvl:2, r:'Petty theft (esp. from cars/beaches); riptides; otherwise stable.', w:'caution', s:'Among the easier in the region for women.', g:'open', gn:'Marriage equality (2020); the most LGBTQ+-friendly in Central America.'},
+  CU:{lvl:2, r:'Petty crime & scams; shortages of food/medicine/cash.', w:'caution', s:'Manageable; usual caution.', g:'legal', gn:'Marriage equality (2022).'},
+  CV:{lvl:1, r:'Petty crime in towns.', w:'caution', s:'Among the easier African destinations for women.', g:'legal', gn:'Decriminalised; relatively tolerant.'},
+  CY:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'caution', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'legal'},
+  CZ:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  DE:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  DJ:{lvl:2, r:'Low-level crime; terrorism risk; avoid Eritrea/Somalia borders.', w:'unsafe', s:'Dress modestly.', g:'legal', gn:'Not criminalised but socially conservative.'},
+  DK:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  DM:{lvl:1, r:'Petty theft; otherwise calm.', w:'caution', s:'Comfortable for women.', g:'illegal', gn:'Male same-sex acts technically illegal (challenged in courts).'},
+  DO:{lvl:2, r:'Petty & some violent crime; resort-area scams.', w:'caution', s:'Usual caution; harassment occurs.', g:'restrict', gn:'Legal but no recognition; conservative.'},
+  DZ:{lvl:3, r:'Terrorism risk; avoid border regions & the Sahara interior.', w:'unsafe', s:'Harassment occurs; dress modestly.', g:'illegal', gn:'Same-sex acts illegal.'},
+  EC:{lvl:3, r:'Rising violent crime & gang activity (esp. Guayaquil/coast); express kidnapping.', w:'unsafe', s:'Heightened caution; reputable transport.', g:'open', gn:'Marriage equality (2019).'},
+  EE:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  EG:{lvl:3, r:'Petty scams & persistent touts; terrorism risk; avoid Sinai interior & Western Desert.', w:'unsafe', s:'Significant harassment reported; dress modestly, prefer reputable transport.', g:'illegal', gn:'Prosecuted under "debauchery" laws — be very discreet.'},
+  ER:{lvl:3, r:'Authoritarian state; arbitrary detention; border-area risk.', w:'unsafe', s:'Significant restrictions.', g:'illegal', gn:'Same-sex acts illegal.'},
+  ES:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  ET:{lvl:3, r:'Armed conflict & unrest in several regions (Tigray, Amhara, Oromia).', w:'unsafe', s:'Heightened caution.', g:'illegal', gn:'Same-sex acts illegal & socially taboo.'},
+  FI:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  FJ:{lvl:1, r:'Petty theft; cyclones; reef/current hazards.', w:'caution', s:'Generally easy for women; usual caution.', g:'legal', gn:'Decriminalised 2010; conservative socially.'},
+  FM:{lvl:1, r:'Low crime; remote services.', w:'caution', s:'Generally safe.', g:'legal', gn:'Mostly legal (varies by state); conservative.'},
+  FR:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  GA:{lvl:2, r:'Street crime in Libreville.', w:'unsafe', s:'Usual caution.', g:'legal', gn:'Legal but conservative.'},
+  GB:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  GD:{lvl:1, r:'Petty theft; otherwise calm.', w:'caution', s:'Comfortable for women.', g:'illegal', gn:'Male same-sex acts technically illegal (not enforced).'},
+  GE:{lvl:1, r:'Petty crime; avoid breakaway Abkhazia & South Ossetia.', w:'caution', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'discreet', gn:'Legal but Pride has faced violence — be very discreet.'},
+  GH:{lvl:1, r:'Petty crime; generally welcoming.', w:'unsafe', s:'Among the easier West African countries for women.', g:'illegal', gn:'Same-sex acts illegal; harsh new bill — be very discreet.'},
+  GM:{lvl:2, r:'Petty crime; "bumster" touts on beaches.', w:'unsafe', s:'Harassment by touts; otherwise manageable.', g:'illegal', gn:'Same-sex acts illegal.'},
+  GN:{lvl:3, r:'Political unrest; petty & violent crime.', w:'unsafe', s:'Heightened caution.', g:'illegal', gn:'Same-sex acts illegal.'},
+  GQ:{lvl:3, r:'Heavy security presence; arbitrary detention; photography restrictions.', w:'unsafe', s:'Heightened caution.', g:'legal', gn:'Legal but extremely conservative.'},
+  GR:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  GT:{lvl:3, r:'Violent crime & gang activity; express kidnapping; volcano/road hazards.', w:'unsafe', s:'Heightened caution; reputable transport.', g:'legal', gn:'Legal but no recognition; conservative.'},
+  GU:{lvl:1, r:'Low crime (US territory).', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open', gn:'US law — marriage equality.'},
+  GW:{lvl:3, r:'Political instability; drug-trafficking crime.', w:'unsafe', s:'Heightened caution.', g:'legal', gn:'Legal but conservative.'},
+  GY:{lvl:2, r:'Petty & some violent crime in Georgetown; interior remote.', w:'unsafe', s:'Usual caution.', g:'illegal', gn:'Male same-sex acts technically illegal (not enforced) — discretion advised.'},
+  HK:{lvl:1, r:'Low street crime; avoid protests; national-security law caution.', w:'safe', s:'Very safe for women, incl. at night.', g:'legal', gn:'Legal; partnerships partly recognised; relatively tolerant.'},
+  HN:{lvl:3, r:'Among the region\'s highest violent-crime rates; gangs; express kidnapping.', w:'unsafe', s:'Heightened caution; reputable transport.', g:'restrict', gn:'Legal but constitutional same-sex marriage ban; high anti-LGBTQ+ violence.'},
+  HR:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'legal', gn:'Same-sex partnerships recognised; smaller towns more conservative.'},
+  HT:{lvl:4, r:'Gang control of much of Port-au-Prince; kidnapping, violent crime. Do not travel.', w:'unsafe', s:'Extreme risk.', g:'legal', gn:'No specific criminal law but deeply hostile socially.'},
+  HU:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'legal', gn:'Legal but recent laws restrict LGBTQ+ "promotion"; discretion in public.'},
+  ID:{lvl:2, r:'Petty crime & scams (esp. Bali); terrorism risk; volcanoes; Papua unrest.', w:'caution', s:'Manageable; dress modestly, esp. outside Bali.', g:'restrict', gn:'Legal nationally except Aceh (Sharia); new code & social hostility — be discreet.'},
+  IE:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  IL:{lvl:3, r:'Conflict & rocket risk; checkpoints; situation can change fast. Avoid Gaza vicinity.', w:'safe', s:'Generally manageable outside conflict areas.', g:'open', gn:'Tel Aviv is a regional LGBTQ+ hub; far more open than neighbours.'},
+  IN:{lvl:2, r:'Scams & petty crime; significant reports of harassment/assault of women; road risks.', w:'unsafe', s:'Notable harassment risk; avoid solo travel after dark, use reputable transport.', g:'legal', gn:'Decriminalised 2018; no marriage; acceptance varies widely.'},
+  IQ:{lvl:4, r:'Terrorism, armed conflict, kidnapping risk. Most governments advise against travel.', w:'unsafe', s:'Very challenging; extreme caution.', g:'illegal', gn:'Severe legal & social danger — same-sex acts effectively criminalised.'},
+  IR:{lvl:4, r:'Risk of arbitrary detention (esp. dual-nationals); avoid borders & protests.', w:'unsafe', s:'Strict dress code (hijab) enforced; significant restrictions on women.', g:'illegal', gn:'Same-sex acts punishable by death — extreme danger.'},
+  IS:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  IT:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  JM:{lvl:2, r:'High violent-crime rate in areas; resort zones safer; scams.', w:'caution', s:'Harassment occurs; usual caution.', g:'illegal', gn:'Male same-sex acts illegal; strong social hostility — be very discreet.'},
+  JO:{lvl:2, r:'Low crime; terrorism risk; avoid Syria/Iraq border areas.', w:'caution', s:'Among the easier MENA countries for women; dress modestly.', g:'discreet', gn:'Not explicitly criminalised but socially taboo — be very discreet.'},
+  JP:{lvl:1, r:'Extremely low crime.', w:'safe', s:'One of the safest countries for solo & women travellers.', g:'legal', gn:'Legal; growing partnership recognition; discreet but tolerant.'},
+  KE:{lvl:2, r:'Terrorism risk (esp. near Somalia); urban & matatu crime; safari road risks.', w:'unsafe', s:'Harassment occurs; reputable transport advised.', g:'illegal', gn:'Same-sex acts illegal — be very discreet.'},
+  KG:{lvl:2, r:'Petty crime; some border-area & protest risk.', w:'caution', s:'Usual caution; dress modestly rurally.', g:'discreet', gn:'Legal but conservative; anti-LGBTQ+ legislation — be very discreet.'},
+  KH:{lvl:2, r:'Petty crime, bag-snatching & scams; rural landmine legacy.', w:'unsafe', s:'Usual caution.', g:'legal', gn:'Legal; relatively tolerant by regional standards; no recognition.'},
+  KI:{lvl:1, r:'Very low crime; remote; climate-exposed.', w:'unsafe', s:'Very safe; small community.', g:'legal', gn:'Decriminalised; conservative.'},
+  KM:{lvl:2, r:'Petty crime; limited services.', w:'unsafe', s:'Dress modestly.', g:'illegal', gn:'Same-sex acts illegal.'},
+  KN:{lvl:1, r:'Petty theft; otherwise calm.', w:'caution', s:'Comfortable for women.', g:'legal', gn:'Decriminalised 2022.'},
+  KP:{lvl:4, r:'Risk of arbitrary arrest & long detention; no consular access for some. Do not travel.', w:'unsafe', s:'Tightly controlled, escorted travel only.', g:'restrict', gn:'No legal recognition; tightly controlled society.'},
+  KR:{lvl:1, r:'Very low crime.', w:'safe', s:'Very safe for women, incl. at night.', g:'discreet', gn:'Legal but no recognition; socially conservative — discretion common.'},
+  KW:{lvl:2, r:'Low crime; strict laws on alcohol, drugs & public conduct.', w:'caution', s:'Relatively comfortable for women regionally.', g:'illegal', gn:'Same-sex acts illegal — be very discreet.'},
+  KZ:{lvl:2, r:'Petty crime; usual urban caution.', w:'caution', s:'Usual caution; dress modestly outside cities.', g:'discreet', gn:'Legal but conservative — be discreet.'},
+  LA:{lvl:2, r:'Petty crime; UXO (unexploded ordnance) off-path in rural areas.', w:'unsafe', s:'Manageable; usual caution.', g:'legal', gn:'Legal; generally low-key tolerance; no recognition.'},
+  LB:{lvl:3, r:'Economic collapse, fuel/power shortages; conflict risk near the south & Hezbollah areas.', w:'unsafe', s:'Beirut relatively relaxed; exercise caution amid instability.', g:'restrict', gn:'Article 534 used against LGBTQ+; rising crackdowns — be very discreet.'},
+  LC:{lvl:1, r:'Petty theft; some crime in parts of Castries.', w:'caution', s:'Comfortable for women.', g:'restrict', gn:'Male same-sex acts technically illegal (not enforced).'},
+  LI:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  LK:{lvl:1, r:'Petty crime & scams; past terrorism; monsoon/sea hazards.', w:'unsafe', s:'Some harassment; otherwise manageable.', g:'illegal', gn:'Same-sex acts technically illegal (rarely enforced) — be discreet.'},
+  LR:{lvl:3, r:'Street & violent crime; weak services.', w:'unsafe', s:'Heightened caution.', g:'illegal', gn:'Same-sex acts illegal.'},
+  LS:{lvl:2, r:'Urban crime; mountain weather hazards.', w:'caution', s:'Usual caution.', g:'legal', gn:'Decriminalised; conservative.'},
+  LT:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  LU:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  LV:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  LY:{lvl:4, r:'Armed conflict, kidnapping, militias. Most governments advise against all travel.', w:'unsafe', s:'Extreme risk.', g:'illegal', gn:'Same-sex acts illegal; extreme danger.'},
+  MA:{lvl:2, r:'Tourist scams & aggressive touts in medinas; pickpocketing.', w:'caution', s:'Harassment common; dress modestly, use reputable guides.', g:'illegal', gn:'Same-sex acts illegal (Art. 489) — be very discreet.'},
+  MC:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  MD:{lvl:2, r:'Petty crime; avoid the breakaway Transnistria region.', w:'caution', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'discreet', gn:'Legal but conservative.'},
+  ME:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'caution', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'discreet', gn:'Legal but conservative; discretion advised.'},
+  MG:{lvl:2, r:'Petty crime; periodic unrest; cyclone season.', w:'unsafe', s:'Usual caution.', g:'legal', gn:'Legal but conservative.'},
+  MH:{lvl:1, r:'Low crime; remote; climate-exposed.', w:'caution', s:'Generally safe.', g:'legal', gn:'Legal; conservative.'},
+  MK:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'caution', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'discreet', gn:'Legal but conservative.'},
+  ML:{lvl:4, r:'Terrorism & kidnapping across much of the country. Do not travel to most areas.', w:'unsafe', s:'Extreme caution.', g:'legal', gn:'Legal but conservative.'},
+  MM:{lvl:4, r:'Civil war, conflict, arbitrary detention, landmines. Do not travel.', w:'unsafe', s:'Extreme caution.', g:'illegal', gn:'Same-sex acts illegal (colonial-era law).'},
+  MN:{lvl:2, r:'Petty crime in UB (esp. pickpocketing); extreme weather; remote travel risks.', w:'caution', s:'Usual caution.', g:'legal', gn:'Legal; capital more tolerant; conservative rurally.'},
+  MO:{lvl:1, r:'Low street crime.', w:'safe', s:'Very safe for women.', g:'discreet', gn:'Legal but no recognition; conservative.'},
+  MR:{lvl:3, r:'Terrorism & kidnapping risk; desert hazards.', w:'unsafe', s:'Dress modestly; heightened caution.', g:'illegal', gn:'Same-sex acts can carry the death penalty — extreme danger.'},
+  MT:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  MU:{lvl:1, r:'Petty crime; generally relaxed.', w:'caution', s:'Among the easier African destinations for women.', g:'restrict', gn:'Decriminalised 2023; attitudes still conservative.'},
+  MV:{lvl:1, r:'Low crime on resort islands; strict laws on inhabited islands.', w:'safe', s:'Resorts very comfortable; modesty rules on local islands.', g:'illegal', gn:'Same-sex acts illegal under Sharia (resorts insulated) — be very discreet.'},
+  MW:{lvl:2, r:'Petty crime; fuel shortages.', w:'unsafe', s:'Usual caution.', g:'illegal', gn:'Same-sex acts illegal (enforcement varies).'},
+  MX:{lvl:3, r:'Cartel-related violence in some states; express kidnapping; scams. Resorts safer.', w:'unsafe', s:'Use reputable transport; avoid isolated areas at night.', g:'legal', gn:'Marriage equality nationwide (2022); big cities tolerant, rural conservative.'},
+  MY:{lvl:2, r:'Petty crime & scams; some terrorism/kidnapping risk off east Sabah.', w:'caution', s:'Manageable; dress modestly.', g:'illegal', gn:'Same-sex acts illegal (federal & Sharia) — be very discreet.'},
+  MZ:{lvl:3, r:'Terrorism in Cabo Delgado (north); urban crime; some landmine legacy.', w:'unsafe', s:'Heightened caution.', g:'legal', gn:'Decriminalised 2015; conservative.'},
+  NA:{lvl:1, r:'Petty crime; long remote drives & wildlife hazards.', w:'caution', s:'Among the safer countries in the region for women.', g:'restrict', gn:'Decriminalised 2024; attitudes conservative.'},
+  NE:{lvl:4, r:'Terrorism & kidnapping; coup-related instability. Do not travel to most areas.', w:'unsafe', s:'Extreme caution.', g:'legal', gn:'Legal but conservative.'},
+  NG:{lvl:3, r:'Kidnapping, terrorism (north/northeast), violent crime, scams.', w:'unsafe', s:'Significant harassment risk; heightened caution.', g:'illegal', gn:'Same-sex acts illegal; death penalty in northern Sharia states — extreme danger.'},
+  NI:{lvl:3, r:'Political repression & arbitrary detention; petty crime.', w:'unsafe', s:'Usual caution amid instability.', g:'legal', gn:'Legal but no recognition.'},
+  NL:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  NO:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  NP:{lvl:2, r:'Petty crime & trekking scams; altitude & trail hazards; earthquakes.', w:'unsafe', s:'Generally manageable; usual caution on treks.', g:'legal', gn:'Among Asia\'s most progressive; third gender recognised; court-backed same-sex marriage.'},
+  NR:{lvl:1, r:'Very low crime; very limited services.', w:'caution', s:'Very safe; small community.', g:'legal', gn:'Decriminalised 2016.'},
+  NZ:{lvl:1, r:'Low crime; outdoor/adventure & weather hazards.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open', gn:'Marriage equality (2013); very tolerant.'},
+  OM:{lvl:1, r:'Very low crime; strict public-conduct & drug laws.', w:'caution', s:'One of the more comfortable Gulf states for women.', g:'illegal', gn:'Same-sex acts illegal — be very discreet.'},
+  PA:{lvl:1, r:'Petty crime; avoid the Darién Gap (Colombia border).', w:'caution', s:'Among the easier in the region for women.', g:'legal', gn:'Marriage equality recognised via courts (2020s); Panama City tolerant.'},
+  PE:{lvl:2, r:'Petty crime, express kidnapping & scams; altitude; protest disruption.', w:'unsafe', s:'Usual caution; reputable transport on night travel.', g:'restrict', gn:'Legal but no recognition; conservative.'},
+  PF:{lvl:1, r:'Petty theft; lagoon/ocean hazards.', w:'caution', s:'Generally easy for women.', g:'open', gn:'French law — marriage equality.'},
+  PG:{lvl:3, r:'High violent-crime rate ("raskol" gangs); tribal clashes; carjacking.', w:'unsafe', s:'Significant risk; avoid solo travel, use trusted hosts.', g:'illegal', gn:'Same-sex acts illegal — be very discreet.'},
+  PH:{lvl:2, r:'Petty & some violent crime; terrorism/kidnapping risk in parts of Mindanao; typhoons.', w:'unsafe', s:'Usual caution.', g:'legal', gn:'Legal & relatively tolerant; no marriage; Catholic conservatism.'},
+  PK:{lvl:3, r:'Terrorism, kidnapping, sectarian violence; avoid border regions.', w:'unsafe', s:'Significant restrictions; dress conservatively, heightened caution.', g:'illegal', gn:'Same-sex acts illegal (incl. Sharia provisions) — be very discreet.'},
+  PL:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  PR:{lvl:2, r:'Petty & some violent crime; otherwise US-standard.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open', gn:'US law — marriage equality.'},
+  PS:{lvl:4, r:'Conflict zone (esp. Gaza); checkpoints, military operations.', w:'unsafe', s:'Conflict conditions; extreme caution.', g:'restrict', gn:'Criminalised in Gaza; West Bank socially hostile.'},
+  PT:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  PW:{lvl:1, r:'Low crime; dive/reef hazards.', w:'safe', s:'Generally safe for women.', g:'legal', gn:'Decriminalised 2014.'},
+  PY:{lvl:1, r:'Petty crime; some northern-border (EPP) risk.', w:'unsafe', s:'Usual caution.', g:'restrict', gn:'Legal but constitutional marriage ban; conservative.'},
+  QA:{lvl:1, r:'Very low crime; strict laws on alcohol, dress & public conduct.', w:'caution', s:'Comfortable & low-harassment for women regionally.', g:'illegal', gn:'Same-sex acts illegal — be very discreet (despite event-time leniency).'},
+  RO:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'caution', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'legal'},
+  RS:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'caution', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'discreet', gn:'Legal; Pride has faced hostility — discretion outside Belgrade.'},
+  RU:{lvl:3, r:'Risk of arbitrary detention; dual-nationals at risk; avoid border/southern regions.', w:'caution', s:'Solo travellers face scrutiny; women take usual caution.', g:'restrict', gn:'"LGBT movement" branded extremist (2023); serious legal & social risk — be very discreet.'},
+  RW:{lvl:1, r:'Low crime; one of the safest in the region.', w:'caution', s:'Among the safest African countries for women.', g:'legal', gn:'Not criminalised but socially conservative.'},
+  SA:{lvl:3, r:'Strict laws; terrorism risk; avoid Yemen border. Public conduct heavily regulated.', w:'caution', s:'Rules have eased (no abaya mandate) but harassment & guardianship norms persist.', g:'illegal', gn:'Same-sex acts can carry severe penalties incl. death — extreme danger.'},
+  SB:{lvl:2, r:'Petty crime; occasional unrest in Honiara; remote services.', w:'unsafe', s:'Usual caution.', g:'illegal', gn:'Same-sex acts illegal (rarely enforced).'},
+  SC:{lvl:1, r:'Petty crime; otherwise calm.', w:'caution', s:'Comfortable for women.', g:'legal', gn:'Decriminalised 2016.'},
+  SD:{lvl:4, r:'Civil war, violent crime, collapse of services. Do not travel.', w:'unsafe', s:'Extreme risk.', g:'illegal', gn:'Same-sex acts illegal; severe penalties.'},
+  SE:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  SG:{lvl:1, r:'Extremely low crime; strict laws & fines (drugs carry the death penalty).', w:'safe', s:'One of the safest countries for women.', g:'legal', gn:'Decriminalised 2022; no marriage; generally discreet.'},
+  SI:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  SK:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  SL:{lvl:2, r:'Petty crime; weak services.', w:'unsafe', s:'Usual caution.', g:'illegal', gn:'Same-sex acts illegal (rarely enforced).'},
+  SM:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  SN:{lvl:2, r:'Petty crime; some tension in Casamance (south).', w:'unsafe', s:'Manageable; usual caution.', g:'illegal', gn:'Same-sex acts illegal — be very discreet.'},
+  SO:{lvl:4, r:'Terrorism, kidnapping, armed conflict, piracy. Do not travel.', w:'unsafe', s:'Extreme risk.', g:'illegal', gn:'Same-sex acts can carry the death penalty — extreme danger.'},
+  SR:{lvl:2, r:'Petty crime in Paramaribo; interior remote.', w:'unsafe', s:'Usual caution.', g:'legal', gn:'Decriminalised; conservative.'},
+  SS:{lvl:4, r:'Armed conflict, violent crime, kidnapping. Do not travel.', w:'unsafe', s:'Extreme risk.', g:'illegal', gn:'Same-sex acts illegal.'},
+  ST:{lvl:1, r:'Petty crime; calm.', w:'unsafe', s:'Usual caution.', g:'legal', gn:'Decriminalised 2012.'},
+  SV:{lvl:2, r:'Gang violence much reduced under the security crackdown; petty crime remains.', w:'unsafe', s:'Usual caution.', g:'legal', gn:'Legal but no recognition; conservative.'},
+  SY:{lvl:4, r:'Active conflict, terrorism, kidnapping, landmines. Do not travel.', w:'unsafe', s:'Extreme risk.', g:'illegal', gn:'Same-sex acts illegal; extreme danger.'},
+  SZ:{lvl:2, r:'Petty crime; periodic political unrest.', w:'caution', s:'Usual caution.', g:'illegal', gn:'Same-sex acts technically illegal; rarely enforced.'},
+  TD:{lvl:4, r:'Terrorism, kidnapping, unrest. Do not travel to most areas.', w:'unsafe', s:'Extreme caution.', g:'illegal', gn:'Same-sex acts illegal.'},
+  TG:{lvl:2, r:'Petty crime; terrorism risk in the far north.', w:'unsafe', s:'Usual caution.', g:'illegal', gn:'Same-sex acts illegal.'},
+  TH:{lvl:1, r:'Scams, bag-snatching & drink-spiking in nightlife; road-accident risk is high.', w:'unsafe', s:'Generally easy for solo & women travellers; usual nightlife caution.', g:'open', gn:'Legalised same-sex marriage (2025); very welcoming.'},
+  TJ:{lvl:2, r:'Petty crime; avoid the Afghanistan border & Gorno-Badakhshan.', w:'caution', s:'Dress modestly; usual caution.', g:'restrict', gn:'Decriminalised but authorities keep an LGBTQ+ "registry" — be very discreet.'},
+  TL:{lvl:2, r:'Petty crime; limited medical facilities.', w:'unsafe', s:'Usual caution.', g:'legal', gn:'Legal; generally tolerant; no recognition.'},
+  TM:{lvl:3, r:'Authoritarian state; heavy surveillance; arbitrary detention risk.', w:'unsafe', s:'Significant restrictions.', g:'illegal', gn:'Male same-sex acts illegal — extreme danger.'},
+  TN:{lvl:2, r:'Petty crime & scams; terrorism risk; avoid the Libya/Algeria border & southern desert.', w:'caution', s:'Manageable in the north; harassment occurs — dress modestly.', g:'illegal', gn:'Same-sex acts illegal (Art. 230); forced anal exams reported — be very discreet.'},
+  TO:{lvl:1, r:'Petty theft; strict Sunday observance.', w:'caution', s:'Generally easy; dress modestly.', g:'illegal', gn:'Male same-sex acts technically illegal (not enforced).'},
+  TR:{lvl:2, r:'Petty scams in tourist areas; avoid the Syria/Iraq border southeast.', w:'caution', s:'Generally manageable; women face some harassment — dress modestly at sites.', g:'restrict', gn:'Legal but no recognition; rising hostility — be discreet.'},
+  TT:{lvl:2, r:'Violent crime in parts of Port of Spain; scams; Carnival caution.', w:'caution', s:'Usual caution; harassment occurs.', g:'legal', gn:'Decriminalised 2018 (court).'},
+  TV:{lvl:1, r:'Very low crime; remote; climate-exposed.', w:'safe', s:'Very safe; small community.', g:'illegal', gn:'Male same-sex acts technically illegal (not enforced).'},
+  TW:{lvl:1, r:'Very low crime.', w:'safe', s:'One of Asia\'s safest for women.', g:'open', gn:'First in Asia to legalise same-sex marriage (2019); very tolerant.'},
+  TZ:{lvl:2, r:'Petty crime; terrorism risk; safari/road hazards; Zanzibar dress norms.', w:'unsafe', s:'Dress modestly (esp. Zanzibar); usual caution.', g:'illegal', gn:'Same-sex acts illegal; harsh penalties — be very discreet.'},
+  UA:{lvl:4, r:'Active war: martial law, missile strikes, mined areas. Most governments advise against travel.', w:'unsafe', s:'Wartime conditions; exercise extreme caution.', g:'legal', gn:'Legal; wartime conditions override day-to-day concerns.'},
+  UG:{lvl:3, r:'Petty & violent crime; terrorism risk.', w:'unsafe', s:'Heightened caution.', g:'illegal', gn:'2023 Anti-Homosexuality Act incl. death penalty for "aggravated" cases — extreme danger.'},
+  US:{lvl:2, r:'Generally safe; firearm prevalence & higher violent-crime pockets in some cities.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open', gn:'Legal nationwide incl. marriage; acceptance varies by region.'},
+  UY:{lvl:1, r:'Petty crime in Montevideo; among the safest in South America.', w:'safe', s:'Among the easiest in the region for women.', g:'open', gn:'Marriage equality (2013); the most progressive in the region.'},
+  UZ:{lvl:2, r:'Petty crime; usual urban caution.', w:'caution', s:'Dress modestly; usual caution.', g:'illegal', gn:'Male same-sex acts criminalised — be very discreet.'},
+  VA:{lvl:1, r:'Pickpocketing & tourist-area scams in hot spots; watch bags on transit.', w:'safe', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'open'},
+  VC:{lvl:1, r:'Petty theft; otherwise calm.', w:'caution', s:'Comfortable for women.', g:'illegal', gn:'Male same-sex acts technically illegal (not enforced).'},
+  VE:{lvl:4, r:'Violent crime, express kidnapping, shortages, instability. Do not travel.', w:'unsafe', s:'Extreme caution.', g:'legal', gn:'No recognition; some social tolerance in Caracas.'},
+  VN:{lvl:1, r:'Petty crime, bag-snatching & scams; heavy traffic.', w:'unsafe', s:'Generally manageable for women; usual caution.', g:'legal', gn:'Not criminalised; increasingly tolerant; no marriage.'},
+  VU:{lvl:1, r:'Petty theft; cyclones; volcano/reef hazards.', w:'caution', s:'Generally easy for women.', g:'legal', gn:'Legal; conservative socially.'},
+  WS:{lvl:1, r:'Petty theft; cyclones.', w:'caution', s:'Generally easy; dress modestly (Sunday observance).', g:'illegal', gn:'Male same-sex acts technically illegal (not enforced).'},
+  XK:{lvl:2, r:'Petty crime; some inter-ethnic tension in the north.', w:'caution', s:'Generally comfortable for solo & women travellers; usual night-time and big-city caution.', g:'discreet', gn:'Legal but very conservative — be discreet.'},
+  YE:{lvl:4, r:'War, terrorism, kidnapping, cholera, landmines. Do not travel.', w:'unsafe', s:'Extreme risk.', g:'illegal', gn:'Same-sex acts punishable by death — extreme danger.'},
+  ZA:{lvl:2, r:'High violent-crime rates; carjacking & muggings; avoid isolated areas.', w:'caution', s:'Real risk of crime; avoid walking alone at night, use reputable transport.', g:'open', gn:'Marriage equality; most progressive in Africa, though rural hostility exists.'},
+  ZM:{lvl:1, r:'Petty crime; otherwise calm.', w:'unsafe', s:'Usual caution.', g:'illegal', gn:'Same-sex acts illegal (enforcement varies).'},
+  ZW:{lvl:2, r:'Petty crime; fuel/cash shortages; avoid political gatherings.', w:'unsafe', s:'Usual caution.', g:'illegal', gn:'Male same-sex acts illegal — be very discreet.'},
+};
+const SAFE_KEY='tt_safe';
+let safeState={countryCode:null};
+function safeEsc(s){ return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function safeCountry(){ const c=safeState.countryCode; if(!c||!TT_COUNTRIES[c]) return null; return {c,n:TT_COUNTRIES[c].name,f:TT_COUNTRIES[c].flag}; }
+function safeSave(){ try{ localStorage.setItem(SAFE_KEY,JSON.stringify({countryCode:safeState.countryCode})); }catch(e){} }
+
+const SAFE_LVL={1:['Exercise normal precautions','ok','🟢'],2:['Exercise increased caution','warn','🟡'],3:['Reconsider travel','bad','🟠'],4:['Avoid all / non-essential travel','crit','🔴']};
+const SAFE_W={safe:['🚰','Tap water is generally safe to drink'],caution:['⚠️','Tap water is risky for visitors — bottled or filtered is safer'],unsafe:['🚱','Do not drink the tap water — use bottled or purified']};
+const SAFE_G={open:['🏳️‍🌈','Legal & broadly accepted','ok'],legal:['✅','Legal — social acceptance varies','ok'],discreet:['🤫','Legal, but discretion advised','warn'],restrict:['⚠️','Hostile or at-risk — be very discreet','warn'],illegal:['⛔','Same-sex relations are criminalised','bad']};
+
+function safeInit(){
+  let saved=null; try{ saved=JSON.parse(localStorage.getItem(SAFE_KEY)||'null'); }catch(e){}
+  if(saved&&saved.countryCode&&SAFE_DATA[saved.countryCode]){ safeState.countryCode=saved.countryCode; }
+  else { const trip=getActiveTrip(); if(trip&&trip.destination){ try{ const r=resolveDestination(trip.destination); if(r&&r.countryCode&&SAFE_DATA[r.countryCode]) safeState.countryCode=r.countryCode; }catch(_){} } }
+  safeRenderCountryList('');
+  if(safeState.countryCode&&SAFE_DATA[safeState.countryCode]){ safeSelectCountry(safeState.countryCode,false); }
+  else { safeState.countryCode=null; document.getElementById('safe-content').style.display='none'; document.getElementById('safe-empty').style.display=''; }
+  if(!document._safeClickBound){ document.addEventListener('click',safeDocClick); document._safeClickBound=true; }
+}
+function safeOpenPicker(){ const d=document.getElementById('safe-country-drop'); if(d.style.display==='block'){ safeClosePicker(); return; } d.style.display='block'; const s=document.getElementById('safe-country-search'); s.value=''; safeRenderCountryList(''); setTimeout(()=>s.focus(),50); }
+function safeClosePicker(){ document.getElementById('safe-country-drop').style.display='none'; }
+function safeDocClick(e){ const w=document.getElementById('safe-country-disp'),d=document.getElementById('safe-country-drop'); if(!w||!d||d.style.display!=='block') return; if(w.contains(e.target)||d.contains(e.target)) return; safeClosePicker(); }
+function safeFilterCountries(){ safeRenderCountryList((document.getElementById('safe-country-search').value||'').toLowerCase().trim()); }
+function safeRenderCountryList(q){
+  const list=Object.keys(SAFE_DATA).filter(c=>TT_COUNTRIES[c]).map(c=>({c,n:TT_COUNTRIES[c].name,f:TT_COUNTRIES[c].flag}))
+    .filter(co=>!q||co.n.toLowerCase().includes(q)||co.c.toLowerCase().includes(q)).sort((a,b)=>a.n.localeCompare(b.n));
+  const html=list.length? list.map(co=>{ const lv=SAFE_DATA[co.c].lvl; return `<div class="tc-drop-item" onclick="safeSelectCountry('${co.c}')"><span class="tc-drop-flag">${co.f}</span><span class="tc-drop-name">${safeEsc(co.n)}</span><span class="tc-drop-cur">${SAFE_LVL[lv][2]} L${lv}</span></div>`; }).join('')
+    : `<div class="tc-drop-item" style="color:var(--muted);cursor:default">No matches for "${safeEsc(q)}"</div>`;
+  document.getElementById('safe-country-list').innerHTML=html;
+}
+function safeSelectCountry(code,save){ if(save===undefined) save=true; if(!SAFE_DATA[code]) return; safeState.countryCode=code; if(save) safeSave(); safeClosePicker(); safeRender(); }
+function safeRow(ico,label,val){ return `<div class="dr-row"><span class="dr-row-ico">${ico}</span><div class="dr-row-body"><div class="dr-row-lbl">${label}</div><div class="dr-row-val">${val}</div></div></div>`; }
+function safeRender(){
+  const co=safeCountry(); if(!co){ document.getElementById('safe-content').style.display='none'; document.getElementById('safe-empty').style.display=''; return; }
+  const d=SAFE_DATA[co.c];
+  document.getElementById('safe-empty').style.display='none';
+  document.getElementById('safe-content').style.display='';
+  document.getElementById('safe-disp-flag').textContent=co.f;
+  document.getElementById('safe-disp-name').textContent=co.n;
+  document.getElementById('safe-hero-flag').textContent=co.f;
+  document.getElementById('safe-hero-co').textContent=co.n;
+  const lv=SAFE_LVL[d.lvl];
+  const hero=document.getElementById('safe-hero');
+  hero.className='dr-hero safe-hero-'+lv[1];
+  document.getElementById('safe-hero-sub').innerHTML=`${lv[2]} <strong>Level ${d.lvl}</strong> — ${lv[0]}`;
+  // safety & risks
+  document.getElementById('safe-risks').innerHTML=
+    safeRow(lv[2],'Overall advisory',`<span class="safe-badge safe-${lv[1]}">Level ${d.lvl} · ${lv[0]}</span>`)
+    + safeRow('⚠️','Common risks & scams',safeEsc(d.r));
+  // water
+  const w=SAFE_W[d.w];
+  document.getElementById('safe-water').innerHTML=safeRow(w[0],'Drinking water',safeEsc(w[1]));
+  // solo
+  document.getElementById('safe-solo').innerHTML=safeRow('🧍','Solo & women travellers',safeEsc(d.s));
+  // lgbt
+  const g=SAFE_G[d.g];
+  let lg=safeRow(g[0],'Legal & social status',`<span class="safe-badge safe-${g[2]}">${g[1]}</span>`);
+  if(d.gn) lg+=safeRow('ℹ️','Note',safeEsc(d.gn));
+  document.getElementById('safe-lgbt').innerHTML=lg;
 }
 
 const LP_PHRASES = [
