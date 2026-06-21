@@ -39352,7 +39352,7 @@ function holHijriDates(y,hm,hd){
   return out;
 }
 /* Chinese New Year (first day) by year — astronomical dates, [month,day]. */
-const HOL_CNY={2024:[2,10],2025:[1,29],2026:[2,17],2027:[2,6],2028:[1,26],2029:[2,13],2030:[2,3],2031:[1,23],2032:[2,11],2033:[1,31],2034:[2,19],2035:[2,8]};
+const HOL_CNY={2024:[2,10],2025:[1,29],2026:[2,17],2027:[2,6],2028:[1,26],2029:[2,13],2030:[2,3],2031:[1,23],2032:[2,11],2033:[1,31],2034:[2,19],2035:[2,8],2036:[1,28],2037:[2,15],2038:[2,4],2039:[1,24],2040:[2,12]};
 
 /* Israel follows the Hebrew calendar; key holidays by Gregorian year [month,day,name]. */
 const HOL_IL={
@@ -39363,6 +39363,16 @@ const HOL_IL={
  2028:[[4,11,'Passover (Pesach) I'],[4,17,'Passover VII'],[5,2,'Independence Day'],[5,31,'Shavuot'],[9,21,'Rosh Hashanah'],[9,30,'Yom Kippur'],[10,5,'Sukkot I'],[10,12,'Simchat Torah']],
  2029:[[3,31,'Passover (Pesach) I'],[4,6,'Passover VII'],[4,19,'Independence Day'],[5,20,'Shavuot'],[9,10,'Rosh Hashanah'],[9,19,'Yom Kippur'],[9,24,'Sukkot I'],[10,1,'Simchat Torah']],
  2030:[[4,18,'Passover (Pesach) I'],[4,24,'Passover VII'],[5,8,'Independence Day'],[6,7,'Shavuot'],[9,28,'Rosh Hashanah'],[10,7,'Yom Kippur'],[10,12,'Sukkot I'],[10,19,'Simchat Torah']],
+ 2031:[[4,8,'Passover (Pesach) I'],[4,14,'Passover VII'],[4,29,'Independence Day'],[5,28,'Shavuot'],[9,18,'Rosh Hashanah'],[9,27,'Yom Kippur'],[10,2,'Sukkot I'],[10,9,'Simchat Torah']],
+ 2032:[[3,27,'Passover (Pesach) I'],[4,2,'Passover VII'],[4,15,'Independence Day'],[5,16,'Shavuot'],[9,6,'Rosh Hashanah'],[9,15,'Yom Kippur'],[9,20,'Sukkot I'],[9,27,'Simchat Torah']],
+ 2033:[[4,14,'Passover (Pesach) I'],[4,20,'Passover VII'],[5,4,'Independence Day'],[6,3,'Shavuot'],[9,24,'Rosh Hashanah'],[10,3,'Yom Kippur'],[10,8,'Sukkot I'],[10,15,'Simchat Torah']],
+ 2034:[[4,4,'Passover (Pesach) I'],[4,10,'Passover VII'],[4,25,'Independence Day'],[5,24,'Shavuot'],[9,14,'Rosh Hashanah'],[9,23,'Yom Kippur'],[9,28,'Sukkot I'],[10,5,'Simchat Torah']],
+ 2035:[[4,24,'Passover (Pesach) I'],[4,30,'Passover VII'],[5,15,'Independence Day'],[6,13,'Shavuot'],[10,4,'Rosh Hashanah'],[10,13,'Yom Kippur'],[10,18,'Sukkot I'],[10,25,'Simchat Torah']],
+ 2036:[[4,12,'Passover (Pesach) I'],[4,18,'Passover VII'],[5,1,'Independence Day'],[6,1,'Shavuot'],[9,22,'Rosh Hashanah'],[10,1,'Yom Kippur'],[10,6,'Sukkot I'],[10,13,'Simchat Torah']],
+ 2037:[[3,31,'Passover (Pesach) I'],[4,6,'Passover VII'],[4,21,'Independence Day'],[5,20,'Shavuot'],[9,10,'Rosh Hashanah'],[9,19,'Yom Kippur'],[9,24,'Sukkot I'],[10,1,'Simchat Torah']],
+ 2038:[[4,20,'Passover (Pesach) I'],[4,26,'Passover VII'],[5,11,'Independence Day'],[6,9,'Shavuot'],[9,30,'Rosh Hashanah'],[10,9,'Yom Kippur'],[10,14,'Sukkot I'],[10,21,'Simchat Torah']],
+ 2039:[[4,9,'Passover (Pesach) I'],[4,15,'Passover VII'],[4,28,'Independence Day'],[5,29,'Shavuot'],[9,19,'Rosh Hashanah'],[9,28,'Yom Kippur'],[10,3,'Sukkot I'],[10,10,'Simchat Torah']],
+ 2040:[[3,29,'Passover (Pesach) I'],[4,4,'Passover VII'],[4,18,'Independence Day'],[5,18,'Shavuot'],[9,8,'Rosh Hashanah'],[9,17,'Yom Kippur'],[9,22,'Sukkot I'],[9,29,'Simchat Torah']],
 };
 
 /* Rule builders: f=fixed, e=Western-Easter offset, oe=Orthodox-Easter offset,
