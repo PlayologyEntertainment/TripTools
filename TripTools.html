@@ -2663,6 +2663,7 @@ body.no-scroll { overflow: hidden; }
         <label for="bl-dest">Destination</label>
         <input type="text" id="bl-dest" placeholder="e.g. Kyoto, Japan" maxlength="80" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="bl-dest-suggest" onkeydown="if(event.key==='Enter' && document.getElementById('bl-dest-suggest').style.display==='none')blSubmit()">
         <div class="ib-dest-suggest" id="bl-dest-suggest" role="listbox" style="display:none"></div>
+        <div class="ib-dest-info" id="bl-dest-info" style="display:none"></div>
       </div>
       <div class="bl-form-grid">
         <div class="fg">
@@ -2946,6 +2947,7 @@ body.no-scroll { overflow: hidden; }
         <label for="bp-dest">Destination</label>
         <input type="text" id="bp-dest" placeholder="e.g. Paris, France" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="bp-dest-suggest" oninput="bpSave()">
         <div class="ib-dest-suggest" id="bp-dest-suggest" role="listbox" style="display:none"></div>
+        <div class="ib-dest-info" id="bp-dest-info" style="display:none"></div>
       </div>
       <div class="fg bp-fg-sm">
         <label for="bp-travelers">Travelers</label>
@@ -5924,6 +5926,7 @@ body.no-scroll { overflow: hidden; }
         <button class="btn btn-p" id="wb-go-btn" onclick="wbSearch()">Plan Wardrobe →</button>
         <div class="ib-dest-suggest" id="wb-q-suggest" role="listbox" style="display:none"></div>
       </div>
+      <div class="ib-dest-info" id="wb-q-info" style="display:none"></div>
       <button class="btn btn-s btn-sm wb-geo-btn" id="wb-geo-btn" onclick="wbGeoLocate()">📍 Use my location</button>
     </div>
 
@@ -14306,6 +14309,7 @@ input:checked + .pb-toggle-box::after { transform:translateX(16px);background:#f
           <div class="ib-dest-fg">
             <input type="text" id="pth-dest" placeholder="e.g. Kenya, Thailand" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="pth-dest-suggest" oninput="pthOnInput()">
             <div class="ib-dest-suggest" id="pth-dest-suggest" role="listbox" style="display:none"></div>
+            <div class="ib-dest-info" id="pth-dest-info" style="display:none"></div>
           </div>
         </div>
         <div>
@@ -16235,8 +16239,9 @@ function _dbRenderBriefing(force){
         <button onclick="dbStartTrip()">Set up trip →</button>
         <div class="ib-dest-suggest" id="db-quick-suggest" role="listbox" style="display:none"></div>
       </div>
+      <div class="ib-dest-info" id="db-quick-info" style="display:none"></div>
     </div>`;
-    ttDestTypeahead({ input:'db-quick-dest', suggest:'db-quick-suggest' });
+    ttDestTypeahead({ input:'db-quick-dest', suggest:'db-quick-suggest', info:'db-quick-info' });
     return;
   }
 
@@ -26546,11 +26551,11 @@ function ttWireDestInputs() {
   // Trip-level fields get the contextual hint (season/budget/visa) + trip-name auto-fill.
   if (!ttMtDest) ttMtDest = ttDestTypeahead({ input: 'mt-dest', suggest: 'mt-dest-suggest', info: 'mt-dest-info', nameInput: 'mt-name' });
   if (!ttIbDest) ttIbDest = ttDestTypeahead({ input: 'ib-destination', suggest: 'ib-dest-suggest', info: 'ib-dest-info', nameInput: 'ib-trip-name', onSelect: () => { if (typeof ibSave === 'function') ibSave(); } });
-  // Other free-text destination fields get the same dropdown (idempotent — guarded by a data flag).
-  ttDestTypeahead({ input: 'bp-dest', suggest: 'bp-dest-suggest', onSelect: () => { if (typeof bpSave === 'function') bpSave(); } });
-  ttDestTypeahead({ input: 'bl-dest', suggest: 'bl-dest-suggest' });
-  ttDestTypeahead({ input: 'wb-q',    suggest: 'wb-q-suggest' });
-  ttDestTypeahead({ input: 'pth-dest', suggest: 'pth-dest-suggest', onSelect: () => { if (typeof pthOnInput === 'function') pthOnInput(); } });
+  // Other free-text destination fields get the same dropdown + hint (idempotent — guarded by a data flag).
+  ttDestTypeahead({ input: 'bp-dest', suggest: 'bp-dest-suggest', info: 'bp-dest-info', onSelect: () => { if (typeof bpSave === 'function') bpSave(); } });
+  ttDestTypeahead({ input: 'bl-dest', suggest: 'bl-dest-suggest', info: 'bl-dest-info' });
+  ttDestTypeahead({ input: 'wb-q',    suggest: 'wb-q-suggest',    info: 'wb-q-info' });
+  ttDestTypeahead({ input: 'pth-dest', suggest: 'pth-dest-suggest', info: 'pth-dest-info', onSelect: () => { if (typeof pthOnInput === 'function') pthOnInput(); } });
 }
 
 function ibInit() {
