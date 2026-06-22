@@ -2002,10 +2002,17 @@ body.no-scroll { overflow: hidden; }
 .db-link{ font-family:var(--sans); font-size:12px; font-weight:600; color:var(--accent); cursor:pointer; background:none; border:none; padding:0; }
 .db-link:hover{ text-decoration:underline; }
 .db-muted{ color:var(--muted); font-style:italic; }
+.db-actions{ display:flex; gap:8px; flex-shrink:0; }
 .db-wx-now{ display:flex; flex-direction:column; gap:2px; }
 .db-wx-ic{ font-size:30px; line-height:1; }
 .db-wx-temp{ font-family:var(--serif); font-size:22px; font-weight:600; color:var(--ink); }
 .db-wx-desc{ font-family:var(--sans); font-size:13px; color:var(--ink-2); }
+.db-wx-days{ display:flex; flex-direction:column; gap:4px; }
+.db-wx-day{ display:flex; align-items:baseline; gap:8px; font-family:var(--sans); font-size:13px; color:var(--ink-2); flex-wrap:wrap; }
+.db-wx-day-ic{ font-size:16px; }
+.db-wx-day-dt{ min-width:54px; }
+.db-wx-day-tp b{ color:var(--ink); }
+.db-wx-day-de{ font-size:12px; color:var(--muted); }
 .db-empty{ border:1.5px dashed var(--ink); border-radius:var(--r); background:var(--paper-2); padding:22px 20px; text-align:center; }
 .db-empty h3{ font-family:var(--serif); font-size:20px; font-weight:600; color:var(--ink); margin:6px 0 4px; }
 .db-empty p{ font-family:var(--sans); font-size:13.5px; color:var(--muted); margin-bottom:14px; max-width:50ch; margin-left:auto; margin-right:auto; line-height:1.5; }
@@ -16058,22 +16065,66 @@ function dbSecWeather(){
   return dbCard('🌦','Weather now',`<div class="db-row" id="db-wx-body"><span class="db-muted">Loading current conditions…</span></div>`,dbLink('weather','5-day forecast'));
 }
 
-async function dbLoadWeather(query,cc){
+function dbWxFmtDay(d){ return d.toLocaleDateString(undefined,{weekday:'short',day:'numeric'}); }
+function dbWxIso(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+
+async function dbWxCurrent(h){
+  const f=await fetch(`${WX_API_URL}?latitude=${h.latitude}&longitude=${h.longitude}&current=temperature_2m,apparent_temperature,weather_code,is_day&timezone=auto`).then(r=>r.json());
+  const c=f.current||{};
+  const wc=(typeof WX_CODES!=='undefined'&&WX_CODES[c.weather_code])||{t:'—',d:'🌡'};
+  const ic=(c.is_day===0&&wc.n)?wc.n:(wc.d||'🌡');
+  const cT=Math.round(c.temperature_2m), fT=Math.round(c.temperature_2m*9/5+32), feels=Math.round(c.apparent_temperature);
+  return `<div class="db-wx-now"><span class="db-wx-ic">${ic}</span><span class="db-wx-temp">${cT}°C / ${fT}°F</span><span class="db-wx-desc">${dbEsc(wc.t)} · feels ${feels}°C</span></div>`;
+}
+
+/* Weather panel — prefers a daily forecast for the trip's actual dates,
+   falling back to current conditions when no dates are set, the dates are
+   beyond the ~16-day forecast horizon, or have already passed. */
+async function dbLoadWeather(query,cc,trip){
   const body=document.getElementById('db-wx-body'); if(!body) return;
-  if(dbState.wx[cc]){ body.innerHTML=dbState.wx[cc]; return; }
-  if(!navigator.onLine || typeof WX_GEO_URL==='undefined'){ body.innerHTML='<span class="db-muted">Offline — open the Weather tool when connected for a live 5-day forecast.</span>'; return; }
+  const dep=(trip&&trip.departDate)||'';
+  const ret=(trip&&trip.returnDate)||dep;
+  const key=cc+'|'+dep+'|'+ret;
+  if(dbState.wx[key]){ body.innerHTML=dbState.wx[key]; return; }
+  if(!navigator.onLine || typeof WX_GEO_URL==='undefined'){ body.innerHTML='<span class="db-muted">Offline — open the Weather tool when connected for a live forecast.</span>'; return; }
   try{
     const g=await fetch(`${WX_GEO_URL}?name=${encodeURIComponent(query)}&count=1&language=en&format=json`).then(r=>r.json());
     if(!g.results||!g.results.length) throw new Error('nogeo');
     const h=g.results[0];
-    const f=await fetch(`${WX_API_URL}?latitude=${h.latitude}&longitude=${h.longitude}&current=temperature_2m,apparent_temperature,weather_code,is_day&timezone=auto`).then(r=>r.json());
-    const c=f.current||{};
-    const wc=(typeof WX_CODES!=='undefined'&&WX_CODES[c.weather_code])||{t:'—',d:'🌡'};
-    const ic=(c.is_day===0&&wc.n)?wc.n:(wc.d||'🌡');
-    const cT=Math.round(c.temperature_2m), fT=Math.round(c.temperature_2m*9/5+32), feels=Math.round(c.apparent_temperature);
-    const html=`<div class="db-wx-now"><span class="db-wx-ic">${ic}</span><span class="db-wx-temp">${cT}°C / ${fT}°F</span><span class="db-wx-desc">${dbEsc(wc.t)} · feels ${feels}°C</span><span class="db-muted">${dbEsc(h.name)}${h.country?', '+dbEsc(h.country):''}</span></div>`;
-    dbState.wx[cc]=html; body.innerHTML=html;
-  }catch(e){ body.innerHTML='<span class="db-muted">Couldn’t load live weather right now. Open the Weather tool to retry.</span>'; }
+    const loc=`${dbEsc(h.name)}${h.country?', '+dbEsc(h.country):''}`;
+    const today=new Date(); today.setHours(0,0,0,0);
+    let html='';
+
+    if(dep){
+      const depD=new Date(dep+'T00:00:00');
+      const retD=new Date((ret||dep)+'T00:00:00');
+      const maxF=new Date(today); maxF.setDate(maxF.getDate()+15);
+      if(retD<today){
+        html=`<span class="db-muted">Your trip dates have passed. Open the Weather tool for current conditions in ${loc}.</span>`;
+      } else if(depD>maxF){
+        html=`<div class="db-row db-muted" style="margin-bottom:6px">A daily forecast unlocks within ~16 days of your trip. Conditions right now in ${loc}:</div>${await dbWxCurrent(h)}`;
+      } else {
+        const sD=(depD<today?today:depD), eD=(retD>maxF?maxF:retD);
+        const f=await fetch(`${WX_API_URL}?latitude=${h.latitude}&longitude=${h.longitude}&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&start_date=${dbWxIso(sD)}&end_date=${dbWxIso(eD)}`).then(r=>r.json());
+        const dd=f.daily;
+        if(dd&&dd.time&&dd.time.length){
+          const days=dd.time.map((t,i)=>{
+            const wc=(typeof WX_CODES!=='undefined'&&WX_CODES[dd.weather_code[i]])||{t:'—',d:'🌡'};
+            const hi=Math.round(dd.temperature_2m_max[i]), lo=Math.round(dd.temperature_2m_min[i]);
+            return `<div class="db-wx-day"><span class="db-wx-day-ic">${wc.d||'🌡'}</span><span class="db-wx-day-dt">${dbWxFmtDay(new Date(t+'T00:00:00'))}</span><span class="db-wx-day-tp"><b>${hi}°</b> / ${lo}°C</span><span class="db-wx-day-de">${dbEsc(wc.t)}</span></div>`;
+          });
+          const shown=days.slice(0,6).join('');
+          const more=days.length>6?`<div class="db-row db-muted">+${days.length-6} more day${days.length-6===1?'':'s'} — see the Weather tool.</div>`:'';
+          const clamp=(depD<today)?`<div class="db-row db-muted">Showing from today through your return.</div>`:'';
+          html=`<div class="db-row db-muted" style="margin-bottom:8px">Forecast for ${loc} during your trip:</div><div class="db-wx-days">${shown}</div>${more}${clamp}`;
+        }
+      }
+    }
+
+    if(!html){ html=`<div class="db-row db-muted" style="margin-bottom:6px">Conditions right now in ${loc}:</div>${await dbWxCurrent(h)}`; }
+
+    dbState.wx[key]=html; body.innerHTML=html;
+  }catch(e){ body.innerHTML='<span class="db-muted">Couldn’t load the forecast right now. Open the Weather tool to retry.</span>'; }
 }
 
 function dbChips(cc,country){
@@ -16092,13 +16143,23 @@ function dbChips(cc,country){
   return chips.join('');
 }
 
-function dbQuickSet(){
-  const inp=document.getElementById('db-quick-dest'); if(!inp) return;
-  const v=inp.value.trim(); if(!v){ inp.focus(); return; }
-  const trips=getTrips(); const t=getActiveTrip();
-  if(t){ const i=trips.findIndex(x=>x.id===t.id); if(i>=0){ trips[i].destination=v; trips[i].updatedAt=new Date().toISOString(); } }
-  else { const nt={id:'trip_'+Date.now(),name:'My Trip',destination:v,homeCurrency:'USD',travelers:2,tripType:[],createdAt:new Date().toISOString()}; trips.push(nt); localStorage.setItem('tt_active',nt.id); }
-  saveTrips(trips); updHdrTrip(); localStorage.setItem('tt_db_exp','1'); renderBriefing(true);
+/* Empty-state CTA → open the full MyTrip "new trip" form, prefilling the
+   destination the user typed (if any) so they can fill in the rest. */
+function dbStartTrip(){
+  const inp=document.getElementById('db-quick-dest');
+  const v=inp?inp.value.trim():'';
+  localStorage.setItem('tt_db_exp','1');
+  showView('mytrip');
+  mtNew();
+  if(v){ const d=document.getElementById('mt-dest'); if(d) d.value=v; }
+}
+
+/* Header CTA → open the full MyTrip form to edit the active trip's
+   specifics (dates, destination, etc.), which drive the briefing. */
+function dbEditTrip(){
+  const t=getActiveTrip();
+  showView('mytrip');
+  if(t) mtEdit(t.id); else mtNew();
 }
 
 function renderBriefing(force){
@@ -16118,8 +16179,8 @@ function renderBriefing(force){
       <h3>Where are you headed?</h3>
       <p>Set a destination and TripTools assembles entry rules, safety, money, plugs, holidays and more into one offline briefing — right here.</p>
       <div class="db-quick">
-        <input id="db-quick-dest" type="text" placeholder="e.g. Tokyo, Japan" onkeydown="if(event.key==='Enter')dbQuickSet()">
-        <button onclick="dbQuickSet()">Build briefing</button>
+        <input id="db-quick-dest" type="text" placeholder="e.g. Tokyo, Japan" onkeydown="if(event.key==='Enter')dbStartTrip()">
+        <button onclick="dbStartTrip()">Set up trip →</button>
       </div>
     </div>`;
     return;
@@ -16159,13 +16220,16 @@ function renderBriefing(force){
         <div class="db-title">${dbEsc(cname)}</div>
         ${dsub?`<div class="db-sub">${dsub}</div>`:''}
       </div>
-      <button class="db-toggle" onclick="event.stopPropagation();dbToggle()">${exp?'Hide ▴':'Full briefing ▾'}</button>
+      <div class="db-actions">
+        <button class="db-toggle" onclick="event.stopPropagation();dbToggle()">${exp?'Hide ▴':'Full briefing ▾'}</button>
+        <button class="db-toggle" onclick="event.stopPropagation();dbEditTrip()">✎ MyTrip</button>
+      </div>
     </div>
     ${chips?`<div class="db-chips">${chips}</div>`:''}
     ${body}
   </div>`;
 
-  if(exp) dbLoadWeather(destText,cc);
+  if(exp) dbLoadWeather(destText,cc,trip);
 }
 
 /* ── TRAVEL BUDGET PLANNER ── */
