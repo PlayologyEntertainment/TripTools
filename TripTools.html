@@ -16168,6 +16168,16 @@ function dbEditTrip(){
 }
 
 function renderBriefing(force){
+  // The country payload datasets (TT_DEST_INDEX, SAFE_DATA, EM_DATA, the *_PAYLOAD
+  // arrays …) are declared with `const` further down the file than the initial
+  // top-level renderHub() call. On that first paint those names are still in their
+  // temporal dead zone, so even `typeof X` throws a ReferenceError (not 'undefined').
+  // Swallow it here so init can't be derailed — renderBriefing(true) runs again at
+  // the very end of the script, after every dataset is defined, and paints for real.
+  try{ _dbRenderBriefing(force); }
+  catch(e){ dbState.sig=null; }
+}
+function _dbRenderBriefing(force){
   const el=document.getElementById('dest-briefing'); if(!el) return;
   const trip=getActiveTrip();
   const destText=trip&&trip.destination?trip.destination.trim():'';
