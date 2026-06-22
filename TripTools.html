@@ -20527,15 +20527,17 @@ function dpClearFavs() {
 
 function dpSaveToMyTrip() {
   if (!dpCurrentDest) return;
-  const trips = JSON.parse(localStorage.getItem('triptools_trips') || '[]');
-  const activeId = localStorage.getItem('triptools_active_trip');
+  // Use the canonical MyTrip store (tt_trips / tt_active) so the destination
+  // actually lands on the active trip — every other tool, the Weather Forecast
+  // autofill and the Trip Briefing all read it from here.
+  const trips = getTrips(), activeId = getActiveTripId();
   const trip = trips.find(t => t.id === activeId);
   if (trip) {
     trip.destination = dpCurrentDest.name + ', ' + dpCurrentDest.country;
     trip.updatedAt = new Date().toISOString();
-    localStorage.setItem('triptools_trips', JSON.stringify(trips));
+    saveTrips(trips);
     alert('✈ Destination set to "' + dpCurrentDest.name + '" in your active trip!');
-    renderHdrTrip();
+    updHdrTrip();
   } else {
     if (confirm('No active trip found. Create a new trip with this destination?')) {
       showView('mytrip');
@@ -45021,11 +45023,16 @@ function wxInit() {
     });
   }
 
-  // Load cached forecast or prefill from MyTrip
+  // Load cached forecast, or pull the destination straight from MyTrip and
+  // fetch its forecast automatically.
   const cached = wxReadCache();
   const trip = getActiveTrip();
+  const tripDest = (trip && trip.destination) ? trip.destination.trim() : '';
+  const norm = s => (s || '').trim().toLowerCase();
+  const cacheCoversTrip = cached && tripDest && norm(cached.query) === norm(tripDest);
 
-  if (cached) {
+  if (cached && (!tripDest || cacheCoversTrip)) {
+    // Cached forecast already covers where we're headed (or there's no trip) — show it.
     wxCurrent = cached;
     input.value = cached.query || '';
     wxRender();
@@ -45035,9 +45042,19 @@ function wxInit() {
     } else {
       wxSetStatus('cached', `Cached forecast is stale (${wxAgo(cached.ts)}) — tap "Get Forecast" to refresh.`);
     }
-  } else if (trip && trip.destination) {
-    input.value = trip.destination;
-    wxSetStatus('idle', `Loaded "${trip.destination}" from your trip — tap "Get Forecast" to fetch.`);
+  } else if (tripDest) {
+    // A MyTrip destination the cache doesn't already cover — autofill it and
+    // fetch the forecast so the location is pulled in without a manual tap.
+    input.value = tripDest;
+    if (navigator.onLine) {
+      wxSearch();
+    } else if (cached) {
+      wxCurrent = cached;
+      wxRender();
+      wxSetStatus('cached', `Offline — showing the last cached forecast (${wxAgo(cached.ts)}).`);
+    } else {
+      wxSetStatus('idle', `Loaded "${tripDest}" from your trip — connect to fetch the forecast.`);
+    }
   } else {
     wxSetStatus('idle', '');
   }
