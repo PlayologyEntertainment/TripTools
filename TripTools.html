@@ -686,6 +686,31 @@ body {
 .ib-setup-body { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 @media(max-width:520px){ .ib-setup-body { grid-template-columns: 1fr; } }
 
+/* Destination typeahead */
+.ib-dest-fg { position: relative; }
+.ib-dest-suggest {
+  position: absolute; z-index: 40; left: 0; right: 0; top: calc(100% + 4px);
+  background: var(--paper); border: 1.5px solid var(--ink); border-radius: var(--r);
+  box-shadow: 3px 3px 0 var(--ink); max-height: 300px; overflow-y: auto;
+}
+.ib-sug-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; cursor: pointer; border-bottom: 1px solid var(--rule); }
+.ib-sug-item:last-child { border-bottom: 0; }
+.ib-sug-item:hover, .ib-sug-item.active { background: var(--paper-2); }
+.ib-sug-flag { width: 26px; height: 19px; border-radius: 2px; background: var(--ink); color: #fff; font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-family: var(--mono); letter-spacing: .02em; }
+.ib-sug-name { font-weight: 600; font-size: 14px; }
+.ib-sug-country { font-size: 12px; color: var(--muted); margin-left: auto; }
+.ib-sug-empty { padding: 12px; color: var(--muted); font-style: italic; font-size: 13px; }
+.ib-dest-info {
+  margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px;
+  font-family: var(--mono); font-size: 11px;
+}
+.ib-dest-info .chip {
+  display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px;
+  background: var(--paper); border: 1.5px solid var(--ink); border-radius: 100px;
+  letter-spacing: .02em; color: var(--ink-2);
+}
+.ib-dest-info .chip b { color: var(--ink); font-weight: 700; }
+
 /* Day tabs strip */
 .ib-days-strip {
   display: flex; gap: 0; overflow-x: auto; border: 1.5px solid var(--ink);
@@ -3780,9 +3805,12 @@ body.no-scroll { overflow: hidden; }
           <label>Trip Name</label>
           <input type="text" id="ib-trip-name" placeholder="e.g. Paris Anniversary Trip" oninput="ibSave()" autocomplete="off">
         </div>
-        <div class="fg" style="margin:0">
+        <div class="fg ib-dest-fg" style="margin:0">
           <label>Destination</label>
-          <input type="text" id="ib-destination" placeholder="e.g. Paris, France" oninput="ibSave()" autocomplete="off">
+          <input type="text" id="ib-destination" placeholder="e.g. Paris, France" autocomplete="off"
+                 oninput="ibDestInput()" onfocus="ibDestSearch()" onkeydown="ibDestKey(event)" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="ib-dest-suggest">
+          <div class="ib-dest-suggest" id="ib-dest-suggest" role="listbox" style="display:none"></div>
+          <div class="ib-dest-info" id="ib-dest-info" style="display:none"></div>
         </div>
         <div class="fg" style="margin:0">
           <label>Start Date</label>
@@ -20303,6 +20331,19 @@ const DP_DESTINATIONS = TT_DESTINATIONS.filter(d => d.inspire).map(d => ({
   id:d.id, name:d.name, country:d.country, flag:d.cc, continent:d.continent,
   types:d.types, budget:d.budget, season:d.season, dailyRange:d.dailyRange, visa:d.visa, desc:d.desc
 }));
+/* Trip Briefing typeahead source — the full registry, normalised so both
+   curated "inspire" rows and supplementary cities expose the same shape.
+   Extra fields (season/dailyRange/visa) are present only for inspire rows
+   and drive the contextual auto-fill hint. */
+const IB_DESTINATIONS = TT_DESTINATIONS.map(d => ({
+  id: d.id,
+  name: d.name,
+  country: d.country || d.tzCountry || '',
+  cc: (d.cc || '').toUpperCase(),
+  season: d.season || '',
+  dailyRange: d.dailyRange || '',
+  visa: d.visa || ''
+})).filter(d => d.name);
 const TZ_CITIES = TT_DESTINATIONS.filter(d => d.tz !== undefined)
   .sort((a,b) => a._tzi - b._tzi)
   .map(d => ({ city:d.tzCity, country:d.tzCountry, tz:d.tz, flag:d.tzFlag }));
@@ -26397,6 +26438,108 @@ function ibSave() {
   ibUpdateSummary();
 }
 
+/* ── Destination typeahead + auto-fill ──────────────────────────────
+   Suggests from the full registry (IB_DESTINATIONS) as the user types,
+   while the field stays free-text. Picking a row normalises the value to
+   "City, Country", pre-fills an empty Trip Name, and surfaces a contextual
+   hint (best season / daily budget / visa) drawn from the destination row. */
+let ibDestSugList = [];
+let ibDestSugActive = -1;
+let ibDestWired = false;
+
+function ibDestInput() {
+  ibDestHideInfo();   // manual typing invalidates a prior selection's hint
+  ibDestSearch();
+  ibSave();
+}
+
+function ibDestSearch() {
+  const inp = document.getElementById('ib-destination');
+  const box = document.getElementById('ib-dest-suggest');
+  if (!inp || !box) return;
+  const q = (inp.value || '').toLowerCase().trim();
+  if (!q) { ibDestHideSuggest(); return; }
+  const list = IB_DESTINATIONS.filter(d =>
+    d.name.toLowerCase().includes(q) || (d.country && d.country.toLowerCase().includes(q))
+  ).slice(0, 12);
+  ibDestSugList = list; ibDestSugActive = -1;
+  if (!list.length) {
+    box.innerHTML = '<div class="ib-sug-empty">No matches — you can still type your own</div>';
+    box.style.display = 'block'; inp.setAttribute('aria-expanded', 'true'); return;
+  }
+  box.innerHTML = list.map((d, i) =>
+    `<div class="ib-sug-item" role="option" data-i="${i}" onmousedown="event.preventDefault();ibDestSelect('${d.id}')">`+
+      `<span class="ib-sug-flag">${d.cc || '🌍'}</span>`+
+      `<span class="ib-sug-name">${d.name}</span>`+
+      (d.country ? `<span class="ib-sug-country">${d.country}</span>` : '')+
+    `</div>`
+  ).join('');
+  box.style.display = 'block'; inp.setAttribute('aria-expanded', 'true');
+}
+
+function ibDestHideSuggest() {
+  const b = document.getElementById('ib-dest-suggest');
+  if (b) b.style.display = 'none';
+  const inp = document.getElementById('ib-destination');
+  if (inp) inp.setAttribute('aria-expanded', 'false');
+}
+
+function ibDestHighlight() {
+  document.querySelectorAll('#ib-dest-suggest .ib-sug-item')
+    .forEach(el => el.classList.toggle('active', +el.dataset.i === ibDestSugActive));
+}
+
+function ibDestKey(e) {
+  const box = document.getElementById('ib-dest-suggest');
+  if (!box || box.style.display === 'none') return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); ibDestSugActive = Math.min(ibDestSugList.length - 1, ibDestSugActive + 1); ibDestHighlight(); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); ibDestSugActive = Math.max(0, ibDestSugActive - 1); ibDestHighlight(); }
+  else if (e.key === 'Enter') {
+    if (ibDestSugList.length) { e.preventDefault(); const pick = ibDestSugActive >= 0 ? ibDestSugList[ibDestSugActive] : ibDestSugList[0]; if (pick) ibDestSelect(pick.id); }
+  }
+  else if (e.key === 'Escape') { ibDestHideSuggest(); }
+}
+
+function ibDestSelect(id) {
+  const d = IB_DESTINATIONS.find(x => x.id === id);
+  if (!d) return;
+  document.getElementById('ib-destination').value = d.country ? `${d.name}, ${d.country}` : d.name;
+  // Auto-fill an empty Trip Name from the chosen place (never overwrite user input).
+  const nameInp = document.getElementById('ib-trip-name');
+  if (nameInp && !nameInp.value.trim()) nameInp.value = `${d.name} Trip`;
+  ibDestHideSuggest();
+  ibDestRenderInfo(d);
+  ibSave();
+}
+
+function ibDestRenderInfo(d) {
+  const box = document.getElementById('ib-dest-info');
+  if (!box) return;
+  const chips = [];
+  if (d.season)     chips.push(`<span class="chip">📅 Best time&nbsp;<b>${d.season}</b></span>`);
+  if (d.dailyRange) chips.push(`<span class="chip">💰 ~<b>${d.dailyRange}</b>/day</span>`);
+  if (d.visa)       chips.push(`<span class="chip">🛂&nbsp;<b>${d.visa}</b></span>`);
+  if (!chips.length) { ibDestHideInfo(); return; }
+  box.innerHTML = chips.join('');
+  box.style.display = 'flex';
+}
+
+function ibDestHideInfo() {
+  const box = document.getElementById('ib-dest-info');
+  if (box) { box.style.display = 'none'; box.innerHTML = ''; }
+}
+
+/* On load, if the saved destination text matches a known place, show its hint. */
+function ibDestRestoreInfo() {
+  const val = (document.getElementById('ib-destination').value || '').toLowerCase().trim();
+  if (!val) return;
+  const d = IB_DESTINATIONS.find(x =>
+    val === (x.country ? `${x.name}, ${x.country}` : x.name).toLowerCase() ||
+    val === x.name.toLowerCase()
+  );
+  if (d) ibDestRenderInfo(d);
+}
+
 function ibInit() {
   ibLoad();
 
@@ -26414,6 +26557,13 @@ function ibInit() {
   document.getElementById('ib-destination').value  = ibData.destination || '';
   document.getElementById('ib-start-date').value   = ibData.startDate || '';
   document.getElementById('ib-end-date').value     = ibData.endDate || '';
+
+  // Restore the destination hint and wire the outside-click close (once).
+  ibDestRestoreInfo();
+  if (!ibDestWired) {
+    ibDestWired = true;
+    document.addEventListener('click', e => { if (!e.target.closest('.ib-dest-fg')) ibDestHideSuggest(); });
+  }
 
   // If we have dates but no days, auto-generate
   if (ibData.startDate && ibData.endDate && ibData.days.length === 0) {
