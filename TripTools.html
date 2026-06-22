@@ -2003,6 +2003,11 @@ body.no-scroll { overflow: hidden; }
 .db-link:hover{ text-decoration:underline; }
 .db-muted{ color:var(--muted); font-style:italic; }
 .db-actions{ display:flex; gap:8px; flex-shrink:0; }
+@media(max-width:600px){
+  .db-head{ flex-wrap:wrap; }
+  .db-actions{ width:100%; flex-basis:100%; }
+  .db-actions .db-toggle{ flex:1 1 0; text-align:center; }
+}
 .db-wx-now{ display:flex; flex-direction:column; gap:2px; }
 .db-wx-ic{ font-size:30px; line-height:1; }
 .db-wx-temp{ font-family:var(--serif); font-size:22px; font-weight:600; color:var(--ink); }
