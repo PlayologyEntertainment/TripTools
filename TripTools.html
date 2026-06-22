@@ -686,6 +686,31 @@ body {
 .ib-setup-body { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 @media(max-width:520px){ .ib-setup-body { grid-template-columns: 1fr; } }
 
+/* Destination typeahead */
+.ib-dest-fg { position: relative; }
+.ib-dest-suggest {
+  position: absolute; z-index: 40; left: 0; right: 0; top: calc(100% + 4px);
+  background: var(--paper); border: 1.5px solid var(--ink); border-radius: var(--r);
+  box-shadow: 3px 3px 0 var(--ink); max-height: 300px; overflow-y: auto;
+}
+.ib-sug-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; cursor: pointer; border-bottom: 1px solid var(--rule); }
+.ib-sug-item:last-child { border-bottom: 0; }
+.ib-sug-item:hover, .ib-sug-item.active { background: var(--paper-2); }
+.ib-sug-flag { width: 26px; height: 19px; border-radius: 2px; background: var(--ink); color: #fff; font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-family: var(--mono); letter-spacing: .02em; }
+.ib-sug-name { font-weight: 600; font-size: 14px; }
+.ib-sug-country { font-size: 12px; color: var(--muted); margin-left: auto; }
+.ib-sug-empty { padding: 12px; color: var(--muted); font-style: italic; font-size: 13px; }
+.ib-dest-info {
+  margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px;
+  font-family: var(--mono); font-size: 11px;
+}
+.ib-dest-info .chip {
+  display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px;
+  background: var(--paper); border: 1.5px solid var(--ink); border-radius: 100px;
+  letter-spacing: .02em; color: var(--ink-2);
+}
+.ib-dest-info .chip b { color: var(--ink); font-weight: 700; }
+
 /* Day tabs strip */
 .ib-days-strip {
   display: flex; gap: 0; overflow-x: auto; border: 1.5px solid var(--ink);
@@ -2039,6 +2064,7 @@ body.no-scroll { overflow: hidden; }
       <div class="hub-stat"><b>✓</b>Private &amp; Free</div>
     </div>
   </div>
+  <div class="db" id="dest-briefing"></div>
   <div class="search-area">
     <div class="search-wrap">
       <input id="hub-q" type="text" placeholder='🔍  Search tools... e.g. "packing" or "passport"' oninput="renderHub()" aria-label="Search tools">
@@ -2062,7 +2088,6 @@ body.no-scroll { overflow: hidden; }
       <span class="result-cnt" id="result-cnt"></span>
     </div>
   </div>
-  <div class="db" id="dest-briefing"></div>
   <div class="tools-wrap" id="tools-wrap"></div>
 </div>
 
@@ -2151,7 +2176,10 @@ body.no-scroll { overflow: hidden; }
     <div id="mt-form" style="display:none;margin-top:24px">
       <div class="sec-lbl" id="mt-lbl">New Trip</div>
       <div class="fg"><label for="mt-name">Trip Name</label><input type="text" id="mt-name" placeholder="e.g. Paris Anniversary Trip"></div>
-      <div class="fg"><label for="mt-dest">Destination</label><input type="text" id="mt-dest" placeholder="e.g. Paris, France"></div>
+      <div class="fg ib-dest-fg"><label for="mt-dest">Destination</label><input type="text" id="mt-dest" placeholder="e.g. Paris, France" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="mt-dest-suggest">
+        <div class="ib-dest-suggest" id="mt-dest-suggest" role="listbox" style="display:none"></div>
+        <div class="ib-dest-info" id="mt-dest-info" style="display:none"></div>
+      </div>
       <div class="frow">
         <div class="fg"><label for="mt-dep">Departure Date</label><input type="date" id="mt-dep"></div>
         <div class="fg"><label for="mt-ret">Return Date</label><input type="date" id="mt-ret"></div>
@@ -2631,9 +2659,11 @@ body.no-scroll { overflow: hidden; }
         <span class="bl-form-title" id="bl-form-title">Add a destination</span>
         <button class="btn-ghost" id="bl-cancel-btn" onclick="blCancelEdit()" style="display:none">✕ Cancel edit</button>
       </div>
-      <div class="fg">
+      <div class="fg ib-dest-fg">
         <label for="bl-dest">Destination</label>
-        <input type="text" id="bl-dest" placeholder="e.g. Kyoto, Japan" maxlength="80" autocomplete="off" onkeydown="if(event.key==='Enter')blSubmit()">
+        <input type="text" id="bl-dest" placeholder="e.g. Kyoto, Japan" maxlength="80" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="bl-dest-suggest" onkeydown="if(event.key==='Enter' && document.getElementById('bl-dest-suggest').style.display==='none')blSubmit()">
+        <div class="ib-dest-suggest" id="bl-dest-suggest" role="listbox" style="display:none"></div>
+        <div class="ib-dest-info" id="bl-dest-info" style="display:none"></div>
       </div>
       <div class="bl-form-grid">
         <div class="fg">
@@ -2913,9 +2943,11 @@ body.no-scroll { overflow: hidden; }
         <label for="bp-trip-name">Trip Name</label>
         <input type="text" id="bp-trip-name" placeholder="e.g. Paris Anniversary" oninput="bpSave()">
       </div>
-      <div class="fg">
+      <div class="fg ib-dest-fg">
         <label for="bp-dest">Destination</label>
-        <input type="text" id="bp-dest" placeholder="e.g. Paris, France" oninput="bpSave()">
+        <input type="text" id="bp-dest" placeholder="e.g. Paris, France" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="bp-dest-suggest" oninput="bpSave()">
+        <div class="ib-dest-suggest" id="bp-dest-suggest" role="listbox" style="display:none"></div>
+        <div class="ib-dest-info" id="bp-dest-info" style="display:none"></div>
       </div>
       <div class="fg bp-fg-sm">
         <label for="bp-travelers">Travelers</label>
@@ -3780,9 +3812,12 @@ body.no-scroll { overflow: hidden; }
           <label>Trip Name</label>
           <input type="text" id="ib-trip-name" placeholder="e.g. Paris Anniversary Trip" oninput="ibSave()" autocomplete="off">
         </div>
-        <div class="fg" style="margin:0">
+        <div class="fg ib-dest-fg" style="margin:0">
           <label>Destination</label>
-          <input type="text" id="ib-destination" placeholder="e.g. Paris, France" oninput="ibSave()" autocomplete="off">
+          <input type="text" id="ib-destination" placeholder="e.g. Paris, France" autocomplete="off"
+                 oninput="ibSave()" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="ib-dest-suggest">
+          <div class="ib-dest-suggest" id="ib-dest-suggest" role="listbox" style="display:none"></div>
+          <div class="ib-dest-info" id="ib-dest-info" style="display:none"></div>
         </div>
         <div class="fg" style="margin:0">
           <label>Start Date</label>
@@ -5886,10 +5921,12 @@ body.no-scroll { overflow: hidden; }
     <!-- ── DESTINATION SEARCH ── -->
     <div class="fg" style="margin-bottom:12px">
       <label for="wb-q">Destination</label>
-      <div class="wb-search-row">
-        <input type="text" id="wb-q" placeholder="e.g. Reykjavík, or Bali, Indonesia" autocomplete="off" autocapitalize="words">
+      <div class="wb-search-row ib-dest-fg">
+        <input type="text" id="wb-q" placeholder="e.g. Reykjavík, or Bali, Indonesia" autocomplete="off" autocapitalize="words" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="wb-q-suggest">
         <button class="btn btn-p" id="wb-go-btn" onclick="wbSearch()">Plan Wardrobe →</button>
+        <div class="ib-dest-suggest" id="wb-q-suggest" role="listbox" style="display:none"></div>
       </div>
+      <div class="ib-dest-info" id="wb-q-info" style="display:none"></div>
       <button class="btn btn-s btn-sm wb-geo-btn" id="wb-geo-btn" onclick="wbGeoLocate()">📍 Use my location</button>
     </div>
 
@@ -14269,7 +14306,11 @@ input:checked + .pb-toggle-box::after { transform:translateX(16px);background:#f
       <div class="pth-recap-row">
         <div>
           <label for="pth-dest">Where did you travel?</label>
-          <input type="text" id="pth-dest" placeholder="e.g. Kenya, Thailand" oninput="pthOnInput()">
+          <div class="ib-dest-fg">
+            <input type="text" id="pth-dest" placeholder="e.g. Kenya, Thailand" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="pth-dest-suggest" oninput="pthOnInput()">
+            <div class="ib-dest-suggest" id="pth-dest-suggest" role="listbox" style="display:none"></div>
+            <div class="ib-dest-info" id="pth-dest-info" style="display:none"></div>
+          </div>
         </div>
         <div>
           <label for="pth-ret">When did you return?</label>
@@ -16193,11 +16234,14 @@ function _dbRenderBriefing(force){
       <div class="db-kicker">Your trip briefing</div>
       <h3>Where are you headed?</h3>
       <p>Set a destination and TripTools assembles entry rules, safety, money, plugs, holidays and more into one offline briefing — right here.</p>
-      <div class="db-quick">
-        <input id="db-quick-dest" type="text" placeholder="e.g. Tokyo, Japan" onkeydown="if(event.key==='Enter')dbStartTrip()">
+      <div class="db-quick ib-dest-fg">
+        <input id="db-quick-dest" type="text" placeholder="e.g. Tokyo, Japan" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="db-quick-suggest" onkeydown="if(event.key==='Enter' && document.getElementById('db-quick-suggest').style.display==='none')dbStartTrip()">
         <button onclick="dbStartTrip()">Set up trip →</button>
+        <div class="ib-dest-suggest" id="db-quick-suggest" role="listbox" style="display:none"></div>
       </div>
+      <div class="ib-dest-info" id="db-quick-info" style="display:none"></div>
     </div>`;
+    ttDestTypeahead({ input:'db-quick-dest', suggest:'db-quick-suggest', info:'db-quick-info' });
     return;
   }
 
@@ -18697,6 +18741,7 @@ function mtNew(){
   document.querySelectorAll('#mt-chips .chip').forEach(c=>c.classList.remove('on'));
   document.getElementById('mt-del').style.display='none';
   document.getElementById('mt-form').style.display='block';
+  ttWireDestInputs(); if(ttMtDest) ttMtDest.hideInfo();
   document.getElementById('mt-name').focus();
 }
 function mtEdit(id){
@@ -18713,6 +18758,7 @@ function mtEdit(id){
   document.querySelectorAll('#mt-chips .chip').forEach(c=>c.classList.toggle('on',(t.tripType||[]).includes(c.dataset.v)));
   document.getElementById('mt-del').style.display='block';
   document.getElementById('mt-form').style.display='block';
+  ttWireDestInputs(); if(ttMtDest) ttMtDest.restoreInfo();
 }
 function mtSave(){
   const nm=document.getElementById('mt-name').value.trim();
@@ -20303,6 +20349,19 @@ const DP_DESTINATIONS = TT_DESTINATIONS.filter(d => d.inspire).map(d => ({
   id:d.id, name:d.name, country:d.country, flag:d.cc, continent:d.continent,
   types:d.types, budget:d.budget, season:d.season, dailyRange:d.dailyRange, visa:d.visa, desc:d.desc
 }));
+/* Trip Briefing typeahead source — the full registry, normalised so both
+   curated "inspire" rows and supplementary cities expose the same shape.
+   Extra fields (season/dailyRange/visa) are present only for inspire rows
+   and drive the contextual auto-fill hint. */
+const IB_DESTINATIONS = TT_DESTINATIONS.map(d => ({
+  id: d.id,
+  name: d.name,
+  country: d.country || d.tzCountry || '',
+  cc: (d.cc || '').toUpperCase(),
+  season: d.season || '',
+  dailyRange: d.dailyRange || '',
+  visa: d.visa || ''
+})).filter(d => d.name);
 const TZ_CITIES = TT_DESTINATIONS.filter(d => d.tz !== undefined)
   .sort((a,b) => a._tzi - b._tzi)
   .map(d => ({ city:d.tzCity, country:d.tzCountry, tz:d.tz, flag:d.tzFlag }));
@@ -26397,6 +26456,108 @@ function ibSave() {
   ibUpdateSummary();
 }
 
+/* ── Reusable destination typeahead + auto-fill ─────────────────────
+   Attaches a suggestion dropdown (sourced from the full registry,
+   IB_DESTINATIONS) to any destination text input while keeping the field
+   free-text. Picking a row normalises the value to "City, Country",
+   optionally pre-fills an empty trip-name field, runs an optional save
+   callback, and surfaces a contextual hint (season / budget / visa).
+   Drives both the MyTrip dialog (which feeds "Your Trip Briefing") and
+   the Itinerary Builder, so the behaviour stays identical across them.
+
+   cfg = { input, suggest, info?, nameInput?, onSelect? } (element ids). */
+function ttDestTypeahead(cfg) {
+  const input = document.getElementById(cfg.input);
+  const box   = document.getElementById(cfg.suggest);
+  if (!input || !box || input.dataset.ttWired) return null;
+  input.dataset.ttWired = '1';
+  let list = [], active = -1;
+
+  const infoEl = () => cfg.info ? document.getElementById(cfg.info) : null;
+  function hide()     { box.style.display = 'none'; input.setAttribute('aria-expanded', 'false'); }
+  function hideInfo() { const el = infoEl(); if (el) { el.style.display = 'none'; el.innerHTML = ''; } }
+  function renderInfo(d) {
+    const el = infoEl(); if (!el) return;
+    const chips = [];
+    if (d.season)     chips.push(`<span class="chip">📅 Best time&nbsp;<b>${d.season}</b></span>`);
+    if (d.dailyRange) chips.push(`<span class="chip">💰 ~<b>${d.dailyRange}</b>/day</span>`);
+    if (d.visa)       chips.push(`<span class="chip">🛂&nbsp;<b>${d.visa}</b></span>`);
+    if (!chips.length) { hideInfo(); return; }
+    el.innerHTML = chips.join(''); el.style.display = 'flex';
+  }
+  function highlight() {
+    box.querySelectorAll('.ib-sug-item').forEach(el => el.classList.toggle('active', +el.dataset.i === active));
+  }
+  function render() {
+    const q = (input.value || '').toLowerCase().trim();
+    if (!q) { hide(); return; }
+    list = IB_DESTINATIONS.filter(d =>
+      d.name.toLowerCase().includes(q) || (d.country && d.country.toLowerCase().includes(q))
+    ).slice(0, 12);
+    active = -1;
+    if (!list.length) {
+      box.innerHTML = '<div class="ib-sug-empty">No matches — you can still type your own</div>';
+      box.style.display = 'block'; input.setAttribute('aria-expanded', 'true'); return;
+    }
+    box.innerHTML = list.map((d, i) =>
+      `<div class="ib-sug-item" role="option" data-i="${i}">`+
+        `<span class="ib-sug-flag">${d.cc || '🌍'}</span>`+
+        `<span class="ib-sug-name">${d.name}</span>`+
+        (d.country ? `<span class="ib-sug-country">${d.country}</span>` : '')+
+      `</div>`
+    ).join('');
+    box.style.display = 'block'; input.setAttribute('aria-expanded', 'true');
+  }
+  function pick(d) {
+    if (!d) return;
+    input.value = d.country ? `${d.name}, ${d.country}` : d.name;
+    // Pre-fill an empty trip-name field (never overwrite user input).
+    if (cfg.nameInput) { const n = document.getElementById(cfg.nameInput); if (n && !n.value.trim()) n.value = `${d.name} Trip`; }
+    hide();
+    renderInfo(d);
+    if (typeof cfg.onSelect === 'function') cfg.onSelect(d);
+  }
+
+  input.addEventListener('input', () => { hideInfo(); render(); });
+  input.addEventListener('focus', render);
+  input.addEventListener('keydown', e => {
+    if (box.style.display === 'none') return;
+    if (e.key === 'ArrowDown') { e.preventDefault(); active = Math.min(list.length - 1, active + 1); highlight(); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); active = Math.max(0, active - 1); highlight(); }
+    else if (e.key === 'Enter') { if (list.length) { e.preventDefault(); pick(active >= 0 ? list[active] : list[0]); } }
+    else if (e.key === 'Escape') { hide(); }
+  });
+  box.addEventListener('mousedown', e => {
+    const it = e.target.closest('.ib-sug-item'); if (!it) return;
+    e.preventDefault(); pick(list[+it.dataset.i]);
+  });
+  document.addEventListener('click', e => { if (e.target !== input && !box.contains(e.target)) hide(); });
+
+  function restoreInfo() {
+    const v = (input.value || '').toLowerCase().trim();
+    if (!v) { hideInfo(); return; }
+    const d = IB_DESTINATIONS.find(x =>
+      v === (x.country ? `${x.name}, ${x.country}` : x.name).toLowerCase() || v === x.name.toLowerCase()
+    );
+    if (d) renderInfo(d); else hideInfo();
+  }
+  return { restoreInfo, hideInfo, hide };
+}
+
+/* Typeahead controllers, wired once after IB_DESTINATIONS exists (see the
+   end-of-script init). Idempotent — safe to call more than once. */
+let ttMtDest = null, ttIbDest = null;
+function ttWireDestInputs() {
+  // Trip-level fields get the contextual hint (season/budget/visa) + trip-name auto-fill.
+  if (!ttMtDest) ttMtDest = ttDestTypeahead({ input: 'mt-dest', suggest: 'mt-dest-suggest', info: 'mt-dest-info', nameInput: 'mt-name' });
+  if (!ttIbDest) ttIbDest = ttDestTypeahead({ input: 'ib-destination', suggest: 'ib-dest-suggest', info: 'ib-dest-info', nameInput: 'ib-trip-name', onSelect: () => { if (typeof ibSave === 'function') ibSave(); } });
+  // Other free-text destination fields get the same dropdown + hint (idempotent — guarded by a data flag).
+  ttDestTypeahead({ input: 'bp-dest', suggest: 'bp-dest-suggest', info: 'bp-dest-info', onSelect: () => { if (typeof bpSave === 'function') bpSave(); } });
+  ttDestTypeahead({ input: 'bl-dest', suggest: 'bl-dest-suggest', info: 'bl-dest-info' });
+  ttDestTypeahead({ input: 'wb-q',    suggest: 'wb-q-suggest',    info: 'wb-q-info' });
+  ttDestTypeahead({ input: 'pth-dest', suggest: 'pth-dest-suggest', info: 'pth-dest-info', onSelect: () => { if (typeof pthOnInput === 'function') pthOnInput(); } });
+}
+
 function ibInit() {
   ibLoad();
 
@@ -26414,6 +26575,10 @@ function ibInit() {
   document.getElementById('ib-destination').value  = ibData.destination || '';
   document.getElementById('ib-start-date').value   = ibData.startDate || '';
   document.getElementById('ib-end-date').value     = ibData.endDate || '';
+
+  // Ensure the typeahead is wired, then refresh the destination hint.
+  ttWireDestInputs();
+  if (ttIbDest) ttIbDest.restoreInfo();
 
   // If we have dates but no days, auto-generate
   if (ibData.startDate && ibData.endDate && ibData.days.length === 0) {
@@ -50519,6 +50684,9 @@ function rdPrint(){
    Force one full rebuild now that everything is loaded, and refresh the
    live-weather panel whenever connectivity is restored. */
 renderBriefing(true);
+/* Wire the destination typeaheads now that IB_DESTINATIONS and the rest of
+   the registry are defined (avoids the load-time TDZ pitfall). */
+ttWireDestInputs();
 window.addEventListener('online', ()=>{ dbState.wx={}; renderBriefing(true); });
 
 </script>
