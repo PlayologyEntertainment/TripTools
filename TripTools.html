@@ -16141,9 +16141,8 @@ async function dbLoadWeather(query,cc,trip){
   if(dbState.wx[key]){ body.innerHTML=dbState.wx[key]; return; }
   if(!navigator.onLine || typeof WX_GEO_URL==='undefined'){ body.innerHTML='<span class="db-muted">Offline — open the Weather tool when connected for a live forecast.</span>'; return; }
   try{
-    const g=await fetch(`${WX_GEO_URL}?name=${encodeURIComponent(query)}&count=1&language=en&format=json`).then(r=>r.json());
-    if(!g.results||!g.results.length) throw new Error('nogeo');
-    const h=g.results[0];
+    const gl=await wxGeocode(query,{interactive:false});
+    const h={name:gl.name,country:gl.country,admin1:gl.admin,latitude:gl.lat,longitude:gl.lng};
     const loc=`${dbEsc(h.name)}${h.country?', '+dbEsc(h.country):''}`;
     const today=new Date(); today.setHours(0,0,0,0);
     let html='';
@@ -20048,48 +20047,48 @@ const TT_DESTINATIONS = [
   {id:"yucatan", name:"Yucatan Peninsula", cc:"MX", inspire:true, country:"Mexico", continent:"northamerica", types:["culture","history","beach","adventure"], budget:2, season:"Nov-Apr", dailyRange:"$50-$150", visa:"Visa-free (180 days)", desc:"Cenotes for swimming, Chichen Itza at dawn, colonial Merida, and Caribbean beaches — Mexico at its most diverse."},
   {id:"orlando", name:"Orlando", cc:"US", inspire:true, country:"USA", continent:"northamerica", types:["themepark","family"], budget:3, season:"Sep-Nov, Jan-Feb", dailyRange:"$150-$400", visa:"ESTA required", desc:"The theme park capital of the world — Walt Disney World, Universal Studios, SeaWorld, and LEGOLAND all within an hour of each other.", tz:"America/New_York", tzCity:"Orlando", tzCountry:"United States", tzFlag:"🇺🇸", _tzi:11},
   {id:"los-angeles", name:"Los Angeles", cc:"US", inspire:true, country:"USA", continent:"northamerica", types:["themepark","city","beach","culture","family"], budget:3, season:"Mar-May, Sep-Nov", dailyRange:"$130-$350", visa:"ESTA required", desc:"Disneyland, Universal Studios Hollywood, beaches, and endless sunshine — plus world-class dining and the magic of Hollywood.", tz:"America/Los_Angeles", tzCity:"Los Angeles", tzCountry:"United States", tzFlag:"🇺🇸", _tzi:1, cost:{"cur":"USD","acc":[50,130,280],"food":[22,48,102],"trans":[10,20,42],"fun":[17,40,86]}, colId:"la", colName:"Los Angeles", colFlag:"🇺🇸", colRegion:"North America", _coli:28},
-  {id:"magic-kingdom", name:"Magic Kingdom", cc:"US", inspire:true, country:"USA — Orlando, FL", continent:"northamerica", types:["themepark","family"], budget:4, season:"Sep-Nov, Jan-Feb", dailyRange:"$150-$400", visa:"ESTA required", desc:"The most visited theme park on earth — Cinderella Castle, Space Mountain, Pirates of the Caribbean, and the full fairy-tale Disney experience."},
-  {id:"epcot", name:"EPCOT", cc:"US", inspire:true, country:"USA — Orlando, FL", continent:"northamerica", types:["themepark","family","culture","foodie"], budget:4, season:"Sep-Nov, Jan-Feb", dailyRange:"$150-$400", visa:"ESTA required", desc:"Part world's fair, part food festival, part sci-fi adventure — Guardians of the Galaxy, Remy's Ratatouille, and 11 global pavilions around World Showcase Lagoon."},
-  {id:"hollywood-studios", name:"Disney Hollywood Studios", cc:"US", inspire:true, country:"USA — Orlando, FL", continent:"northamerica", types:["themepark","family"], budget:4, season:"Sep-Nov, Jan-Feb", dailyRange:"$150-$400", visa:"ESTA required", desc:"Star Wars: Galaxy's Edge, Toy Story Land, and Tower of Terror — Disney's most cinematic and thrilling park."},
-  {id:"animal-kingdom", name:"Disney Animal Kingdom", cc:"US", inspire:true, country:"USA — Orlando, FL", continent:"northamerica", types:["themepark","family","nature"], budget:4, season:"Sep-Nov, Jan-Feb", dailyRange:"$150-$400", visa:"ESTA required", desc:"Pandora - The World of Avatar, a real working zoo, Kilimanjaro Safaris, and Flight of Passage — Disney's wildest and most visually stunning park."},
-  {id:"universal-orlando", name:"Universal Studios Florida", cc:"US", inspire:true, country:"USA — Orlando, FL", continent:"northamerica", types:["themepark","family"], budget:3, season:"Sep-Nov, Jan-Feb", dailyRange:"$130-$380", visa:"ESTA required", desc:"Harry Potter, Jurassic World, and a new Epic Universe mega-expansion — Universal's Florida flagship delivers blockbuster thrills at every turn."},
-  {id:"islands-adventure", name:"Universal Islands of Adventure", cc:"US", inspire:true, country:"USA — Orlando, FL", continent:"northamerica", types:["themepark","family"], budget:3, season:"Sep-Nov, Jan-Feb", dailyRange:"$130-$380", visa:"ESTA required", desc:"Hagrid's Magical Creatures Motorbike Adventure and Velocicoaster make this the roller coaster capital of Florida — sheer adrenaline from open to close."},
-  {id:"disneyland-ca", name:"Disneyland Park", cc:"US", inspire:true, country:"USA — Anaheim, CA", continent:"northamerica", types:["themepark","family"], budget:4, season:"Sep-Nov, Jan-Feb", dailyRange:"$140-$380", visa:"ESTA required", desc:"The original — Walt Disney's park opened in 1955 and remains uniquely special. New Orleans Square, Matterhorn, and Star Wars: Galaxy's Edge in the park that started it all."},
-  {id:"california-adventure", name:"Disney California Adventure", cc:"US", inspire:true, country:"USA — Anaheim, CA", continent:"northamerica", types:["themepark","family"], budget:4, season:"Sep-Nov, Jan-Feb", dailyRange:"$140-$380", visa:"ESTA required", desc:"Radiator Springs Racers, Guardians of the Galaxy Mission: Breakout, and Pixar Pier — DCA has quietly become one of the most satisfying parks Disney operates."},
-  {id:"universal-hollywood", name:"Universal Studios Hollywood", cc:"US", inspire:true, country:"USA — Los Angeles, CA", continent:"northamerica", types:["themepark","family"], budget:3, season:"year-round", dailyRange:"$120-$300", visa:"ESTA required", desc:"The Wizarding World, Jurassic World ride, and the legendary Studio Tour tram ride through working Hollywood backlots — compact but packed with iconic experiences."},
-  {id:"seaworld-orlando", name:"SeaWorld Orlando", cc:"US", inspire:true, country:"USA — Orlando, FL", continent:"northamerica", types:["themepark","family","nature"], budget:3, season:"Sep-Nov, Jan-Feb", dailyRange:"$80-$200", visa:"ESTA required", desc:"Mako, Manta, and Ice Breaker are among the best coasters in Florida, plus marine animal encounters, Aquatica waterpark, and world-class animal care."},
-  {id:"knotts-berry-farm", name:"Knott's Berry Farm", cc:"US", inspire:true, country:"USA — Buena Park, CA", continent:"northamerica", types:["themepark","family"], budget:2, season:"year-round", dailyRange:"$80-$200", visa:"ESTA required", desc:"America's oldest theme park, home to GhostRider and Hangtime coasters, the iconic Ghost Town, and a fried chicken dinner that predates the rides."},
-  {id:"busch-gardens-tb", name:"Busch Gardens Tampa", cc:"US", inspire:true, country:"USA — Tampa, FL", continent:"northamerica", types:["themepark","family","adventure"], budget:3, season:"Sep-Nov, Mar-May", dailyRange:"$80-$200", visa:"ESTA required", desc:"Cheetah Hunt, Tigris, and Montu rank among the Southeast's finest coasters — set inside a sprawling African-themed safari park with real animals."},
+  {id:"magic-kingdom", name:"Magic Kingdom", cc:"US", inspire:true, geo:"Orlando, United States", country:"USA — Orlando, FL", continent:"northamerica", types:["themepark","family"], budget:4, season:"Sep-Nov, Jan-Feb", dailyRange:"$150-$400", visa:"ESTA required", desc:"The most visited theme park on earth — Cinderella Castle, Space Mountain, Pirates of the Caribbean, and the full fairy-tale Disney experience."},
+  {id:"epcot", name:"EPCOT", cc:"US", inspire:true, geo:"Orlando, United States", country:"USA — Orlando, FL", continent:"northamerica", types:["themepark","family","culture","foodie"], budget:4, season:"Sep-Nov, Jan-Feb", dailyRange:"$150-$400", visa:"ESTA required", desc:"Part world's fair, part food festival, part sci-fi adventure — Guardians of the Galaxy, Remy's Ratatouille, and 11 global pavilions around World Showcase Lagoon."},
+  {id:"hollywood-studios", name:"Disney Hollywood Studios", cc:"US", inspire:true, geo:"Orlando, United States", country:"USA — Orlando, FL", continent:"northamerica", types:["themepark","family"], budget:4, season:"Sep-Nov, Jan-Feb", dailyRange:"$150-$400", visa:"ESTA required", desc:"Star Wars: Galaxy's Edge, Toy Story Land, and Tower of Terror — Disney's most cinematic and thrilling park."},
+  {id:"animal-kingdom", name:"Disney Animal Kingdom", cc:"US", inspire:true, geo:"Orlando, United States", country:"USA — Orlando, FL", continent:"northamerica", types:["themepark","family","nature"], budget:4, season:"Sep-Nov, Jan-Feb", dailyRange:"$150-$400", visa:"ESTA required", desc:"Pandora - The World of Avatar, a real working zoo, Kilimanjaro Safaris, and Flight of Passage — Disney's wildest and most visually stunning park."},
+  {id:"universal-orlando", name:"Universal Studios Florida", cc:"US", inspire:true, geo:"Orlando, United States", country:"USA — Orlando, FL", continent:"northamerica", types:["themepark","family"], budget:3, season:"Sep-Nov, Jan-Feb", dailyRange:"$130-$380", visa:"ESTA required", desc:"Harry Potter, Jurassic World, and a new Epic Universe mega-expansion — Universal's Florida flagship delivers blockbuster thrills at every turn."},
+  {id:"islands-adventure", name:"Universal Islands of Adventure", cc:"US", inspire:true, geo:"Orlando, United States", country:"USA — Orlando, FL", continent:"northamerica", types:["themepark","family"], budget:3, season:"Sep-Nov, Jan-Feb", dailyRange:"$130-$380", visa:"ESTA required", desc:"Hagrid's Magical Creatures Motorbike Adventure and Velocicoaster make this the roller coaster capital of Florida — sheer adrenaline from open to close."},
+  {id:"disneyland-ca", name:"Disneyland Park", cc:"US", inspire:true, geo:"Anaheim, United States", country:"USA — Anaheim, CA", continent:"northamerica", types:["themepark","family"], budget:4, season:"Sep-Nov, Jan-Feb", dailyRange:"$140-$380", visa:"ESTA required", desc:"The original — Walt Disney's park opened in 1955 and remains uniquely special. New Orleans Square, Matterhorn, and Star Wars: Galaxy's Edge in the park that started it all."},
+  {id:"california-adventure", name:"Disney California Adventure", cc:"US", inspire:true, geo:"Anaheim, United States", country:"USA — Anaheim, CA", continent:"northamerica", types:["themepark","family"], budget:4, season:"Sep-Nov, Jan-Feb", dailyRange:"$140-$380", visa:"ESTA required", desc:"Radiator Springs Racers, Guardians of the Galaxy Mission: Breakout, and Pixar Pier — DCA has quietly become one of the most satisfying parks Disney operates."},
+  {id:"universal-hollywood", name:"Universal Studios Hollywood", cc:"US", inspire:true, geo:"Los Angeles, United States", country:"USA — Los Angeles, CA", continent:"northamerica", types:["themepark","family"], budget:3, season:"year-round", dailyRange:"$120-$300", visa:"ESTA required", desc:"The Wizarding World, Jurassic World ride, and the legendary Studio Tour tram ride through working Hollywood backlots — compact but packed with iconic experiences."},
+  {id:"seaworld-orlando", name:"SeaWorld Orlando", cc:"US", inspire:true, geo:"Orlando, United States", country:"USA — Orlando, FL", continent:"northamerica", types:["themepark","family","nature"], budget:3, season:"Sep-Nov, Jan-Feb", dailyRange:"$80-$200", visa:"ESTA required", desc:"Mako, Manta, and Ice Breaker are among the best coasters in Florida, plus marine animal encounters, Aquatica waterpark, and world-class animal care."},
+  {id:"knotts-berry-farm", name:"Knott's Berry Farm", cc:"US", inspire:true, geo:"Buena Park, United States", country:"USA — Buena Park, CA", continent:"northamerica", types:["themepark","family"], budget:2, season:"year-round", dailyRange:"$80-$200", visa:"ESTA required", desc:"America's oldest theme park, home to GhostRider and Hangtime coasters, the iconic Ghost Town, and a fried chicken dinner that predates the rides."},
+  {id:"busch-gardens-tb", name:"Busch Gardens Tampa", cc:"US", inspire:true, geo:"Tampa, United States", country:"USA — Tampa, FL", continent:"northamerica", types:["themepark","family","adventure"], budget:3, season:"Sep-Nov, Mar-May", dailyRange:"$80-$200", visa:"ESTA required", desc:"Cheetah Hunt, Tigris, and Montu rank among the Southeast's finest coasters — set inside a sprawling African-themed safari park with real animals."},
   // ── inspire · asia ──
-  {id:"tokyo-disneyland", name:"Tokyo Disneyland", cc:"JP", inspire:true, country:"Japan — Tokyo", continent:"asia", types:["themepark","family"], budget:3, season:"Mar-May, Oct-Nov", dailyRange:"$100-$280", visa:"Visa-free (90 days)", desc:"The most immaculate Disney park on earth — obsessive Japanese guest service, flawless operations, and fan-favorite attractions like Pooh's Hunny Hunt found nowhere else."},
-  {id:"tokyo-disneysea", name:"Tokyo DisneySea", cc:"JP", inspire:true, country:"Japan — Tokyo", continent:"asia", types:["themepark","family"], budget:3, season:"Mar-May, Oct-Nov", dailyRange:"$100-$280", visa:"Visa-free (90 days)", desc:"Consistently rated the world's best theme park — seven nautical-themed ports of call, Journey to the Center of the Earth, and the new Fantasy Springs expansion."},
-  {id:"usj", name:"Universal Studios Japan", cc:"JP", inspire:true, country:"Japan — Osaka", continent:"asia", types:["themepark","family"], budget:3, season:"Mar-May, Oct-Nov", dailyRange:"$100-$280", visa:"Visa-free (90 days)", desc:"The Wizarding World of Harry Potter, Super Nintendo World, and Minion Park — Japan's version surpasses its American counterparts in atmosphere and execution."},
+  {id:"tokyo-disneyland", name:"Tokyo Disneyland", cc:"JP", inspire:true, geo:"Tokyo, Japan", country:"Japan — Tokyo", continent:"asia", types:["themepark","family"], budget:3, season:"Mar-May, Oct-Nov", dailyRange:"$100-$280", visa:"Visa-free (90 days)", desc:"The most immaculate Disney park on earth — obsessive Japanese guest service, flawless operations, and fan-favorite attractions like Pooh's Hunny Hunt found nowhere else."},
+  {id:"tokyo-disneysea", name:"Tokyo DisneySea", cc:"JP", inspire:true, geo:"Tokyo, Japan", country:"Japan — Tokyo", continent:"asia", types:["themepark","family"], budget:3, season:"Mar-May, Oct-Nov", dailyRange:"$100-$280", visa:"Visa-free (90 days)", desc:"Consistently rated the world's best theme park — seven nautical-themed ports of call, Journey to the Center of the Earth, and the new Fantasy Springs expansion."},
+  {id:"usj", name:"Universal Studios Japan", cc:"JP", inspire:true, geo:"Osaka, Japan", country:"Japan — Osaka", continent:"asia", types:["themepark","family"], budget:3, season:"Mar-May, Oct-Nov", dailyRange:"$100-$280", visa:"Visa-free (90 days)", desc:"The Wizarding World of Harry Potter, Super Nintendo World, and Minion Park — Japan's version surpasses its American counterparts in atmosphere and execution."},
   // ── inspire · europe ──
-  {id:"disneyland-paris", name:"Disneyland Park Paris", cc:"FR", inspire:true, country:"France — Paris area", continent:"europe", types:["themepark","family"], budget:4, season:"Apr-Jun, Sep-Oct", dailyRange:"$150-$380", visa:"Visa-free (90 days)", desc:"Europe's most visited theme park resort — Phantom Manor, Big Thunder Mountain, and the stunning Sleeping Beauty Castle, with Walt Disney Studios Park next door."},
-  {id:"europa-park", name:"Europa-Park", cc:"DE", inspire:true, country:"Germany — Rust", continent:"europe", types:["themepark","family"], budget:3, season:"Apr-Oct", dailyRange:"$80-$200", visa:"Visa-free (90 days)", desc:"Europe's largest theme park outside Paris — 18 European-themed areas, Silver Star and Wodan coasters, and theme resort hotels of extraordinary quality."},
-  {id:"efteling", name:"Efteling", cc:"NL", inspire:true, country:"Netherlands — Kaatsheuvel", continent:"europe", types:["themepark","family","culture"], budget:3, season:"Apr-Oct", dailyRange:"$80-$180", visa:"Visa-free (90 days)", desc:"Europe's most magical and unique park — fairytale forests, the spellbinding Symbolica dark ride, and 70 years of Dutch storytelling tradition at its finest."},
-  {id:"puy-du-fou", name:"Puy du Fou", cc:"FR", inspire:true, country:"France — Vendee", continent:"europe", types:["themepark","culture","family"], budget:3, season:"Apr-Oct", dailyRange:"$80-$200", visa:"Visa-free (90 days)", desc:"No roller coasters — instead, breathtaking live historical spectacles: gladiator battles, Viking raids, and medieval jousting performed by 3,500 volunteers nightly."},
-  {id:"portaventura", name:"PortAventura World", cc:"ES", inspire:true, country:"Spain — Salou", continent:"europe", types:["themepark","family","beach"], budget:3, season:"Apr-Oct", dailyRange:"$80-$200", visa:"Visa-free (90 days)", desc:"Spain's top theme park resort — Shambhala (Europe's tallest hypercoaster), Ferrari Land next door, and a Costa Dorada beach location that seals the deal."},
-  {id:"phantasialand", name:"Phantasialand", cc:"DE", inspire:true, country:"Germany — Bruehl", continent:"europe", types:["themepark","family"], budget:3, season:"Apr-Oct", dailyRange:"$70-$180", visa:"Visa-free (90 days)", desc:"The coaster connoisseur's park — Taron and F.L.Y. are among the world's finest launched coasters, set inside jaw-dropping immersive themed lands."},
-  {id:"tivoli-gardens", name:"Tivoli Gardens", cc:"DK", inspire:true, country:"Denmark — Copenhagen", continent:"europe", types:["themepark","family","culture"], budget:4, season:"Apr-Sep", dailyRange:"$100-$220", visa:"Visa-free (90 days)", desc:"One of the world's oldest amusement parks (1843) and the inspiration for Disneyland — gardens, pantomime theater, and rides in the heart of Copenhagen."},
-  {id:"alton-towers", name:"Alton Towers", cc:"GB", inspire:true, country:"England — Staffordshire", continent:"europe", types:["themepark","family"], budget:3, season:"Apr-Oct", dailyRange:"$80-$200", visa:"Visa-free (6 months)", desc:"The UK's theme park icon — Nemesis, Oblivion, and Wicker Man coasters hidden inside a stunning ruined Gothic manor estate in the Staffordshire countryside."},
-  {id:"gardaland", name:"Gardaland", cc:"IT", inspire:true, country:"Italy — Lake Garda", continent:"europe", types:["themepark","family"], budget:3, season:"Apr-Oct", dailyRange:"$80-$200", visa:"Visa-free (90 days)", desc:"Italy's top theme park on the shores of Lake Garda — Oblivion The Black Hole, Legoland Water Park, and the perfect base for exploring one of Italy's most beautiful lakes."},
+  {id:"disneyland-paris", name:"Disneyland Park Paris", cc:"FR", inspire:true, geo:"Paris, France", country:"France — Paris area", continent:"europe", types:["themepark","family"], budget:4, season:"Apr-Jun, Sep-Oct", dailyRange:"$150-$380", visa:"Visa-free (90 days)", desc:"Europe's most visited theme park resort — Phantom Manor, Big Thunder Mountain, and the stunning Sleeping Beauty Castle, with Walt Disney Studios Park next door."},
+  {id:"europa-park", name:"Europa-Park", cc:"DE", inspire:true, geo:"Rust, Germany", country:"Germany — Rust", continent:"europe", types:["themepark","family"], budget:3, season:"Apr-Oct", dailyRange:"$80-$200", visa:"Visa-free (90 days)", desc:"Europe's largest theme park outside Paris — 18 European-themed areas, Silver Star and Wodan coasters, and theme resort hotels of extraordinary quality."},
+  {id:"efteling", name:"Efteling", cc:"NL", inspire:true, geo:"Kaatsheuvel, Netherlands", country:"Netherlands — Kaatsheuvel", continent:"europe", types:["themepark","family","culture"], budget:3, season:"Apr-Oct", dailyRange:"$80-$180", visa:"Visa-free (90 days)", desc:"Europe's most magical and unique park — fairytale forests, the spellbinding Symbolica dark ride, and 70 years of Dutch storytelling tradition at its finest."},
+  {id:"puy-du-fou", name:"Puy du Fou", cc:"FR", inspire:true, geo:"Les Herbiers, France", country:"France — Vendee", continent:"europe", types:["themepark","culture","family"], budget:3, season:"Apr-Oct", dailyRange:"$80-$200", visa:"Visa-free (90 days)", desc:"No roller coasters — instead, breathtaking live historical spectacles: gladiator battles, Viking raids, and medieval jousting performed by 3,500 volunteers nightly."},
+  {id:"portaventura", name:"PortAventura World", cc:"ES", inspire:true, geo:"Salou, Spain", country:"Spain — Salou", continent:"europe", types:["themepark","family","beach"], budget:3, season:"Apr-Oct", dailyRange:"$80-$200", visa:"Visa-free (90 days)", desc:"Spain's top theme park resort — Shambhala (Europe's tallest hypercoaster), Ferrari Land next door, and a Costa Dorada beach location that seals the deal."},
+  {id:"phantasialand", name:"Phantasialand", cc:"DE", inspire:true, geo:"Bruehl, Germany", country:"Germany — Bruehl", continent:"europe", types:["themepark","family"], budget:3, season:"Apr-Oct", dailyRange:"$70-$180", visa:"Visa-free (90 days)", desc:"The coaster connoisseur's park — Taron and F.L.Y. are among the world's finest launched coasters, set inside jaw-dropping immersive themed lands."},
+  {id:"tivoli-gardens", name:"Tivoli Gardens", cc:"DK", inspire:true, geo:"Copenhagen, Denmark", country:"Denmark — Copenhagen", continent:"europe", types:["themepark","family","culture"], budget:4, season:"Apr-Sep", dailyRange:"$100-$220", visa:"Visa-free (90 days)", desc:"One of the world's oldest amusement parks (1843) and the inspiration for Disneyland — gardens, pantomime theater, and rides in the heart of Copenhagen."},
+  {id:"alton-towers", name:"Alton Towers", cc:"GB", inspire:true, geo:"Stoke-on-Trent, United Kingdom", country:"England — Staffordshire", continent:"europe", types:["themepark","family"], budget:3, season:"Apr-Oct", dailyRange:"$80-$200", visa:"Visa-free (6 months)", desc:"The UK's theme park icon — Nemesis, Oblivion, and Wicker Man coasters hidden inside a stunning ruined Gothic manor estate in the Staffordshire countryside."},
+  {id:"gardaland", name:"Gardaland", cc:"IT", inspire:true, geo:"Verona, Italy", country:"Italy — Lake Garda", continent:"europe", types:["themepark","family"], budget:3, season:"Apr-Oct", dailyRange:"$80-$200", visa:"Visa-free (90 days)", desc:"Italy's top theme park on the shores of Lake Garda — Oblivion The Black Hole, Legoland Water Park, and the perfect base for exploring one of Italy's most beautiful lakes."},
   // ── inspire · asia ──
-  {id:"shanghai-disney", name:"Shanghai Disneyland", cc:"CN", inspire:true, country:"China — Shanghai", continent:"asia", types:["themepark","family"], budget:3, season:"Oct-Nov, Mar-May", dailyRange:"$80-$250", visa:"Visa required", desc:"Disney's most ambitious park — the world's largest castle, TRON Lightcycle Run, and Zootopia land in a park that blends Disney magic with Chinese cultural storytelling."},
-  {id:"chimelong-ocean", name:"Chimelong Ocean Kingdom", cc:"CN", inspire:true, country:"China — Zhuhai", continent:"asia", types:["themepark","family","nature"], budget:2, season:"year-round", dailyRange:"$60-$160", visa:"Visa required", desc:"The world's largest aquarium combined with world-class thrill rides — record-breaking whale shark tanks, Flying over the Whale, and a sprawling ocean-themed resort."},
-  {id:"lotte-world", name:"Lotte World Adventure", cc:"KR", inspire:true, country:"South Korea — Seoul", continent:"asia", types:["themepark","family"], budget:2, season:"year-round", dailyRange:"$60-$160", visa:"K-ETA required", desc:"The world's largest indoor theme park in the heart of Seoul — French Revolution coaster, Magic Island on an outdoor lake, and K-pop festival events year-round."},
-  {id:"everland", name:"Everland", cc:"KR", inspire:true, country:"South Korea — Yongin", continent:"asia", types:["themepark","family"], budget:2, season:"Apr-Oct", dailyRange:"$60-$160", visa:"K-ETA required", desc:"South Korea's most popular theme park — the legendary wooden T-Express coaster, a working safari zone, and four distinct seasonal festivals including a stunning tulip garden."},
+  {id:"shanghai-disney", name:"Shanghai Disneyland", cc:"CN", inspire:true, geo:"Shanghai, China", country:"China — Shanghai", continent:"asia", types:["themepark","family"], budget:3, season:"Oct-Nov, Mar-May", dailyRange:"$80-$250", visa:"Visa required", desc:"Disney's most ambitious park — the world's largest castle, TRON Lightcycle Run, and Zootopia land in a park that blends Disney magic with Chinese cultural storytelling."},
+  {id:"chimelong-ocean", name:"Chimelong Ocean Kingdom", cc:"CN", inspire:true, geo:"Zhuhai, China", country:"China — Zhuhai", continent:"asia", types:["themepark","family","nature"], budget:2, season:"year-round", dailyRange:"$60-$160", visa:"Visa required", desc:"The world's largest aquarium combined with world-class thrill rides — record-breaking whale shark tanks, Flying over the Whale, and a sprawling ocean-themed resort."},
+  {id:"lotte-world", name:"Lotte World Adventure", cc:"KR", inspire:true, geo:"Seoul, South Korea", country:"South Korea — Seoul", continent:"asia", types:["themepark","family"], budget:2, season:"year-round", dailyRange:"$60-$160", visa:"K-ETA required", desc:"The world's largest indoor theme park in the heart of Seoul — French Revolution coaster, Magic Island on an outdoor lake, and K-pop festival events year-round."},
+  {id:"everland", name:"Everland", cc:"KR", inspire:true, geo:"Yongin, South Korea", country:"South Korea — Yongin", continent:"asia", types:["themepark","family"], budget:2, season:"Apr-Oct", dailyRange:"$60-$160", visa:"K-ETA required", desc:"South Korea's most popular theme park — the legendary wooden T-Express coaster, a working safari zone, and four distinct seasonal festivals including a stunning tulip garden."},
   // ── inspire · middleeast ──
-  {id:"ferrari-world", name:"Ferrari World Abu Dhabi", cc:"AE", inspire:true, country:"UAE — Abu Dhabi", continent:"middleeast", types:["themepark","family","adventure"], budget:4, season:"Nov-Mar", dailyRange:"$120-$280", visa:"Visa on arrival", desc:"Formula Rossa — the world's fastest roller coaster at 240 km/h — anchors this Ferrari-red indoor megapark, with Italian theming and a scale of ambition that matches the brand."},
-  {id:"img-worlds", name:"IMG Worlds of Adventure", cc:"AE", inspire:true, country:"UAE — Dubai", continent:"middleeast", types:["themepark","family"], budget:3, season:"Nov-Mar", dailyRange:"$80-$200", visa:"Visa on arrival", desc:"The world's largest indoor theme park — Marvel, Cartoon Network, Haunted Hotel, and the Jurassic zones under one massive climate-controlled roof in Dubai."},
-  {id:"warner-abu-dhabi", name:"Warner Bros. World Abu Dhabi", cc:"AE", inspire:true, country:"UAE — Abu Dhabi", continent:"middleeast", types:["themepark","family"], budget:4, season:"Nov-Mar", dailyRange:"$100-$250", visa:"Visa on arrival", desc:"Six fully immersive worlds — Metropolis, Gotham City, Bedrock, Cartoon Junction, Dynamite Gulch, and Warner Bros. Plaza — all indoors with astonishing detail."},
+  {id:"ferrari-world", name:"Ferrari World Abu Dhabi", cc:"AE", inspire:true, geo:"Abu Dhabi, United Arab Emirates", country:"UAE — Abu Dhabi", continent:"middleeast", types:["themepark","family","adventure"], budget:4, season:"Nov-Mar", dailyRange:"$120-$280", visa:"Visa on arrival", desc:"Formula Rossa — the world's fastest roller coaster at 240 km/h — anchors this Ferrari-red indoor megapark, with Italian theming and a scale of ambition that matches the brand."},
+  {id:"img-worlds", name:"IMG Worlds of Adventure", cc:"AE", inspire:true, geo:"Dubai, United Arab Emirates", country:"UAE — Dubai", continent:"middleeast", types:["themepark","family"], budget:3, season:"Nov-Mar", dailyRange:"$80-$200", visa:"Visa on arrival", desc:"The world's largest indoor theme park — Marvel, Cartoon Network, Haunted Hotel, and the Jurassic zones under one massive climate-controlled roof in Dubai."},
+  {id:"warner-abu-dhabi", name:"Warner Bros. World Abu Dhabi", cc:"AE", inspire:true, geo:"Abu Dhabi, United Arab Emirates", country:"UAE — Abu Dhabi", continent:"middleeast", types:["themepark","family"], budget:4, season:"Nov-Mar", dailyRange:"$100-$250", visa:"Visa on arrival", desc:"Six fully immersive worlds — Metropolis, Gotham City, Bedrock, Cartoon Junction, Dynamite Gulch, and Warner Bros. Plaza — all indoors with astonishing detail."},
   // ── inspire · asia ──
   {id:"universal-singapore", name:"Universal Studios Singapore", cc:"SG", inspire:true, country:"Singapore", continent:"asia", types:["themepark","family"], budget:3, season:"Feb-Apr", dailyRange:"$100-$250", visa:"Visa-free (30 days)", desc:"Southeast Asia's only Universal park — Battlestar Galactica dueling coasters, Transformers, and Jurassic World Rapids on Sentosa Island."},
   {id:"ocean-park-hk", name:"Ocean Park Hong Kong", cc:"HK", inspire:true, country:"Hong Kong", continent:"asia", types:["themepark","family","nature"], budget:3, season:"Oct-Apr", dailyRange:"$80-$200", visa:"Visa-free (90 days)", desc:"Perched on Hong Kong's southern cliffs — giant pandas, world-class aquarium, cable car with harbor views, and a full complement of thrill rides above the South China Sea."},
   // ── inspire · southamerica ──
-  {id:"beto-carrero", name:"Beto Carrero World", cc:"BR", inspire:true, country:"Brazil — Santa Catarina", continent:"southamerica", types:["themepark","family"], budget:2, season:"Nov-Mar", dailyRange:"$40-$100", visa:"Visa-free (90 days)", desc:"The largest theme park in Latin America — a 1.5 million m2 resort with Brazil's best roller coasters, a wildlife park, and themed lands based on ancient civilizations."},
+  {id:"beto-carrero", name:"Beto Carrero World", cc:"BR", inspire:true, geo:"Itajai, Brazil", country:"Brazil — Santa Catarina", continent:"southamerica", types:["themepark","family"], budget:2, season:"Nov-Mar", dailyRange:"$40-$100", visa:"Visa-free (90 days)", desc:"The largest theme park in Latin America — a 1.5 million m2 resort with Brazil's best roller coasters, a wildlife park, and themed lands based on ancient civilizations."},
   // ── inspire · oceania ──
-  {id:"dreamworld-au", name:"Dreamworld", cc:"AU", inspire:true, country:"Australia — Gold Coast", continent:"oceania", types:["themepark","family"], budget:3, season:"Apr-Sep", dailyRange:"$80-$180", visa:"ETA required", desc:"Australia's largest theme park — Thor's Hammer, Steel Taipan, and the Big 9 Thrill Rides, combined with the Tiger Island wildlife sanctuary on the Gold Coast."},
+  {id:"dreamworld-au", name:"Dreamworld", cc:"AU", inspire:true, geo:"Gold Coast, Australia", country:"Australia — Gold Coast", continent:"oceania", types:["themepark","family"], budget:3, season:"Apr-Sep", dailyRange:"$80-$180", visa:"ETA required", desc:"Australia's largest theme park — Thor's Hammer, Steel Taipan, and the Big 9 Thrill Rides, combined with the Tiger Island wildlife sanctuary on the Gold Coast."},
   // ── inspire · africa ──
   {id:"serengeti", name:"Serengeti", cc:"TZ", inspire:true, country:"Tanzania", continent:"africa", types:["nature","adventure"], budget:5, season:"Jun-Sep (migration)", dailyRange:"$200-$800", visa:"Visa on arrival", desc:"The greatest wildlife spectacle on earth — over a million wildebeest migrating across endless golden plains."},
   {id:"morocco", name:"Marrakech", cc:"MA", inspire:true, country:"Morocco", continent:"africa", types:["city","culture","history","foodie"], budget:2, season:"Mar-May, Sep-Oct", dailyRange:"$50-$150", visa:"Visa-free (90 days)", desc:"Labyrinthine souks, snake charmers, rooftop riads, and a sensory experience unlike anywhere else on earth.", tz:"Africa/Casablanca", tzCity:"Marrakech", tzCountry:"Morocco", tzFlag:"🇲🇦", _tzi:79, cost:{"cur":"MAD","acc":[16,48,110],"food":[8,20,46],"trans":[3,9,20],"fun":[7,18,42]}, colId:"marrakech", colName:"Marrakech", colFlag:"🇲🇦", colRegion:"Middle East & Africa", _coli:40},
@@ -45259,15 +45258,65 @@ async function wxSearch() {
   }
 }
 
-async function wxGeocode(query) {
-  const url = `${WX_GEO_URL}?name=${encodeURIComponent(query)}&count=1&language=en&format=json`;
+/* ── Location resolution ────────────────────────────────────────────────
+   Open-Meteo's geocoder matches ONLY the bare place name and ignores any
+   ", Country/State" suffix — so passing "Denver, USA" verbatim returns zero
+   results. We split the query, search on the place token, then rank the
+   candidates by the region the traveler typed. Known TripTools destinations
+   (including POIs like theme parks, which aren't geocodable cities) short-
+   circuit to their anchor city. When several real cities share a name, the
+   traveler picks. Shared by the Weather, Wardrobe, UV and Dashboard tools. */
+
+// How travelers commonly write a country/region → Open-Meteo's canonical name.
+const WX_COUNTRY_ALIASES = {
+  'usa':'united states','us':'united states','u.s':'united states','u.s.a':'united states',
+  'america':'united states','united states of america':'united states',
+  'uk':'united kingdom','u.k':'united kingdom','britain':'united kingdom',
+  'great britain':'united kingdom','england':'united kingdom','scotland':'united kingdom',
+  'wales':'united kingdom','northern ireland':'united kingdom',
+  'uae':'united arab emirates','holland':'netherlands','korea':'south korea'
+};
+
+// US state abbreviation → full name (Open-Meteo's admin1 stores full names).
+const WX_US_STATES = {al:'alabama',ak:'alaska',az:'arizona',ar:'arkansas',ca:'california',co:'colorado',ct:'connecticut',de:'delaware',fl:'florida',ga:'georgia',hi:'hawaii',id:'idaho',il:'illinois',in:'indiana',ia:'iowa',ks:'kansas',ky:'kentucky',la:'louisiana',me:'maine',md:'maryland',ma:'massachusetts',mi:'michigan',mn:'minnesota',ms:'mississippi',mo:'missouri',mt:'montana',ne:'nebraska',nv:'nevada',nh:'new hampshire',nj:'new jersey',nm:'new mexico',ny:'new york',nc:'north carolina',nd:'north dakota',oh:'ohio',ok:'oklahoma',or:'oregon',pa:'pennsylvania',ri:'rhode island',sc:'south carolina',sd:'south dakota',tn:'tennessee',tx:'texas',ut:'utah',vt:'vermont',va:'virginia',wa:'washington',wv:'west virginia',wi:'wisconsin',wy:'wyoming',dc:'district of columbia'};
+
+function wxNorm(s){ return (s == null ? '' : String(s)).trim().toLowerCase(); }
+
+// Expand a region token the traveler typed into the strings we'll accept when
+// matching a candidate's country / admin1 (e.g. "co" → colorado + united states).
+function wxRegionTokens(raw){
+  const t = wxNorm(raw).replace(/\.$/, '');
+  const out = new Set([t]);
+  if (WX_COUNTRY_ALIASES[t]) out.add(WX_COUNTRY_ALIASES[t]);
+  if (WX_US_STATES[t]) { out.add(WX_US_STATES[t]); out.add('united states'); }
+  return out;
+}
+
+// Resolve the query against TripTools' own destination list so selected
+// suggestions — and POIs that aren't geocodable place names — anchor to a
+// real city. Returns a "City, Country" string, or null if not a known dest.
+function wxDatasetAnchor(query){
+  if (typeof IB_DESTINATIONS === 'undefined') return null;
+  const q = wxNorm(query);
+  const d = IB_DESTINATIONS.find(x => {
+    const full = x.country ? wxNorm(`${x.name}, ${x.country}`) : wxNorm(x.name);
+    return q === full || q === wxNorm(x.name);
+  });
+  if (!d) return null;
+  if (d.geo) return d.geo;                                   // explicit anchor city
+  if (d.tzCity && d.tzCountry) return `${d.tzCity}, ${d.tzCountry}`;
+  return null;
+}
+
+async function wxGeoFetch(name){
+  const url = `${WX_GEO_URL}?name=${encodeURIComponent(name)}&count=10&language=en&format=json`;
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Geocoder unavailable (HTTP ${res.status}).`);
   const j = await res.json();
-  if (!j.results || !j.results.length) {
-    throw new Error(`Couldn't find "${query}". Try adding a country, e.g. "Paris, France".`);
-  }
-  const h = j.results[0];
+  return (j && j.results) ? j.results : [];
+}
+
+function wxResultToLoc(h){
   return {
     name:    h.name,
     country: h.country || '',
@@ -45277,6 +45326,119 @@ async function wxGeocode(query) {
     tz:      h.timezone || 'auto',
     flag:    h.country_code ? wxCountryFlag(h.country_code) : ''
   };
+}
+
+/* Resolve a free-text destination to a single location.
+   opts.interactive (default true): when several same-named cities match the
+   region, show a picker; when false (Dashboard) just take the best candidate. */
+async function wxGeocode(query, opts){
+  opts = opts || {};
+  const interactive = opts.interactive !== false;
+
+  // Anchor known TripTools destinations / POIs to a geocodable city first.
+  const effective = wxDatasetAnchor(query) || query;
+
+  // Split "<place>, <region…>" — Open-Meteo only matches <place>.
+  const parts = effective.split(',').map(s => s.trim()).filter(Boolean);
+  const place = parts[0] || effective.trim();
+  const regionRaw = parts.slice(1);
+
+  let results = await wxGeoFetch(place);
+  // Inputs with no comma but trailing words ("St Louis Missouri") — retry on
+  // the first word so the place name still has a chance to match.
+  if (!results.length && /\s/.test(place)) {
+    results = await wxGeoFetch(place.split(/\s+/)[0]);
+  }
+  if (!results.length) {
+    throw new Error(`Couldn't find "${query}". Check the spelling, or try the nearest city.`);
+  }
+
+  // Rank candidates by how well each matches the region tokens the user typed.
+  if (regionRaw.length) {
+    const wanted = new Set();
+    regionRaw.forEach(r => wxRegionTokens(r).forEach(t => wanted.add(t)));
+    const score = h => {
+      const cc = wxNorm(h.country_code), country = wxNorm(h.country), admin = wxNorm(h.admin1);
+      let s = 0;
+      wanted.forEach(w => {
+        if (!w) return;
+        if (country === w || admin === w || cc === w) s += 3;
+        else if (country.includes(w) || admin.includes(w)) s += 1;
+      });
+      return s;
+    };
+    const scored = results.map(h => ({ h, s: score(h) }));
+    const max = Math.max(...scored.map(x => x.s));
+    if (max > 0) results = scored.filter(x => x.s === max).map(x => x.h);
+  }
+
+  // De-dupe near-identical hits (same name + admin1 + country).
+  const seen = new Set(), distinct = [];
+  for (const h of results) {
+    const k = `${wxNorm(h.name)}|${wxNorm(h.admin1)}|${wxNorm(h.country)}`;
+    if (!seen.has(k)) { seen.add(k); distinct.push(h); }
+  }
+
+  if (distinct.length === 1 || !interactive) return wxResultToLoc(distinct[0]);
+  return await wxPickLocation(distinct.slice(0, 8));
+}
+
+/* ── Same-name disambiguation picker (shared modal, injected once) ── */
+function wxEnsurePicker(){
+  if (document.getElementById('wx-picker-ov')) return;
+  const style = document.createElement('style');
+  style.textContent =
+    '.wx-picker-ov{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:18px}'+
+    '.wx-picker{background:var(--paper);border:1.5px solid var(--ink);border-radius:var(--r);box-shadow:6px 6px 0 var(--ink);max-width:420px;width:100%;max-height:70vh;overflow:hidden;display:flex;flex-direction:column}'+
+    '.wx-picker-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1.5px solid var(--ink);font-weight:700}'+
+    '.wx-picker-close{background:none;border:0;font-size:18px;line-height:1;cursor:pointer;color:var(--ink)}'+
+    '.wx-picker-list{overflow-y:auto}'+
+    '.wx-picker-item{display:flex;align-items:center;gap:10px;width:100%;padding:11px 14px;cursor:pointer;border:0;border-bottom:1px solid var(--rule);background:none;font:inherit;text-align:left;color:var(--ink)}'+
+    '.wx-picker-item:last-child{border-bottom:0}'+
+    '.wx-picker-item:hover,.wx-picker-item:focus{background:var(--paper-2)}'+
+    '.wx-picker-flag{font-size:18px;flex-shrink:0}'+
+    '.wx-picker-name{font-weight:600}'+
+    '.wx-picker-sub{font-size:12px;color:var(--muted);margin-left:auto;text-align:right}';
+  document.head.appendChild(style);
+  const ov = document.createElement('div');
+  ov.className = 'wx-picker-ov'; ov.id = 'wx-picker-ov'; ov.style.display = 'none';
+  ov.innerHTML =
+    '<div class="wx-picker" role="dialog" aria-modal="true" aria-label="Choose a location">'+
+      '<div class="wx-picker-hdr"><span>Which one?</span>'+
+      '<button class="wx-picker-close" id="wx-picker-x" aria-label="Cancel">✕</button></div>'+
+      '<div class="wx-picker-list" id="wx-picker-list"></div></div>';
+  document.body.appendChild(ov);
+}
+
+function wxPickLocation(results){
+  return new Promise((resolve, reject) => {
+    wxEnsurePicker();
+    const ov   = document.getElementById('wx-picker-ov');
+    const list = document.getElementById('wx-picker-list');
+    const done = (val, err) => {
+      ov.style.display = 'none';
+      list.innerHTML = '';
+      document.removeEventListener('keydown', onKey);
+      if (err) reject(err); else resolve(val);
+    };
+    const onKey = e => { if (e.key === 'Escape') done(null, new Error('Location selection cancelled.')); };
+
+    list.innerHTML = results.map((h, i) => {
+      const flag = h.country_code ? wxCountryFlag(h.country_code) : '🌍';
+      const sub  = [h.admin1, h.country].filter(Boolean).join(', ');
+      return `<button class="wx-picker-item" data-i="${i}">`+
+        `<span class="wx-picker-flag">${flag}</span>`+
+        `<span class="wx-picker-name">${h.name}</span>`+
+        `<span class="wx-picker-sub">${sub}</span></button>`;
+    }).join('');
+    list.querySelectorAll('.wx-picker-item').forEach(btn => {
+      btn.addEventListener('click', () => done(wxResultToLoc(results[+btn.dataset.i])));
+    });
+    document.getElementById('wx-picker-x').onclick = () => done(null, new Error('Location selection cancelled.'));
+    ov.onclick = e => { if (e.target === ov) done(null, new Error('Location selection cancelled.')); };
+    document.addEventListener('keydown', onKey);
+    ov.style.display = 'flex';
+  });
 }
 
 function wxCountryFlag(cc) {
