@@ -1,7 +1,7 @@
-# TripTools — Destination & Country Data Consolidation Plan
+# GoTools — Destination & Country Data Consolidation Plan
 
 **Status:** Proposal for review
-**Author:** Generated for PlayologyEntertainment / TripTools
+**Author:** Generated for PlayologyEntertainment / GoTools
 **Date:** 2026-06-20
 **Decision inputs (agreed):**
 1. **Scope** — Full two-tier registry (one country registry + one destination registry + one shared resolver).
@@ -16,7 +16,7 @@
 
 ## 1. The problem in one paragraph
 
-TripTools is a single 43.6k-line `TripTools.html` file containing ~70 applets. What looks like "destination data" is actually **~14 independent datasets** at two different granularities (city/region vs. country), each with its own schema, its own country coverage, its own flag/name conventions, and — critically — **its own bespoke logic for matching the user's free-text `trip.destination` string** (e.g. `"Paris, France"`). The same trip can resolve to different results (or fail to resolve) from one tool to the next, and identity data (country names, flags, ISO codes) is duplicated and drifts across the file.
+GoTools is a single 43.6k-line `GoTools.html` file containing ~70 applets. What looks like "destination data" is actually **~14 independent datasets** at two different granularities (city/region vs. country), each with its own schema, its own country coverage, its own flag/name conventions, and — critically — **its own bespoke logic for matching the user's free-text `trip.destination` string** (e.g. `"Paris, France"`). The same trip can resolve to different results (or fail to resolve) from one tool to the next, and identity data (country names, flags, ISO codes) is duplicated and drifts across the file.
 
 ---
 
