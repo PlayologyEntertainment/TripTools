@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'TripTools.html'
+      - 'GoTools.html'
   workflow_dispatch:
 
 jobs:
@@ -15,10 +15,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Upload TripTools.html via FTP
+      - name: Upload GoTools.html via FTP
         run: |
-          curl -T TripTools.html \
+          curl -T GoTools.html \
             --user "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" \
             --max-time 60 \
             --connect-timeout 15 \
-            "ftp://ftp.playologyentertainment.com/experiments/TripTools/TripTools.html"
+            "ftp://ftp.playologyentertainment.com/GoTools/GoTools.html"
