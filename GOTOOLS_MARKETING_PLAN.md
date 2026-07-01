@@ -12,9 +12,9 @@ Before any outreach, the site needed to be *shareable* and *measurable* — it h
 
 1. **Added to `GoTools.html` `<head>`:** meta description, canonical URL, `robots` tag, Open Graph tags, Twitter Card tags, and a theme color — so links posted to Reddit/Twitter/Facebook/iMessage render as a real card (title, description, image) instead of a bare gray link.
 2. **Created `og-image.jpg`** (1200×630, generated from the existing GoTools plane logo) — the image those social cards show.
-3. **Wired in [GoatCounter](https://www.goatcounter.com)** — a free, cookie-less, no-personal-data analytics script, consistent with the "no tracking" promise (it only counts aggregate pageviews, nothing per-user). **Action required from you:** sign up free at goatcounter.com, pick a site code, and swap it into the `data-goatcounter` URL in `GoTools.html` (currently a placeholder: `gotools-count`). This is the only way we'll know when we've hit 1,000.
+3. **Wired in [GoatCounter](https://www.goatcounter.com)**, live at `playologyentertainment.goatcounter.com` — a free, cookie-less, no-personal-data analytics script, consistent with the "no tracking" promise (it only counts aggregate pageviews, nothing per-user). This is how we'll track progress toward 1,000.
 
-**Deploy checklist:** upload the updated `GoTools.html` **and** `og-image.jpg` (same folder) via FTP, then activate GoatCounter. Until both are live, skip straight to outreach prep below — but don't post anywhere publicly until the analytics is live, or you'll burn your best launch moment with no way to measure it.
+**Deploy checklist:** upload the updated `GoTools.html` **and** `og-image.jpg` (same folder) via FTP. Once both are live, check the GoatCounter dashboard once to confirm pageviews are registering before starting public outreach — you don't want to burn your best launch moment with broken measurement.
 
 ---
 
