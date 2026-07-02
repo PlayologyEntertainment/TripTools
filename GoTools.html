@@ -2464,42 +2464,6 @@ body.no-scroll { overflow: hidden; }
       </div>
 
       <div id="mt-sync-status" style="font-size:13px;margin-top:12px;min-height:18px;color:var(--muted)"></div>
-
-      <!-- ── legacy GitHub sync (kept until Google is verified live; then removed) ── -->
-      <details id="mt-sync-legacy" style="margin-top:20px;border-top:1px dashed var(--rule);padding-top:14px">
-        <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Advanced · legacy GitHub sync</summary>
-        <div style="margin-top:12px">
-          <p style="color:var(--muted);font-size:12px;line-height:1.5;margin-bottom:12px">
-            The old GitHub-token sync still works for now, but is being replaced by Google. If you used it before, paste your
-            token and tap <strong>Import my GitHub-synced trips</strong> to bring those trips over, then back them up with Google above.
-          </p>
-          <div class="fg">
-            <label for="mt-sync-token">GitHub token <span style="font-weight:400;color:var(--muted)">(<code>gist</code> scope — stored on this device only)</span></label>
-            <input type="password" id="mt-sync-token" placeholder="github_pat_… or ghp_…" autocomplete="off" oninput="syncTokenChanged()">
-          </div>
-          <div class="fg">
-            <label>Your GitHub sync code</label>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-              <input type="text" id="mt-sync-mycode" readonly placeholder="Create your sync code →" style="flex:1;min-width:180px">
-              <button class="btn btn-sm" type="button" onclick="syncCreateGist()">Create</button>
-              <button class="btn btn-sm" type="button" onclick="syncCopyCode()">Copy</button>
-              <button class="btn btn-sm" type="button" onclick="syncResetCode()">Reset</button>
-            </div>
-          </div>
-          <div class="fg">
-            <label for="mt-sync-partners">Companion sync codes <span style="font-weight:400;color:var(--muted)">(one per line)</span></label>
-            <textarea id="mt-sync-partners" rows="2" placeholder="Paste the codes your companions shared with you"></textarea>
-            <div style="margin-top:6px">
-              <button class="btn btn-sm" type="button" onclick="syncSavePartners()">Save companions</button>
-            </div>
-          </div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:6px">
-            <button class="btn btn-sm" type="button" onclick="syncPublish()">⬆ Publish (GitHub)</button>
-            <button class="btn btn-sm" type="button" onclick="syncRefresh()">⬇ Refresh (GitHub)</button>
-            <button class="btn btn-sm" type="button" onclick="gMigrateFromGist()">↪ Import my GitHub-synced trips</button>
-          </div>
-        </div>
-      </details>
     </div>
   </div>
 </div>
@@ -19743,19 +19707,18 @@ function mtDelete(){
 }
 
 /* ══════════════════════════════════════════════════════
-   TRIP SYNC  (cross-device sync + companion sharing)
+   TRIP SYNC  (shared payload helpers)
    ──────────────────────────────────────────────────────
-   Primary transport is Google Drive (see the GOOGLE / DRIVE
-   block near INIT). This GitHub-Gist path is the legacy
-   fallback, kept until Google is verified live, then removed.
-   No backend either way: each person stores their active trip
-   in their own store and pulls companions' by id/code. Merge is
-   per-trip, last-published-wins. Only MyTrip data is shared:
-   the trip record + tt_pack_/tt_bizpack_/tt_budget_/
-   tt_expenses_/tt_souvenir_/tt_wardrobe_items_/tt_cdn_prec_/
-   tt_itinerary_ (the Itinerary Builder's day-by-day plan).
+   Transport is Google Drive (see the GOOGLE / DRIVE block
+   near INIT). These helpers build/adopt the synced bundle and
+   are shared by that path. No backend: each person stores
+   their active trip in their own Drive and pulls companions'
+   shared trips by code. Merge is per-trip, last-published-wins.
+   Only MyTrip data is shared: the trip record + tt_pack_/
+   tt_bizpack_/tt_budget_/tt_expenses_/tt_souvenir_/
+   tt_wardrobe_items_/tt_cdn_prec_/tt_itinerary_ (the Itinerary
+   Builder's day-by-day plan).
    ══════════════════════════════════════════════════════ */
-const SYNC_FILE = 'gotools-trip.json';
 /* localStorage key suffix (after the trip id) -> bundle field */
 const SYNC_DATA_KEYS = {
   pack:      'tt_pack_',
@@ -19776,78 +19739,6 @@ function syncStatus(msg, kind){
   el.textContent=msg||'';
   el.style.color = kind==='err' ? 'var(--accent)' : (kind==='ok' ? '#2e7d32' : 'var(--muted)');
 }
-function syncRender(){
-  const c=syncCfgGet();
-  const tk=document.getElementById('mt-sync-token'); if(tk && document.activeElement!==tk) tk.value=c.token||'';
-  const mc=document.getElementById('mt-sync-mycode'); if(mc) mc.value=c.myGistId||'';
-  const pp=document.getElementById('mt-sync-partners');
-  if(pp && document.activeElement!==pp) pp.value=(c.partners||[]).join('\n');
-}
-function syncTokenChanged(){
-  const c=syncCfgGet();
-  c.token=(document.getElementById('mt-sync-token').value||'').trim();
-  syncCfgSet(c);
-}
-function syncSavePartners(){
-  const c=syncCfgGet();
-  c.partners=(document.getElementById('mt-sync-partners').value||'')
-    .split(/[\s,]+/).map(s=>s.trim()).filter(Boolean);
-  // never list your own gist as a companion
-  if(c.myGistId) c.partners=c.partners.filter(p=>p!==c.myGistId);
-  syncCfgSet(c); syncRender();
-  syncStatus(c.partners.length? ('Saved '+c.partners.length+' companion code(s).') : 'No companion codes saved.', 'ok');
-}
-function syncCopyCode(){
-  const c=syncCfgGet();
-  if(!c.myGistId){ syncStatus('Create your sync code first.', 'err'); return; }
-  const done=()=>syncStatus('Sync code copied — send it to your companion.', 'ok');
-  if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(c.myGistId).then(done).catch(done);
-  else done();
-}
-async function syncApi(method, url, body){
-  const c=syncCfgGet();
-  const headers={ 'Accept':'application/vnd.github+json', 'X-GitHub-Api-Version':'2022-11-28' };
-  if(c.token) headers['Authorization']='Bearer '+c.token;
-  if(body) headers['Content-Type']='application/json';
-  const res=await fetch(url,{ method, headers, body: body?JSON.stringify(body):undefined });
-  if(!res.ok){
-    let detail=''; try{ detail=(await res.json()).message||''; }catch(_){}
-    let err;
-    if(res.status===401) err=new Error('GitHub rejected the token (401). Check it has the gist scope.');
-    else if(res.status===404) err=new Error('Gist not found (404). Check the sync code.');
-    else err=new Error('GitHub error '+res.status+(detail?': '+detail:''));
-    err.status=res.status;
-    throw err;
-  }
-  return res.status===204?null:res.json();
-}
-/* Always creates a fresh gist under the current token and stores its id.
-   Returns the new gist id, or throws. */
-async function syncMakeGist(){
-  const g=await syncApi('POST','https://api.github.com/gists',{
-    description:'GoTools trip sync', public:false,
-    files:{ [SYNC_FILE]:{ content: JSON.stringify({ app:'GoTools', kind:'trip-sync', schema:1 }) } }
-  });
-  const c=syncCfgGet(); c.myGistId=g.id; syncCfgSet(c); syncRender();
-  return g.id;
-}
-async function syncCreateGist(){
-  const c=syncCfgGet();
-  if(!c.token){ syncStatus('Enter your GitHub token first.', 'err'); return; }
-  if(c.myGistId){ syncStatus('You already have a sync code — use Reset to make a new one.', 'ok'); return; }
-  syncStatus('Creating your sync gist…');
-  try {
-    await syncMakeGist();
-    syncStatus('Sync code created. Copy it and send it to your companion, then Publish your trip.', 'ok');
-  } catch(e){ syncStatus(e.message, 'err'); }
-}
-function syncResetCode(){
-  const c=syncCfgGet();
-  if(!c.myGistId){ syncStatus('No sync code to reset.', 'ok'); return; }
-  if(!confirm('Reset your sync code? A new code will be created next time you Create or Publish. Your companions must update to the new code, and the old gist is left untouched on GitHub.')) return;
-  delete c.myGistId; syncCfgSet(c); syncRender();
-  syncStatus('Sync code cleared. Click Create (or Publish) to generate a new one.', 'ok');
-}
 function syncBuildBundle(trip){
   const data={};
   for(const [field,prefix] of Object.entries(SYNC_DATA_KEYS)){
@@ -19863,50 +19754,6 @@ function syncBuildBundle(trip){
     trip, data
   };
 }
-async function syncPublish(){
-  const c=syncCfgGet();
-  if(!c.token){ syncStatus('Enter your GitHub token first.', 'err'); return; }
-  const trip=getActiveTrip();
-  if(!trip){ syncStatus('No active trip — create or activate one first.', 'err'); return; }
-  ibAdoptScratch(trip.id);   // make sure a standalone itinerary is attached before publishing
-  syncStatus('Publishing “'+trip.name+'”…');
-  try {
-    let gistId=c.myGistId;
-    if(!gistId){ gistId=await syncMakeGist(); }
-    const bundle=syncBuildBundle(trip);
-    const files={ [SYNC_FILE]:{ content: JSON.stringify(bundle) } };
-    let recreated=false;
-    try {
-      await syncApi('PATCH','https://api.github.com/gists/'+gistId,{ files });
-    } catch(e){
-      // The stored code points at a gist this token can't write (e.g. after
-      // switching GitHub accounts, or the gist was deleted) — make a fresh one.
-      if(e.status===404 || e.status===403){
-        syncStatus('Old sync code is no longer writable — creating a new one…');
-        gistId=await syncMakeGist();
-        await syncApi('PATCH','https://api.github.com/gists/'+gistId,{ files });
-        recreated=true;
-      } else throw e;
-    }
-    const cfg2=syncCfgGet();
-    cfg2.lastSyncedAt=cfg2.lastSyncedAt||{};
-    cfg2.lastSyncedAt[trip.id]=bundle.publishedAt;
-    syncCfgSet(cfg2);
-    syncStatus(recreated
-      ? 'Published “'+trip.name+'” to a NEW sync code — copy it and resend to your companion.'
-      : 'Published “'+trip.name+'”. Your companion can Refresh now.', 'ok');
-  } catch(e){ syncStatus(e.message, 'err'); }
-}
-async function syncFetchBundle(gistId){
-  const g=await syncApi('GET','https://api.github.com/gists/'+gistId, null);
-  const f=(g.files && (g.files[SYNC_FILE] || Object.values(g.files)[0]));
-  if(!f) throw new Error('Sync gist '+gistId+' has no data file.');
-  let content=f.content;
-  if(f.truncated && f.raw_url){ content=await (await fetch(f.raw_url)).text(); }
-  const b=JSON.parse(content);
-  if(b.kind!=='trip-sync' || !b.trip || !b.trip.id) throw new Error('Gist '+gistId+' is not a GoTools trip.');
-  return b;
-}
 function syncAdopt(bundle){
   const t=bundle.trip;
   const trips=getTrips();
@@ -19920,31 +19767,6 @@ function syncAdopt(bundle){
   }
   if(!getActiveTripId()) localStorage.setItem('tt_active', t.id);
 }
-async function syncRefresh(){
-  const c=syncCfgGet();
-  const partners=c.partners||[];
-  if(!partners.length){ syncStatus('Add a companion sync code in Setup first.', 'err'); return; }
-  syncStatus('Refreshing from '+partners.length+' companion(s)…');
-  let adopted=0, skipped=0, errors=[];
-  c.lastSyncedAt=c.lastSyncedAt||{};
-  for(const pid of partners){
-    try {
-      const b=await syncFetchBundle(pid);
-      const seen=c.lastSyncedAt[b.trip.id]||'';
-      if(b.publishedAt > seen){
-        syncAdopt(b);
-        c.lastSyncedAt[b.trip.id]=b.publishedAt;
-        adopted++;
-      } else skipped++;
-    } catch(e){ errors.push(e.message); }
-  }
-  syncCfgSet(c);
-  updHdrTrip(); renderTripList();
-  let msg = adopted? ('Updated '+adopted+' trip(s).') : 'Already up to date.';
-  if(skipped) msg+=' '+skipped+' unchanged.';
-  if(errors.length) msg+=' Issues: '+errors.join(' ');
-  syncStatus(msg, errors.length?'err':'ok');
-}
 
 /* ══════════════════════════════════════════════════════
    GOOGLE SIGN-IN + DRIVE SYNC  (optional cloud layer)
@@ -19955,8 +19777,8 @@ async function syncRefresh(){
    only ever touch files it created. The access token lives
    in memory only (never persisted). Trips are stored as one
    JSON file per trip in a "GoTools Trips" folder in the
-   user's own Drive. Reuses syncBuildBundle/syncAdopt so the
-   payload + last-published-wins merge match the legacy path.
+   user's own Drive. Uses syncBuildBundle/syncAdopt to build
+   and apply the bundle, merging per-trip last-published-wins.
    ══════════════════════════════════════════════════════ */
 const GOOGLE_CLIENT_ID = '342590616820-3s8gu2ll417g325t0dtqmp5j9v8qeimt.apps.googleusercontent.com';
 const GOOGLE_SCOPE     = 'https://www.googleapis.com/auth/drive.file';
@@ -20210,19 +20032,6 @@ async function gFetchShared(code){
   throw new Error(GOOGLE_API_KEY ? ('Could not read shared trip '+id+'.')
     : 'Importing a companion’s trip needs the Drive API key configured — coming soon.');
 }
-/* One-time migrator: pull trips from the legacy GitHub Gist path into local storage. */
-async function gMigrateFromGist(){
-  const c=syncCfgGet();
-  const ids=[c.myGistId, ...(c.partners||[])].filter(Boolean);
-  if(!c.token){ syncStatus('Enter your GitHub token above first.','err'); return; }
-  if(!ids.length){ syncStatus('No GitHub sync codes found to import.','err'); return; }
-  syncStatus('Importing '+ids.length+' trip(s) from GitHub…');
-  let n=0; const errs=[];
-  for(const id of ids){ try{ syncAdopt(await syncFetchBundle(id)); n++; }catch(e){ errs.push(e.message); } }
-  updHdrTrip(); renderTripList();
-  syncStatus('Imported '+n+' trip(s) from GitHub.'+(gSignedIn()?' Tap Back up active trip to move them to Google Drive.':' Sign in with Google, then Back up to move them to Drive.')+(errs.length?' Issues: '+errs.join(' '):''), errs.length?'err':'ok');
-}
-
 /* ── Google UI rendering ── */
 function gRenderAuth(){
   const inSig=gSignedIn();
@@ -20251,7 +20060,15 @@ mtCur.value='USD';
 renderHub();
 ibAdoptScratch(getActiveTripId());   // attach any pre-existing standalone itinerary to the active trip
 updHdrTrip();
-syncRender();
+/* One-time cleanup: drop the retired GitHub-Gist sync config keys (local trips
+   are untouched — this only clears the old token/gist bookkeeping). */
+(function(){
+  const c=syncCfgGet(); let dirty=false;
+  for(const k of ['token','myGistId','partners','lastSyncedAt','deviceName']){
+    if(k in c){ delete c[k]; dirty=true; }
+  }
+  if(dirty) syncCfgSet(c);
+})();
 gRenderAuth();
 gRenderShare();
 
