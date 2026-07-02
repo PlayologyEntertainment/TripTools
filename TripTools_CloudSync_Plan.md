@@ -283,18 +283,24 @@ involved. Static hosting stays on the existing Hostinger plan; deploy is the unc
 
 ---
 
-## 11. Open questions for the owner (please resolve before Phase A code)
+## 11. Open questions — RESOLVED (owner, 2026-07-02)
 
-1. **Apex vs. www.** Is the app ever served from `https://playologyentertainment.com` (no `www`), or
-   only `https://www.playologyentertainment.com`? Determines whether the apex origin is registered.
-2. **Consent-screen branding.** OK to use **GoTools** as the app name with `GoTools.svg` as the logo,
-   and to point the required privacy-policy/terms links at pages on `playologyentertainment.com`? (A
-   published consent screen **requires** a reachable privacy-policy URL — do we have one, or should a
-   short privacy page be added under `/GoTools/`?)
-3. **Local-dev origin.** Confirm the localhost port to register (I'll serve `GoTools.html` over a tiny
-   static server during Phase A rather than `file://`).
-4. **Soak period for Phase C.** How long should Google run as primary (Phase B) before we delete the
-   GitHub code — e.g. 2–4 weeks / N sync users?
+1. **Apex vs. www.** ✅ **Both.** The app is served from `https://playologyentertainment.com` *and*
+   `https://www.playologyentertainment.com` → register **both** origins on the OAuth client.
+2. **Consent-screen branding.** ✅ Use **GoTools** as the app name with **`GoTools.svg`** as the logo.
+   Privacy Policy and Terms of Service pages have been created in the repo (`privacy.html`,
+   `terms.html`) and deploy to `https://www.playologyentertainment.com/GoTools/privacy.html` and
+   `/GoTools/terms.html` — use those as the consent-screen privacy/terms URLs.
+3. **Local-dev origin.** ✅ **`http://localhost:5173`** is registered as an authorized JS origin.
+4. **Soak period for Phase C.** ✅ **None.** Remove the GitHub/Gist code **as soon as** the Google
+   path is verified working live — Phase B and Phase C collapse into effectively one step.
+
+### 11.1 Impact on the phasing (§6)
+
+With no soak period, Phase B ("Google primary, GitHub legacy") is momentary: once Google sign-in is
+verified on the production origins, the same or immediately-following PR deletes the GitHub PAT/Gist
+code (Phase C). A one-time in-app migrator still runs so existing Gist-sync users can pull their trips
+into Google before the old path disappears.
 
 ---
 
@@ -302,4 +308,6 @@ involved. Static hosting stays on the existing Hostinger plan; deploy is the unc
 
 On sign-off of this plan, proceed to **Phase A**: implement Google Sign-In + Drive publish / refresh /
 share inside `GoTools.html` behind a placeholder `GOOGLE_CLIENT_ID`, keeping the GitHub path intact,
-delivered as one PR — mirroring the per-phase cadence used for the data-registry work.
+delivered as one PR — mirroring the per-phase cadence used for the data-registry work. **Blocking
+input for Phase A:** the **OAuth Client ID** from the owner's Google Cloud project (§7) — code can be
+written against a placeholder, but cannot be verified live without it.

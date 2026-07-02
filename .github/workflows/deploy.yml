@@ -6,6 +6,8 @@ on:
       - main
     paths:
       - 'GoTools.html'
+      - 'privacy.html'
+      - 'terms.html'
   workflow_dispatch:
 
 jobs:
@@ -22,3 +24,19 @@ jobs:
             --max-time 60 \
             --connect-timeout 15 \
             "ftp://ftp.playologyentertainment.com/GoTools/GoTools.html"
+
+      - name: Upload privacy.html via FTP
+        run: |
+          curl -T privacy.html \
+            --user "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" \
+            --max-time 60 \
+            --connect-timeout 15 \
+            "ftp://ftp.playologyentertainment.com/GoTools/privacy.html"
+
+      - name: Upload terms.html via FTP
+        run: |
+          curl -T terms.html \
+            --user "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" \
+            --max-time 60 \
+            --connect-timeout 15 \
+            "ftp://ftp.playologyentertainment.com/GoTools/terms.html"
