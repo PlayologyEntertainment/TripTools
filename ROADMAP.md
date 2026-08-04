@@ -1,9 +1,14 @@
 # GoTools Roadmap
 
-**Status:** Draft for review
+**Status:** Revised — real priorities set
 **Author:** Generated for PlayologyEntertainment / GoTools
-**Date:** 2026-07-01
-**Covers:** Version 1.0 recap → Version 2.0 direction
+**Date:** 2026-08-04 (supersedes the 2026-07-01 draft)
+**Covers:** Version 1.0 recap → what shipped since → Version 2.0 priority order
+
+**Revision note:** This is a working update, not a rewrite from scratch. Section 1 (v1.0) is unchanged.
+Section 2 documents what actually shipped in the month since the original draft — notably, cloud sync
+landed already, via a different path than the original plan sketched. Sections 3+ re-prioritize
+everything still open, based on decisions made with the owner on 2026-08-04 (recorded inline).
 
 ---
 
@@ -29,6 +34,8 @@ GoTools shipped essentially the full catalog laid out in `TripTools_DesignDocume
 
 Three of these — **Public Holidays**, **eSIM & Mobile Data**, and **Safety & Advisories** — didn't exist in the original 75-tool design document. They were added as net-new data domains during the consolidation effort (design doc §Phase 7) and are now first-class tools in the hub.
 
+**Confirmed still 77 as of this revision** (verified directly against the `TOOLS` array in `GoTools.html`) — no new applets have shipped since the last draft; see §2 for what *has* shipped instead.
+
 ### 1.2 The data foundation (finished, not to be re-litigated)
 
 The single biggest v1.0 achievement isn't a tool — it's that GoTools no longer has ~14 independent, drifting country/city datasets. `TripTools_DataConsolidation_Plan.md` Phases 0–7 delivered:
@@ -44,9 +51,9 @@ The single biggest v1.0 achievement isn't a tool — it's that GoTools no longer
 Built after the design document, on top of the 77-tool grid:
 
 - **MyTrip profile** — the active-trip object ~20 tools read via a `trip:true` flag to auto-fill/auto-detect.
-- **Trip Sync** — BYO GitHub personal-access-token, private Gist per trip, companion merge, reset-sync-code flow. Zero GoTools-hosted backend.
 - **Trip Briefing** — an aggregating dashboard: countdown banner (with a "heading home" flip and a C/F toggle), itinerary box, customizable/scrollable boxes.
 - **Favorites** — starred tools, surfaced as a gold category above the phase grid.
+- **Trip Sync — now Google Sign-In + Drive.** Originally BYO GitHub personal-access-token + private Gist (as this section said in the prior draft). **That path no longer exists in the codebase** — see §2.1, it was fully replaced this cycle.
 
 ### 1.4 Explicit v1.0 principles (from the design doc — worth restating so v2.0 doesn't accidentally violate them)
 
@@ -57,108 +64,147 @@ Built after the design document, on top of the 77-tool grid:
 
 ---
 
-## 2. Version 2.0 — direction (confirmed with you)
+## 2. What shipped since the last draft (2026-07-01 → 2026-08-04) — now also locked
 
-Four decisions locked in before drafting the workstreams below:
+The prior draft treated cloud sync as the single most sensitive open decision in all of v2.0 and recommended gating it behind a dedicated design doc before any code landed. That happened correctly, but the resulting feature **shipped already** — faster and via a different path than the original phasing (§9 of the old draft) assumed. Restating it here so the rest of this document doesn't re-litigate it or plan around a scenario that no longer exists.
 
-1. **Architecture:** move from purely backend-free to **optional lightweight cloud sync** (opt-in account layer for cross-device sync/notifications), while every tool must remain fully usable with zero account — this is additive, not a replacement for the local-first model.
-2. **Investment mix:** all four of — new applets, deepening existing tools, platform/UX, and data completeness.
-3. **AI features:** yes, via **BYO API key** (same trust pattern as the existing Gist sync token — user supplies their own key, stored locally, called directly from the browser).
-4. **New traveler segments** (pet travel, accessibility & mobility, digital nomad): **backlog/stretch only** — not committed v2.0 scope. Listed in §7 for later prioritization, not built against in the phases below.
+### 2.1 Cloud sync: Google Sign-In + Drive (done, not GitHub OAuth, not a custom backend)
 
----
+- A dedicated design doc (`TripTools_CloudSync_Plan.md`, dated 2026-07-02) was written and signed off first, per the process the data-consolidation effort established.
+- Shipped as **Google Identity Services (token model) + Drive `drive.file` scope** — narrowest possible Drive permission, no backend, no server-held secret, $0 running cost. `GOOGLE_CLIENT_ID` is live in `GoTools.html` (not a placeholder).
+- Companion trip-sharing preserved via visible, shareable Drive files (a trip file set to "anyone with the link, reader") — a companion can import a shared trip **without signing in**, keeping the zero-account guarantee intact on the receiving side.
+- **The legacy GitHub PAT / Gist sync was fully removed** (not kept as a fallback) — the owner's sign-off explicitly waived the soak period once Google sign-in was verified live, so Phase B and Phase C of that plan collapsed into one PR.
+- **This closes out old-§2 decision 1 (architecture) and old-§5's C1/C2 fork entirely.** There is no more open cloud-sync architecture decision. Any future cloud-sync work is refinement (e.g., Google Picker for browsing shared-with-me files), not a new foundational choice.
 
-## 3. Workstream A — New applets & unified destination view
+### 2.2 Growth infrastructure (shipped, not yet used)
 
-Rather than bolting on isolated new tools, the highest-leverage move is consolidating the **At Destination** phase's 8 country-lookup tools (Emergency, Tipping, Driving Rules, Quiet Hours, Safety, eSIM, Holidays, Phrasebook) — which already all key off the same `TT_COUNTRIES`/`resolveDestination()` — into one skimmable view:
+- SEO/social meta tags, Open Graph/Twitter Card tags, `og-image.jpg`, and `GOTOOLS_MARKETING_PLAN.md` (a zero-cost, $0-budget push targeting 1,000 tries in 4–8 weeks).
+- **GoatCounter** wired in — free, cookie-less, aggregate-only pageview analytics, consistent with the no-tracking principle.
+- Privacy Policy and Terms of Service pages (`privacy.html`, `terms.html`), required for the Google OAuth consent screen and now also linked in the site footer.
+- **As of this revision, per the owner: the growth push has not launched yet** — outreach hasn't started, so there is no usage data yet to mine. Treat GoatCounter as instrumented-but-empty; §3 below adds a second, more granular layer of telemetry to have *before* outreach starts, not after.
 
-- **Destination Dossier** — a single-screen brief for the active trip's country (or any looked-up country) pulling one line each from Safety level, Emergency numbers, Tipping norms, Driving side, Quiet hours, eSIM status, next public holiday, and phrasebook language. Each line deep-links to its full tool. This is a natural extension of Trip Briefing, not a new dataset — pure UI/aggregation work.
-- **EV / hybrid road trip support** — Fuel Cost Calculator currently assumes gas; add an EV mode (cost-per-kWh, charging stop planning) as a genuine gap inside the existing Road Trip phase.
-- **International Customs Duty** — Customs Duty Calculator is US-only (the $800 exemption); extend to Canada/UK/EU/Australia duty-free allowances so non-US travelers get value from the Home phase.
-- **Multi-trip history / "countries visited" map** — a new lightweight view (not a full tool) that reads past MyTrip records and renders a visited-countries map using the existing `TT_COUNTRIES` alpha-2 keys. No new data domain required.
+### 2.3 What did *not* ship (confirmed directly against the code, not assumed)
 
----
+Every other 2026-07-01 workstream is still fully open — verified by direct inspection of `GoTools.html`, not carried over from the old draft:
 
-## 4. Workstream B — Deepen existing tools
+- No PWA manifest, no service worker, no install prompt handling.
+- No `Notification` API usage anywhere (no expiry/countdown local notifications).
+- No `.ics`/`VCALENDAR` export.
+- No Destination Dossier, no EV/kWh fuel mode, no gamification/badge system, no visited-countries map.
+- No AI/BYO-key panel, no "Ask GoTools."
 
-Phase-by-phase, concrete (not speculative) enhancements to tools that already exist:
-
-- **Itinerary Builder** — `.ics` calendar export; per-day budget rollup tying into Travel Budget Planner instead of living separately.
-- **Group Trip Organizer** — real-time voting via Trip Sync's existing Gist channel instead of local-only state.
-- **Smart Packing List / Weather-Based Wardrobe** — these are two separate tools solving overlapping problems; unify their state so a forecast pull feeds the rules-based packing generator directly.
-- **Park Day Optimizer** — layer in a live wait-time source (e.g., a free queue-times-style API) as a new *online* enhancement, consistent with the existing connectivity-badge pattern — falls back to the current static strategy guide when offline.
-- **Trip Journal + Review Drafter** — combined "trip recap" export (journal entries + photos + spend summary) as a shareable artifact, feeding the gamification ideas in Workstream C.
-- **Frequent Flyer Tracker / Passport Expiry Checker** — these already compute expiry dates; they just can't *alert* you. Pairs directly with the notification work in Workstream C.
+So the real state, in one line: **cloud sync is done and out of scope going forward; everything else from the last draft (new applets, deepening tools, PWA/notifications/gamification, AI, data completeness) is untouched and needs fresh prioritization** — which is what the rest of this document now does.
 
 ---
 
-## 5. Workstream C — Platform & UX
+## 3. Decisions locked in for this revision (owner, 2026-08-04)
+
+1. **Top priority: Workstream A (new applets)** — specifically the four items below, starting with Destination Dossier.
+2. **Growth push has not launched yet.** No usage data exists to weight priorities by; ordering below is judgment-based, not data-based, by design.
+3. **Add lightweight anonymous per-tool telemetry**, extending the existing GoatCounter integration (custom events, not a new tracking system) — and ship it **first**, before Workstream A, specifically so there's a usage baseline in place before new applets launch and before the growth push starts. This directly serves the "not yet launched" answer above: instrument now, while there's no traffic to disturb, so the first real traffic is measured from day one.
+4. **AI features (old Workstream D) are demoted to the backlog**, alongside the traveler-segment ideas (pet travel, accessibility, digital nomad) — not committed v2.0 scope. Provider-scope questions (OpenAI/Anthropic/Gemini) are deferred until it's actually scheduled.
+5. **Priority order for everything else:** Telemetry → **A** (new applets) → **C** (PWA install + local notifications + gamification) → **B** (deepen existing tools) → **E** (remaining data completeness: ATM gap, refresh cadence, destination granularity).
+
+---
+
+## 4. v2.0-P0 — Per-tool telemetry (ships first, before any new applet)
+
+Extend the existing GoatCounter hook — do not stand up a new analytics system or add anything that leaves the "aggregate, cookie-less, no accounts" posture.
+
+- Fire a GoatCounter custom event per tool open (`tool:<id>`), so usage-by-tool becomes visible in the existing dashboard.
+- Track destination/country lookups that miss (`resolveDestination()` returning no match) — this is the concrete signal Workstream E's "grow destination granularity where user demand shows up" recommendation was blocked on.
+- No per-user identifiers, no new consent UI needed (same script, same privacy posture already disclosed) — but do add one line to `privacy.html` noting that tool-open and lookup-miss events (not raw input) are counted in aggregate.
+- **Why first:** the growth push hasn't started yet, so this is the one moment usage instrumentation can land with zero backfill gap — every subsequent phase (especially A and E) benefits from having a "before" baseline.
+
+---
+
+## 5. v2.0-P1–P4 — Workstream A: new applets (top priority)
+
+In ship order, per owner decision:
+
+1. **Destination Dossier** — a single-screen brief for the active trip's country (or any looked-up country) pulling one line each from Safety level, Emergency numbers, Tipping norms, Driving side, Quiet hours, eSIM status, next public holiday, and phrasebook language. Each line deep-links to its full tool. Pure aggregation over data that already exists in `TT_COUNTRIES`/`resolveDestination()` — no new data domain, natural extension of Trip Briefing. **Ships first** — highest leverage, lowest new-data risk of the four.
+2. **EV / hybrid road trip support** — Fuel Cost Calculator currently assumes gas-only; add an EV mode (cost-per-kWh, charging-stop planning) inside the existing Road Trip phase.
+3. **International Customs Duty** — Customs Duty Calculator is US-only (the $800 exemption); extend to Canada/UK/EU/Australia duty-free allowances so non-US travelers get value from the Home phase.
+4. **Multi-trip history / "countries visited" map** — a new lightweight view (not a full tool) that reads past MyTrip records and renders a visited-countries map using the existing `TT_COUNTRIES` alpha-2 keys. No new data domain required. (Natural pairing with the multi-trip dashboard in Workstream C, below — sequenced after Dossier/EV/Customs Duty since it depends on there being multiple archived trips to show.)
+
+---
+
+## 6. v2.0-P5–P6 — Workstream C: retention & platform (PWA, notifications, gamification)
+
+Deliberately placed *after* new applets per the owner's ordering, but *before* deepening existing tools — the reasoning being that these are zero-account, ship independently of any other decision, and matter most right before the growth push actually starts driving new visitors who need a reason to come back.
 
 - **Installable PWA** — manifest + service worker for true offline caching (today "offline" means "no network call," not "installable/cacheable app shell").
-- **Local notifications** — passport/visa/frequent-flyer-point expiry reminders and trip-countdown milestones, via the Notification API — works with **zero account**, so it ships independently of the cloud-sync decision.
-- **Multi-trip dashboard** — past-trips archive, stats (countries visited, days traveled, total spent by rolling up Trip Cost Recap history), feeding the visited-countries map from Workstream A.
+- **Local notifications** — passport/visa/frequent-flyer-point expiry reminders and trip-countdown milestones, via the Notification API — zero account required, ships independently of cloud sync.
+- **Multi-trip dashboard** — past-trips archive, stats (countries visited, days traveled, total spent by rolling up Trip Cost Recap history) — feeds and is fed by the visited-countries map in Workstream A item 4.
 - **Light gamification** — milestone badges (countries visited, tools used across all 10 phases) — additive, cosmetic, no new data domain.
-- **Optional cloud sync (the architecture decision from §2.1):** the current Trip Sync (BYO GitHub token + Gist) proved the sync *concept* works without a backend. Two credible paths to "optional lightweight cloud sync," in increasing order of commitment:
-  - **C1 — Lower friction on the existing model.** Replace manual PAT entry with GitHub OAuth device flow. Still zero GoTools-hosted infrastructure.
-  - **C2 — A minimal opt-in backend** (e.g., Cloudflare Workers + KV, or Supabase) with magic-link auth, used *only* for cross-device MyTrip sync and push delivery. Every tool must keep working with no account, per the v1.0 principle in §1.4.
-  - **Recommendation:** treat this the way the data-registry work was treated — write a dedicated short design doc (architecture, auth provider, data retention, cost) before any code lands, given it's the one workstream that touches the "no accounts" principle. Don't start C2 without that doc reviewed.
 
 ---
 
-## 6. Workstream D — AI-assisted features (BYO API key)
+## 7. v2.0-P7–P9 — Workstream B: deepen existing tools
 
-Mirrors the trust model already established by the Gist sync token: user pastes their own key (OpenAI/Anthropic/etc.) into a settings panel, it's stored in `localStorage` only, and calls go straight from the browser to the provider — no GoTools-side key, no proxy, no cost to us.
-
-Candidate features, in order of value/risk:
-
-1. **Smart Packing List, AI-augmented** — free-text trip description ("5 days in Tokyo in March with a toddler, mostly museums") augments, not replaces, the existing rules-based generator. Tool still works fully with zero key.
-2. **Itinerary auto-draft** — seed a first-pass day-by-day plan from MyTrip + Bucket List + destination data, which the user then edits in the existing drag-and-drop Itinerary Builder.
-3. **"Ask GoTools"** — a scoped Q&A box that answers *by summarizing the bundled `TT_COUNTRIES`/domain datasets*, not by freelancing. This is the important guardrail: for the legally/medically adjacent domains (Visa, Vaccination, Customs, Driving Rules, Safety & Advisories), the model must cite and restate the existing verified, dated, disclaimed data — never generate new claims — preserving the "best-effort, dated, disclaimed" bar the data-consolidation effort established.
-
----
-
-## 7. Workstream E — Data completeness & quality
-
-- **ATM Fees:** either close the remaining 37-country gap with clearly-labeled "approximate" figures, or formally document the caveat-only state as permanent-by-design (it's currently an implicit exception, not a documented one).
-- **Recurring re-verification cadence:** several domains are inherently time-sensitive and will silently rot without a refresh cycle — GSA per-diem rates (published annually), airline baggage fees, Public Holidays' movable-feast tables (currently validated only through 2030), driving speed/BAC limits, visa rules. Recommend an annual "data refresh" pass per domain, tracked like the original per-domain PRs.
-- **Deepen destination granularity below the country level** — `TT_DESTINATIONS` guarantees one anchor city per country (332 rows), but Cost of Living (41) and the curated Destination Picker (113) are much smaller than the full registry; consider growing those two specifically where user demand shows up (e.g., via search-miss telemetry, if any is ever added).
+- **Itinerary Builder** — `.ics` calendar export; per-day budget rollup tying into Travel Budget Planner instead of living separately.
+- **Group Trip Organizer** — real-time voting via the (now Google Drive-based) sync channel instead of local-only state.
+- **Smart Packing List / Weather-Based Wardrobe** — unify their state so a forecast pull feeds the rules-based packing generator directly.
+- **Park Day Optimizer** — layer in a live wait-time source (e.g., a free queue-times-style API) as a new *online* enhancement, consistent with the existing connectivity-badge pattern — falls back to the current static strategy guide when offline.
+- **Trip Journal + Review Drafter** — combined "trip recap" export (journal entries + photos + spend summary) as a shareable artifact.
+- **Frequent Flyer Tracker / Passport Expiry Checker** — pairs directly with the notification work shipped in Workstream C (P5–P6) — these tools already compute expiry dates, they just couldn't alert you until notifications existed.
 
 ---
 
-## 8. Backlog — new traveler segments (not committed to v2.0)
+## 8. v2.0-P10 — Workstream E: remaining data completeness
 
-Explicitly deferred per your answer — listed here so they aren't lost, not because they're being built now:
+Telemetry itself moved to P0 (§4). What's left here is the data-quality work that telemetry will make *evidence-based* instead of guesswork, plus items that don't depend on it:
+
+- **ATM Fees:** either close the remaining 37-country gap with clearly-labeled "approximate" figures, or formally document the caveat-only state as permanent-by-design.
+- **Recurring re-verification cadence:** GSA per-diem rates (published annually), airline baggage fees, Public Holidays' movable-feast tables (validated only through 2030), driving speed/BAC limits, visa rules all silently rot without a refresh cycle. Recommend an annual "data refresh" pass per domain.
+- **Destination granularity below the country level** — now decidable with real data: the P0 lookup-miss telemetry (§4) tells you exactly where `TT_DESTINATIONS`'/Cost of Living's/Destination Picker's smaller lists are actually being missed, instead of guessing.
+
+---
+
+## 9. Backlog — demoted or deferred, not committed v2.0 scope
+
+### 9.1 AI-assisted features (was Workstream D — demoted this revision)
+
+Mirrors the trust model already established by Drive sync: user pastes their own API key into a settings panel, stored in `localStorage` only, calls go straight from browser to provider. Kept here for when it's revisited — **do not schedule against this until it's pulled back into a committed phase**, and re-open the provider-scope question (OpenAI/Anthropic only vs. also Gemini, given Google sign-in is already integrated) at that time.
+
+1. Smart Packing List, AI-augmented (free-text trip description augments, doesn't replace, the rules-based generator).
+2. Itinerary auto-draft seeded from MyTrip + Bucket List + destination data.
+3. "Ask GoTools" — scoped Q&A that must cite/restate the existing verified `TT_COUNTRIES`/domain data rather than freelancing, especially for legally/medically adjacent domains (Visa, Vaccination, Customs, Driving Rules, Safety & Advisories).
+
+### 9.2 New traveler segments
 
 - **Pet travel** — pet documents, in-cabin/cargo airline rules, international import requirements, pet-friendly lodging checklist.
 - **Accessibility & mobility** — wheelchair-accessible destination notes, service-animal rules by country, traveling with medical equipment.
 - **Digital nomad / remote work** — long-stay/digital-nomad visa guide, wifi-quality expectations, coworking/time-zone-overlap planning.
 
-Any of these could become a v2.1+ phase once the committed workstreams above are further along.
+### 9.3 Monetization groundwork (from `GOTOOLS_MARKETING_PLAN.md` §6, not part of this roadmap's committed scope)
+
+Not evaluated in this revision — the growth push hasn't launched, so there's no usage data to base an ads-vs-tip-jar-vs-Pro-tier decision on yet. Revisit once P0 telemetry (§4) and the growth push both have real numbers.
 
 ---
 
-## 9. Suggested phasing
+## 10. Suggested phasing (supersedes the old §9 table)
 
-Following the one-PR-per-phase cadence established by the data-consolidation effort:
-
-| Phase | Workstream | Ships |
+| Phase | Ships | Depends on |
 |---|---|---|
-| v2.0-P0 | C | PWA install + service worker + local expiry/countdown notifications (no account required) |
-| v2.0-P1 | A | Destination Dossier aggregation view |
-| v2.0-P2 | B | Itinerary `.ics` export + budget rollup; Packing/Wardrobe state unification |
-| v2.0-P3 | D | BYO-key settings panel + AI-augmented Smart Packing List |
-| v2.0-P4 | E | ATM Fee gap closure + documented refresh cadence for time-sensitive domains |
-| v2.0-P5 | A/B | EV road trip mode; international Customs Duty allowances |
-| v2.0-P6 | C | Multi-trip history dashboard + countries-visited map + light gamification |
-| v2.0-P7 | D | "Ask GoTools" scoped Q&A over bundled data |
-| v2.0-Design | C2 | Dedicated cloud-sync design doc (architecture/auth/cost) — gates any work on optional accounts |
-
-Cloud sync (C2) is deliberately last/gated: it's the one change that touches the "no accounts" principle, so it gets its own design doc — the same way the data registry got `TripTools_DataConsolidation_Plan.md` — before any implementation phase is scheduled against it.
+| v2.0-P0 | Per-tool + lookup-miss telemetry (GoatCounter custom events) | Nothing — ships first |
+| v2.0-P1 | Destination Dossier | P0 (so its usage is measured from day one) |
+| v2.0-P2 | EV / hybrid road trip mode | — |
+| v2.0-P3 | International Customs Duty (Canada/UK/EU/Australia) | — |
+| v2.0-P4 | Visited-countries map | Benefits from P6 (multi-trip dashboard) but can ship standalone |
+| v2.0-P5 | PWA install + service worker | — |
+| v2.0-P6 | Local notifications + multi-trip dashboard + light gamification | P5 (notifications want the installed-app context) |
+| v2.0-P7 | Itinerary `.ics` export + budget rollup | — |
+| v2.0-P8 | Group voting via Drive sync; Packing/Wardrobe unification | Cloud sync (done, §2.1) |
+| v2.0-P9 | Park Day Optimizer live wait times; Trip Journal/Review recap export | — |
+| v2.0-P10 | ATM Fee gap closure + documented refresh cadence + destination-granularity growth (data-driven by P0) | P0 |
+| Backlog | AI features (§9.1), new traveler segments (§9.2), monetization (§9.3) | Not scheduled |
 
 ---
 
-## 10. Open questions
+## 11. Open questions
 
-- **AI provider scope:** which providers does the BYO-key panel support at launch (OpenAI + Anthropic only, or broader)? Affects the settings UI and the "Ask GoTools" grounding prompt design.
-- **Cloud sync auth provider:** magic-link email, GitHub OAuth (reusing the existing Trip Sync relationship), or something else — to be resolved in the C2 design doc, not here.
-- **Telemetry:** several data-completeness recommendations above (e.g., "grow destination granularity where user demand shows up") assume some way to see what's missing. GoTools currently has zero analytics by design — worth an explicit decision on whether v2.0 introduces any, even anonymous/local-only.
+- **Telemetry event taxonomy:** P0 needs a concrete list of GoatCounter custom event names (e.g., `tool-open:<id>`, `lookup-miss:<query>`) before implementation — worth a quick one-page spec, not a full design doc, given the data-consolidation precedent of writing things down before code for anything touching data collection.
+- **AI provider scope:** deferred per §9.1 — not worth resolving until the backlog item is pulled back into a committed phase.
+- **Growth push timing:** the marketing plan is ready to go but hasn't launched. Worth deciding whether launch waits for P0 telemetry to land first (so day-one traffic is measured) or proceeds in parallel.
+- **Monetization:** explicitly deferred per §9.3 until real usage data exists from both GoatCounter and the new P0 telemetry.
