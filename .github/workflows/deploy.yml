@@ -8,6 +8,9 @@ on:
       - 'GoTools.html'
       - 'privacy.html'
       - 'terms.html'
+      - 'og-image.jpg'
+      - 'favicon.ico'
+      - 'favicon-*.png'
   workflow_dispatch:
 
 jobs:
@@ -40,3 +43,35 @@ jobs:
             --max-time 60 \
             --connect-timeout 15 \
             "ftp://ftp.playologyentertainment.com/GoTools/terms.html"
+
+      - name: Upload og-image.jpg via FTP
+        run: |
+          curl -T og-image.jpg \
+            --user "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" \
+            --max-time 60 \
+            --connect-timeout 15 \
+            "ftp://ftp.playologyentertainment.com/GoTools/og-image.jpg"
+
+      - name: Upload favicon.ico via FTP
+        run: |
+          curl -T favicon.ico \
+            --user "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" \
+            --max-time 60 \
+            --connect-timeout 15 \
+            "ftp://ftp.playologyentertainment.com/GoTools/favicon.ico"
+
+      - name: Upload favicon-32.png via FTP
+        run: |
+          curl -T favicon-32.png \
+            --user "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" \
+            --max-time 60 \
+            --connect-timeout 15 \
+            "ftp://ftp.playologyentertainment.com/GoTools/favicon-32.png"
+
+      - name: Upload favicon-192.png via FTP
+        run: |
+          curl -T favicon-192.png \
+            --user "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" \
+            --max-time 60 \
+            --connect-timeout 15 \
+            "ftp://ftp.playologyentertainment.com/GoTools/favicon-192.png"
